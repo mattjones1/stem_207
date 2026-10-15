@@ -13,7 +13,52 @@ The classroom dashboard for the **STEM Explorers** program at the **STEM Coliseu
 - **Coding pathway** with seven readiness-based stages. Each stage has a prerequisite, learning goal, project, debugging habit, and an "I can" statement.
 - **Projector mode** to enlarge everything for a shared screen. This setting is remembered only on that device.
 
-There are no student accounts, no tracking, and no student information collected.
+
+## Accounts and progress (prototype)
+
+**Students** sign in with a class code, by tapping their name, and by tapping three secret pictures from a login card their teacher hands out. They never type an email or password, and the only thing stored about them is a display name (first name and last initial) and a grade band.
+
+**Educators** sign in with an email and password, create classes, add students, and print login cards.
+
+**Try it with the sample class:**
+
+| | |
+| --- | --- |
+| Educator | `demo@stemexplorers.example` / `explore` |
+| Student | class code `ORBIT7` → **Ava R.** → Moon, Comet, Compass |
+
+The sample class has eight made-up students with two and a half weeks of made-up activity, so the educator dashboard has something to show. It is labeled as sample data everywhere it appears, and **Reset sample data** on the dashboard restores it.
+
+### What students get
+
+- **My expedition** home: rank, XP, mission count, patches, weekly streak, suggested next missions, a note from their teacher, and a class goal.
+- **Expedition map**: every mission is a star in its area's constellation. Finishing a mission lights its star and connects it to the constellation.
+- **Mission checklist**: steps can be checked off, and the page remembers where they stopped.
+- **Mission debrief**: answer "Think about it," mark "Take it further" as tried, and say how it went. Then a Mission complete screen shows XP earned, any promotion, and new patches.
+- **Ranks**: Cadet → Scout → Navigator → Pathfinder → Trailblazer → Voyager → Mission Commander, each with a chevron insignia.
+- **15 mission patches** for things like first mission, reflections, team missions, debugging, each area, and pathway stages.
+- **Class expedition**: everyone's XP moves the class from the launch pad to Neptune. It's cooperative, so there's no leaderboard.
+- **Coding pathway**: an "I can do this" button sends a stage to the teacher to check.
+
+### What educators get (`#/teach`)
+
+- **Overview**: active students this week, missions this week compared with last week, reflections and "I can" checks waiting, a 14-day chart, which areas the class is exploring, a "needs a check-in" list (inactive for a week, or "still figuring it out" on recent missions), the class goal, a sortable roster, and a live activity log.
+- **Student detail**: rank, XP, patches, pathway with Confirm / Not yet, every completed mission with answers and confidence, and a full activity timeline.
+- **Pathway checks**: pending "I can" claims and a class-by-stage readiness map.
+- **Reflections**: unread answers with a one-line reply that students see on their home screen.
+- **Class & logins**: add students, change grade bands, issue new pictures, remove students, create more classes, and print login cards.
+
+### What gets recorded
+
+Each student action is saved as an event: signed in, opened a mission, checked a step, launched a resource, completed a mission (with answer, challenge, and confidence), claimed a pathway stage. Teacher actions are also events: confirmed a stage, said not yet, read or replied to a reflection. XP, ranks, and patches are calculated from the events using the rules in `assets/js/data/progression.js`, so changing a rule updates everyone.
+
+### Before using with real students
+
+This prototype keeps all accounts and activity in the browser's local storage. It works for a demo on one device, but data isn't shared between devices and passwords are only hashed in the browser. To go live:
+
+1. Replace the storage functions in `assets/js/store.js` with a real backend (for example Firebase, Supabase, or your district's sign-in service). The rest of the app only uses the `SE.store` API.
+2. Review student-data requirements (COPPA, FERPA, and district policy) and get the approvals your program needs.
+3. Keep collecting only display names and grade bands for students.
 
 ## Running it
 
@@ -27,10 +72,16 @@ It's a static site with no build step and no dependencies.
 ```
 index.html                    Page shell: header, footer, script tags
 assets/css/styles.css         All styles. Color and type tokens are at the top.
-assets/js/app.js              Router and views (dashboard, area, activity, pathway)
 assets/js/data/areas.js       Exploration areas, levels, grade bands, durations, formats, equipment
 assets/js/data/activities.js  The activity library
 assets/js/data/pathway.js     The seven coding pathway stages
+assets/js/data/progression.js XP rules, ranks, patches, class goal, picture codes
+assets/js/core.js             Shared helpers and icons
+assets/js/store.js            Accounts, sessions, activity log, sample class (swap for a backend)
+assets/js/game.js             Turns the activity log into XP, rank, patches, and pathway status
+assets/js/art.js              Insignia, patches, expedition map, class goal track
+assets/js/views-*.js          Library, student, sign-in, and educator views
+assets/js/main.js             Router and header
 ```
 
 ## Adding an activity
