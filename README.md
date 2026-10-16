@@ -80,6 +80,8 @@ This prototype keeps all accounts and activity in the browser's local storage. I
 
 ## Running it
 
+- **One-file version:** run `python tools/build_single_file.py` to create `dist/STEM Explorers.html`. Double-click that file to run the whole app offline, with no server needed. You can copy it to any computer.
+
 It's a static site with no build step and no dependencies.
 
 - **Open locally:** double-click `index.html`, or run `python3 -m http.server` in this folder and visit `http://localhost:8000`.
