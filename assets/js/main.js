@@ -106,6 +106,11 @@
     }
     else if (a === "area") { SE.views.area(user, b); title = `${SE.areaById[b] ? SE.areaById[b].name : "Not found"} · STEM Explorers`; }
     else if (a === "activity") { SE.views.activity(user, b); title = `${SE.activityById[b] ? SE.activityById[b].title : "Not found"} · STEM Explorers`; }
+    else if (a === "lab") {
+      SE.views.lab(user, b, c);
+      const lab = SE.labs.byId(b);
+      title = `${lab ? lab.title : "Lab"} · STEM Explorers`;
+    }
     else if (a === "pathway") { SE.views.pathway(user); navKey = "pathway"; title = "Coding pathway · STEM Explorers"; }
     else SE.views.notFound();
 

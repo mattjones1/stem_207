@@ -15,6 +15,8 @@
   const app = () => document.getElementById("app");
 
   let currentClassId = null;
+  const FEED_NOISE = ["step_checked", "signed_in", "lab_test_run", "lab_opened", "lab_hint", "lab_clue", "lab_compass", "lab_fps", "lab_play", "lab_prediction", "lab_trained", "lab_bug", "lab_miss"];
+  const TIMELINE_NOISE = ["lab_test_run", "lab_clue", "lab_compass", "lab_fps", "lab_play", "lab_prediction", "lab_trained", "lab_bug", "lab_miss"];
   let rosterSort = { key: "name", dir: 1 };
   let showReviewed = false;
   let pendingRemove = null;
@@ -40,6 +42,12 @@
       case "ican_claimed": return { icon: "flag", text: `${who}said “I can” for pathway stage ${e.data.stage}` };
       case "ican_verified": return { icon: "shield", text: `${withName ? who : ""}Stage ${e.data.stage} confirmed by teacher` };
       case "ican_returned": return { icon: "refresh", text: `${withName ? who : ""}Stage ${e.data.stage}: teacher said “not yet”` };
+      case "lab_level_completed": {
+        const lab = SE.labs.byId(e.data.labId);
+        return { icon: "flask", text: `${who}finished level ${e.data.level + 1} of <a href="#/lab/${esc(e.data.labId)}/${e.data.level + 1}">${esc(lab ? lab.title : "a lab")}</a>`, strong: true };
+      }
+      case "lab_opened": { const lab = SE.labs.byId(e.data.labId); return { icon: "eye", text: `${who}opened ${esc(lab ? lab.title : "a lab")}, level ${e.data.level + 1}` }; }
+      case "lab_hint": { const lab = SE.labs.byId(e.data.labId); return { icon: "question", text: `${who}used a hint in ${esc(lab ? lab.title : "a lab")}, level ${e.data.level + 1}` }; }
       case "reflection_reviewed": return { icon: "message", text: `Teacher ${e.data.note ? "replied to" : "read"} ${withName ? esc((SE.store.studentById(e.studentId) || {}).displayName) + "’s" : "a"} reflection` };
       default: return { icon: "clock", text: esc(e.type) };
     }
@@ -196,6 +204,18 @@
           </ul>
         </div>
         <div class="block">
+          <div class="block__head"><h2>Interactive labs</h2><span class="muted">Levels finished</span></div>
+          <table class="lab-table">
+            <thead><tr><th scope="col">Lab</th><th scope="col" class="num">Started</th><th scope="col" class="num">Avg. levels</th><th scope="col" class="num">Finished</th></tr></thead>
+            <tbody>${SE.labs.all().map((lab) => {
+              const ps = sum.profiles.map((p) => (p.prof.labLevels[lab.id] || new Set()).size);
+              const started = ps.filter((n) => n > 0);
+              const avg = started.length ? (started.reduce((a, b) => a + b, 0) / started.length).toFixed(1) : "–";
+              return `<tr><th scope="row"><a href="#/lab/${lab.id}">${esc(lab.title)}</a></th><td class="num">${started.length}/${sum.students.length}</td><td class="num">${avg} <small>of ${lab.levels.length}</small></td><td class="num">${ps.filter((n) => n === lab.levels.length).length}</td></tr>`;
+            }).join("")}</tbody>
+          </table>
+        </div>
+        <div class="block">
           <div class="block__head"><h2>Needs a check-in</h2><span class="muted">${attention.length ? plural(attention.length, "item", "items") : ""}</span></div>
           ${attention.length ? `<ul class="attn">${attention.map((x) => `<li>${icon(x.icon)}<span><a href="#/teach/student/${x.student.id}"><strong>${esc(x.student.displayName)}</strong></a><small>${esc(x.why)}</small></span></li>`).join("")}</ul>`
             : `<p class="muted">Everyone has been active this week and nobody is flagging trouble.</p>`}
@@ -216,7 +236,7 @@
       <section class="wrap section" aria-labelledby="feed-title">
         <div class="section__head"><div><span class="eyebrow">Live log</span><h2 id="feed-title">Recent activity</h2></div></div>
         <ol class="feed">
-          ${sum.events.filter((e) => e.type !== "step_checked" && e.type !== "signed_in").slice(-14).reverse().map((e) => {
+          ${sum.events.filter((e) => !FEED_NOISE.includes(e.type)).slice(-14).reverse().map((e) => {
             const d = describe(e, true);
             return `<li class="${d.strong ? "is-strong" : ""}">${icon(d.icon)}<span>${d.text}</span><time datetime="${new Date(e.at).toISOString()}">${SE.timeAgo(e.at)}</time></li>`;
           }).join("") || `<li>${icon("clock")}<span>No activity yet. Share your class code to get started.</span></li>`}
@@ -340,6 +360,21 @@
         </div>
       </section>
 
+      <section class="wrap section teach-grid">
+        <div class="block">
+          <div class="block__head"><h2>Interactive labs</h2><span class="muted">tests run · hints used</span></div>
+          <ul class="lab-prog-list">${SE.labs.all().map((lab) => {
+            const n = (prof.labLevels[lab.id] || new Set()).size;
+            const st = prof.labStats[lab.id] || { runs: 0, hints: 0 };
+            return `<li><span><a href="#/lab/${lab.id}">${esc(lab.title)}</a><small>${n} of ${lab.levels.length} levels · ${st.runs} tests · ${st.hints} hints</small></span><span class="meter"><span style="width:${(n / lab.levels.length) * 100}%"></span></span></li>`;
+          }).join("")}</ul>
+        </div>
+        <div class="block">
+          <div class="block__head"><h2>Creations</h2><span class="muted">From the Pixel Animation Studio</span></div>
+          ${SE.views.creationsGallery(prof) || `<p class="muted">No saved animations yet.</p>`}
+        </div>
+      </section>
+
       <section class="wrap section" aria-labelledby="slog-title">
         <div class="section__head"><div><span class="eyebrow">Mission log</span><h2 id="slog-title">${plural(log.length, "completed mission", "completed missions")}</h2></div></div>
         ${log.length ? `<ol class="mission-log">${log.map((c) => reflectionItem(student, prof, c, false)).join("")}</ol>` : `<p class="muted">No missions completed yet.</p>`}
@@ -347,7 +382,7 @@
 
       <section class="wrap section" aria-labelledby="tl-title">
         <div class="section__head"><div><span class="eyebrow">Activity</span><h2 id="tl-title">Everything ${esc(student.displayName.split(" ")[0])} did</h2></div><span class="muted">${plural(events.length, "event", "events")}</span></div>
-        <ol class="feed">${events.slice(0, 60).map((e) => { const d = describe(e, false); return `<li class="${d.strong ? "is-strong" : ""}">${icon(d.icon)}<span>${d.text}</span><time datetime="${new Date(e.at).toISOString()}">${SE.timeAgo(e.at)}</time></li>`; }).join("")}</ol>
+        <ol class="feed">${events.filter((e) => !TIMELINE_NOISE.includes(e.type)).slice(0, 60).map((e) => { const d = describe(e, false); return `<li class="${d.strong ? "is-strong" : ""}">${icon(d.icon)}<span>${d.text}</span><time datetime="${new Date(e.at).toISOString()}">${SE.timeAgo(e.at)}</time></li>`; }).join("")}</ol>
       </section>`;
 
     app().innerHTML = frame(user, cls, classes, "", body, { title: esc(cls.name) });

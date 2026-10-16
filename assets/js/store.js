@@ -221,6 +221,35 @@
       }
     });
 
+    /* Interactive lab progress for the sample class */
+    const LAB_PLAN = [["rover", 12], ["field-station", 5], ["pattern-machine", 6], ["launcher", 6], ["line-follower", 4], ["ramp-racers", 5], ["pixel-studio", 6]];
+    const rle = (grid) => grid.map((row) => { const out = []; let i = 0; while (i < row.length) { let j = i; while (j < row.length && row[j] === row[i]) j++; out.push(`${j - i}${row[i]}`); i = j; } return out.join(" "); }).join("/");
+    const canvas = (n) => Array.from({ length: n }, () => Array(n).fill("."));
+    const disc = (g, cx, cy, r, c) => g.forEach((row, y) => row.forEach((_, x) => { if ((x - cx) ** 2 + (y - cy) ** 2 <= r * r) g[y][x] = c; }));
+    const SAMPLE_ART = {
+      3: () => { const a = canvas(12), b = canvas(12); [a, b].forEach((g) => disc(g, 5.5, 5.5, 4.6, "Y")); a[4][4] = a[4][7] = "K"; b[4][4] = b[4][7] = "Y"; b[5][3] = b[5][4] = b[5][7] = b[5][8] = "K"; [a, b].forEach((g) => { g[8][4] = g[8][5] = g[8][6] = g[8][7] = "R"; }); return { n: 12, fps: 3, frames: [a, a, a, b].map(rle) }; },
+      4: () => ({ n: 12, fps: 6, frames: [1, 3, 5, 7, 9].map((x) => { const g = canvas(12); disc(g, x, 6, 1.5, "B"); for (let k = 0; k < 12; k++) g[9][k] = "G"; return rle(g); }) }),
+      5: () => ({ n: 16, fps: 8, frames: [3, 6, 9, 11, 9, 6].map((y) => { const g = canvas(16); disc(g, 7.5, y, 2.2, "O"); for (let k = 0; k < 16; k++) g[14][k] = "K"; return rle(g); }) })
+    };
+    students.forEach((s, i) => {
+      const engagement = people[i][2];
+      LAB_PLAN.forEach(([labId, total], li) => {
+        if (rand() > engagement + 0.15) return;
+        const levels = Math.min(total, Math.max(1, Math.round(total * engagement * (0.45 + rand() * 0.7))));
+        for (let lv = 0; lv < levels; lv++) {
+          const dayOffset = i === 7 ? 9 + Math.floor(rand() * 6) : Math.max(0, 15 - Math.round((lv / Math.max(1, total)) * 14) - Math.floor(rand() * 3) + (li % 3));
+          const t = SE.startOfDay(now - dayOffset * SE.DAY) + (10 + Math.floor(rand() * 4)) * 3600000 + Math.floor(rand() * 50) * 60000;
+          if (t > now) continue;
+          ev(s, "lab_opened", t, { labId, level: lv });
+          const runs = 1 + Math.floor(rand() * 4);
+          for (let r = 0; r < runs; r++) ev(s, "lab_test_run", t + (r + 1) * 60000, { labId, level: lv });
+          if (rand() < 0.3) ev(s, "lab_hint", t + 30000, { labId, level: lv });
+          const result = labId === "pixel-studio" && SAMPLE_ART[lv] ? SAMPLE_ART[lv]() : {};
+          ev(s, "lab_level_completed", t + (runs + 2) * 60000, { labId, level: lv, result });
+        }
+      });
+    });
+
     events.sort((a, b) => a.at - b.at);
     return { educator, cls, students, events };
   }
@@ -243,8 +272,8 @@
 
   function init() {
     db = readDb();
-    if (!db || db.version !== 3) {
-      db = { version: 3, educators: [], classes: [], students: [], events: [] };
+    if (!db || db.version !== 4) {
+      db = { version: 4, educators: [], classes: [], students: [], events: [] };
       installDemo();
       save();
     }

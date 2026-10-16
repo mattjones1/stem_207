@@ -1337,5 +1337,297 @@ window.STEM.activities = [
       "Groups of three work well: director, animator, photographer. Rotate roles.",
       "Connect to coding: each photo is like a costume change in Scratch."
     ]
+  },
+
+  /* ───────────────────────────── Interactive labs (run inside STEM Explorers) ───────────────────────────── */
+  {
+    id: "lab-rover",
+    title: "Rover Code Lab",
+    area: "coding",
+    summary: "Program a rover with code blocks through 12 levels, from first steps to your own functions.",
+    level: "beginner",
+    grades: ["2-3", "4-5", "6-8"],
+    duration: 45,
+    format: "independent",
+    equipment: ["computer", "tablet"],
+    source: "original",
+    featured: false,
+    keywords: ["lab", "blocks", "sequence", "loops", "conditionals", "variables", "functions", "debugging", "rover", "interactive"],
+    access: { account: "none", cost: "free", supervision: false, hardware: [] },
+    launch: { status: "lab", labId: "rover", label: "Open the Rover Code Lab", note: "Runs inside STEM Explorers. No outside account or website needed." },
+    mission: "Get the rover to the flag. Each level adds a new coding idea, and later levels limit how many blocks you can use, so you'll need loops, conditionals, variables, and your own blocks.",
+    learn: [
+      "Build and run a program as a sequence of instructions.",
+      "Use loops, if–else, and a variable to write shorter, smarter programs.",
+      "Debug a program by stepping through it one block at a time."
+    ],
+    before: {
+      materials: ["Laptop, Chromebook, or tablet"],
+      setup: ["Students can sign in to save progress, or explore as guests.", "Levels 1–3 suit any beginner. Levels 8–12 suit students ready for conditionals, variables, and functions."],
+      prerequisites: "None. The lab starts at the very beginning and climbs the coding pathway."
+    },
+    steps: [
+      "Open the lab and read the goal for the level.",
+      "Tap blocks to add them to your program. Tap a gap to choose where new blocks go.",
+      "Press Run to watch the rover, or Step to run one block at a time.",
+      "If the rover bumps a wall, find the highlighted block and fix it.",
+      "When you finish a level, read “What you just learned,” then try the next one."
+    ],
+    reflect: "Which level made you change how you were thinking about the problem? What did you do differently?",
+    extend: "On Free build, solve the level, then try to beat par by using loops and conditionals to make your program shorter.",
+    teacherNotes: [
+      "Levels map to the coding pathway: 1–3 sequencing and debugging (Stage 1), 4–6 loops (Stage 3), 7–9 actions and conditionals (Stages 2 and 4), 10 variables (Stage 5), 11 functions (Stage 6), 12 independent creation (Stage 7).",
+      "Block limits on later levels are intentional. They push students to find the pattern instead of brute-forcing with many Forward blocks.",
+      "Step-through is the key debugging habit. Ask “Which block went wrong first?” before helping.",
+      "Your dashboard shows each student's level progress, test runs, and hints used."
+    ]
+  },
+  {
+    id: "lab-field-station",
+    title: "Field Station 360",
+    area: "vr",
+    summary: "Look all around a rainforest, desert, and coral reef. Find clues, use a compass, and think like a field scientist.",
+    level: "beginner",
+    grades: ["2-3", "4-5", "6-8"],
+    duration: 45,
+    format: "independent",
+    equipment: ["computer", "tablet", "vr", "projector"],
+    source: "original",
+    keywords: ["lab", "360", "field trip", "habitat", "adaptations", "compass", "observation", "inference", "interactive"],
+    access: { account: "none", cost: "free", supervision: false, hardware: [] },
+    launch: { status: "lab", labId: "field-station", label: "Open Field Station 360", note: "Runs inside STEM Explorers. Drag, use arrow keys, or open it in a VR headset's web browser." },
+    vr: {
+      setup: [
+        "On a VR headset with a web browser, open STEM Explorers and go to this lab. Students drag with the controller to look around.",
+        "Keep headset turns to 10–15 minutes, seated or standing clear of furniture.",
+        "The lab saves nothing to the headset; students can sign in with their picture code to save progress."
+      ],
+      nonHeadset: "The lab is built for laptops, Chromebooks, tablets, and projectors. Students drag, tap the Look arrows, or use arrow keys to turn. On a projector, students can take turns as the navigator."
+    },
+    mission: "You're a field scientist at three research stations. Turn around to find hidden clues, separate what you see from what you think it means, and complete each station's compass check.",
+    learn: [
+      "Tell the difference between an observation and an inference.",
+      "Explain how adaptations help living things survive in a habitat.",
+      "Use compass headings in degrees (north 0°, east 90°, south 180°, west 270°)."
+    ],
+    before: {
+      materials: ["Laptop, Chromebook, tablet, projector, or VR headset with a web browser"],
+      setup: ["Optional: give students a paper field log to record I see / I think / I wonder."],
+      prerequisites: "None."
+    },
+    steps: [
+      "Open the lab and pick the first station.",
+      "Look all the way around. Tap a search marker when you find one.",
+      "Read the observation, then choose the inference that fits best.",
+      "Complete the compass check by turning to the heading you're given.",
+      "After the three habitats, compare them and practice sorting observations from inferences."
+    ],
+    reflect: "Which clue surprised you most? What did you observe, and what did you infer from it?",
+    extend: "Pick a habitat near your school. List three observations you could make there and one inference for each.",
+    teacherNotes: [
+      "The core skill is separating observation from inference. Ask students: “Could you point to that, or is it your explanation?”",
+      "“Scan for a clue” turns the view toward the nearest unfound clue. It supports students who are struggling to navigate.",
+      "Compass headings connect to math (angles) and geography. Have students stand and physically face each direction before the check."
+    ]
+  },
+  {
+    id: "lab-pattern-machine",
+    title: "Pattern Machine Lab",
+    area: "ai",
+    summary: "Train a real machine-learning model with examples, then find out how it learns, where it goes wrong, and why.",
+    level: "intermediate",
+    grades: ["4-5", "6-8"],
+    duration: 45,
+    format: "independent",
+    equipment: ["computer", "tablet"],
+    source: "original",
+    keywords: ["lab", "machine learning", "training data", "bias", "confidence", "responsible ai", "classifier", "interactive"],
+    access: { account: "none", cost: "free", supervision: true, hardware: [] },
+    launch: { status: "lab", labId: "pattern-machine", label: "Open the Pattern Machine Lab", note: "Runs inside STEM Explorers. Uses made-up creatures only: no cameras, photos, or personal information." },
+    mission: "Teach a machine to sort creatures, then put it to the test. You'll see how the number and variety of examples change what it learns, catch it learning the wrong lesson, and decide when AI should and shouldn't be trusted.",
+    learn: [
+      "Explain that AI learns patterns from labeled training examples.",
+      "Show how too few or lopsided examples lead to wrong predictions (bias).",
+      "Decide when an AI's answer needs a human to check it."
+    ],
+    before: {
+      materials: ["Laptop, Chromebook, or tablet"],
+      setup: ["Preview levels 4 and 6 so you're ready to lead a short discussion on bias and responsible use."],
+      prerequisites: "“How Does an AI Sort?” is a helpful unplugged warm-up."
+    },
+    steps: [
+      "Open the lab and find the pattern in labeled examples.",
+      "Invent your own rule and train the machine with examples.",
+      "Add examples and watch accuracy change on the chart.",
+      "Find and fix a biased training set.",
+      "Set a confidence threshold, then decide which uses of AI are responsible."
+    ],
+    reflect: "The machine never knew the rule, only the examples. What does that mean for AI tools you use in real life?",
+    extend: "Think of an AI tool you've seen (like autocomplete). What examples do you think it learned from? What might be missing from them?",
+    teacherNotes: [
+      "The machine is a real k-nearest-neighbors classifier. It shows the 3 training examples it compared against, so its reasoning is visible, not magic.",
+      "Pause the class after level 4 (bias) for a whole-group discussion: where could real AI training data be lopsided?",
+      "Level 6 has no single “correct” answer for every case. The explanations model good reasoning; welcome thoughtful disagreement.",
+      "No student data, images, or text leave the page. Creatures are generated from simple features."
+    ]
+  },
+  {
+    id: "lab-launcher",
+    title: "Launcher Lab",
+    area: "engineering",
+    summary: "Design and tune a catapult. Predict, test, change one thing at a time, and work within a budget.",
+    level: "intermediate",
+    grades: ["4-5", "6-8"],
+    duration: 45,
+    format: "collaborative",
+    equipment: ["computer", "tablet"],
+    source: "original",
+    keywords: ["lab", "catapult", "design", "iteration", "fair test", "budget", "optimize", "engineering notebook", "interactive"],
+    access: { account: "none", cost: "free", supervision: false, hardware: [] },
+    launch: { status: "lab", labId: "launcher", label: "Open the Launcher Lab", note: "Runs inside STEM Explorers." },
+    mission: "Your team is building a launcher for a field-day challenge. Hit the targets, clear the wall, stay on budget, and record every trial in your engineering notebook.",
+    learn: [
+      "Use test results to decide what to change next (iteration).",
+      "Change one variable at a time to run a fair test.",
+      "Balance constraints like height and budget to optimize a design."
+    ],
+    before: {
+      materials: ["Laptop, Chromebook, or tablet per pair"],
+      setup: ["Pairs work well: one operates, one records predictions and reasons in a paper notebook."],
+      prerequisites: "Paper Bridge Challenge or any design-test-improve activity helps."
+    },
+    steps: [
+      "Set the angle, spring force, and load.",
+      "Predict how far it will go, then launch.",
+      "Read the result and the notebook. Decide what to change.",
+      "Change one thing and launch again.",
+      "Keep iterating until you hit the target."
+    ],
+    reflect: "Which setting had the biggest effect on distance? How do you know?",
+    extend: "Build a real catapult from craft sticks and rubber bands. Do the patterns from the lab hold up?",
+    teacherNotes: [
+      "Level 3 enforces one-change-at-a-time. Students who struggle often skip the notebook; point them back to it.",
+      "Level 5 rewards finding that about 45° gives the most distance, a great moment to connect to math.",
+      "Pair this lab with the hands-on Paper Bridge Challenge or Marble Run Iteration Lab."
+    ]
+  },
+  {
+    id: "lab-line-follower",
+    title: "Line Follower Lab",
+    area: "engineering",
+    summary: "Write sense → think → act rules so a robot can follow a track on its own.",
+    level: "intermediate",
+    grades: ["4-5", "6-8"],
+    duration: 30,
+    format: "independent",
+    equipment: ["computer", "tablet"],
+    source: "original",
+    keywords: ["lab", "robot", "sensors", "rules", "robot behavior", "if then", "debugging", "trade-offs", "interactive"],
+    access: { account: "none", cost: "free", supervision: false, hardware: [] },
+    launch: { status: "lab", labId: "line-follower", label: "Open the Line Follower Lab", note: "Runs inside STEM Explorers." },
+    mission: "Your robot has two light sensors. Give it rules for everything it might sense so it can drive a full lap, recover from sharp corners, and race the clock.",
+    learn: [
+      "Describe the sense → think → act loop that robots use.",
+      "Write if–then rules for each sensor state.",
+      "Debug robot behavior and balance speed against accuracy."
+    ],
+    before: {
+      materials: ["Laptop, Chromebook, or tablet"],
+      setup: ["Run Sense–Think–Act: Human Robot Game first for younger groups."],
+      prerequisites: "Comfortable with if–then ideas (coding pathway Stage 4 is a good match)."
+    },
+    steps: [
+      "Choose an action for each thing the robot can sense.",
+      "Press Run and watch the sensors light up as the robot drives.",
+      "If it leaves the track, watch what it sensed right before.",
+      "Fix the rule and run again."
+    ],
+    reflect: "Why does the robot need a rule for when it sees nothing at all?",
+    extend: "Design rules for a robot vacuum that bumps into walls. What sensors would it need? Write its rules as a table.",
+    teacherNotes: [
+      "Real classroom robots (and robot vacuums) use this exact approach. If you have a robot kit, students can test the same rule table on a real line.",
+      "Level 3's sharp corners require a memory rule (“keep turning the same way”): a nice bridge to variables.",
+      "Level 4 is a trade-off: the fastest speed isn't always the best."
+    ]
+  },
+  {
+    id: "lab-ramp-racers",
+    title: "Ramp Racers",
+    area: "science",
+    summary: "Run a real investigation: predict, repeat trials, keep it fair, graph your data, and explain your results.",
+    level: "intermediate",
+    grades: ["4-5", "6-8"],
+    duration: 45,
+    format: "independent",
+    equipment: ["computer", "tablet"],
+    source: "original",
+    keywords: ["lab", "experiment", "variables", "fair test", "data", "graph", "average", "claim evidence reasoning", "friction", "interactive"],
+    access: { account: "none", cost: "free", supervision: false, hardware: [] },
+    launch: { status: "lab", labId: "ramp-racers", label: "Open Ramp Racers", note: "Runs inside STEM Explorers." },
+    mission: "Find out what makes a car roll farther. You'll test ramp height, floor surface, and the car's weight, then write a scientific explanation backed by your own data.",
+    learn: [
+      "Repeat trials and use the average because measurements vary.",
+      "Control variables so a test is fair.",
+      "Write a claim supported by evidence and reasoning."
+    ],
+    before: {
+      materials: ["Laptop, Chromebook, or tablet", "Optional: a real ramp, toy car, and tape measure to compare"],
+      setup: ["Results include small random variation, just like a real experiment."],
+      prerequisites: "Sink or Float or any prediction activity."
+    },
+    steps: [
+      "Read the question and make a prediction.",
+      "Set up the ramp, floor, and car, then run a trial.",
+      "Run more trials and watch the data table and graph.",
+      "Keep everything the same except the one thing you're testing.",
+      "Answer the question using your data."
+    ],
+    reflect: "Was there a time your data didn't match your prediction? What did you do?",
+    extend: "Build a real ramp with books and a ruler. Do your real results show the same pattern as the lab?",
+    teacherNotes: [
+      "Level 4 (mass) targets a common misconception: most students predict a heavier car goes farther. Let the data do the persuading.",
+      "Unfair trials are marked in the table and left off the graph, so students see why control matters.",
+      "The CER level works well as an exit ticket. You can see each student's chosen evidence on your dashboard."
+    ]
+  },
+  {
+    id: "lab-pixel-studio",
+    title: "Pixel Animation Studio",
+    area: "creative",
+    summary: "Draw pixel art, turn pictures into code, and bring them to life frame by frame.",
+    level: "beginner",
+    grades: ["2-3", "4-5", "6-8"],
+    duration: 45,
+    format: "independent",
+    equipment: ["computer", "tablet"],
+    source: "original",
+    keywords: ["lab", "pixels", "resolution", "encoding", "animation", "frames", "fps", "digital art", "interactive"],
+    access: { account: "none", cost: "free", supervision: false, hardware: [] },
+    launch: { status: "lab", labId: "pixel-studio", label: "Open the Pixel Animation Studio", note: "Runs inside STEM Explorers. Signed-in students' animations are saved to their gallery." },
+    mission: "Learn how computers store pictures, then make your own looping animation and save it to your gallery.",
+    learn: [
+      "Explain that digital images are made of pixels and that resolution changes detail.",
+      "Read and write a picture as run-length code.",
+      "Create animation with frames and control its speed with frames per second."
+    ],
+    before: {
+      materials: ["Laptop, Chromebook, or tablet (touch screens work well)"],
+      setup: ["Pairs well after the unplugged Pixel Art Code activity."],
+      prerequisites: "None."
+    },
+    steps: [
+      "Pick a color and tap or drag on the grid to draw.",
+      "Watch your picture turn into code as you draw.",
+      "Decode a picture from its code.",
+      "Use Copy frame to build an animation, then press Play.",
+      "Try different speeds, then save your best animation."
+    ],
+    reflect: "How is a flipbook like your animation? What makes motion look smooth?",
+    extend: "Plan a 6-frame animation on paper first, then build it. Did your plan change once you saw it move?",
+    teacherNotes: [
+      "Students' saved animations appear in their profile and on your student detail page.",
+      "The keyboard works too: arrow keys move the cursor, and Space paints.",
+      "Run-length encoding is a real compression method. Ask: when does it make files smaller, and when doesn't it help?"
+    ]
   }
 ];

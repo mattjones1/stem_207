@@ -20,7 +20,8 @@
     } else if (prof) {
       chips.push(`<span class="chip chip--xp">+${SE.game.baseXp(a)} XP</span>`);
     }
-    if (a.launch.status === "ready") chips.push(`<span class="chip">${icon("external")}Opens ${esc(a.launch.provider)}</span>`);
+    if (a.launch.status === "lab") chips.push(`<span class="chip chip--lab">${icon("flask")}Interactive lab</span>`);
+    else if (a.launch.status === "ready") chips.push(`<span class="chip">${icon("external")}Opens ${esc(a.launch.provider)}</span>`);
     else if (a.launch.status === "coming-soon") chips.push(`<span class="chip chip--soon">${icon("clock")}Resource coming soon</span>`);
     else chips.push(`<span class="chip chip--ok">${icon("check")}Hands-on, no link needed</span>`);
     if (a.access.account === "required") chips.push(`<span class="chip chip--warn">${icon("key")}Account required</span>`);
@@ -255,6 +256,7 @@
             <a class="area-card" href="#/area/${a.id}">
               <div class="area-card__top"><span class="icon-badge">${icon(a.icon)}</span><h3>${esc(a.name)}</h3></div>
               <p>${esc(a.tagline)}</p>
+              ${SE.labs && SE.labs.forArea(a.id).length ? `<span class="chip chip--lab">${icon("flask")}${SE.labs.forArea(a.id).length === 1 ? "Interactive lab" : `${SE.labs.forArea(a.id).length} interactive labs`}</span>` : ""}
               ${prof ? `<div class="mini-meter" aria-hidden="true"><span style="width:${(done / total) * 100}%"></span></div>` : ""}
               <span class="area-card__foot">${prof ? `${done} of ${total} missions complete` : `Explore the lab · ${plural(total, "activity", "activities")}`} ${icon("arrowRight")}</span>
             </a>`;
@@ -315,7 +317,7 @@
 
     if (isStudent) {
       const prof = SE.game.profile(user.id);
-      app().innerHTML = SE.views.expeditionHome(user, prof) + areasSection(prof) + pathwayStrip(prof) + librarySection(user, prof);
+      app().innerHTML = SE.views.expeditionHome(user, prof) + labsStrip(user, null, "Your labs") + areasSection(prof) + pathwayStrip(prof) + librarySection(user, prof);
       SE.views.bindExpeditionHome && SE.views.bindExpeditionHome(user, prof);
       bindLibrary(prof);
       return;
@@ -342,6 +344,7 @@
       ${guestBanner}
       ${user && user.role === "educator" ? SE.views.educatorStrip(user) : ""}
       ${areasSection(null)}
+      ${labsStrip(user, null, "Interactive labs")}
       ${featuredSection()}
       ${pathwayStrip(null)}
       ${librarySection(user, null)}`;
@@ -370,6 +373,7 @@
           ${prof ? `<p class="page-top__progress"><strong>${done} of ${list.length}</strong> missions complete in this area</p>` : ""}
         </div>
       </section>
+      ${labsStrip(user, id)}
       ${id === "coding" ? `
         <section class="wrap section">
           <div class="notice notice--row">
@@ -385,8 +389,50 @@
       </section>`;
   };
 
+  /* Interactive labs for an area (or all areas), with this user's progress */
+  function labsStrip(user, areaId, title) {
+    const labs = areaId ? SE.labs.forArea(areaId) : SE.labs.all();
+    if (!labs.length) return "";
+    return `
+      <section class="wrap section" aria-labelledby="labs-${areaId || "all"}">
+        <div class="section__head">
+          <div><span class="eyebrow">Interactive ${labs.length === 1 ? "lab" : "labs"}</span><h2 id="labs-${areaId || "all"}">${title || "Explore the lab"}</h2></div>
+          <p>Hands-on, leveled practice that runs right here. Each level teaches one idea, then checks that you've got it.</p>
+        </div>
+        <div class="lab-cards ${areaId ? "lab-cards--area" : ""}">${labs.map((lab) => labCard(user, lab)).join("")}</div>
+      </section>`;
+  }
+  function labCard(user, lab) {
+    const area = SE.areaById[lab.area];
+    const done = SE.labs.progressFor(user, lab.id);
+    const pct = (done.size / lab.levels.length) * 100;
+    const next = lab.levels.findIndex((_, i) => !done.has(i));
+    return `
+      <a class="lab-card" href="#/lab/${lab.id}">
+        <span class="lab-card__top"><span class="icon-badge">${icon(area.icon)}</span><span class="lab-card__area">${esc(area.short)}</span></span>
+        <strong>${esc(lab.title)}</strong>
+        <span class="lab-card__tag">${esc(lab.tagline)}</span>
+        <span class="lab-card__levels">${lab.levels.map((l, i) => `<i class="${done.has(i) ? "on" : ""}" title="${esc(l.title)}"></i>`).join("")}</span>
+        <span class="lab-card__foot"><span>${done.size ? `${done.size} of ${lab.levels.length} levels` : `${lab.levels.length} levels`}</span><span class="lab-card__go">${done.size === lab.levels.length ? "Replay" : done.size ? `Continue: level ${next + 1}` : "Start"} ${icon("arrowRight")}</span></span>
+        <span class="visually-hidden">${Math.round(pct)}% complete</span>
+      </a>`;
+  }
+  SE.labsStrip = labsStrip;
+
   /* ───────── Activity ───────── */
-  function launchPanel(a, id) {
+  function launchPanel(a, id, user) {
+    if (a.launch.status === "lab") {
+      const lab = SE.labs.byId(a.launch.labId);
+      const done = lab ? SE.labs.progressFor(user, lab.id) : new Set();
+      return `
+        <section class="launch-panel launch-panel--lab" aria-labelledby="${id}">
+          <h2 id="${id}">Launch activity</h2>
+          <p class="launch-panel__note">${esc(a.launch.note)}</p>
+          ${lab ? `<div class="lab-progress"><span>${done.size} of ${lab.levels.length} levels complete</span><span class="meter"><span style="width:${(done.size / lab.levels.length) * 100}%"></span></span></div>` : ""}
+          <a class="btn btn--launch" href="#/lab/${esc(a.launch.labId)}">${icon("rocket")}${done.size ? "Continue the lab" : esc(a.launch.label)}</a>
+          <p class="launch-panel__small">The lab opens right here in STEM Explorers. Use the Dashboard button to come back anytime.</p>
+        </section>`;
+    }
     if (a.launch.status === "ready") {
       return `
         <section class="launch-panel" aria-labelledby="${id}">
@@ -414,6 +460,8 @@
   }
 
   function quickLaunch(a) {
+    if (a.launch.status === "lab")
+      return `<a class="btn btn--launch" href="#/lab/${esc(a.launch.labId)}">${icon("rocket")}Open the lab</a>`;
     if (a.launch.status === "ready")
       return `<a class="btn btn--launch" data-launch href="${esc(a.launch.url)}" target="_blank" rel="noopener noreferrer">${icon("rocket")}Launch activity<span class="visually-hidden">: ${esc(a.launch.label)} (opens in a new tab)</span></a>`;
     if (a.launch.status === "coming-soon")
@@ -512,7 +560,7 @@
             ${isStudent ? `<p class="block__hint">Check off each step as you finish it.</p>` : ""}
             ${stepsHtml}
           </section>
-          ${launchPanel(a, "s-launch")}
+          ${launchPanel(a, "s-launch", user)}
           ${isStudent ? SE.views.debrief(user, a, prof) : `
           <section class="block block--reflect" aria-labelledby="s-reflect">
             <h2 id="s-reflect">${icon("question")}Think about it</h2><p>${esc(a.reflect)}</p>
@@ -572,6 +620,7 @@
   };
 
   /* ───────── Pathway ───────── */
+  const ROVER_FOR_STAGE = { 1: [1, 2, 3], 2: [7], 3: [4, 5, 6], 4: [8, 9], 5: [10], 6: [11], 7: [12] };
   SE.views.pathway = function (user) {
     const isStudent = user && user.role === "student";
     const prof = isStudent ? SE.game.profile(user.id) : null;
@@ -624,6 +673,7 @@
               </div>
               <div class="ican">${icon("check")}<span><span class="visually-hidden">Readiness check: </span>${esc(s.iCan)}</span>${claimBtn}</div>
               <div class="stage__links">
+                ${(ROVER_FOR_STAGE[s.stage] || []).map((lv) => `<a class="btn btn--ghost btn--small btn--lab" href="#/lab/rover/${lv}">${icon("flask")}Rover Code Lab · level ${lv}${prof && SE.labs.progressFor(prof, "rover").has(lv - 1) ? " ✓" : ""}</a>`).join("")}
                 ${s.activities.map((id) => SE.activityById[id]).filter(Boolean).map((a) => `
                   <a class="btn btn--ghost btn--small ${prof && prof.completedIds.has(a.id) ? "is-done" : ""}" href="#/activity/${a.id}">${icon(prof && prof.completedIds.has(a.id) ? "check" : SE.areaById[a.area].icon)}${esc(a.title)} · ${a.duration} min</a>`).join("")}
               </div>

@@ -16,6 +16,7 @@ window.STEM.progression = {
     extension: 50,           // tried "Take it further"
     newSector: 50,           // first mission in an exploration area
     stageCleared: 100,       // teacher confirmed a pathway "I can"
+    labLevel: 30,            // finished a level in an interactive lab (first time)
     replay: 0.25             // repeating a mission earns a quarter of its base XP
   },
 
@@ -63,6 +64,12 @@ window.STEM.progression = {
       how: "Clear 3 coding pathway stages." },
     { id: "pathway-7", name: "Full Pathway", icon: "target", ring: "orange", rule: "stages", n: 7,
       how: "Clear all 7 coding pathway stages." },
+    { id: "lab-explorer", name: "Lab Explorer", icon: "flask", ring: "teal", rule: "labs", n: 3,
+      how: "Finish a level in 3 different interactive labs." },
+    { id: "lab-master", name: "Lab Master", icon: "star", ring: "orange", rule: "labFull", n: 1,
+      how: "Finish every level of one interactive lab." },
+    { id: "lab-legend", name: "Lab Legend", icon: "target", ring: "navy", rule: "labLevels", n: 30,
+      how: "Finish 30 lab levels." },
     { id: "teacher-level", name: "Could Teach It", icon: "bulb", ring: "navy", rule: "confident", n: 3,
       how: "Finish 3 missions feeling ready to teach someone else." }
   ],

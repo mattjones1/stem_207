@@ -273,6 +273,31 @@
     });
   }
 
+  /* ───────── Pixel creations (looping, CSS-only animation) ───────── */
+  let animId = 0;
+  SE.pixelAnim = (res, size = 96) => {
+    if (!res || !res.frames || !res.frames.length) return "";
+    const id = `pxa${++animId}`;
+    const N = res.frames.length;
+    const dur = N / (res.fps || 6);
+    const pct = (100 / N).toFixed(3);
+    return `<span class="pix-anim" id="${id}" style="width:${size}px;height:${size}px">
+      <style>@keyframes ${id}k { 0% { opacity: 1; } ${pct}% { opacity: 0; } 100% { opacity: 0; } }
+        #${id} > svg { animation: ${id}k ${dur}s steps(1, end) infinite; }
+        ${res.frames.map((_, i) => `#${id} > svg:nth-of-type(${i + 1}) { animation-delay: ${((i * dur) / N - dur).toFixed(3)}s; }`).join("")}
+        @media (prefers-reduced-motion: reduce) { #${id} > svg { animation: none; opacity: 0; } #${id} > svg:first-of-type { opacity: 1; } }</style>
+      ${res.frames.map((f, i) => SE.pixelSvg(f, res.n, size, i === 0 ? `Animation with ${N} frames` : "")).join("")}
+    </span>`;
+  };
+  SE.views.creationsGallery = (prof) => {
+    const r = prof.labResults["pixel-studio"];
+    if (!r) return "";
+    const lab = SE.labs.byId("pixel-studio");
+    const items = Object.entries(r).sort((a, b) => b[0] - a[0]).filter(([, v]) => v.result && v.result.frames);
+    if (!items.length) return "";
+    return `<div class="creations">${items.map(([lvl, v]) => `<figure class="creation">${v.result.frames.length > 1 ? SE.pixelAnim(v.result, 96) : SE.pixelSvg(v.result.frames[0], v.result.n, 96, "Pixel art")}<figcaption><strong>${esc(lab ? lab.levels[lvl].title : "Creation")}</strong><span>${v.result.frames.length} frame${v.result.frames.length > 1 ? "s" : ""}${v.result.frames.length > 1 ? ` · ${v.result.fps} fps` : ""} · ${SE.dateShort(v.at)}</span></figcaption></figure>`).join("")}</div>`;
+  };
+
   /* ───────── Explorer profile ───────── */
   SE.views.me = function (user) {
     const prof = SE.game.profile(user.id);
@@ -316,6 +341,9 @@
             </figure>`).join("")}
         </div>
       </section>
+
+      ${SE.views.creationsGallery(prof) ? `<section class="section wrap" aria-labelledby="gal-title"><div class="section__head"><div><span class="eyebrow">Gallery</span><h2 id="gal-title">My creations</h2></div></div>${SE.views.creationsGallery(prof)}</section>` : ""}
+      ${SE.labsStrip(user, null, "My labs")}
 
       <section class="section wrap" aria-labelledby="log-title">
         <div class="section__head"><div><span class="eyebrow">Mission log</span><h2 id="log-title">${log.length ? "Everything you've completed" : "Your log is empty, for now"}</h2></div></div>

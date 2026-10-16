@@ -94,6 +94,7 @@ html.projector { font-size: 125%; }
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 body {
   margin: 0;

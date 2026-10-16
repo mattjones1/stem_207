@@ -34,6 +34,9 @@
       case "area": return c.areas[patch.area] || 0;
       case "stages": return c.stagesCleared;
       case "confident": return c.confident;
+      case "labs": return c.labsTouched;
+      case "labFull": return c.labsFull;
+      case "labLevels": return c.labLevelsDone;
       default: return 0;
     }
   }
@@ -49,8 +52,13 @@
     events = (events || SE.store.eventsFor(studentId)).slice().sort((a, b) => a.at - b.at);
     const c = {
       missions: 0, reflections: 0, extensions: 0, collaborative: 0, confident: 0,
-      sectors: new Set(), areas: {}, keywords: {}, stagesCleared: 0
+      sectors: new Set(), areas: {}, keywords: {}, stagesCleared: 0,
+      labsTouched: 0, labsFull: 0, labLevelsDone: 0
     };
+    const labLevels = {}; // labId -> Set of completed level indexes
+    const labResults = {}; // labId -> { level: latest result }
+    const labTimes = [];
+    const labStats = {}; // labId -> { runs, hints }
     let xp = 0;
     const completedIds = new Set();
     const completions = [];
@@ -122,10 +130,30 @@
         if (stages[e.data.stage] && stages[e.data.stage].status === "claimed") delete stages[e.data.stage];
       }
       if (e.type === "reflection_reviewed") reviewed[e.data.completionId] = e;
+
+      if (e.type === "lab_test_run" || e.type === "lab_hint") {
+        const st = (labStats[e.data.labId] = labStats[e.data.labId] || { runs: 0, hints: 0 });
+        if (e.type === "lab_test_run") st.runs++; else st.hints++;
+      }
+      if (e.type === "lab_level_completed") {
+        labTimes.push(e.at);
+        const id = e.data.labId;
+        if (!labLevels[id]) { labLevels[id] = new Set(); c.labsTouched++; }
+        labResults[id] = labResults[id] || {};
+        labResults[id][e.data.level] = { at: e.at, result: e.data.result || {} };
+        if (!labLevels[id].has(e.data.level)) {
+          labLevels[id].add(e.data.level);
+          xp += P.xp.labLevel;
+          c.labLevelsDone++;
+          const lab = SE.labs && SE.labs.byId(id);
+          if (lab && labLevels[id].size === lab.levels.length) c.labsFull++;
+        }
+        checkPatches(e.at);
+      }
     });
 
     // Weekly streak: consecutive weeks (ending this week or last) with at least one mission.
-    const weeks = new Set(completions.map((x) => weekOf(x.event.at)));
+    const weeks = new Set(completions.map((x) => weekOf(x.event.at)).concat(labTimes.map(weekOf)));
     let streak = 0;
     let w = weekOf(Date.now());
     if (!weeks.has(w)) w -= 1;
@@ -151,7 +179,10 @@
       patches,
       earnedCount: patches.filter((p) => p.earned).length,
       lastActive,
-      streak
+      streak,
+      labLevels,
+      labResults,
+      labStats
     };
   }
 

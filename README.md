@@ -14,6 +14,24 @@ The classroom dashboard for the **STEM Explorers** program at the **STEM Coliseu
 - **Projector mode** to enlarge everything for a shared screen. This setting is remembered only on that device.
 
 
+## Interactive labs
+
+Each exploration area has its own leveled, interactive lab that runs inside STEM Explorers, with no outside account or website. Every level teaches one idea, gives a hint on request, checks the student's work, and ends with "What you just learned." Signed-in students earn XP for each level (+30), and lab work counts toward patches and the weekly streak.
+
+| Area | Lab | Levels | What students learn |
+| --- | --- | --- | --- |
+| Coding & Computer Science | **Rover Code Lab** | 12 | Sequences, debugging with step-through, loops, actions, conditionals (if / if–else), a variable, functions (custom blocks), free build. Levels map to coding pathway stages. |
+| Virtual Reality | **Field Station 360** | 5 | Look-around rainforest, desert, and coral reef with compass headings. Observation vs. inference, adaptations, comparing habitats. Works in a VR headset's browser too. |
+| Artificial Intelligence | **Pattern Machine Lab** | 6 | Find a pattern, train a real k-nearest-neighbors classifier, see accuracy grow with more examples, uncover biased data, set a confidence threshold, judge responsible uses. Made-up creatures only. |
+| Engineering & Robotics | **Launcher Lab** | 6 | Design–test–iterate a catapult: prediction, one-change-at-a-time fair tests, a wall constraint, a budget, an engineering notebook. |
+| Engineering & Robotics | **Line Follower Lab** | 4 | Sense → think → act rules for a two-sensor robot, debugging behavior, recovering at sharp corners, speed vs. accuracy. |
+| Science & Discovery | **Ramp Racers** | 5 | Predict and test, natural variation and averages, controlling variables, the "does weight matter?" misconception, claim–evidence–reasoning. |
+| Creative STEM | **Pixel Animation Studio** | 6 | Pixels, resolution, run-length encoding, frames and fps, and an original animation saved to the student's gallery. |
+
+Each lab also has a library entry with a full teacher guide (mission, objectives, setup, steps, reflection, extension, and facilitation notes). Educators see lab progress per class and per student, including tests run, hints used, and saved animations.
+
+Lab code lives in `assets/js/labs/`. `lab-shell.js` provides the shared layout, hints, completion panel, and progress logging. Each lab registers itself with `SE.labs.register({ id, area, title, tagline, levels, mount })`, so adding a lab means adding one file and one `<script>` tag.
+
 ## Accounts and progress (prototype)
 
 **Students** sign in with a class code, by tapping their name, and by tapping three secret pictures from a login card their teacher hands out. They never type an email or password, and the only thing stored about them is a display name (first name and last initial) and a grade band.
@@ -36,7 +54,7 @@ The sample class has eight made-up students with two and a half weeks of made-up
 - **Mission checklist**: steps can be checked off, and the page remembers where they stopped.
 - **Mission debrief**: answer "Think about it," mark "Take it further" as tried, and say how it went. Then a Mission complete screen shows XP earned, any promotion, and new patches.
 - **Ranks**: Cadet → Scout → Navigator → Pathfinder → Trailblazer → Voyager → Mission Commander, each with a chevron insignia.
-- **15 mission patches** for things like first mission, reflections, team missions, debugging, each area, and pathway stages.
+- **18 mission patches** for things like first mission, reflections, team missions, debugging, each area, pathway stages, and interactive labs.
 - **Class expedition**: everyone's XP moves the class from the launch pad to Neptune. It's cooperative, so there's no leaderboard.
 - **Coding pathway**: an "I can do this" button sends a stage to the teacher to check.
 
