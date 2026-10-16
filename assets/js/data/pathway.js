@@ -1,5 +1,5 @@
 /*
- * STEM Explorer Academy — coding pathway.
+ * STEM 207 — coding pathway.
  *
  * Stages are ordered by readiness, not grade. `suggestedStart` helps teachers
  * pick an entry point; it never limits who can move on.

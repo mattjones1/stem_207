@@ -345,10 +345,10 @@
 
   /* ───────── Level 6: responsible use ───────── */
   const USES = [
-    ["Sorting photos of recycling into paper and plastic", "good", "Low risk. If it makes a mistake, it's easy to fix, and no one is harmed."],
+    ["Counting puffins in photos from a Maine seabird island", "good", "Low risk, and it saves scientists hours. If it miscounts, a person can spot-check the photos, and no one is harmed."],
+    ["Sorting Maine wild blueberries from leaves and stems on a conveyor belt", "good", "Low risk. A mistake means one leaf slips through, and machines like this help farms work faster."],
     ["Suggesting a library book you might like", "good", "Helpful and low risk. You still choose what to read."],
-    ["Translating a menu while traveling", "good", "Useful, and a small mistake is easy to notice."],
-    ["Spotting something worrying on an X-ray", "human", "It can help doctors find things faster, but a doctor must check, because a mistake could hurt someone."],
+        ["Spotting something worrying on an X-ray", "human", "It can help doctors find things faster, but a doctor must check, because a mistake could hurt someone."],
     ["Grading a student's science report", "human", "A teacher should review it. AI can miss creative thinking or be unfair to some kinds of writing."],
     ["Choosing which people get a job interview", "human", "AI trained on past choices can copy past unfairness. People need to check the results."],
     ["Writing a whole essay and turning it in as your own", "not", "That's not your work. Using AI to brainstorm can be OK if your teacher allows it, but passing off its writing as yours isn't honest."],

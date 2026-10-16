@@ -1,7 +1,7 @@
 /*
- * STEM Explorer Academy — lab framework.
+ * STEM 207 — lab framework.
  *
- * A lab is an interactive, leveled learning app that runs inside STEM Explorer Academy.
+ * A lab is an interactive, leveled learning app that runs inside STEM 207.
  * Each lab file registers itself with SE.labs.register({...}). The shell handles
  * the page layout, level list, concept intro, hints, the "level complete" panel,
  * and saving progress to the activity log.

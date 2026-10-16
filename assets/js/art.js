@@ -1,5 +1,5 @@
 /*
- * STEM Explorer Academy — drawn elements: rank insignia, mission patches,
+ * STEM 207 — drawn elements: rank insignia, mission patches,
  * the expedition star map, and the class goal track.
  */
 (function () {
@@ -11,7 +11,7 @@
 
   /* Fixed object colors: insignia and patches are "physical" objects, so they keep
      their colors in both themes, like a real embroidered patch would. */
-  const C = { navy: "#2e286e", navyDeep: "#1a1745", teal: "#4741b0", tealLight: "#b9e27f", orange: "#91c440", cream: "#f6f5ff", ink: "#1e1a4d" };
+  const C = { navy: "#302568", navyDeep: "#1d1647", teal: "#4a3ba6", tealLight: "#b9e27f", orange: "#8cc832", cream: "#f7f6f0", ink: "#1d1647" };
 
   function starPath(cx, cy, r) {
     const pts = [];
@@ -43,7 +43,7 @@
   SE.patchArt = (patch, earned, size = 96) => {
     const id = `arc${++uid}`;
     const ring = { teal: C.teal, orange: C.orange, navy: C.navy }[patch.ring] || C.teal;
-    const inner = patch.ring === "navy" ? "#4741b0" : C.navy;
+    const inner = patch.ring === "navy" ? "#4a3ba6" : C.navy;
     const cls = earned ? "patch" : "patch patch--locked";
     const ink = patch.ring === "orange" ? C.ink : C.cream; // dark lettering on the lime ring
     return `<svg class="${cls}" width="${size}" height="${size}" viewBox="0 0 120 120" role="img" aria-label="${SE.esc(patch.name)} patch${earned ? "" : ", not earned yet"}">
@@ -103,13 +103,24 @@
       labels.push(`<text x="${cx}" y="${cy + 92}" text-anchor="middle" class="map-label">${SE.esc(area.short.toUpperCase())}</text>
         <text x="${cx}" y="${cy + 108}" text-anchor="middle" class="map-count">${count} of ${acts.length} stars</text>`);
     });
-    return `<svg class="starmap" viewBox="0 0 960 440" role="group" aria-label="Expedition map. Each star is a mission; completed missions light up.">
-      <rect width="960" height="440" fill="${C.navyDeep}"/>
+    // A pine ridge along the bottom: the Maine North Woods under a dark-sky night.
+    const pr = SE.rng("starmap-ridge");
+    const pines = [];
+    for (let x = -10; x < 970; x += 10 + pr() * 12) {
+      const h = 24 + pr() * 44;
+      pines.push(`<use href="#mapPine" x="${x.toFixed(1)}" y="${(492 - h).toFixed(1)}" width="${(h * 117 / 332).toFixed(1)}" height="${h.toFixed(1)}"/>`);
+    }
+    return `<svg class="starmap" viewBox="0 0 960 500" role="group" aria-label="Expedition map of the Maine night sky. Each star is a mission; completed missions light up.">
+      <defs><symbol id="mapPine" viewBox="1138 172 117 332"><path d="${SE.brand.PINE_D}"/></symbol>
+        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.navyDeep}"/><stop offset=".8" stop-color="${C.navy}"/><stop offset="1" stop-color="#43379a"/></linearGradient></defs>
+      <rect width="960" height="500" fill="url(#skyGrad)"/>
       ${parts.join("")}${labels.join("")}
+      <path d="M0 470 L120 452 L210 462 L330 440 L420 455 L560 438 L700 458 L820 446 L960 460 V500 H0Z" fill="#2a2068"/>
+      <g fill="#120d33">${pines.join("")}</g><rect y="490" width="960" height="10" fill="#120d33"/>
     </svg>`;
   };
 
-  /* Class goal: a route across the solar system with the class's position on it. */
+  /* Class goal: a route up the Maine coast and inland to Katahdin, with the class's position on it. */
   SE.goalTrack = (goal) => {
     const g = P.classGoal;
     const pos = (goal.index + goal.progress) / (g.length - 1);
@@ -118,7 +129,7 @@
         <div class="goal__track" role="img" aria-label="Class expedition: ${SE.num(goal.totalXp)} XP. Reached ${SE.esc(goal.reached.name)}${goal.next ? `, ${Math.round(goal.progress * 100)}% of the way to ${SE.esc(goal.next.name)}` : ""}.">
           <div class="goal__fill" style="width:${(pos * 100).toFixed(1)}%"></div>
           ${g.map((m, i) => `<span class="goal__stop ${i <= goal.index ? "is-reached" : ""}" style="left:${((i / (g.length - 1)) * 100).toFixed(1)}%"></span>`).join("")}
-          <span class="goal__ship" style="left:${(pos * 100).toFixed(1)}%">${SE.icon("rocket")}</span>
+          <span class="goal__ship" style="left:${(pos * 100).toFixed(1)}%">${SE.icon("boat")}</span>
         </div>
         <ol class="goal__labels" aria-hidden="true">
           ${g.map((m, i) => `<li class="${i <= goal.index ? "is-reached" : ""} ${i === goal.index ? "is-current" : ""} ${i === goal.index + 1 ? "is-next" : ""}" style="left:${((i / (g.length - 1)) * 100).toFixed(1)}%"><b>${SE.esc(m.name)}</b><span>${SE.num(m.xp)} XP</span></li>`).join("")}

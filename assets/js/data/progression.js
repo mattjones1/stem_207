@@ -1,5 +1,5 @@
 /*
- * STEM Explorer Academy — progression rules.
+ * STEM 207 — progression rules.
  *
  * Everything a student earns is calculated from their activity log, so these
  * rules can be tuned at any time and every student's rank and patches update
@@ -20,15 +20,16 @@ window.STEM.progression = {
     replay: 0.25             // repeating a mission earns a quarter of its base XP
   },
 
-  /* Explorer ranks. Insignia are drawn from `chevrons` and `stars`. */
+  /* Explorer ranks, Maine-style: from the dock to the top of Katahdin.
+     Insignia are drawn from `chevrons` and `stars`. */
   ranks: [
-    { id: "cadet", name: "Cadet", xp: 0, chevrons: 0, stars: 0, motto: "Every expedition starts with one step." },
-    { id: "scout", name: "Scout", xp: 300, chevrons: 1, stars: 0, motto: "You know how to look closely." },
-    { id: "navigator", name: "Navigator", xp: 800, chevrons: 2, stars: 0, motto: "You can find your own way." },
-    { id: "pathfinder", name: "Pathfinder", xp: 1600, chevrons: 3, stars: 0, motto: "Others follow the trails you find." },
-    { id: "trailblazer", name: "Trailblazer", xp: 2800, chevrons: 3, stars: 1, motto: "You go where no one has mapped yet." },
-    { id: "voyager", name: "Voyager", xp: 4500, chevrons: 3, stars: 2, motto: "Long journeys don't scare you." },
-    { id: "commander", name: "Mission Commander", xp: 7000, chevrons: 3, stars: 3, motto: "You can lead an expedition." }
+    { id: "deckhand", name: "Deckhand", xp: 0, chevrons: 0, stars: 0, motto: "Every expedition starts at the dock." },
+    { id: "tidepooler", name: "Tidepooler", xp: 300, chevrons: 1, stars: 0, motto: "You know how to look closely." },
+    { id: "trail-scout", name: "Trail Scout", xp: 800, chevrons: 2, stars: 0, motto: "You can find your own way through the woods." },
+    { id: "keeper", name: "Lighthouse Keeper", xp: 1600, chevrons: 3, stars: 0, motto: "Others steer by the light you keep." },
+    { id: "harbor-pilot", name: "Harbor Pilot", xp: 2800, chevrons: 3, stars: 1, motto: "You can guide a boat home through fog." },
+    { id: "ridge-runner", name: "Ridge Runner", xp: 4500, chevrons: 3, stars: 2, motto: "Long climbs don't scare you." },
+    { id: "katahdin", name: "Katahdin Guide", xp: 7000, chevrons: 3, stars: 3, motto: "You can lead an expedition all the way to the summit." }
   ],
 
   /*
@@ -36,15 +37,15 @@ window.STEM.progression = {
    * `icon` uses the app's icon set. `ring` is "teal", "orange", or "navy".
    */
   patches: [
-    { id: "first-launch", name: "First Launch", icon: "rocket", ring: "orange", rule: "missions", n: 1,
+    { id: "first-launch", name: "Cast Off", icon: "boat", ring: "orange", rule: "missions", n: 1,
       how: "Complete your first mission." },
     { id: "logbook", name: "Logbook Keeper", icon: "clipboard", ring: "teal", rule: "reflections", n: 5,
       how: "Answer 5 \"Think about it\" questions." },
-    { id: "further", name: "Further Out", icon: "flag", ring: "navy", rule: "extensions", n: 3,
+    { id: "further", name: "Past the Breakwater", icon: "flag", ring: "navy", rule: "extensions", n: 3,
       how: "Try 3 \"Take it further\" challenges." },
-    { id: "wide-horizon", name: "Wide Horizon", icon: "mountain", ring: "orange", rule: "sectors", n: 4,
+    { id: "wide-horizon", name: "Down East", icon: "compass", ring: "orange", rule: "sectors", n: 4,
       how: "Complete missions in 4 different exploration areas." },
-    { id: "crew", name: "Crew Member", icon: "users", ring: "teal", rule: "collaborative", n: 3,
+    { id: "crew", name: "Sternman", icon: "users", ring: "teal", rule: "collaborative", n: 3,
       how: "Complete 3 team missions." },
     { id: "bug-hunter", name: "Bug Hunter", icon: "bug", ring: "navy", rule: "keyword", keyword: "debugging", n: 2,
       how: "Complete 2 debugging missions." },
@@ -60,28 +61,29 @@ window.STEM.progression = {
       how: "Complete 2 Science missions." },
     { id: "sector-creative", name: "Maker", icon: "palette", ring: "orange", rule: "area", area: "creative", n: 2,
       how: "Complete 2 Creative missions." },
-    { id: "pathway-3", name: "Trail Markers", icon: "list", ring: "teal", rule: "stages", n: 3,
+    { id: "pathway-3", name: "Trail Blazes", icon: "pine", ring: "teal", rule: "stages", n: 3,
       how: "Clear 3 coding pathway stages." },
-    { id: "pathway-7", name: "Full Pathway", icon: "target", ring: "orange", rule: "stages", n: 7,
+    { id: "pathway-7", name: "Summit Katahdin", icon: "mountain", ring: "orange", rule: "stages", n: 7,
       how: "Clear all 7 coding pathway stages." },
     { id: "lab-explorer", name: "Lab Explorer", icon: "flask", ring: "teal", rule: "labs", n: 3,
       how: "Finish a level in 3 different interactive labs." },
     { id: "lab-master", name: "Lab Master", icon: "star", ring: "orange", rule: "labFull", n: 1,
       how: "Finish every level of one interactive lab." },
-    { id: "lab-legend", name: "Lab Legend", icon: "target", ring: "navy", rule: "labLevels", n: 30,
+    { id: "lab-legend", name: "Lab Legend", icon: "lighthouse", ring: "navy", rule: "labLevels", n: 30,
       how: "Finish 30 lab levels." },
     { id: "teacher-level", name: "Could Teach It", icon: "bulb", ring: "navy", rule: "confident", n: 3,
       how: "Finish 3 missions feeling ready to teach someone else." }
   ],
 
-  /* Shared class goal. Everyone's XP adds up toward the next destination. */
+  /* Shared class goal: the class travels Maine together, from the state line to the summit.
+     Everyone's XP adds up toward the next stop. */
   classGoal: [
-    { name: "Launch pad", xp: 0 },
-    { name: "Low orbit", xp: 3000 },
-    { name: "The Moon", xp: 8000 },
-    { name: "Mars", xp: 16000 },
-    { name: "Jupiter", xp: 30000 },
-    { name: "Neptune", xp: 50000 }
+    { name: "Kittery", xp: 0 },
+    { name: "Portland Head", xp: 3000 },
+    { name: "Penobscot Bay", xp: 8000 },
+    { name: "Acadia", xp: 16000 },
+    { name: "Moosehead", xp: 30000 },
+    { name: "Katahdin", xp: 50000 }
   ],
 
   /* How a student felt at the end of a mission. Shown to teachers. */
@@ -93,14 +95,14 @@ window.STEM.progression = {
 
   /* Picture codes for student sign-in. Order matters; students pick three. */
   pictures: [
+    { id: "pine", name: "Pine tree" },
+    { id: "lighthouse", name: "Lighthouse" },
     { id: "moon", name: "Moon" },
-    { id: "comet", name: "Comet" },
+    { id: "boat", name: "Lobster boat" },
+    { id: "wave", name: "Wave" },
+    { id: "leaf", name: "Maple leaf" },
     { id: "compass", name: "Compass" },
     { id: "mountain", name: "Mountain" },
-    { id: "wave", name: "Wave" },
-    { id: "leaf", name: "Leaf" },
-    { id: "crystal", name: "Crystal" },
-    { id: "telescope", name: "Telescope" },
-    { id: "lighthouse", name: "Lighthouse" }
+    { id: "snowflake", name: "Snowflake" }
   ]
 };

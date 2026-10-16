@@ -1,35 +1,41 @@
 /*
- * STEM Explorer Academy
- * Brand: indigo #2E286E and lime #91C440 from the SE compass logo.
- * Layout: light command bar with the logo, indigo mission bands, big cards, clear readouts.
+ * STEM 207
+ * Brand: indigo #302568 and lime #8CC832 from the STEM 207 wordmark (assets/img/brand/stem207-logo.svg).
+ * Maine touches: pine-ridge edges cut from the logo's own pine, a coastal night hero with a working
+ * lighthouse, fog-white page background, and granite/sea accents.
  * Token names are kept from the first version (navy, teal, orange) so components didn't need renaming:
  *   navy = brand indigo, teal = secondary violet, orange = brand lime accent, warn = amber for alerts.
  */
 :root {
   /* Color */
-  --navy: #2e286e;
-  --navy-deep: #1e1a4d;
-  --teal: #4741b0;
-  --teal-soft: #e8e7f8;
-  --orange: #91c440;
-  --orange-ink: #46700f;
-  --orange-soft: #eef6df;
-  --mission-bg: #2e286e;
+  --navy: #302568;
+  --navy-deep: #1d1647;
+  --teal: #4a3ba6;
+  --teal-soft: #e9e6f6;
+  --orange: #8cc832;
+  --orange-ink: #3f6b0c;
+  --orange-soft: #edf6dc;
+  --mission-bg: #302568;
   --warn: #d9822b;
   --warn-ink: #9a4a0e;
   --warn-soft: #fdecdc;
+  /* Maine accents */
+  --sea: #1f5f7a;
+  --granite: #8b8a83;
+  --footer-bg: #241c58;
+  --logo-stem: #302568;
 
-  --bg: #f4f4fa;
+  --bg: #f5f5f1;
   --surface: #ffffff;
-  --surface-2: #ebebf5;
-  --line: #d7d6ea;
-  --fg: #1d1a45;
-  --muted: #55537a;
+  --surface-2: #ecebe4;
+  --line: #d9d7cc;
+  --fg: #1f1a45;
+  --muted: #565370;
   --on-dark: #f3f2fc;
   --on-dark-muted: #c4c2e6;
-  --on-accent: #1e1a4d;
-  --brand-ink: #2e286e;
-  --focus: #4741b0;
+  --on-accent: #1d1647;
+  --brand-ink: #302568;
+  --focus: #4a3ba6;
   --shadow: 0 1px 2px rgba(29, 26, 69, .06), 0 6px 18px rgba(29, 26, 69, .08);
 
   /* Type */
@@ -55,13 +61,17 @@
     --navy-deep: #110f33;
     --teal: #aca8f4;
     --teal-soft: #2a2766;
-    --orange: #a3d455;
+    --orange: #9ad44a;
     --orange-ink: #bfe486;
     --orange-soft: #26381a;
     --mission-bg: #2a2766;
     --warn: #f0a050;
     --warn-ink: #f6b678;
     --warn-soft: #3d2614;
+    --sea: #7cc3dd;
+    --granite: #a6a59e;
+    --footer-bg: #0c0a26;
+    --logo-stem: #ffffff;
     --bg: #0f0e2a;
     --surface: #18163d;
     --surface-2: #221f52;
@@ -81,13 +91,17 @@
   --navy-deep: #110f33;
   --teal: #aca8f4;
   --teal-soft: #2a2766;
-  --orange: #a3d455;
+  --orange: #9ad44a;
   --orange-ink: #bfe486;
   --orange-soft: #26381a;
   --mission-bg: #2a2766;
   --warn: #f0a050;
   --warn-ink: #f6b678;
   --warn-soft: #3d2614;
+  --sea: #7cc3dd;
+  --granite: #a6a59e;
+  --footer-bg: #0c0a26;
+  --logo-stem: #ffffff;
   --bg: #0f0e2a;
   --surface: #18163d;
   --surface-2: #221f52;
@@ -154,7 +168,7 @@ ul, ol { margin: 0; padding: 0; }
   left: var(--gutter-l);
   top: -100px;
   background: var(--orange);
-  color: #1e1a4d;
+  color: #1d1647;
   padding: .6rem 1rem;
   border-radius: var(--radius-sm);
   font-weight: 700;
@@ -199,7 +213,7 @@ ul, ol { margin: 0; padding: 0; }
   min-height: 44px;
 }
 .brand__mark { width: 40px; height: 40px; color: #b9e27f; flex: none; }
-.brand__planet { fill: #91c440; }
+.brand__planet { fill: #8cc832; }
 .brand__text { display: flex; flex-direction: column; line-height: 1.1; }
 .brand__org {
   font-size: .72rem;
@@ -235,7 +249,7 @@ ul, ol { margin: 0; padding: 0; }
 .site-nav a:hover { background: rgba(255, 255, 255, .08); }
 .site-nav a[aria-current="page"] {
   background: rgba(255, 255, 255, .12);
-  box-shadow: inset 0 -3px 0 #91c440;
+  box-shadow: inset 0 -3px 0 #8cc832;
 }
 .projector-toggle {
   background: transparent;
@@ -245,7 +259,7 @@ ul, ol { margin: 0; padding: 0; }
   margin-left: .25rem;
 }
 .projector-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
-.projector-toggle[aria-pressed="true"] { background: #91c440; color: #1e1a4d; border-color: #91c440; }
+.projector-toggle[aria-pressed="true"] { background: #8cc832; color: #1d1647; border-color: #8cc832; }
 
 /* ───────── Shared bits ───────── */
 .eyebrow {
@@ -297,7 +311,7 @@ ul, ol { margin: 0; padding: 0; }
   line-height: 1.1;
 }
 .btn svg { width: 1.1em; height: 1.1em; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
-.btn--launch { background: var(--orange); color: #1e1a4d; }
+.btn--launch { background: var(--orange); color: #1d1647; }
 .btn--launch:hover { filter: brightness(1.06); }
 .btn--primary { background: var(--teal); color: var(--surface); }
 .btn--ghost { background: transparent; color: var(--fg); border-color: var(--line); }
@@ -384,18 +398,10 @@ ul, ol { margin: 0; padding: 0; }
   gap: .45rem;
 }
 .time-picker button svg { width: 1.1em; height: 1.1em; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
-.time-picker button:hover { border-color: #91c440; }
-.time-picker button[aria-pressed="true"] { background: #91c440; border-color: #91c440; color: #1e1a4d; }
+.time-picker button:hover { border-color: #8cc832; }
+.time-picker button[aria-pressed="true"] { background: #8cc832; border-color: #8cc832; color: #1d1647; }
 
-.radar { width: 100%; max-width: 340px; justify-self: center; aspect-ratio: 1; }
-.radar svg { width: 100%; height: 100%; display: block; overflow: visible; }
-.radar .ring { fill: none; stroke: rgba(185, 226, 127, .28); stroke-width: 1; }
-.radar .axis { stroke: rgba(185, 226, 127, .16); stroke-width: 1; }
-.radar .sweep { fill: url(#sweepGrad); transform-origin: 170px 170px; animation: sweep 9s linear infinite; }
-.radar .blip { fill: #b9e27f; }
-.radar .blip--hot { fill: #91c440; }
-.radar text { fill: var(--on-dark-muted); font-family: var(--font-display); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
-@keyframes sweep { to { transform: rotate(360deg); } }
+
 
 /* ───────── Exploration areas ───────── */
 .areas {
@@ -673,7 +679,7 @@ ul, ol { margin: 0; padding: 0; }
   font-weight: 700;
   text-decoration: none;
 }
-.back-link:hover { border-color: #91c440; }
+.back-link:hover { border-color: #8cc832; }
 .back-link svg { width: 1.1rem; height: 1.1rem; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .crumbs { color: var(--on-dark-muted); font-size: .95rem; }
 .crumbs a { color: var(--on-dark); }
@@ -720,7 +726,7 @@ ul, ol { margin: 0; padding: 0; }
   position: relative;
   overflow: hidden;
 }
-.block--mission h2 svg { stroke: #91c440; }
+.block--mission h2 svg { stroke: #8cc832; }
 .block--mission p { font-size: var(--step-1); max-width: 60ch; }
 .block--reflect { background: var(--teal-soft); border-color: transparent; }
 .block--reflect p { font-size: var(--step-1); font-style: italic; }
@@ -930,7 +936,7 @@ ul, ol { margin: 0; padding: 0; }
 }
 @media (max-width: 860px) {
   .hero__inner { grid-template-columns: minmax(0, 1fr); }
-  .radar { display: none; }
+  .coast { max-width: 400px; }
   .areas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .featured { grid-template-columns: minmax(0, 1fr); }
   .featured__side { border-left: 0; border-top: 1.5px solid var(--line); }
@@ -981,23 +987,23 @@ code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-si
 .user-chip b { font-size: .92rem; }
 .user-chip small { font-size: .75rem; color: var(--on-dark-muted); }
 .user-chip--edu > svg { width: 22px; height: 22px; fill: none; stroke: #b9e27f; stroke-width: 2; }
-.site-nav .user-chip[aria-current="page"] { box-shadow: inset 0 -3px 0 #91c440; }
+.site-nav .user-chip[aria-current="page"] { box-shadow: inset 0 -3px 0 #8cc832; }
 .nav-out, .nav-signin {
   display: inline-flex; align-items: center; gap: .4rem; min-height: 44px; padding: .5rem .75rem;
   background: none; border: 0; color: var(--on-dark-muted); font: inherit; font-weight: 700; font-size: .9rem; cursor: pointer; border-radius: var(--radius-sm);
 }
 .nav-out:hover { color: var(--on-dark); background: rgba(255, 255, 255, .08); }
 .nav-out svg, .nav-signin svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.site-nav a.nav-signin { color: #1e1a4d; background: #91c440; }
+.site-nav a.nav-signin { color: #1d1647; background: #8cc832; }
 .projector-toggle svg { stroke-linejoin: round; }
 
 /* Chips added for progress */
 .chip--done { background: var(--teal); color: var(--surface); }
 .chip--xp { background: var(--orange-soft); color: var(--orange-ink); font-family: var(--font-display); letter-spacing: .03em; }
-.chip--done-dark { background: #b9e27f; color: #1e1a4d; }
-.chip--xp-dark { background: #91c440; color: #1e1a4d; font-family: var(--font-display); }
-.page-top .chip--done-dark { background: #b9e27f; color: #1e1a4d; }
-.page-top .chip--xp-dark { background: #91c440; color: #1e1a4d; }
+.chip--done-dark { background: #b9e27f; color: #1d1647; }
+.chip--xp-dark { background: #8cc832; color: #1d1647; font-family: var(--font-display); }
+.page-top .chip--done-dark { background: #b9e27f; color: #1d1647; }
+.page-top .chip--xp-dark { background: #8cc832; color: #1d1647; }
 .card--done { border-color: color-mix(in srgb, var(--teal) 45%, var(--line)); }
 .card--done .card__summary { opacity: .8; }
 
@@ -1112,13 +1118,13 @@ code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-si
 .next-card--resume .next-card__tag { color: var(--orange-ink); }
 .next-card--resume .next-card__go { color: var(--orange-ink); }
 
-.map-frame { border-radius: var(--radius); overflow: hidden; border: 1.5px solid var(--line); background: #1e1a4d; }
+.map-frame { border-radius: var(--radius); overflow: hidden; border: 1.5px solid var(--line); background: #1d1647; }
 .starmap { display: block; width: 100%; height: auto; }
 .map-label { fill: #f6efe2; font-family: var(--font-display); font-weight: 700; font-size: 15px; letter-spacing: .12em; }
 .map-count { fill: #9fb2c8; font-family: var(--font-body); font-size: 12px; }
 .map-star { cursor: pointer; outline: none; }
 .map-star:hover path, .map-star:hover circle:last-child { filter: brightness(1.25); }
-.map-star:focus-visible circle:first-of-type { stroke: #91c440; stroke-width: 2.5; fill: rgba(145, 196, 64, .15); }
+.map-star:focus-visible circle:first-of-type { stroke: #8cc832; stroke-width: 2.5; fill: rgba(140, 200, 50, .15); }
 .map-pulse { transform-box: fill-box; transform-origin: center; animation: pulse 2.4s ease-out infinite; }
 @keyframes pulse { 0% { transform: scale(.7); opacity: 1; } 100% { transform: scale(1.7); opacity: 0; } }
 
@@ -1137,7 +1143,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-si
 .goal__fill { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: linear-gradient(90deg, var(--teal), var(--orange)); }
 .goal__stop { position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%; transform: translate(-50%, -50%); background: var(--surface); border: 3px solid var(--line); }
 .goal__stop.is-reached { border-color: var(--teal); background: var(--teal); }
-.goal__ship { position: absolute; top: 50%; transform: translate(-50%, -50%) rotate(45deg); width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: var(--orange); color: #1e1a4d; box-shadow: 0 0 0 4px var(--surface); }
+.goal__ship { position: absolute; top: 50%; transform: translate(-50%, -50%) rotate(45deg); width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: var(--orange); color: #1d1647; box-shadow: 0 0 0 4px var(--surface); }
 .goal__ship svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transform: rotate(-90deg); }
 .goal__labels { position: relative; list-style: none; margin-inline: 8px; height: 0; }
 .goal__labels li { position: absolute; top: .6rem; transform: translateX(-50%); display: grid; text-align: center; font-size: .72rem; line-height: 1.2; color: var(--muted); width: 5.5rem; }
@@ -1252,7 +1258,7 @@ body.has-overlay { overflow: hidden; }
 .stage__links .btn.is-done { border-color: var(--teal); color: var(--teal); }
 
 /* ───────── Auth ───────── */
-.auth { position: relative; min-height: calc(100vh - 80px); display: grid; align-items: start; background: #1e1a4d; overflow: hidden; }
+.auth { position: relative; min-height: calc(100vh - 80px); display: grid; align-items: start; background: #1d1647; overflow: hidden; }
 .auth__sky { position: absolute; inset: 0; opacity: .55; pointer-events: none; }
 .auth__sky svg { width: 100%; height: 100%; object-fit: cover; }
 .auth__sky .map-label, .auth__sky .map-count { display: none; }
@@ -1307,7 +1313,7 @@ body.has-overlay { overflow: hidden; }
 .stepper li > span { width: 1.6rem; height: 1.6rem; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--line); font-size: .8rem; }
 .stepper li > span svg { width: .95rem; height: .95rem; fill: none; stroke: currentColor; stroke-width: 3; }
 .stepper li.is-current { color: var(--fg); }
-.stepper li.is-current > span { border-color: var(--orange); background: var(--orange); color: #1e1a4d; }
+.stepper li.is-current > span { border-color: var(--orange); background: var(--orange); color: #1d1647; }
 .stepper li.is-done > span { border-color: var(--teal); background: var(--teal); color: var(--surface); }
 
 .name-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .6rem; }
@@ -1376,7 +1382,7 @@ body.has-overlay { overflow: hidden; }
 .tab:hover { color: var(--on-dark); background: rgba(255, 255, 255, .06); }
 .tab[aria-current="page"] { background: var(--bg); color: var(--fg); }
 .tab svg { width: 1.1rem; height: 1.1rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.tab__badge { min-width: 1.4rem; height: 1.4rem; padding-inline: .35rem; border-radius: 999px; display: grid; place-items: center; background: #91c440; color: #1e1a4d; font-size: .78rem; font-variant-numeric: tabular-nums; }
+.tab__badge { min-width: 1.4rem; height: 1.4rem; padding-inline: .35rem; border-radius: 999px; display: grid; place-items: center; background: #8cc832; color: #1d1647; font-size: .78rem; font-variant-numeric: tabular-nums; }
 
 .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
 .kpi { display: grid; gap: .2rem; padding: 1.1rem 1.25rem; border-radius: var(--radius); background: var(--surface); border: 1.5px solid var(--line); color: var(--fg); text-decoration: none; }
@@ -1535,15 +1541,21 @@ a.kpi:hover { border-color: var(--teal); }
   .kpi__value { font-size: 2rem; }
 }
 
-/* ═════════════════════════ STEM Explorer Academy brand layer ═════════════════════════ */
+/* ═════════════════════════ STEM 207 brand layer ═════════════════════════ */
 
-/* Header: light bar so the logo reads in its true colors */
+/* The wordmark: indigo letters recolor to white on dark surfaces; lime stays lime. */
+.logo207 { display: block; height: auto; max-width: 100%; overflow: visible; }
+.logo207 .logo207__stem { fill: var(--logo-stem); }
+.logo207--reverse .logo207__stem, .site-footer .logo207__stem { fill: #ffffff; }
+.pine { display: inline-block; vertical-align: -.15em; }
+
+/* Header: light bar so the wordmark reads in its true colors */
 .site-header { background: var(--surface); color: var(--fg); border-bottom: 3px solid var(--orange); box-shadow: 0 1px 0 var(--line); }
-.brand { color: var(--brand-ink); gap: .65rem; }
-.brand__mark { width: 46px; height: 46px; color: var(--brand-ink); }
-.brand__text { line-height: 1; gap: .1rem; }
-.brand__name { font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; letter-spacing: -.01em; color: var(--brand-ink); }
-.brand__org { font-family: var(--font-display); font-weight: 700; font-size: .78rem; letter-spacing: .32em; text-transform: uppercase; color: var(--orange-ink); }
+.brand { color: var(--brand-ink); gap: .65rem; align-items: center; }
+.brand .logo207 { width: 168px; height: auto; }
+.brand__tag { font-family: var(--font-display); font-weight: 700; font-size: .66rem; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); border-left: 2px solid var(--line); padding-left: .65rem; line-height: 1.25; }
+@media (max-width: 860px) { .brand__tag { display: none; } }
+@media (max-width: 420px) { .brand .logo207 { width: 132px; } }
 .site-nav a, .projector-toggle { color: var(--fg); }
 .site-nav a:hover { background: var(--surface-2); }
 .site-nav a[aria-current="page"] { background: var(--surface-2); box-shadow: inset 0 -3px 0 var(--orange); }
@@ -1558,19 +1570,56 @@ a.kpi:hover { border-color: var(--teal); }
 .nav-out:hover { color: var(--fg); background: var(--surface-2); }
 .site-nav a.nav-signin { color: var(--on-accent); background: var(--orange); }
 
+/* Pine ridge: a treeline cut from the pine in the STEM 207 M. Used as a mask so it takes any color. */
+:root { --treeline: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 640 64' width='640' height='64'%3E%3Cdefs%3E%3Cpath id='p' transform='translate%28-1138 -172%29' d='M1140.4,418.2 C1140.6,372.1 1140.8,300.0 1140.9,258.0 L1141.0,181.5 L1145.5,177.6 L1150.0,173.8 L1152.1,178.6 C1164.5,207.7 1178.6,228.0 1202.3,251.1 C1209.9,258.6 1213.0,262.3 1212.6,263.4 C1212.1,264.7 1209.0,265.0 1189.5,265.0 L1167.1,265.0 L1171.6,273.2 C1185.8,299.0 1206.6,323.8 1229.6,342.2 C1235.8,347.2 1237.3,349.6 1234.7,350.4 C1234.0,350.6 1221.4,351.0 1206.7,351.2 C1192.0,351.4 1179.7,351.9 1179.4,352.2 C1178.0,353.6 1191.6,374.9 1203.7,390.5 C1214.7,404.6 1237.9,427.1 1250.8,436.2 C1252.4,437.2 1253.0,438.5 1252.8,440.1 L1252.5,442.5 L1220.8,443.0 L1189.2,443.5 L1199.1,465.0 C1204.6,476.8 1210.6,489.7 1212.4,493.6 C1214.3,497.6 1215.5,501.1 1215.2,501.4 C1214.9,501.7 1197.8,502.0 1177.4,502.0 L1140.1,502.0 L1140.4,418.2 Z'/%3E%3C/defs%3E%3Crect y='58' width='640' height='6'/%3E%3Cuse href='%23p' transform='translate%280.0 18.0%29 scale%280.1446%29'/%3E%3Cuse href='%23p' transform='translate%2813.1 36.0%29 scale%280.0904%29'/%3E%3Cuse href='%23p' transform='translate%2821.0 6.0%29 scale%280.1807%29'/%3E%3Cuse href='%23p' transform='translate%2833.6 32.0%29 scale%280.1024%29'/%3E%3Cuse href='%23p' transform='translate%2843.3 36.0%29 scale%280.0904%29'/%3E%3Cuse href='%23p' transform='translate%2850.1 24.0%29 scale%280.1265%29'/%3E%3Cuse href='%23p' transform='translate%2859.0 6.0%29 scale%280.1807%29'/%3E%3Cuse href='%23p' transform='translate%2874.3 32.0%29 scale%280.1024%29'/%3E%3Cuse href='%23p' transform='translate%2881.6 26.0%29 scale%280.1205%29'/%3E%3Cuse href='%23p' transform='translate%2892.8 24.0%29 scale%280.1265%29'/%3E%3Cuse href='%23p' transform='translate%28104.7 6.0%29 scale%280.1807%29'/%3E%3Cuse href='%23p' transform='translate%28116.6 24.0%29 scale%280.1265%29'/%3E%3Cuse href='%23p' transform='translate%28127.8 6.0%29 scale%280.1807%29'/%3E%3Cuse href='%23p' transform='translate%28144.8 12.0%29 scale%280.1627%29'/%3E%3Cuse href='%23p' transform='translate%28158.2 24.0%29 scale%280.1265%29'/%3E%3Cuse href='%23p' transform='translate%28168.0 36.0%29 scale%280.0904%29'/%3E%3Cuse href='%23p' transform='translate%28175.0 32.0%29 scale%280.1024%29'/%3E%3Cuse href='%23p' transform='translate%28182.9 6.0%29 scale%280.1807%29'/%3E%3Cuse href='%23p' transform='translate%28196.9 6.0%29 scale%280.1807%29'/%3E%3Cuse href='%23p' transform='translate%28211.2 6.0%29 scale%280.1807%29'/%3E%3Cuse href='%23p' transform='translate%28228.3 18.0%29 scale%280.1446%29'/%3E%3Cuse href='%23p' transform='translate%28242.2 18.0%29 scale%280.1446%29'/%3E%3Cuse href='%23p' transform='translate%28256.3 12.0%29 scale%280.1627%29'/%3E%3Cuse href='%23p' transform='translate%28269.8 6.0%29 scale%280.1807%29'/%3E%3Cuse href='%23p' transform='translate%28283.5 32.0%29 scale%280.1024%29'/%3E%3Cuse href='%23p' transform='translate%28290.8 24.0%29 scale%280.1265%29'/%3E%3Cuse href='%23p' transform='translate%28299.0 12.0%29 scale%280.1627%29'/%3E%3Cuse href='%23p' transform='translate%28313.5 6.0%29 scale%280.1807%29'/%3E%3Cuse href='%23p' transform='translate%28325.8 6.0%29 scale%280.1807%29'/%3E%3Cuse href='%23p' transform='translate%28343.6 30.0%29 scale%280.1084%29'/%3E%3Cuse href='%23p' transform='translate%28352.5 26.0%29 scale%280.1205%29'/%3E%3Cuse href='%23p' transform='translate%28363.0 32.0%29 scale%280.1024%29'/%3E%3Cuse href='%23p' transform='translate%28372.5 30.0%29 scale%280.1084%29'/%3E%3Cuse href='%23p' transform='translate%28380.5 6.0%29 scale%280.1807%29'/%3E%3Cuse href='%23p' transform='translate%28392.3 18.0%29 scale%280.1446%29'/%3E%3Cuse href='%23p' transform='translate%28404.2 26.0%29 scale%280.1205%29'/%3E%3Cuse href='%23p' transform='translate%28413.6 6.0%29 scale%280.1807%29'/%3E%3Cuse href='%23p' transform='translate%28425.2 24.0%29 scale%280.1265%29'/%3E%3Cuse href='%23p' transform='translate%28436.4 30.0%29 scale%280.1084%29'/%3E%3Cuse href='%23p' transform='translate%28447.2 30.0%29 scale%280.1084%29'/%3E%3Cuse href='%23p' transform='translate%28455.5 18.0%29 scale%280.1446%29'/%3E%3Cuse href='%23p' transform='translate%28467.7 32.0%29 scale%280.1024%29'/%3E%3Cuse href='%23p' transform='translate%28476.1 12.0%29 scale%280.1627%29'/%3E%3Cuse href='%23p' transform='translate%28491.5 26.0%29 scale%280.1205%29'/%3E%3Cuse href='%23p' transform='translate%28501.0 30.0%29 scale%280.1084%29'/%3E%3Cuse href='%23p' transform='translate%28508.9 6.0%29 scale%280.1807%29'/%3E%3Cuse href='%23p' transform='translate%28523.9 18.0%29 scale%280.1446%29'/%3E%3Cuse href='%23p' transform='translate%28533.3 30.0%29 scale%280.1084%29'/%3E%3Cuse href='%23p' transform='translate%28540.9 24.0%29 scale%280.1265%29'/%3E%3Cuse href='%23p' transform='translate%28552.9 24.0%29 scale%280.1265%29'/%3E%3Cuse href='%23p' transform='translate%28565.2 18.0%29 scale%280.1446%29'/%3E%3Cuse href='%23p' transform='translate%28576.5 24.0%29 scale%280.1265%29'/%3E%3Cuse href='%23p' transform='translate%28584.7 36.0%29 scale%280.0904%29'/%3E%3Cuse href='%23p' transform='translate%28591.5 6.0%29 scale%280.1807%29'/%3E%3Cuse href='%23p' transform='translate%28605.6 30.0%29 scale%280.1084%29'/%3E%3Cuse href='%23p' transform='translate%28615.0 30.0%29 scale%280.1084%29'/%3E%3Cuse href='%23p' transform='translate%28624.3 12.0%29 scale%280.1627%29'/%3E%3C/svg%3E"); }
+.ridge { position: relative; }
+.ridge::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 46px; pointer-events: none;
+  background: #140f38;
+  -webkit-mask: var(--treeline) repeat-x left bottom / auto 46px; mask: var(--treeline) repeat-x left bottom / auto 46px;
+}
+.hero.ridge > .wrap, .xhero.ridge > .wrap { padding-bottom: calc(2.5rem + 30px); }
+
+/* Footer: deep indigo night with the treeline along its top edge */
+.site-footer { position: relative; margin-top: 5rem; border-top: 0; background: var(--footer-bg); color: #c9c5ea; }
+.site-footer::before {
+  content: ""; position: absolute; left: 0; right: 0; top: -43px; height: 44px; background: var(--footer-bg); pointer-events: none;
+  -webkit-mask: var(--treeline) repeat-x 120px bottom / auto 44px; mask: var(--treeline) repeat-x 120px bottom / auto 44px;
+}
+.site-footer__inner { padding-block: 1.75rem 2rem; gap: .6rem; }
+.site-footer strong { color: #fff; }
+.site-footer a { color: #d4ef9f; }
+.site-footer__brand { display: flex; align-items: center; gap: .9rem; flex-wrap: wrap; margin: 0 0 .25rem; }
+.site-footer__brand .logo207 { width: 150px; }
+.site-footer__brand span { font-family: var(--font-display); font-weight: 700; font-size: .72rem; letter-spacing: .2em; text-transform: uppercase; color: #b9e27f; }
+.site-footer__coords { font-size: .8rem; color: #9893c8; letter-spacing: .04em; }
+
+/* Sign-in lockup */
+.auth__logo { display: flex; justify-content: center; margin-bottom: .75rem; }
+.auth__logo .logo207 { width: min(340px, 80vw); }
+.auth__name { font-size: var(--step-2); color: var(--brand-ink); line-height: 1.2; }
+.login-card__brand { display: inline-flex; align-items: center; gap: .4rem; font-family: var(--font-display); font-weight: 800; font-size: .8rem; letter-spacing: .04em; color: var(--brand-ink); }
+.login-card__brand .logo207 { width: 86px; }
+
+/* Coastal hero scene: lighthouse beam, pine ridge, and six buoys (one per exploration area) */
+.coast { width: 100%; max-width: 440px; justify-self: center; }
+.coast svg { width: 100%; height: auto; display: block; overflow: visible; }
+.coast .beam { transform-origin: var(--lx) var(--ly); animation: beam 10s linear infinite; }
+@keyframes beam { 0% { transform: rotate(-38deg); opacity: .0; } 8% { opacity: 1; } 42% { opacity: 1; } 50% { transform: rotate(38deg); opacity: 0; } 100% { transform: rotate(38deg); opacity: 0; } }
+.coast .buoy { transform-box: fill-box; transform-origin: 50% 100%; animation: bob 3.6s ease-in-out infinite; }
+.coast .buoy:nth-of-type(2n) { animation-delay: -1.2s; }
+.coast .buoy:nth-of-type(3n) { animation-delay: -2.1s; }
+@keyframes bob { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(3px) rotate(3deg); } }
+.coast a text { fill: var(--on-dark-muted); font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.coast a:hover text, .coast a:focus-visible text { fill: #d4ef9f; }
+.coast a:focus-visible { outline: none; }
+.coast a:focus-visible .buoy-ring { stroke: #d4ef9f; stroke-width: 2.5; }
+@media (max-width: 640px) { .coast { display: none; } }
+@media (prefers-reduced-motion: reduce) { .coast .beam { animation: none; transform: rotate(-12deg); opacity: 1; } }
+
 /* Display type: Montserrat is wider than the old face, so ease the big sizes slightly */
 h1, h2, h3, h4 { letter-spacing: -.015em; }
 .eyebrow, .kpi__label, .facts dt, .field label, .stage__grid h3, .track__num, .card__area { letter-spacing: .1em; }
-
-/* Footer mark */
-.site-footer__brand { display: flex; align-items: center; gap: .5rem; }
-.footer-mark { width: 28px; height: 28px; color: var(--brand-ink); flex: none; }
-
-/* Sign-in lockup */
-.auth__logo { color: var(--brand-ink); display: block; }
-.auth__name { font-size: var(--step-4); color: var(--brand-ink); line-height: 1.05; }
-.auth__name span { display: block; }
-.login-card__brand { display: inline-flex; align-items: center; gap: .4rem; font-family: var(--font-display); font-weight: 700; font-size: .78rem; letter-spacing: .06em; color: var(--brand-ink); }
 
 /* Alerts and "waiting" states keep a warm amber, separate from the lime brand accent */
 .chip--warn { background: var(--warn-soft); color: var(--warn-ink); }
@@ -1589,5 +1638,18 @@ h1, h2, h3, h4 { letter-spacing: -.015em; }
 .form__error { color: #b42318; }
 
 /* Mission-control hero and bands: indigo with a lime pop */
-.hero, .xhero { background: linear-gradient(160deg, var(--navy) 0%, var(--navy-deep) 100%); }
-.radar .blip--hot { fill: #91c440; }
+/* Hero bands: Maine night, indigo up top fading to a dusk glow over the ridge */
+.hero, .xhero { background: radial-gradient(120% 90% at 85% 110%, #4b3fa0 0%, rgba(75,63,160,0) 60%), linear-gradient(180deg, #1d1647 0%, #302568 100%); }
+.hero .eyebrow, .xhero .eyebrow { color: #b9e27f; }
+
+/* Made in Maine tag and rail */
+.maine-tag { display: inline-flex; align-items: center; gap: .3rem; margin-left: auto; padding: .15rem .55rem .15rem .45rem; border-radius: 999px; background: var(--orange-soft); color: var(--orange-ink); font-family: var(--font-display); font-weight: 700; font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.maine-tag .pine { color: var(--orange-ink); }
+.card__area { flex-wrap: wrap; }
+.label-original + .maine-tag { margin-left: .5rem; }
+.maine .eyebrow { display: inline-flex; align-items: center; gap: .35rem; }
+.maine .eyebrow .pine { color: var(--orange-ink); }
+.cards--rail { position: relative; grid-auto-flow: column; grid-auto-columns: minmax(330px, 1fr); grid-template-columns: none; overflow-x: auto; padding-bottom: .75rem; scroll-snap-type: x proximity; }
+.cards--rail > * { scroll-snap-align: start; }
+@media (max-width: 640px) { .cards--rail { grid-auto-columns: 82%; } }
+.maine .maine-tag { display: none; }

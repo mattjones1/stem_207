@@ -1,5 +1,5 @@
 /*
- * STEM Explorer Academy — educator dashboard.
+ * STEM 207 — educator dashboard.
  *   #/teach                   class overview
  *   #/teach/student/<id>      one student's progress and log
  *   #/teach/pathway           coding pathway readiness checks
@@ -554,7 +554,7 @@
         ${students.length ? `<div class="login-cards">
           ${students.map((s) => `
             <article class="login-card">
-              <header><span class="login-card__brand">${SE.brandMark(28)}STEM Explorer Academy</span><strong>${esc(s.displayName)}</strong></header>
+              <header><span class="login-card__brand">${SE.brandLogo(17)}</span><strong>${esc(s.displayName)}</strong></header>
               <p class="login-card__code">Class code <b>${esc(cls.code)}</b></p>
               <div class="login-card__pics">${s.picCode.map(pic).join("")}</div>
               <footer class="login-card__tools">

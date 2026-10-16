@@ -1,8 +1,8 @@
-<p><img src="assets/img/brand/logo.svg" alt="STEM Explorer Academy" width="420"></p>
+<p><img src="assets/img/brand/stem207-logo.svg" alt="STEM 207" width="420"></p>
 
-# STEM Explorer Academy
+# STEM 207
 
-The classroom dashboard for **STEM Explorer Academy**. Teachers and students in grades 2–8 choose an exploration area, find an activity that fits their time and equipment, read the mission, and launch it.
+**Maine's STEM explorer for grades 2–8.** Teachers and students choose an exploration area, find an activity that fits their time and equipment, read the mission, and launch it. The content is rooted in Maine: lobster boats and tide pools, the North Woods and Katahdin, sugarhouses, nor'easters, and fall fairs.
 
 **Choose an exploration area → Select an activity → Understand the mission → Launch the experience.**
 
@@ -18,21 +18,21 @@ The classroom dashboard for **STEM Explorer Academy**. Teachers and students in 
 
 ## Interactive labs
 
-Each exploration area has its own leveled, interactive lab that runs inside STEM Explorer Academy, with no outside account or website. Every level teaches one idea, gives a hint on request, checks the student's work, and ends with "What you just learned." Signed-in students earn XP for each level (+30), and lab work counts toward patches and the weekly streak.
+Each exploration area has its own leveled, interactive lab that runs inside STEM 207, with no outside account or website. Every level teaches one idea, gives a hint on request, checks the student's work, and ends with "What you just learned." Signed-in students earn XP for each level (+30), and lab work counts toward patches and the weekly streak.
 
 | Area | Lab | Levels | What students learn |
 | --- | --- | --- | --- |
-| Coding & Computer Science | **Rover Code Lab** | 12 | Sequences, debugging with step-through, loops, actions, conditionals (if / if–else), a variable, functions (custom blocks), free build. Levels map to coding pathway stages. |
-| Virtual Reality | **Field Station 360** | 5 | Look-around rainforest, desert, and coral reef with compass headings. Observation vs. inference, adaptations, comparing habitats. Works in a VR headset's browser too. |
-| Artificial Intelligence | **Pattern Machine Lab** | 6 | Find a pattern, train a real k-nearest-neighbors classifier, see accuracy grow with more examples, uncover biased data, set a confidence threshold, judge responsible uses. Made-up creatures only. |
-| Engineering & Robotics | **Launcher Lab** | 6 | Design–test–iterate a catapult: prediction, one-change-at-a-time fair tests, a wall constraint, a budget, an engineering notebook. |
-| Engineering & Robotics | **Line Follower Lab** | 4 | Sense → think → act rules for a two-sensor robot, debugging behavior, recovering at sharp corners, speed vs. accuracy. |
-| Science & Discovery | **Ramp Racers** | 5 | Predict and test, natural variation and averages, controlling variables, the "does weight matter?" misconception, claim–evidence–reasoning. |
-| Creative STEM | **Pixel Animation Studio** | 6 | Pixels, resolution, run-length encoding, frames and fps, and an original animation saved to the student's gallery. |
+| Coding & Computer Science | **Harbor Code Lab** | 12 | Steer a lobster boat around a Maine harbor: haul traps, dodge granite ledges, find the mooring in fog. Sequences, debugging with step-through, loops, actions, conditionals (if / if–else), a variable, functions (custom blocks), free build. Levels map to coding pathway stages. |
+| Virtual Reality | **Field Station 360** | 7 | Look-around Gulf of Maine tide pools and a North Woods pond below Katahdin, then a rainforest, desert, and coral reef, with compass headings. Observation vs. inference, adaptations, comparing five habitats. Works in a VR headset's browser too. |
+| Artificial Intelligence | **Pattern Machine Lab** | 6 | Find a pattern, train a real k-nearest-neighbors classifier, see accuracy grow with more examples, uncover biased data, set a confidence threshold, judge responsible uses (including counting puffins and sorting wild blueberries). Made-up creatures only. |
+| Engineering & Robotics | **Pumpkin Launcher Lab** | 6 | Design–test–iterate a catapult for a fall-fair pumpkin toss: prediction, one-change-at-a-time fair tests, a hay-bale constraint, a budget, an engineering notebook. |
+| Engineering & Robotics | **Snowplow Robot Lab** | 4 | After a nor'easter, sense → think → act rules for a two-sensor robot plow: debugging behavior, recovering at sharp corners, speed vs. accuracy. |
+| Science & Discovery | **Sled Hill Science** | 5 | A model sledding hill: predict and test, natural variation and averages, controlling variables (powder, packed snow, ice), the "does weight matter?" misconception, claim–evidence–reasoning. |
+| Creative STEM | **Pixel Animation Studio** | 6 | Pixels, resolution, run-length encoding (decode a lighthouse), frames and fps, and an original animation saved to the student's gallery. |
 
 Each lab also has a library entry with a full teacher guide (mission, objectives, setup, steps, reflection, extension, and facilitation notes). Educators see lab progress per class and per student, including tests run, hints used, and saved animations.
 
-Lab code lives in `assets/js/labs/`. `lab-shell.js` provides the shared layout, hints, completion panel, and progress logging. Each lab registers itself with `SE.labs.register({ id, area, title, tagline, levels, mount })`, so adding a lab means adding one file and one `<script>` tag.
+Lab ids (`rover`, `launcher`, `line-follower`, `ramp-racers`) are kept from earlier versions so saved progress carries over. Lab code lives in `assets/js/labs/`. `lab-shell.js` provides the shared layout, hints, completion panel, and progress logging. Each lab registers itself with `SE.labs.register({ id, area, title, tagline, levels, mount })`, so adding a lab means adding one file and one `<script>` tag.
 
 ## Accounts and progress (prototype)
 
@@ -44,20 +44,20 @@ Lab code lives in `assets/js/labs/`. `lab-shell.js` provides the shared layout, 
 
 | | |
 | --- | --- |
-| Educator | `demo@stemexploreracademy.example` / `explore` |
-| Student | class code `ORBIT7` → **Ava R.** → Moon, Comet, Compass |
+| Educator | `demo@stem207.example` / `explore` |
+| Student | class code `MOOSE7` → **Ava R.** → Pine tree, Lighthouse, Moon |
 
 The sample class has eight made-up students with two and a half weeks of made-up activity, so the educator dashboard has something to show. It is labeled as sample data everywhere it appears, and **Reset sample data** on the dashboard restores it.
 
 ### What students get
 
 - **My expedition** home: rank, XP, mission count, patches, weekly streak, suggested next missions, a note from their teacher, and a class goal.
-- **Expedition map**: every mission is a star in its area's constellation. Finishing a mission lights its star and connects it to the constellation.
+- **Expedition map**: the Maine night sky over a North Woods treeline. Every mission is a star in its area's constellation. Finishing a mission lights its star and connects it to the constellation.
 - **Mission checklist**: steps can be checked off, and the page remembers where they stopped.
 - **Mission debrief**: answer "Think about it," mark "Take it further" as tried, and say how it went. Then a Mission complete screen shows XP earned, any promotion, and new patches.
-- **Ranks**: Cadet → Scout → Navigator → Pathfinder → Trailblazer → Voyager → Mission Commander, each with a chevron insignia.
+- **Ranks**: Deckhand → Tidepooler → Trail Scout → Lighthouse Keeper → Harbor Pilot → Ridge Runner → Katahdin Guide, each with a chevron insignia.
 - **18 mission patches** for things like first mission, reflections, team missions, debugging, each area, pathway stages, and interactive labs.
-- **Class expedition**: everyone's XP moves the class from the launch pad to Neptune. It's cooperative, so there's no leaderboard.
+- **Class expedition**: everyone's XP moves the class across Maine, from Kittery to Portland Head, Penobscot Bay, Acadia, Moosehead, and the summit of Katahdin. It's cooperative, so there's no leaderboard.
 - **Coding pathway**: an "I can do this" button sends a stage to the teacher to check.
 
 ### What educators get (`#/teach`)
@@ -80,9 +80,24 @@ This prototype keeps all accounts and activity in the browser's local storage. I
 2. Review student-data requirements (COPPA, FERPA, and district policy) and get the approvals your program needs.
 3. Keep collecting only display names and grade bands for students.
 
+## Made in Maine
+
+Eight original activities are rooted in Maine, alongside the five Maine-themed labs:
+
+| Activity | Area | What students do |
+| --- | --- | --- |
+| Lobster Trap Logic | Coding | Write if–else rules for Maine's lobster size, egg, and V-notch rules (featured mission) |
+| Acadia from Above | Virtual Reality | Fly over Acadia in Google Earth and read glacier clues |
+| Blueberry Sorting Machine | AI | Train a human "machine" to sort wild blueberries, then catch it missing examples |
+| Lighthouse Beam Challenge | Engineering | Build a foil reflector that focuses a flashlight beam |
+| Float a Wind Turbine | Engineering | Keep a model floating turbine upright in waves, like UMaine's VolturnUS |
+| Tide Watchers: Portland vs. Eastport | Science | Graph a day of tides at two harbors and explain the difference |
+| Sap Run Detectives | Science | Find the freeze–thaw pattern in sugarhouse data and do the 40-to-1 syrup math |
+| Animated Maine Postcard | Creative | Animate a favorite Maine place in Scratch |
+
 ## Running it
 
-- **One-file version:** run `python tools/build_single_file.py` to create `dist/STEM Explorer Academy.html`. Double-click that file to run the whole app offline, with no server needed. You can copy it to any computer.
+- **One-file version:** run `python tools/build_single_file.py` to create `dist/STEM 207.html`. Double-click that file to run the whole app offline, with no server needed. You can copy it to any computer.
 
 It's a static site with no build step and no dependencies.
 
@@ -120,7 +135,8 @@ Copy any entry in `assets/js/data/activities.js`, give it a new `id`, and fill i
 | `duration` | Minutes. Used by the 20/30/45 time filter |
 | `format` | `independent`, `collaborative`, or `teacher-led` |
 | `equipment` | Keys from `equipment` in `areas.js` (for example, `computer`, `unplugged`, `vr`) |
-| `source` | `"original"` shows the "Original STEM Explorer Academy lesson" label |
+| `source` | `"original"` shows the "Original STEM 207 lesson" label |
+| `keywords` containing `"maine"` | Shows the **Made in Maine** tag and adds the activity to the dashboard's Made in Maine rail |
 | `featured` | `true` on one activity makes it the featured classroom mission |
 | `pathwayStage` | Optional. Links a coding activity to a pathway stage (1–7) |
 | `keywords` | Extra words for search |
@@ -151,7 +167,9 @@ Two activities are marked **Resource coming soon** until the program picks a res
 
 ## Brand
 
-The SE compass logo is redrawn as vector art in `assets/img/brand/` (`mark.svg`, `logo.svg`), with the original file kept as `logo-original.png`. Brand colors are indigo `#2E286E` and lime `#91C440`. Headings use Montserrat and body text uses Atkinson Hyperlegible. Color tokens live at the top of `assets/css/styles.css`.
+The STEM 207 wordmark lives in `assets/img/brand/`: `stem207-logo.svg` (the vector master), `stem207-logo-reverse.svg` (white letters for dark backgrounds), `stem207-mark.svg` (the Maine "0" on an indigo tile, used as the favicon), and `stem207-pine.svg` (the pine from the M). In the app, `assets/js/brand.js` draws the same artwork inline so the letters can turn white in dark mode. Brand colors are indigo `#302568` and lime `#8CC832`. Headings use Montserrat and body text uses Atkinson Hyperlegible. Color tokens live at the top of `assets/css/styles.css`.
+
+Maine design touches: a pine-ridge edge cut from the logo's own pine (on the hero, student home, star map, and footer), a coastal hero scene with a working lighthouse beam and one lobster buoy per exploration area, and a fog-white page background.
 
 ## Accessibility
 

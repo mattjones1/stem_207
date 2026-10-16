@@ -1,5 +1,5 @@
 /*
- * STEM Explorer Academy — exploration areas and shared vocabularies.
+ * STEM 207 — exploration areas and shared vocabularies.
  *
  * Everything the filters and badges display is defined here, so adding a new
  * piece of equipment or a new area only means editing this file.
@@ -14,7 +14,7 @@ window.STEM.areas = [
     icon: "code",
     tagline: "Give clear instructions and build things that respond.",
     description:
-      "Algorithms, sequences, loops, conditionals, variables, debugging, and creative programming. Start anywhere on the coding pathway and move forward when you're ready.",
+      "Algorithms, sequences, loops, conditionals, variables, debugging, and creative programming. Steer a lobster boat around the harbor in the Harbor Code Lab, sort the day's catch with if–else rules, and move along the coding pathway when you're ready.",
     topics: ["Algorithms", "Sequences", "Loops", "Conditionals", "Variables", "Debugging", "Creative programming"]
   },
   {
@@ -22,9 +22,9 @@ window.STEM.areas = [
     name: "Virtual Reality",
     short: "Virtual Reality",
     icon: "vr",
-    tagline: "Travel anywhere and look closely.",
+    tagline: "Travel anywhere, starting with Maine, and look closely.",
     description:
-      "Guided virtual field trips, immersive exploration, and observation challenges. Every VR activity includes teacher setup notes and a way to take part without a headset.",
+      "Guided virtual field trips, immersive exploration, and observation challenges. Explore a Gulf of Maine tide pool, a North Woods pond below Katahdin, and Acadia from above, then travel the world. Every VR activity includes teacher setup notes and a way to take part without a headset.",
     topics: ["Virtual field trips", "Immersive exploration", "Observation challenges"]
   },
   {
@@ -34,7 +34,7 @@ window.STEM.areas = [
     icon: "ai",
     tagline: "Find out how computers learn from examples.",
     description:
-      "Patterns, training examples, how computers make predictions, where they go wrong, and how to use them responsibly. AI activities are teacher-guided and never ask students for personal information.",
+      "Patterns, training examples, how computers make predictions, where they go wrong, and how to use them responsibly, from sorting wild blueberries to counting puffins. AI activities are teacher-guided and never ask students for personal information.",
     topics: ["Patterns", "Training examples", "Predictions", "Limitations", "Responsible use"]
   },
   {
@@ -44,7 +44,7 @@ window.STEM.areas = [
     icon: "gear",
     tagline: "Design it, build it, test it, make it better.",
     description:
-      "Design challenges, building, testing, iteration, and robot behaviors. Most engineering activities need only classroom materials.",
+      "Design challenges, building, testing, iteration, and robot behaviors. Launch pumpkins, program a snowplow robot, focus a lighthouse beam, and float a wind turbine for the Gulf of Maine. Most engineering activities need only classroom materials.",
     topics: ["Design challenges", "Building", "Testing", "Iteration", "Robot behaviors"]
   },
   {
@@ -54,7 +54,7 @@ window.STEM.areas = [
     icon: "flask",
     tagline: "Predict, observe, and let the evidence decide.",
     description:
-      "Experiments, predictions, observations, and evidence. Students make a claim and back it up with what they measured.",
+      "Experiments, predictions, observations, and evidence. Graph Maine's giant tides, crack the maple sap code, and test sleds on a snowy hill, then make a claim and back it up with what you measured.",
     topics: ["Experiments", "Predictions", "Observations", "Evidence"]
   },
   {
@@ -64,7 +64,7 @@ window.STEM.areas = [
     icon: "palette",
     tagline: "Make art and stories with technology.",
     description:
-      "Digital art, animation, storytelling, and projects that combine creativity with technology.",
+      "Digital art, animation, storytelling, and projects that combine creativity with technology. Decode a lighthouse in pixels and make an animated postcard from your favorite Maine place.",
     topics: ["Digital art", "Animation", "Storytelling", "Creative technology"]
   }
 ];

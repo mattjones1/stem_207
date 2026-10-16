@@ -1,5 +1,5 @@
 /*
- * STEM Explorer Academy — accounts, sessions, and the activity log.
+ * STEM 207 — accounts, sessions, and the activity log.
  *
  * PROTOTYPE STORAGE: everything is kept in this browser's localStorage.
  * That's enough to try the experience on one device, but it is NOT a secure
@@ -63,7 +63,7 @@
   const save = () => writeDb(db);
 
   /* ───────── Class codes and picture codes ───────── */
-  const CODE_WORDS = ["ORBIT", "COMET", "NOVA", "ROVER", "LUNAR", "QUASAR", "SOLAR", "ATLAS", "VECTOR", "PULSE"];
+  const CODE_WORDS = ["MOOSE", "PUFFIN", "LOBSTR", "ACADIA", "BAXTER", "CASCO", "KENNEBC", "PINE", "LOON", "BEACON"];
   function newClassCode() {
     let code;
     do {
@@ -85,11 +85,11 @@
    * A made-up class so the educator dashboard has something to show.
    * Every demo record has isDemo: true and the UI labels it as sample data. */
   const DEMO = {
-    email: "demo@stemexploreracademy.example",
+    email: "demo@stem207.example",
     password: "explore",
-    classCode: "ORBIT7",
+    classCode: "MOOSE7",
     studentName: "Ava R.",
-    studentCode: ["moon", "comet", "compass"]
+    studentCode: ["pine", "lighthouse", "moon"]
   };
 
   // Sample answers are grouped by area so they fit the mission they're attached to.
@@ -222,7 +222,7 @@
     });
 
     /* Interactive lab progress for the sample class */
-    const LAB_PLAN = [["rover", 12], ["field-station", 5], ["pattern-machine", 6], ["launcher", 6], ["line-follower", 4], ["ramp-racers", 5], ["pixel-studio", 6]];
+    const LAB_PLAN = [["rover", 12], ["field-station", 7], ["pattern-machine", 6], ["launcher", 6], ["line-follower", 4], ["ramp-racers", 5], ["pixel-studio", 6]];
     const rle = (grid) => grid.map((row) => { const out = []; let i = 0; while (i < row.length) { let j = i; while (j < row.length && row[j] === row[i]) j++; out.push(`${j - i}${row[i]}`); i = j; } return out.join(" "); }).join("/");
     const canvas = (n) => Array.from({ length: n }, () => Array(n).fill("."));
     const disc = (g, cx, cy, r, c) => g.forEach((row, y) => row.forEach((_, x) => { if ((x - cx) ** 2 + (y - cy) ** 2 <= r * r) g[y][x] = c; }));
@@ -272,8 +272,8 @@
 
   function init() {
     db = readDb();
-    if (!db || db.version !== 5) {
-      db = { version: 5, educators: [], classes: [], students: [], events: [] };
+    if (!db || db.version !== 6) {
+      db = { version: 6, educators: [], classes: [], students: [], events: [] };
       installDemo();
       save();
     }

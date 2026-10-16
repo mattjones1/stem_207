@@ -1,5 +1,5 @@
 /*
- * STEM Explorer Academy — progression engine.
+ * STEM 207 — progression engine.
  * Turns a student's activity log into XP, rank, patches, and pathway status.
  * Rules live in data/progression.js.
  */

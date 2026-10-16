@@ -1,5 +1,5 @@
 /*
- * STEM Explorer Academy — library views: dashboard, exploration areas, activity pages, coding pathway.
+ * STEM 207 — library views: dashboard, exploration areas, activity pages, coding pathway.
  * These views adapt to who is signed in: guests browse, students earn progress,
  * educators see how their class is doing.
  */
@@ -32,12 +32,14 @@
     return chips.join("");
   }
 
+  SE.isMaine = (a) => (a.keywords || []).includes("maine");
+  const maineTag = (a) => SE.isMaine(a) ? `<span class="maine-tag">${SE.pine(14)}Made in Maine</span>` : "";
   function activityCard(a, prof) {
     const area = SE.areaById[a.area];
     const done = prof && prof.completedIds.has(a.id);
     return `
       <article class="card ${done ? "card--done" : ""}">
-        <div class="card__area"><span class="icon-badge">${icon(area.icon)}</span>${esc(area.short)}</div>
+        <div class="card__area"><span class="icon-badge">${icon(area.icon)}</span>${esc(area.short)}${maineTag(a)}</div>
         <h3><a href="#/activity/${a.id}">${esc(a.title)}</a></h3>
         <p class="card__summary">${esc(a.summary)}</p>
         <div class="meta">
@@ -214,24 +216,76 @@
   }
 
   /* ───────── Dashboard ───────── */
-  function radarSvg() {
-    const cx = 170, cy = 170;
-    const blips = areas.map((a, i) => {
-      const angle = (-90 + i * 60) * (Math.PI / 180);
-      const r = [118, 82, 132, 96, 124, 70][i];
-      const x = cx + r * Math.cos(angle), y = cy + r * Math.sin(angle);
-      const lx = cx + 158 * Math.cos(angle), ly = cy + 158 * Math.sin(angle);
-      const anchor = Math.abs(Math.cos(angle)) < 0.2 ? "middle" : Math.cos(angle) > 0 ? "start" : "end";
-      return `<circle class="blip ${i === 0 ? "blip--hot" : ""}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${i === 0 ? 7 : 5}"/>
-              <text x="${lx.toFixed(1)}" y="${(ly + 4).toFixed(1)}" text-anchor="${anchor}">${esc(a.short)}</text>`;
+  /* Coastal scene for the dashboard hero: a lighthouse sweeping its beam over Casco Bay-style
+     water, granite ledge, a pine ridge, Katahdin in the distance, and one lobster buoy per
+     exploration area. Each buoy is a link to its area. */
+  const BUOYS = [
+    { x: 182, y: 270, label: "Coding", c1: "#8cc832", c2: "#302568" },
+    { x: 290, y: 270, label: "VR", c1: "#ffffff", c2: "#8cc832" },
+    { x: 398, y: 270, label: "AI", c1: "#f2c14e", c2: "#302568" },
+    { x: 128, y: 312, label: "Engineering", c1: "#e9603f", c2: "#ffffff" },
+    { x: 238, y: 312, label: "Science", c1: "#8cc832", c2: "#ffffff" },
+    { x: 348, y: 312, label: "Creative", c1: "#ffffff", c2: "#e9603f" }
+  ];
+  function coastSvg() {
+    const sky = SE.rng("maine-sky");
+    const stars = Array.from({ length: 34 }, () => `<circle cx="${(sky() * 440).toFixed(1)}" cy="${(sky() * 120).toFixed(1)}" r="${(sky() * 1 + .4).toFixed(2)}" fill="#fff" opacity="${(sky() * .5 + .2).toFixed(2)}"/>`).join("");
+    const pr = SE.rng("maine-ridge");
+    const pines = [];
+    for (let x = 150; x < 450; x += 9 + pr() * 9) {
+      const h = 26 + pr() * 34;
+      pines.push(`<use href="#pine207" x="${x.toFixed(1)}" y="${(252 - h).toFixed(1)}" width="${(h * 117 / 332).toFixed(1)}" height="${h.toFixed(1)}"/>`);
+    }
+    const buoys = areas.map((a, i) => {
+      const b = BUOYS[i];
+      return `<a href="#/area/${a.id}" aria-label="${esc(a.name)}">
+        <g transform="translate(${b.x} ${b.y})">
+          <ellipse class="buoy-ring" cx="0" cy="1" rx="13" ry="3.5" fill="none" stroke="#b9e27f" stroke-opacity=".35" stroke-width="1.2"/>
+          <g class="buoy">
+            <line x1="0" y1="-24" x2="0" y2="-36" stroke="#d9d6f0" stroke-width="1.6"/>
+            <rect x="-6.5" y="-25" width="13" height="25" rx="6.5" fill="${b.c1}"/>
+            <rect x="-6.5" y="-16" width="13" height="7" fill="${b.c2}"/>
+            <rect x="-6.5" y="-25" width="13" height="25" rx="6.5" fill="none" stroke="#1d1647" stroke-opacity=".35"/>
+          </g>
+          <text x="0" y="19" text-anchor="middle">${esc(b.label)}</text>
+        </g></a>`;
     }).join("");
     return `
-      <svg viewBox="-40 -10 420 360" role="img" aria-label="Mission scope showing the six exploration areas">
-        <defs><linearGradient id="sweepGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b9e27f" stop-opacity="0"/><stop offset="1" stop-color="#b9e27f" stop-opacity=".3"/></linearGradient></defs>
-        <circle class="ring" cx="170" cy="170" r="145"/><circle class="ring" cx="170" cy="170" r="105"/><circle class="ring" cx="170" cy="170" r="62"/>
-        <line class="axis" x1="25" y1="170" x2="315" y2="170"/><line class="axis" x1="170" y1="25" x2="170" y2="315"/>
-        <path class="sweep" d="M170 170 L315 170 A145 145 0 0 0 272.5 67.5 Z"/>
-        <circle cx="170" cy="170" r="5" fill="#91c440"/>${blips}
+      <svg viewBox="0 0 440 340" role="group" aria-label="Six lobster buoys float off a Maine lighthouse, one for each exploration area">
+        <defs>
+          <symbol id="pine207" viewBox="1138 172 117 332"><path d="${SE.brand.PINE_D}"/></symbol>
+          <linearGradient id="beamGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff9d6" stop-opacity=".75"/><stop offset="1" stop-color="#fff9d6" stop-opacity="0"/></linearGradient>
+          <linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a2170"/><stop offset="1" stop-color="#171240"/></linearGradient>
+          <linearGradient id="fadeX" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000"/><stop offset=".12" stop-color="#fff"/><stop offset=".88" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
+          <linearGradient id="fadeY" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".78" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
+          <mask id="coastFadeX" maskUnits="userSpaceOnUse" x="0" y="0" width="440" height="340"><rect width="440" height="340" fill="url(#fadeX)"/></mask>
+          <mask id="coastFadeY" maskUnits="userSpaceOnUse" x="0" y="0" width="440" height="340"><rect width="440" height="340" fill="url(#fadeY)"/></mask>
+        </defs>
+        <g mask="url(#coastFadeX)"><g mask="url(#coastFadeY)">
+        ${stars}
+        <circle cx="384" cy="46" r="15" fill="#f6f1d3" opacity=".9"/><circle cx="391" cy="41" r="13" fill="#2b2263" opacity=".9"/>
+        <path d="M150 252 L214 196 L236 206 L262 168 L284 180 L300 160 L338 196 L372 214 L440 232 L440 252 Z" fill="#3c3190"/>
+        <path d="M262 168 L270 172 L284 180 L275 183 L268 177 Z M300 160 L310 170 L304 172 Z" fill="#c9c4ec" opacity=".55"/>
+        <g fill="#1a1440">${pines.join("")}</g>
+        <rect x="0" y="250" width="440" height="90" fill="url(#seaGrad)"/>
+        <g stroke="#8cc832" stroke-opacity=".18" stroke-width="1.2" fill="none" stroke-linecap="round">
+          <path d="M160 262 q8 -3 16 0 t16 0"/><path d="M330 290 q8 -3 16 0 t16 0"/><path d="M60 326 q8 -3 16 0 t16 0"/><path d="M280 332 q8 -3 16 0 t16 0"/><path d="M410 300 q8 -3 16 0 t16 0"/>
+        </g>
+        <path d="M70 262 L56 340 L84 340 Z" fill="#fff9d6" opacity=".08"/>
+        <path class="beam" style="--lx:70px;--ly:140px" d="M70 140 L440 100 L440 176 Z" fill="url(#beamGrad)"/>
+        <path d="M0 240 C18 230 40 236 58 232 C80 228 104 236 124 244 C146 252 160 262 170 276 C150 282 120 280 96 284 C64 290 30 284 0 288 Z" fill="#3b3a4a"/>
+        <path d="M0 252 C24 246 46 252 70 248 C94 244 120 254 140 262 C120 270 90 268 64 274 C40 278 18 274 0 278 Z" fill="#55546a"/>
+        <path d="M22 258 l18 -4 M80 256 l22 3 M108 266 l14 -2" stroke="#7b7a8c" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M96 246 h34 v-20 h-34 Z" fill="#efece2"/><path d="M92 228 L113 214 L134 228 Z" fill="#8a2c2c"/><rect x="104" y="232" width="7" height="8" fill="#f2c14e" opacity=".85"/><rect x="117" y="232" width="7" height="8" fill="#2b2263"/>
+        <path d="M58 248 L62 150 H78 L82 248 Z" fill="#f4f2ea"/>
+        <path d="M60.6 200 H79.4" stroke="#d9d5c6" stroke-width="2"/>
+        <rect x="56" y="146" width="28" height="5" rx="1" fill="#1d1647"/>
+        <rect x="62" y="132" width="16" height="14" fill="#1d1647"/>
+        <rect x="64" y="134" width="12" height="10" fill="#fff4b0"/>
+        <circle cx="70" cy="139" r="9" fill="#fff4b0" opacity=".35"/>
+        <path d="M60 132 L70 122 L80 132 Z" fill="#1d1647"/><line x1="70" y1="122" x2="70" y2="116" stroke="#1d1647" stroke-width="1.6"/>
+        </g></g>
+        ${buoys}
       </svg>`;
   }
 
@@ -262,6 +316,19 @@
             </a>`;
           }).join("")}
         </div>
+      </section>`;
+  }
+
+  /* Made in Maine: activities and labs rooted in Maine places, work, and wildlife. */
+  function maineSection(prof) {
+    const list = activities.filter((a) => SE.isMaine(a) && !a.launch.labId);
+    return `
+      <section class="section wrap maine" aria-labelledby="maine-title">
+        <div class="section__head">
+          <div><span class="eyebrow">${SE.pine(14)} Made in Maine</span><h2 id="maine-title">Missions from the coast to the County</h2></div>
+          <p>Lobster boats, tide pools, sugarhouses, and snow days. These missions start right here in the 207.</p>
+        </div>
+        <div class="cards cards--rail">${list.map((a) => activityCard(a, prof)).join("")}</div>
       </section>`;
   }
 
@@ -317,7 +384,7 @@
 
     if (isStudent) {
       const prof = SE.game.profile(user.id);
-      app().innerHTML = SE.views.expeditionHome(user, prof) + labsStrip(user, null, "Your labs") + areasSection(prof) + pathwayStrip(prof) + librarySection(user, prof);
+      app().innerHTML = SE.views.expeditionHome(user, prof) + labsStrip(user, null, "Your labs") + maineSection(prof) + areasSection(prof) + pathwayStrip(prof) + librarySection(user, prof);
       SE.views.bindExpeditionHome && SE.views.bindExpeditionHome(user, prof);
       bindLibrary(prof);
       return;
@@ -330,22 +397,23 @@
       </div></div>` : "";
 
     app().innerHTML = `
-      <section class="hero" aria-labelledby="hero-title">
+      <section class="hero ridge" aria-labelledby="hero-title">
         <div class="wrap hero__inner">
           <div>
-            <span class="eyebrow">Mission control</span>
-            <h1 id="hero-title" tabindex="-1">Big ideas start with curious minds.</h1>
-            <p class="hero__lede">Choose your next adventure. Pick an area to explore, read your mission, and launch the activity.</p>
+            <span class="eyebrow">STEM 207 · Grades 2–8 · Made in Maine</span>
+            <h1 id="hero-title" tabindex="-1">From the coast to Katahdin, big ideas start here.</h1>
+            <p class="hero__lede">Pick an area to explore, read your mission, and launch it. Coding, virtual field trips, AI, engineering, science, and art, built for Maine classrooms.</p>
             ${timePicker()}
           </div>
-          <div class="radar">${radarSvg()}</div>
+          <div class="coast">${coastSvg()}</div>
         </div>
       </section>
       ${guestBanner}
       ${user && user.role === "educator" ? SE.views.educatorStrip(user) : ""}
       ${areasSection(null)}
-      ${labsStrip(user, null, "Interactive labs")}
       ${featuredSection()}
+      ${maineSection(null)}
+      ${labsStrip(user, null, "Interactive labs")}
       ${pathwayStrip(null)}
       ${librarySection(user, null)}`;
     bindLibrary(null);
@@ -430,7 +498,7 @@
           <p class="launch-panel__note">${esc(a.launch.note)}</p>
           ${lab ? `<div class="lab-progress"><span>${done.size} of ${lab.levels.length} levels complete</span><span class="meter"><span style="width:${(done.size / lab.levels.length) * 100}%"></span></span></div>` : ""}
           <a class="btn btn--launch" href="#/lab/${esc(a.launch.labId)}">${icon("rocket")}${done.size ? "Continue the lab" : esc(a.launch.label)}</a>
-          <p class="launch-panel__small">The lab opens right here in STEM Explorer Academy. Use the Dashboard button to come back anytime.</p>
+          <p class="launch-panel__small">The lab opens right here in STEM 207. Use the Dashboard button to come back anytime.</p>
         </section>`;
     }
     if (a.launch.status === "ready") {
@@ -523,7 +591,7 @@
           </div>
           <p class="page-top__lede">${esc(a.summary)}</p>
           <div class="page-top__tags">
-            ${a.source === "original" ? `<span class="label-original">${icon("flag")}Original STEM Explorer Academy lesson</span>` : ""}
+            ${a.source === "original" ? `<span class="label-original">${icon("flag")}Original STEM 207 lesson</span>` : ""}${maineTag(a)}
             ${isStudent ? (lastCompletion
               ? `<span class="chip chip--done-dark">${icon("check")}Completed ${SE.dateShort(lastCompletion.event.at)}</span>`
               : `<span class="chip chip--xp-dark">Worth ${SE.game.baseXp(a)} XP</span>`) : ""}
@@ -673,7 +741,7 @@
               </div>
               <div class="ican">${icon("check")}<span><span class="visually-hidden">Readiness check: </span>${esc(s.iCan)}</span>${claimBtn}</div>
               <div class="stage__links">
-                ${(ROVER_FOR_STAGE[s.stage] || []).map((lv) => `<a class="btn btn--ghost btn--small btn--lab" href="#/lab/rover/${lv}">${icon("flask")}Rover Code Lab · level ${lv}${prof && SE.labs.progressFor(prof, "rover").has(lv - 1) ? " ✓" : ""}</a>`).join("")}
+                ${(ROVER_FOR_STAGE[s.stage] || []).map((lv) => `<a class="btn btn--ghost btn--small btn--lab" href="#/lab/rover/${lv}">${icon("flask")}Harbor Code Lab · level ${lv}${prof && SE.labs.progressFor(prof, "rover").has(lv - 1) ? " ✓" : ""}</a>`).join("")}
                 ${s.activities.map((id) => SE.activityById[id]).filter(Boolean).map((a) => `
                   <a class="btn btn--ghost btn--small ${prof && prof.completedIds.has(a.id) ? "is-done" : ""}" href="#/activity/${a.id}">${icon(prof && prof.completedIds.has(a.id) ? "check" : SE.areaById[a.area].icon)}${esc(a.title)} · ${a.duration} min</a>`).join("")}
               </div>

@@ -1,5 +1,5 @@
 /*
- * STEM Explorer Academy — sign in and sign up.
+ * STEM 207 — sign in and sign up.
  *
  * Students: class code → tap your name → tap your three secret pictures.
  *   No email, no typed password, no personal information. Teachers hand out
@@ -28,9 +28,8 @@
   SE.views.signin = function () {
     app().innerHTML = shell(`
       <div class="auth__brand">
-        <span class="auth__logo">${SE.brandMark(96)}</span>
-        <h1 tabindex="-1" class="auth__name"><span>STEM Explorer</span> Academy</h1>
-        <p>Big ideas start with curious minds. Who's exploring today?</p>
+        <h1 tabindex="-1" class="auth__name"><span class="auth__logo">${SE.brandLogo(64)}</span>Maine's STEM explorer for grades 2–8</h1>
+        <p>From the coast to the County, big ideas start with curious minds. Who's exploring today?</p>
       </div>
       <div class="doors">
         <a class="door" href="#/signin/student">
@@ -78,7 +77,7 @@
       <a class="auth__back" href="#/signin">${icon("arrowLeft")}Back</a>
       ${stepper(1)}
       <h1 tabindex="-1">What's your class code?</h1>
-      <p class="muted">Your teacher has it. It looks like a word and a number, like <strong>ORBIT7</strong>.</p>
+      <p class="muted">Your teacher has it. It looks like a word and a number, like <strong>MOOSE7</strong>.</p>
       <form id="code-form" class="form" novalidate>
         <div class="form__field">
           <label for="class-code">Class code</label>

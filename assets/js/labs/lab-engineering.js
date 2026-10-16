@@ -1,10 +1,10 @@
 /*
  * Engineering & Robotics labs
  *
- * Launcher Lab: design, test, and iterate a catapult. Students predict,
+ * Pumpkin Launcher Lab: design, test, and iterate a catapult for a Maine fall-fair pumpkin toss. Students predict,
  *   change one variable at a time, work within a budget, and keep an
  *   engineering notebook of every trial.
- * Line Follower Lab: a robot with two light sensors follows a track using
+ * Snowplow Robot Lab: after a nor'easter, a robot plow with two light sensors follows the road line using
  *   sense → think → act rules that students write and debug.
  */
 (function () {
@@ -12,14 +12,14 @@
   const SE = window.SE;
   const { icon, esc } = SE;
   const G = 9.8;
-  const LOADS = { light: { name: "Foam ball", m: 1 }, medium: { name: "Tennis ball", m: 1.5 }, heavy: { name: "Bean bag", m: 2.2 } };
+  const LOADS = { light: { name: "Gourd", m: 1 }, medium: { name: "Pie pumpkin", m: 1.5 }, heavy: { name: "Big pumpkin", m: 2.2 } };
 
   /* ═════════════ Launcher Lab ═════════════ */
   const LAUNCH_LEVELS = [
     { title: "First launch", concept: "Test and observe",
-      goal: "Land the ball on the target at 12 meters.",
+      goal: "It's fall-fair season in Maine. Land a pumpkin on the hay bale target at 12 meters.",
       hint: "Try a launch, then look at where it landed. Too short? Pull back harder or change the angle.",
-      learned: "Engineers learn by testing. Every launch gives you data, even the misses.",
+      learned: "Engineers learn by testing. Every launch gives you data, even the squashed misses.",
       targets: [12], start: { angle: 30, force: 5, load: "medium" } },
     { title: "Predict first", concept: "Prediction",
       goal: "Before each launch, predict the distance. Hit the target at 18 m with a prediction within 3 m of the result.",
@@ -32,14 +32,14 @@
       learned: "Changing one variable at a time is a fair test. If you change two things and it works, you don't know which change helped.",
       targets: [15], fair: true, start: { angle: 20, force: 4, load: "heavy" } },
     { title: "Over the wall", concept: "Design constraints",
-      goal: "Clear the 4 m wall and land on the target at 16 m.",
+      goal: "Clear the 4 m stack of hay bales and land on the target at 16 m.",
       hint: "A low, flat launch hits the wall. What happens to the path if you aim higher?",
-      learned: "Constraints, like a wall, change which design is best. A steeper angle trades distance for height.",
+      learned: "Constraints, like a stack of hay bales in the way, change which design is best. A steeper angle trades distance for height.",
       targets: [16], wall: { x: 10, h: 4 }, start: { angle: 30, force: 7, load: "medium" } },
     { title: "Budget build", concept: "Optimize",
       goal: "Hit the target at 22 m without going over the $50 budget.",
-      steps: ["Each force level costs $5 (stronger springs cost more).", "Loads cost $5 (foam ball), $8 (tennis ball), or $10 (bean bag)."],
-      hint: "With a limited budget, make the most of every setting. Which angle sends a ball the farthest? Which load is easiest to launch?",
+      steps: ["Each force level costs $5 (stronger springs cost more).", "Loads cost $5 (gourd), $8 (pie pumpkin), or $10 (big pumpkin)."],
+      hint: "With a limited budget, make the most of every setting. Which angle sends a pumpkin the farthest? Which load is easiest to launch?",
       learned: "Real engineering has budgets. Optimizing means getting the best result from limited resources, like finding the angle that gives the most distance.",
       targets: [22], budget: 50, start: { angle: 30, force: 6, load: "heavy" } },
     { title: "Three targets", concept: "Iterate to mastery",
@@ -81,7 +81,7 @@
     el.innerHTML = `
       <div class="launch">
         <div class="lab-panel launch__field">
-          <canvas class="launch__canvas" width="900" height="380" role="img" aria-label="Side view of the launcher and target"></canvas>
+          <canvas class="launch__canvas" width="900" height="380" role="img" aria-label="Side view of the pumpkin launcher and hay bale target"></canvas>
           <p class="launch__result" id="ln-result" aria-live="polite"></p>
         </div>
         <div class="launch__controls lab-panel">
@@ -110,9 +110,14 @@
       const W = canvas.width, Hh = canvas.height;
       ctx.clearRect(0, 0, W, Hh);
       const sky = ctx.createLinearGradient(0, 0, 0, Hh);
-      sky.addColorStop(0, "#cfe6f2"); sky.addColorStop(1, "#eef6f1");
+      sky.addColorStop(0, "#bcd8ea"); sky.addColorStop(1, "#f3ecdc");
       ctx.fillStyle = sky; ctx.fillRect(0, 0, W, Hh);
-      ctx.fillStyle = "#7aa35a"; ctx.fillRect(0, sy(0), W, Hh - sy(0));
+      // Fall hills and a pine treeline
+      ctx.fillStyle = "#c9894a"; ctx.beginPath(); ctx.moveTo(0, sy(0)); for (let px = 0; px <= W; px += 30) ctx.lineTo(px, sy(0) - 70 - Math.sin(px / 140) * 22); ctx.lineTo(W, sy(0)); ctx.fill();
+      ctx.fillStyle = "#2f4a2c";
+      for (let px = 0; px < W; px += 14) { const h = 24 + ((px * 37) % 23); ctx.beginPath(); ctx.moveTo(px - 8, sy(0) - 34); ctx.lineTo(px, sy(0) - 34 - h); ctx.lineTo(px + 8, sy(0) - 34); ctx.fill(); }
+      ctx.fillStyle = "#8aa35a"; ctx.fillRect(0, sy(0) - 34, W, 34);
+      ctx.fillStyle = "#6f8f45"; ctx.fillRect(0, sy(0), W, Hh - sy(0));
       // distance markers
       ctx.fillStyle = "#0d1d36"; ctx.font = "700 20px 'Atkinson Hyperlegible', sans-serif"; ctx.textAlign = "center";
       for (let m = 0; m <= MAXX; m += 2) {
@@ -122,17 +127,19 @@
       // targets
       L.targets.forEach((t, i) => {
         const hit = hits.has(i);
-        ctx.fillStyle = hit ? "#0b7471" : "#ec7a2f";
-        ctx.fillRect(sx(t - 1), sy(0) - 4, sx(t + 1) - sx(t - 1), 8);
-        ctx.fillRect(sx(t) - 1.5, sy(0) - 46, 3, 42);
-        ctx.beginPath(); ctx.moveTo(sx(t) + 1.5, sy(0) - 46); ctx.lineTo(sx(t) + 26, sy(0) - 38); ctx.lineTo(sx(t) + 1.5, sy(0) - 30); ctx.fill();
-        ctx.fillStyle = "#0d1d36"; ctx.fillText(hit ? "hit!" : `${t} m`, sx(t), sy(0) - 54);
+        // hay bale target with a flag
+        ctx.fillStyle = "#e3c15a"; ctx.fillRect(sx(t - 1), sy(0) - 14, sx(t + 1) - sx(t - 1), 14);
+        ctx.strokeStyle = "#b8923a"; ctx.lineWidth = 2; ctx.strokeRect(sx(t - 1), sy(0) - 14, sx(t + 1) - sx(t - 1), 14);
+        ctx.fillStyle = hit ? "#3f6b0c" : "#302568";
+        ctx.fillRect(sx(t) - 1.5, sy(0) - 56, 3, 42);
+        ctx.beginPath(); ctx.moveTo(sx(t) + 1.5, sy(0) - 56); ctx.lineTo(sx(t) + 26, sy(0) - 48); ctx.lineTo(sx(t) + 1.5, sy(0) - 40); ctx.fill();
+        ctx.fillStyle = "#0d1d36"; ctx.fillText(hit ? "hit!" : `${t} m`, sx(t), sy(0) - 64);
       });
       // wall
       if (L.wall) {
-        ctx.fillStyle = "#6b5a4a";
-        ctx.fillRect(sx(L.wall.x) - 8, sy(L.wall.h), 16, sy(0) - sy(L.wall.h));
-        ctx.fillStyle = "#0d1d36"; ctx.fillText(`${L.wall.h} m wall`, sx(L.wall.x), sy(L.wall.h) - 8);
+        const wx = sx(L.wall.x), wt = sy(L.wall.h), bh = (sy(0) - wt) / 4;
+        for (let k = 0; k < 4; k++) { ctx.fillStyle = k % 2 ? "#d9b54e" : "#e3c15a"; ctx.fillRect(wx - 10, wt + k * bh, 20, bh); ctx.strokeStyle = "#b8923a"; ctx.lineWidth = 1.5; ctx.strokeRect(wx - 10, wt + k * bh, 20, bh); }
+        ctx.fillStyle = "#0d1d36"; ctx.fillText(`${L.wall.h} m hay bales`, wx, wt - 8);
       }
       // previous landing marks
       trials.forEach((t) => { ctx.fillStyle = "rgba(13,29,54,.35)"; ctx.beginPath(); ctx.arc(sx(t.land), sy(0), 4, 0, Math.PI * 2); ctx.fill(); });
@@ -151,9 +158,12 @@
         ctx.strokeStyle = "#0b7471"; ctx.lineWidth = 2.5; ctx.setLineDash([6, 5]);
         ctx.beginPath(); path.pts.slice(0, n).forEach(([x, y], i) => (i ? ctx.lineTo(sx(x), sy(y)) : ctx.moveTo(sx(x), sy(y)))); ctx.stroke(); ctx.setLineDash([]);
         const [x, y] = path.pts[n - 1];
-        ctx.fillStyle = s.load === "heavy" ? "#8a5a3a" : s.load === "medium" ? "#c9d64a" : "#ec7a2f";
-        ctx.beginPath(); ctx.arc(sx(Math.min(x, MAXX + 2)), sy(y), s.load === "heavy" ? 9 : 7, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = "#0d1d36"; ctx.lineWidth = 1.5; ctx.stroke();
+        const px = sx(Math.min(x, MAXX + 2)), py = sy(y), pr = s.load === "heavy" ? 10 : s.load === "medium" ? 8 : 6;
+        ctx.fillStyle = s.load === "light" ? "#f2c14e" : "#e9822b";
+        ctx.beginPath(); ctx.ellipse(px, py, pr * 1.15, pr, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = "#8a4a14"; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.ellipse(px, py, pr * .45, pr, 0, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = "#0d1d36"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(px, py, pr * 1.15, pr, 0, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = "#3f6b0c"; ctx.fillRect(px - 1.5, py - pr - 4, 3, 5);
       }
     }
 
@@ -212,7 +222,7 @@
       el.querySelector("#ln-rows").innerHTML = trials.map((t, i) => `<tr class="${i === trials.length - 1 ? "is-new" : ""}"><td>${i + 1}</td><td>${t.angle}°</td><td>${t.force}</td><td>${esc(LOADS[t.load].name)}</td>${L.predict ? `<td>${t.pred} m</td>` : ""}${L.budget ? `<td>$${t.cost}</td>` : ""}<td>${t.hitWall ? "Hit the wall" : `${t.land} m`}</td><td>${t.hit ? "Yes" : "No"}</td></tr>`).join("");
       drawScene(sim, 1);
       const nearest = L.targets.filter((_, i) => !hits.has(i)).sort((a, b) => Math.abs(a - land) - Math.abs(b - land))[0];
-      const msg = sim.hitWall ? `It hit the wall at ${L.wall.x} m. The ball needs to be higher than ${L.wall.h} m when it gets there.`
+      const msg = sim.hitWall ? `It smashed into the hay bales at ${L.wall.x} m. The pumpkin needs to be higher than ${L.wall.h} m when it gets there.`
         : `Landed at ${land} m${pred != null ? ` (you predicted ${pred} m, off by ${Math.abs(Math.round((land - pred) * 10) / 10)} m)` : ""}.`;
       el.querySelector("#ln-result").textContent = msg;
 
@@ -242,8 +252,8 @@
   SE.labs.register({
     id: "launcher",
     area: "engineering",
-    title: "Launcher Lab",
-    tagline: "Design and tune a catapult. Predict, test, change one thing at a time, and keep an engineering notebook.",
+    title: "Pumpkin Launcher Lab",
+    tagline: "Design and tune a catapult for a Maine fall-fair pumpkin toss. Predict, test, change one thing at a time, and keep an engineering notebook.",
     levels: LAUNCH_LEVELS,
     mount: mountLauncher
   });
@@ -264,23 +274,23 @@
   };
   const LINE_LEVELS = [
     { title: "Sense, think, act", concept: "Robot behavior", track: "oval",
-      goal: "Write rules so the robot drives one full lap of the oval.",
-      steps: ["The robot has two light sensors at the front.", "For each thing it can sense, choose what it should do.", "Press Run and watch it follow your rules."],
+      goal: "A nor'easter buried the roads. Write rules so the robot plow follows the road line for one full lap.",
+      steps: ["The plow has two light sensors at the front. They can tell the dark road line from white snow.", "For each thing it can sense, choose what it should do.", "Press Run and watch it follow your rules."],
       hint: "If only the left sensor sees the line, the line is on the robot's left. Which way should it turn to get back on?",
       learned: "Robots follow a loop: sense (read sensors), think (check rules), act (move). Simple rules, repeated many times a second, create smart-looking behavior.",
       rules: { both: "forward", left: "", right: "", none: "forward" }, speed: 3 },
     { title: "Fix the robot", concept: "Debugging behavior", track: "oval",
-      goal: "Another team's robot keeps driving off the track. Find the bug in its rules and fix it.",
+      goal: "Another town's plow keeps driving off into the snowbanks. Find the bug in its rules and fix it.",
       hint: "Run it and watch the first moment it goes wrong. Which sensor state was it in? What did the rule tell it to do?",
       learned: "Debugging a robot is like debugging code: watch for the first wrong action, find the rule that caused it, and fix that rule.",
       rules: { both: "forward", left: "right", right: "left", none: "forward" }, speed: 3 },
     { title: "Sharp corners", concept: "Handling the unexpected", track: "corners",
-      goal: "Drive a full lap of the track with sharp corners at full speed (speed 6).",
+      goal: "Plow a full lap of a village with sharp corners at full speed (speed 6).",
       hint: "On sharp curves, both sensors can slip off the line. What should the robot do when it sees nothing? It was just turning one way…",
       learned: "Good robots plan for the unexpected. Remembering the last turn and continuing it lets the robot recover when it loses the line.",
       rules: { both: "forward", left: "left", right: "right", none: "forward" }, speed: 6, lockSpeed: true },
     { title: "Speed trial", concept: "Trade-offs", track: "bean",
-      goal: "Finish a lap of the teardrop track in under 14 seconds.",
+      goal: "The school buses leave soon. Clear a lap of the teardrop road in under 14 seconds.",
       hint: "Faster isn't always better: too fast and the robot overshoots the curves. Find the fastest speed that still stays on the line.",
       learned: "Engineering is full of trade-offs. Going faster saves time but makes control harder. Testing finds the best balance.",
       rules: { both: "forward", left: "left", right: "right", none: "keep" }, speed: 2, timeLimit: 14 }
@@ -299,7 +309,7 @@
     el.innerHTML = `
       <div class="line">
         <div class="lab-panel line__field">
-          <canvas class="line__canvas" width="${W}" height="${H}" role="img" aria-label="Top view of the robot and the track"></canvas>
+          <canvas class="line__canvas" width="${W}" height="${H}" role="img" aria-label="Top view of the robot plow and the snowy road"></canvas>
           <div class="line__readout" aria-live="polite"><span>Sensors: <b id="lf-sense">–</b></span><span>Doing: <b id="lf-act">–</b></span><span>Time: <b id="lf-time">0.0 s</b></span><span>Lap: <b id="lf-lap">0%</b></span></div>
           <div class="lab-row">
             <button type="button" class="btn btn--launch" id="lf-run">${icon("rocket")}Run</button>
@@ -341,7 +351,10 @@
       return { l: [bot.x + fx * 16 - px * 9, bot.y + fy * 16 - py * 9], r: [bot.x + fx * 16 + px * 9, bot.y + fy * 16 + py * 9] };
     };
     function draw() {
-      ctx.fillStyle = "#f4f1e6"; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "#f7f8fa"; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "#dfe6ee"; for (let k = 0; k < 160; k++) { ctx.beginPath(); ctx.arc((k * 97) % W, (k * 53) % H, 1.6 + (k % 3), 0, Math.PI * 2); ctx.fill(); }
+      ctx.strokeStyle = "#9aa3ad"; ctx.lineWidth = 64; ctx.lineJoin = "round";
+      ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath(); ctx.stroke();
       ctx.strokeStyle = "#1d2433"; ctx.lineWidth = 26; ctx.lineJoin = "round";
       ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath(); ctx.stroke();
       // start line
@@ -352,8 +365,10 @@
       ctx.beginPath(); bot.trail.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.stroke();
       // robot
       ctx.save(); ctx.translate(bot.x, bot.y); ctx.rotate(bot.a);
-      ctx.fillStyle = "#0b7471"; ctx.strokeStyle = "#0d1d36"; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.roundRect(-14, -11, 28, 22, 5); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "#e9822b"; ctx.strokeStyle = "#0d1d36"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.roundRect(-14, -11, 26, 22, 5); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "#302568"; ctx.fillRect(-4, -7, 9, 14);
+      ctx.fillStyle = "#f2c14e"; ctx.beginPath(); ctx.moveTo(13, -16); ctx.lineTo(19, -12); ctx.lineTo(19, 12); ctx.lineTo(13, 16); ctx.closePath(); ctx.fill(); ctx.stroke();
       ctx.fillStyle = "#0d1d36"; ctx.fillRect(-10, -14, 12, 4); ctx.fillRect(-10, 10, 12, 4);
       ctx.restore();
       const se = sensors();
@@ -444,8 +459,8 @@
   SE.labs.register({
     id: "line-follower",
     area: "engineering",
-    title: "Line Follower Lab",
-    tagline: "Program a robot's sense → think → act rules so it can follow a track on its own.",
+    title: "Snowplow Robot Lab",
+    tagline: "A Maine nor'easter just hit. Program a robot plow's sense → think → act rules so it follows the road on its own.",
     levels: LINE_LEVELS,
     mount: mountLine
   });

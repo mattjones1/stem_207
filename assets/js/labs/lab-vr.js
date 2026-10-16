@@ -1,8 +1,9 @@
 /*
  * Field Station 360 — Virtual Reality
- * A look-around field trip. Students turn to compass headings, find clues
- * hidden around a habitat, separate observations from inferences, and
- * compare how living things are adapted to where they live.
+ * A look-around field trip. Students start at home in Maine (a Gulf of Maine
+ * tide pool and a North Woods pond under Katahdin), then travel to a rainforest,
+ * a desert, and a coral reef. They turn to compass headings, find clues,
+ * separate observations from inferences, and compare adaptations.
  * Works with a mouse, touch, keyboard, or a VR headset's web browser.
  */
 (function () {
@@ -13,6 +14,46 @@
 
   /* ───────── Scenes ───────── */
   const SCENES = {
+    tidepool: {
+      name: "Gulf of Maine tide pools",
+      short: "Maine tide pools",
+      sky: ["#5f98c8", "#a6cde6", "#e2eff6"], ground: "#9c8a80",
+      clues: [
+        { deg: 30, y: 300, title: "White cones on the rocks", see: "Hundreds of tiny white cone-shaped shells are stuck to the rock. Right now, with the tide out, every one is shut tight.",
+          q: "What's the best inference?", options: ["They close up to keep from drying out until the tide comes back.", "They are empty shells left by animals that died.", "They close because they are asleep for the winter."], a: 0,
+          why: "These are barnacles: animals that glue themselves head-first to rocks. At low tide they seal their shells to hold in seawater. When the water returns, they open and sweep feathery legs through it to catch food." },
+        { deg: 110, y: 260, title: "Bubbly seaweed", see: "Brown seaweed lies flat over the rocks. Along each strand are little bubbles, like beads.",
+          q: "What could the bubbles help the seaweed do?", options: ["Keep fish from eating it", "Float up toward sunlight when the tide comes in", "Store salt"], a: 1,
+          why: "This is rockweed, a kind of algae. Like plants, it needs sunlight to make food. Its air bladders lift it toward the light when it's underwater. At low tide it lies flat, stays damp, and shelters snails and crabs underneath." },
+        { deg: 200, y: 330, title: "Sea star on a mussel", see: "A sea star is wrapped around a dark blue mussel shell. The shell is open a crack.",
+          q: "What is the sea star most likely doing?", options: ["Hiding from the sun", "Protecting the mussel", "Prying the shell open to eat the mussel"], a: 2,
+          why: "Sea stars pull mussel shells apart with hundreds of tiny tube feet, then eat the soft animal inside. A tide pool is full of predators and prey, packed into a small space." },
+        { deg: 290, y: 190, title: "A dark stripe on the cliff", see: "High above the water there's a dark band across the rock. Above it, the rock is dry and gray. Below it, seaweed covers everything.",
+          q: "What can you infer from the stripe?", options: ["Someone painted a line", "The ocean reaches that high at high tide", "It's a shadow from a cloud"], a: 1,
+          why: "The Gulf of Maine has big tides. Twice a day the water rises and falls, about 9 feet at Portland and close to 20 feet near Eastport. Everything living on these rocks has to survive both underwater and out in the air." }
+      ],
+      task: { prompt: "The open ocean is east of these tide pools. Turn to face east, out to sea.", deg: 90, label: "east (90°)" }
+    },
+    northwoods: {
+      name: "Maine North Woods",
+      short: "North Woods",
+      sky: ["#4f7fb3", "#97bfdb", "#dbe9f0"], ground: "#39452a",
+      clues: [
+        { deg: 50, y: 285, title: "Moose in the pond", see: "A moose stands knee-deep in the pond. It dunks its head and comes up chewing water plants.",
+          q: "What's a likely reason a moose wades into a pond in summer?", options: ["To eat water plants and stay cool", "To hunt for fish", "To wash off mud"], a: 0,
+          why: "Water plants are full of salt (sodium) that moose need, and the cool water helps such a big animal shed heat and escape biting insects. Long legs make wading easy. Maine has more moose than any state except Alaska." },
+        { deg: 140, y: 170, title: "Cone-shaped trees", see: "The spruce and fir trees are shaped like cones, with thin needles instead of wide leaves. Last night's snow is sliding off the branches.",
+          q: "How could the cone shape help in a Maine winter?", options: ["It catches more snow to keep the tree warm", "Heavy snow slides off instead of breaking branches", "It makes the tree easier for birds to land on"], a: 1,
+          why: "Snow slides off sloped branches instead of piling up and snapping them. Thin, waxy needles also lose less water in cold, dry air, so these evergreens can stay green all winter." },
+        { deg: 230, y: 300, title: "A dome of sticks", see: "A big dome of sticks and mud sits in the pond. On the shore, a tree stump has been chewed to a sharp point.",
+          q: "What can you infer?", options: ["Beavers cut the tree and built a home", "A storm knocked the tree down", "People are building a camp"], a: 0,
+          why: "Beavers cut trees with their teeth and build dams and lodges. The dam floods the area into a pond, which becomes a home for fish, frogs, ducks, and moose. That's why beavers are called ecosystem engineers." },
+        { deg: 320, y: 270, title: "Bird with back legs", see: "A black-and-white checkered bird floats low on the water. Its legs are set far back on its body.",
+          q: "What are legs that far back best for?", options: ["Walking long distances", "Perching on branches", "Swimming and diving fast"], a: 2,
+          why: "This is a common loon. Legs at the very back push it through the water like propellers when it dives for fish. On land it can barely walk, so loons nest right at the water's edge." }
+      ],
+      task: { prompt: "Katahdin, Maine's tallest mountain, is north of this pond. Turn to face north.", deg: 0, label: "north (0°)" }
+    },
     rainforest: {
       name: "Amazon rainforest",
       sky: ["#2f5d3a", "#5f8f4e", "#a9c97a"], ground: "#2b3b1d",
@@ -85,6 +126,136 @@
     x.fillStyle = grd; x.fillRect(0, 0, W, H);
     // Draw an object at world x, repeating it across the wrap seam if needed
     const wrap = (px, fn) => { fn(px); if (px < 200) fn(px + W); if (px > W - 200) fn(px - W); };
+
+    if (id === "tidepool") {
+      // Open ocean to the east, with a far spruce shore the rest of the way around
+      x.fillStyle = "#2f6185"; x.fillRect(0, 196, W, 70);
+      x.fillStyle = "rgba(255,255,255,.55)";
+      for (let i = 0; i < 70; i++) { const px = r() * W, py = 205 + r() * 55; x.fillRect(px, py, 10 + r() * 16, 2); }
+      // Far headlands with spruce, except straight out to sea (east)
+      x.fillStyle = "#24442f";
+      for (let px = 0; px < W; px += 9) {
+        const deg = (px / W) * 360;
+        if (deg > 55 && deg < 135) continue;
+        const h = 14 + r() * 18;
+        x.beginPath(); x.moveTo(px - 6, 198); x.lineTo(px, 198 - h); x.lineTo(px + 6, 198); x.fill();
+      }
+      x.fillRect(0, 194, at(55), 6); x.fillRect(at(135), 194, W - at(135), 6);
+      // A white lighthouse on a far point
+      wrap(at(160), (p) => {
+        x.fillStyle = "#f4f2ea"; x.beginPath(); x.moveTo(p - 7, 196); x.lineTo(p - 5, 150); x.lineTo(p + 5, 150); x.lineTo(p + 7, 196); x.fill();
+        x.fillStyle = "#1d1647"; x.fillRect(p - 7, 144, 14, 7); x.beginPath(); x.moveTo(p - 7, 144); x.lineTo(p, 136); x.lineTo(p + 7, 144); x.fill();
+        x.fillStyle = "#fff3a8"; x.fillRect(p - 4, 145, 8, 5);
+      });
+      // Pink granite ledges in the foreground
+      const ledge = ["#b6988c", "#a8897e", "#c4a89c", "#9b7f74"];
+      for (let i = 0; i < 26; i++) {
+        const px = i * (W / 26) + r() * 30, w = 160 + r() * 120, top = 236 + r() * 40;
+        wrap(px, (p) => {
+          x.fillStyle = ledge[i % 4];
+          x.beginPath(); x.moveTo(p - w / 2, 420); x.lineTo(p - w / 2 + 20, top + 12); x.lineTo(p - 10, top); x.lineTo(p + w / 2 - 18, top + 18); x.lineTo(p + w / 2, 420); x.fill();
+          x.strokeStyle = "rgba(60,40,35,.25)"; x.lineWidth = 2; x.beginPath(); x.moveTo(p - w / 4, top + 30); x.lineTo(p - w / 8, top + 80); x.lineTo(p - w / 5, 420); x.stroke();
+        });
+      }
+      // Tide pools
+      x.fillStyle = "#3f7fa3";
+      [[15, 372], [75, 360], [150, 380], [245, 368], [330, 376]].forEach(([deg, y]) => wrap(at(deg), (p) => { x.beginPath(); x.ellipse(p, y, 60, 14, 0, 0, Math.PI * 2); x.fill(); }));
+      // Tall cliff with the high-tide stripe
+      wrap(at(290), (p) => {
+        x.fillStyle = "#c9c2b8"; x.beginPath(); x.moveTo(p - 170, 420); x.lineTo(p - 150, 140); x.lineTo(p - 40, 118); x.lineTo(p + 120, 132); x.lineTo(p + 170, 420); x.fill();
+        x.fillStyle = "#2f2d2a"; x.beginPath(); x.moveTo(p - 157, 222); x.lineTo(p + 145, 214); x.lineTo(p + 147, 236); x.lineTo(p - 156, 246); x.fill();
+        x.fillStyle = "#7a5d2a"; x.beginPath(); x.moveTo(p - 156, 246); x.lineTo(p + 147, 236); x.lineTo(p + 168, 420); x.lineTo(p - 170, 420); x.fill();
+        x.fillStyle = "#24442f";
+        for (let k = -140; k < 120; k += 14) { const h = 20 + Math.abs(Math.sin(k)) * 20; x.beginPath(); x.moveTo(p + k - 7, 130); x.lineTo(p + k, 130 - h); x.lineTo(p + k + 7, 130); x.fill(); }
+      });
+      // Barnacles
+      wrap(at(30), (p) => {
+        for (let k = 0; k < 140; k++) { const bx = p - 110 + r() * 220, by = 280 + r() * 50; x.fillStyle = "#f2efe6"; x.beginPath(); x.arc(bx, by, 3 + r() * 2.5, 0, Math.PI * 2); x.fill(); x.fillStyle = "#6b625a"; x.beginPath(); x.arc(bx, by, 1, 0, Math.PI * 2); x.fill(); }
+      });
+      // Rockweed with air bladders
+      wrap(at(110), (p) => {
+        for (let k = 0; k < 16; k++) {
+          const sx = p - 130 + k * 17, sy = 250 + r() * 20;
+          x.strokeStyle = k % 2 ? "#6f6a26" : "#7d7130"; x.lineWidth = 4; x.lineCap = "round";
+          x.beginPath(); x.moveTo(sx, sy); x.bezierCurveTo(sx + 20, sy + 20, sx - 10, sy + 40, sx + 14, sy + 64); x.stroke();
+          x.fillStyle = "#a89a45"; [0.3, 0.6, 0.85].forEach((t) => { x.beginPath(); x.ellipse(sx + 6 + t * 6, sy + t * 64, 4, 6, 0, 0, Math.PI * 2); x.fill(); });
+        }
+      });
+      // Sea star on a mussel bed
+      wrap(at(200), (p) => {
+        x.fillStyle = "#1f2b4a";
+        for (let k = 0; k < 14; k++) { x.beginPath(); x.ellipse(p - 70 + r() * 140, 338 + r() * 26, 13, 6, r() * 2, 0, Math.PI * 2); x.fill(); }
+        x.fillStyle = "#c2552f"; x.beginPath();
+        for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, rr = k % 2 ? 9 : 30; x.lineTo(p + Math.cos(a) * rr, 335 + Math.sin(a) * rr); }
+        x.closePath(); x.fill();
+        x.fillStyle = "rgba(255,230,200,.5)"; for (let k = 0; k < 12; k++) { x.beginPath(); x.arc(p - 12 + r() * 24, 325 + r() * 20, 1.6, 0, Math.PI * 2); x.fill(); }
+      });
+    }
+
+    if (id === "northwoods") {
+      // Katahdin to the north, with other far ridges
+      x.fillStyle = "#7d8fae";
+      for (let i = 0; i < 8; i++) {
+        const px = r() * W, w = 300 + r() * 300, h = 40 + r() * 40;
+        wrap(px, (p) => { x.beginPath(); x.moveTo(p - w / 2, 250); x.quadraticCurveTo(p, 250 - h * 2, p + w / 2, 250); x.fill(); });
+      }
+      wrap(at(0), (p) => {
+        x.fillStyle = "#6a7c9e"; x.beginPath(); x.moveTo(p - 330, 250); x.lineTo(p - 150, 150); x.lineTo(p - 60, 96); x.lineTo(p - 10, 86); x.lineTo(p + 40, 104); x.lineTo(p + 120, 128); x.lineTo(p + 330, 250); x.fill();
+        x.fillStyle = "#eef2f6"; x.beginPath(); x.moveTo(p - 60, 96); x.lineTo(p - 10, 86); x.lineTo(p + 40, 104); x.lineTo(p + 18, 112); x.lineTo(p - 8, 101); x.lineTo(p - 40, 112); x.fill();
+      });
+      // Far shore of spruce and fir
+      x.fillStyle = "#1f3a26";
+      for (let px = 0; px < W; px += 8) { const h = 22 + r() * 30; x.beginPath(); x.moveTo(px - 7, 266); x.lineTo(px, 266 - h); x.lineTo(px + 7, 266); x.fill(); }
+      x.fillRect(0, 262, W, 6);
+      // The pond
+      x.fillStyle = "#3f6f8f"; x.fillRect(0, 266, W, 72);
+      x.fillStyle = "rgba(255,255,255,.28)"; for (let i = 0; i < 50; i++) x.fillRect(r() * W, 272 + r() * 60, 18 + r() * 24, 2);
+      // Near shore
+      x.fillStyle = "#39452a"; x.beginPath(); x.moveTo(0, 420); for (let px = 0; px <= W; px += 40) x.lineTo(px, 340 + Math.sin(px / 150) * 6); x.lineTo(W, 420); x.fill();
+      // Birches
+      for (let i = 0; i < 12; i++) {
+        const px = r() * W; const deg = (px / W) * 360;
+        if ([50, 140, 230, 320].some((d) => Math.abs(deg - d) < 22)) continue;
+        wrap(px, (p) => { x.fillStyle = "#efeee8"; x.fillRect(p - 6, 120, 12, 240); x.fillStyle = "#2b2b2b"; for (let k = 0; k < 9; k++) x.fillRect(p - 6 + (k % 2) * 5, 140 + k * 24, 6, 3); x.fillStyle = "#c7a43a"; x.beginPath(); x.arc(p, 120, 34, 0, Math.PI * 2); x.fill(); });
+      }
+      // Big snowy spruce up close
+      [[128, 1.1], [150, 1.25], [170, .9]].forEach(([deg, k]) => wrap(at(deg), (p) => {
+        x.fillStyle = "#4a3828"; x.fillRect(p - 6, 330, 12, 40);
+        for (let t = 0; t < 5; t++) {
+          const y = 120 * k + t * 45, w = (40 + t * 22) * k;
+          x.fillStyle = "#1c4a2c"; x.beginPath(); x.moveTo(p, y - 30 * k); x.lineTo(p - w, y + 50); x.lineTo(p + w, y + 50); x.fill();
+          x.fillStyle = "#f4f7fa"; x.beginPath(); x.moveTo(p, y - 30 * k); x.lineTo(p - w * .55, y + 18); x.lineTo(p - w * .2, y + 10); x.lineTo(p + w * .3, y + 20); x.lineTo(p + w * .5, y + 14); x.fill();
+        }
+      }));
+      // Moose wading
+      wrap(at(50), (p) => {
+        x.fillStyle = "#3b2a1e";
+        x.beginPath(); x.ellipse(p, 268, 58, 26, 0, 0, Math.PI * 2); x.fill();
+        x.beginPath(); x.moveTo(p + 40, 250); x.lineTo(p + 62, 236); x.lineTo(p + 70, 270); x.lineTo(p + 50, 278); x.fill();
+        x.beginPath(); x.ellipse(p + 78, 276, 22, 13, 0.5, 0, Math.PI * 2); x.fill();
+        x.fillRect(p - 40, 280, 9, 22); x.fillRect(p + 28, 280, 9, 22);
+        x.strokeStyle = "#cdb48a"; x.lineWidth = 6; x.lineCap = "round";
+        x.beginPath(); x.moveTo(p + 62, 236); x.quadraticCurveTo(p + 60, 214, p + 44, 210); x.moveTo(p + 54, 222); x.lineTo(p + 40, 222); x.moveTo(p + 64, 234); x.quadraticCurveTo(p + 80, 214, p + 96, 214); x.moveTo(p + 82, 220); x.lineTo(p + 88, 206); x.stroke();
+        x.fillStyle = "rgba(255,255,255,.35)"; x.fillRect(p - 70, 300, 160, 3);
+      });
+      // Beaver lodge and chewed stump
+      wrap(at(230), (p) => {
+        x.fillStyle = "#5a4430"; x.beginPath(); x.ellipse(p, 300, 80, 34, 0, Math.PI, 0); x.fill();
+        x.strokeStyle = "#7a5e40"; x.lineWidth = 3;
+        for (let k = 0; k < 22; k++) { const a = Math.PI + r() * Math.PI, rr = 30 + r() * 46; x.beginPath(); x.moveTo(p + Math.cos(a) * rr * .5, 300 + Math.sin(a) * 20); x.lineTo(p + Math.cos(a) * rr, 300 + Math.sin(a) * 30); x.stroke(); }
+        x.fillStyle = "#b98d5a"; x.beginPath(); x.moveTo(p + 120, 360); x.lineTo(p + 124, 330); x.lineTo(p + 132, 318); x.lineTo(p + 140, 330); x.lineTo(p + 144, 360); x.fill();
+        x.fillStyle = "#e9d3a8"; for (let k = 0; k < 6; k++) { x.beginPath(); x.arc(p + 110 + r() * 40, 362 + r() * 8, 2.5, 0, Math.PI * 2); x.fill(); }
+      });
+      // Loon
+      wrap(at(320), (p) => {
+        x.fillStyle = "#121418"; x.beginPath(); x.ellipse(p, 290, 40, 11, 0, 0, Math.PI * 2); x.fill();
+        x.beginPath(); x.ellipse(p + 34, 274, 9, 8, 0, 0, Math.PI * 2); x.fill(); x.fillRect(p + 28, 276, 8, 12);
+        x.fillStyle = "#121418"; x.beginPath(); x.moveTo(p + 41, 272); x.lineTo(p + 56, 276); x.lineTo(p + 41, 277); x.fill();
+        x.fillStyle = "#eef0ee"; for (let k = 0; k < 14; k++) x.fillRect(p - 26 + (k % 7) * 7, 284 + Math.floor(k / 7) * 5, 3, 3);
+        x.fillStyle = "#b21e1e"; x.beginPath(); x.arc(p + 36, 272, 1.8, 0, Math.PI * 2); x.fill();
+        x.fillStyle = "rgba(255,255,255,.3)"; x.fillRect(p - 50, 302, 110, 2);
+      });
+    }
 
     if (id === "rainforest") {
       for (let layer = 0; layer < 3; layer++) {
@@ -435,16 +606,18 @@
   }
 
   /* ───────── Compare habitats (sorting) ───────── */
+  const HABS = ["tidepool", "northwoods", "rainforest", "desert", "reef"];
   const TRAITS = [
+    ["Shell seals shut to stay wet at low tide", "tidepool"],
+    ["Air bubbles float seaweed up toward light", "tidepool"],
+    ["Cone shape lets heavy snow slide off", "northwoods"],
+    ["Legs at the back for diving after fish", "northwoods"],
     ["Roots spread wide because the soil is thin", "rainforest"],
     ["Leaves with drip tips shed daily rain", "rainforest"],
-    ["Long bill reaches fruit on thin branches", "rainforest"],
     ["Pleated stem swells to store water", "desert"],
     ["Big ears let body heat escape", "desert"],
-    ["Animals stay in burrows during the hot day", "desert"],
     ["Tiny animals build hard skeletons", "reef"],
-    ["Fish and anemone protect each other", "reef"],
-    ["Must swim up to breathe air", "reef"]
+    ["Fish and anemone protect each other", "reef"]
   ];
   function mountCompare(el, api) {
     const order = SE.shuffle(TRAITS.map((t, i) => i), "compare");
@@ -457,13 +630,13 @@
           <p class="muted">Tap an adaptation, then tap the habitat where it helps a living thing survive.</p>
           <div class="sort-cards" id="sort-cards"></div>
         </div>
-        <div class="sort-bins">
-          ${["rainforest", "desert", "reef"].map((h) => `<button type="button" class="sort-bin" data-bin="${h}"><strong>${esc(SCENES[h].name)}</strong><ul data-list="${h}"></ul></button>`).join("")}
+        <div class="sort-bins sort-bins--5">
+          ${HABS.map((h) => `<button type="button" class="sort-bin" data-bin="${h}"><strong>${esc(SCENES[h].short || SCENES[h].name)}</strong><ul data-list="${h}"></ul></button>`).join("")}
         </div>
       </div>`;
     function render() {
       el.querySelector("#sort-cards").innerHTML = order.filter((i) => !placed[i]).map((i) => `<button type="button" class="sort-card" data-card="${i}" aria-pressed="${selected === i}">${esc(TRAITS[i][0])}</button>`).join("") || `<p class="muted">All sorted!</p>`;
-      ["rainforest", "desert", "reef"].forEach((h) => {
+      HABS.forEach((h) => {
         el.querySelector(`[data-list="${h}"]`).innerHTML = Object.keys(placed).filter((i) => placed[i] === h).map((i) => `<li>${icon("check")}${esc(TRAITS[i][0])}</li>`).join("");
       });
     }
@@ -490,6 +663,8 @@
 
   /* ───────── Observation or inference? ───────── */
   const STATEMENTS = [
+    ["The moose is standing in the pond.", "obs", "You can see this directly."],
+    ["The moose went in the pond to stay cool.", "inf", "That's a good explanation, but you can't see why the moose went in. You'd need more evidence."],
     ["The leaves have long pointed tips.", "obs", "You can see this directly."],
     ["The pointed tips help rain run off.", "inf", "This explains why, based on what you saw. You can't see it directly."],
     ["The fox has very large ears.", "obs", "You can see and measure this."],
@@ -529,17 +704,25 @@
       why.textContent = `${right ? "Correct." : "Not quite."} ${STATEMENTS[i][2]}`;
       answered[i] = right;
       const correct = Object.values(answered).filter(Boolean).length;
-      if (correct === STATEMENTS.length) { api.say("All 8 sorted correctly. You can tell what you see from what you think!", "good"); api.win({ correct }); }
+      if (correct === STATEMENTS.length) { api.say(`All ${STATEMENTS.length} sorted correctly. You can tell what you see from what you think!`, "good"); api.win({ correct }); }
       else api.say(`${correct} of ${STATEMENTS.length} correct so far.`, "info");
     });
   }
 
   const LEVELS = [
-    { title: "Rainforest", concept: "Observe and infer", scene: "rainforest",
-      goal: "Find all 4 clues in the rainforest and complete the compass check.",
+    { title: "Maine tide pools", concept: "Observe and infer", scene: "tidepool",
+      goal: "Find all 4 clues in a Gulf of Maine tide pool at low tide and complete the compass check.",
       steps: ["Drag the view, use the arrow keys, or tap the Look buttons to turn around.", "Tap a search marker to examine a clue.", "Choose the inference that best fits what you see."],
+      hint: "Use “Scan for a clue” if you're stuck. For the compass check, watch the strip under the view: east is 90°.",
+      learned: "Scientists separate observations (what they see) from inferences (what they think it means). Tide pool life has adaptations for a home that is underwater half the day and dry the other half." },
+    { title: "North Woods", concept: "Adaptations", scene: "northwoods",
+      goal: "Find all 4 clues at a North Woods pond below Katahdin and complete the compass check.",
+      hint: "Think about Maine's long, snowy winters and how much life depends on water. North is 0° (or 360°).",
+      learned: "North Woods living things are shaped by cold winters and lots of water: trees that shed snow, divers built for lakes, and beavers that build whole new ponds." },
+    { title: "Rainforest", concept: "Observe and infer", scene: "rainforest",
+      goal: "Leave Maine for the Amazon. Find all 4 clues in the rainforest and complete the compass check.",
       hint: "Use “Scan for a clue” if you're stuck. For the compass check, watch the strip under the view: south is 180°.",
-      learned: "Scientists separate observations (what they see) from inferences (what they think it means). Living things have adaptations that fit where they live." },
+      learned: "A rainforest gets rain almost every day and very little light reaches the ground. Its living things are shaped by those two facts." },
     { title: "Desert", concept: "Adaptations", scene: "desert",
       goal: "Find all 4 clues in the Sonoran Desert and complete the compass check.",
       hint: "Many desert adaptations are about saving water or staying cool. West is 270°, where the sun sets.",
@@ -549,11 +732,11 @@
       hint: "North is 0° (or 360°). Some reef clues are about living things helping each other.",
       learned: "A reef is built by tiny animals. Its living things depend on each other, and changes like warmer water can harm the whole ecosystem." },
     { title: "Compare habitats", concept: "Compare with evidence",
-      goal: "Sort 9 adaptations into the habitat where each one helps living things survive.",
-      hint: "For each trait, ask: what problem does it solve? Too much rain, too little water, or life underwater?",
+      goal: "Sort 10 adaptations into the habitat where each one helps living things survive, from Maine to the tropics.",
+      hint: "For each trait, ask: what problem does it solve? Drying out at low tide, deep snow, too much rain, too little water, or life on a warm reef?",
       learned: "Comparing habitats shows a big idea: living things in different places solve different problems, so they have different adaptations." },
     { title: "Observation or inference?", concept: "Thinking like a scientist",
-      goal: "Sort all 8 statements correctly.",
+      goal: "Sort all 10 statements correctly.",
       hint: "Ask: could I point to it, or measure it, right now? If yes, it's an observation. If it explains why, it's an inference.",
       learned: "Good field scientists record observations first and label their inferences as ideas to test. That keeps evidence and guesses separate." }
   ];
@@ -562,12 +745,12 @@
     id: "field-station",
     area: "vr",
     title: "Field Station 360",
-    tagline: "Look all around three habitats, find clues, and think like a field scientist. Works with a mouse, touch screen, or a VR headset's browser.",
+    tagline: "Start in Maine's tide pools and North Woods, then travel the world. Look all around five habitats, find clues, and think like a field scientist. Works with a mouse, touch screen, or a VR headset's browser.",
     levels: LEVELS,
     mount(el, idx, api) {
       const L = LEVELS[idx];
       if (L.scene) return mountScene(el, L.scene, api);
-      if (idx === 3) return mountCompare(el, api);
+      if (idx === 5) return mountCompare(el, api);
       return mountObsInf(el, api);
     }
   });

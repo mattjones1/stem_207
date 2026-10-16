@@ -1,6 +1,6 @@
 /*
- * Ramp Racers — Science & Discovery
- * A virtual investigation: roll a car down a ramp and measure how far it goes.
+ * Sled Hill Science — Science & Discovery (lab id "ramp-racers")
+ * A virtual investigation on a model sledding hill: slide a toy sled down and measure how far it glides.
  * Students predict, repeat trials, see natural variation, control variables,
  * graph their data, and write a claim supported by evidence and reasoning.
  * Results include small random variation, like a real experiment.
@@ -10,24 +10,24 @@
   const SE = window.SE;
   const { icon, esc } = SE;
 
-  const SURFACES = { carpet: { name: "Carpet", mu: 0.36, color: "#8a6f9c" }, wood: { name: "Wood", mu: 0.2, color: "#b98a56" }, tile: { name: "Tile", mu: 0.13, color: "#c9d3db" } };
-  const MASSES = { light: { name: "Car only" }, heavy: { name: "Car + 4 washers" } };
+  const SURFACES = { carpet: { name: "Fresh powder", mu: 0.36, color: "#ffffff" }, wood: { name: "Packed snow", mu: 0.2, color: "#dbe4ec" }, tile: { name: "Ice", mu: 0.13, color: "#b6dcec" } };
+  const MASSES = { light: { name: "Sled only" }, heavy: { name: "Sled + 4 washers" } };
   let noiseSeed = 0;
 
   function runTrial(c) {
     const r = SE.rng(`trial-${Date.now()}-${noiseSeed++}`);
     // Two random numbers give a gentle bell-shaped wobble of about ±6%
     const wobble = 1 + ((r() + r()) - 1) * 0.12;
-    const massEffect = c.mass === "heavy" ? 1.02 : 1; // real cars: mass barely matters
+    const massEffect = c.mass === "heavy" ? 1.02 : 1; // real sleds: mass barely matters
     return Math.round(((c.height * 0.85) / SURFACES[c.surface].mu) * wobble * massEffect);
   }
 
   const LEVELS = [
     { title: "Predict and test", concept: "Prediction",
-      question: "Does a higher ramp make the car roll farther?",
-      goal: "Make a prediction, test at least 3 different ramp heights, then answer the question using your data.",
-      hint: "Keep the floor and the car the same. Only change the height. Try a low, a middle, and a high ramp.",
-      learned: "A prediction is a testable idea. Your data showed the higher the ramp, the farther the car rolled, because it was moving faster at the bottom.",
+      question: "Does a higher sledding hill make the sled slide farther?",
+      goal: "Make a prediction, test at least 3 different hill heights, then answer the question using your data.",
+      hint: "Keep the snow and the sled the same. Only change the height. Try a low, a middle, and a high hill.",
+      learned: "A prediction is a testable idea. Your data showed the higher the hill, the farther the sled slid, because it was moving faster at the bottom.",
       vary: "height" },
     { title: "Same setup, different results", concept: "Variation",
       question: "If you run the exact same test again, do you get the exact same distance?",
@@ -35,20 +35,20 @@
       hint: "Don't change anything. Just press Run trial several times and compare the distances.",
       learned: "Real measurements vary a little each time. Scientists repeat trials and use the average, which is more trustworthy than any single result.",
       vary: "none", lock: ["height", "surface", "mass"] },
-    { title: "Fair test: floor surface", concept: "Controlling variables",
-      question: "Which floor surface lets the car roll the farthest?",
-      goal: "Test all 3 surfaces at least 2 times each, keeping height and car the same, then answer the question.",
-      hint: "Pick one height and one car, and don't touch them. Change only the floor. The table marks any unfair trial.",
-      learned: "In a fair test you change one variable (surface) and keep the rest the same (height, car). Then any difference must come from the variable you changed.",
+    { title: "Fair test: kind of snow", concept: "Controlling variables",
+      question: "Which kind of snow lets the sled slide the farthest?",
+      goal: "Test all 3 kinds of snow at least 2 times each, keeping height and sled the same, then answer the question.",
+      hint: "Pick one height and one sled, and don't touch them. Change only the snow. The table marks any unfair trial.",
+      learned: "In a fair test you change one variable (the snow) and keep the rest the same (height, sled). Then any difference must come from the variable you changed.",
       vary: "surface" },
     { title: "Does weight matter?", concept: "Testing a hunch",
-      question: "Does adding washers to make the car heavier change how far it rolls?",
-      goal: "Predict, then test both cars at least 3 times each with everything else the same. Answer using your averages.",
+      question: "Does adding washers to make the sled heavier change how far it slides?",
+      goal: "Predict, then test both sleds at least 3 times each with everything else the same. Answer using your averages.",
       hint: "Compare the averages, not single trials. Is the difference bigger than the normal wobble you saw in level 2?",
-      learned: "Many people predict heavier cars go farther, but the evidence says the difference is tiny. Good scientists let the data change their minds.",
+      learned: "Many people predict heavier sleds go farther, but the evidence says the difference is tiny. Good scientists let the data change their minds.",
       vary: "mass" },
     { title: "Claim, evidence, reasoning", concept: "Explaining with evidence",
-      question: "How does ramp height affect how far the car rolls?",
+      question: "How does hill height affect how far the sled slides?",
       goal: "Collect data, then write a scientific explanation: pick a claim, choose evidence from your table, and choose your reasoning.",
       hint: "Your evidence should be trials where only the height changed. Pick at least 2 rows with different heights.",
       learned: "A claim, backed by evidence and connected by reasoning, is how scientists explain what they found and convince others.",
@@ -67,16 +67,16 @@
         ${idx === 0 || idx === 3 ? `<div class="pred-q"><span class="muted">Your prediction:</span><div class="seg" role="group" aria-label="Prediction">${(idx === 0 ? ["Farther", "Shorter", "No difference"] : ["Heavier goes farther", "Heavier goes shorter", "About the same"]).map((p) => `<button type="button" data-pred="${esc(p)}">${esc(p)}</button>`).join("")}</div></div>` : ""}
       </div>
       <div class="lab-panel">
-        <canvas class="ramp__canvas" width="900" height="300" role="img" aria-label="Side view: a car rolls down a ramp onto the floor and a tape measure shows the distance"></canvas>
+        <canvas class="ramp__canvas" width="900" height="300" role="img" aria-label="Side view: a toy sled slides down a model snow hill and a tape measure shows the distance"></canvas>
         <div class="ramp__controls">
-          <div class="range"><label for="rp-h">Ramp height <b id="rp-h-v"></b></label><input type="range" id="rp-h" min="10" max="50" step="5" ${lock.has("height") ? "disabled" : ""}></div>
-          <div class="range"><span class="range__label">Floor</span><div class="seg" role="group" aria-label="Floor surface">${Object.entries(SURFACES).map(([k, v]) => `<button type="button" data-surf="${k}" ${lock.has("surface") ? "disabled" : ""}>${v.name}</button>`).join("")}</div></div>
-          <div class="range"><span class="range__label">Car</span><div class="seg" role="group" aria-label="Car">${Object.entries(MASSES).map(([k, v]) => `<button type="button" data-mass="${k}" ${lock.has("mass") ? "disabled" : ""}>${v.name}</button>`).join("")}</div></div>
+          <div class="range"><label for="rp-h">Hill height <b id="rp-h-v"></b></label><input type="range" id="rp-h" min="10" max="50" step="5" ${lock.has("height") ? "disabled" : ""}></div>
+          <div class="range"><span class="range__label">Snow</span><div class="seg" role="group" aria-label="Kind of snow">${Object.entries(SURFACES).map(([k, v]) => `<button type="button" data-surf="${k}" ${lock.has("surface") ? "disabled" : ""}>${v.name}</button>`).join("")}</div></div>
+          <div class="range"><span class="range__label">Sled</span><div class="seg" role="group" aria-label="Sled">${Object.entries(MASSES).map(([k, v]) => `<button type="button" data-mass="${k}" ${lock.has("mass") ? "disabled" : ""}>${v.name}</button>`).join("")}</div></div>
           <button type="button" class="btn btn--launch btn--big" id="rp-run">${icon("rocket")}Run trial</button>
         </div>
       </div>
       <div class="ramp__data">
-        <div class="lab-panel"><h3>${icon("clipboard", 'class="inline-icon"')}Data table</h3><div class="table-scroll"><table class="data-table"><thead><tr>${L.cer ? "<th>Use</th>" : ""}<th>Trial</th><th>Height</th><th>Floor</th><th>Car</th><th>Distance</th></tr></thead><tbody id="rp-rows"><tr><td colspan="6" class="muted">No trials yet.</td></tr></tbody></table></div></div>
+        <div class="lab-panel"><h3>${icon("clipboard", 'class="inline-icon"')}Data table</h3><div class="table-scroll"><table class="data-table"><thead><tr>${L.cer ? "<th>Use</th>" : ""}<th>Trial</th><th>Height</th><th>Snow</th><th>Sled</th><th>Distance</th></tr></thead><tbody id="rp-rows"><tr><td colspan="6" class="muted">No trials yet.</td></tr></tbody></table></div></div>
         <div class="lab-panel"><h3>${icon("chart", 'class="inline-icon"')}Graph</h3><div id="rp-chart"></div></div>
       </div>
       <div class="lab-panel" id="rp-answer" hidden></div>`;
@@ -87,8 +87,12 @@
     function draw(rollT = null, dist = 0) {
       const W = canvas.width, H = canvas.height, floorY = 230;
       ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = "#eef3f6"; ctx.fillRect(0, 0, W, H);
+      const sk = ctx.createLinearGradient(0, 0, 0, floorY); sk.addColorStop(0, "#c7dcec"); sk.addColorStop(1, "#eef3f6");
+      ctx.fillStyle = sk; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "#2f4a2c";
+      for (let px = 170; px < W; px += 22) { const h = 30 + ((px * 31) % 26); ctx.beginPath(); ctx.moveTo(px - 11, floorY); ctx.lineTo(px, floorY - h); ctx.lineTo(px + 11, floorY); ctx.fill(); ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.moveTo(px, floorY - h); ctx.lineTo(px - 5, floorY - h + 12); ctx.lineTo(px + 5, floorY - h + 12); ctx.fill(); ctx.fillStyle = "#2f4a2c"; }
       ctx.fillStyle = SURFACES[c.surface].color; ctx.fillRect(0, floorY, W, 24);
+      ctx.strokeStyle = "#9fb2c2"; ctx.lineWidth = 1; ctx.strokeRect(0.5, floorY + .5, W - 1, 23);
       ctx.fillStyle = "#0d1d36"; ctx.fillRect(0, floorY + 24, W, 3);
       // tape measure
       const x0 = 150;
@@ -101,8 +105,8 @@
       ctx.textAlign = "left"; ctx.fillText("cm", W - 40, floorY + 66);
       // ramp
       const rh = c.height * 3.2;
-      ctx.fillStyle = "#6b5a4a";
-      ctx.beginPath(); ctx.moveTo(20, floorY - rh); ctx.lineTo(x0, floorY); ctx.lineTo(20, floorY); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = "#f7f9fb"; ctx.strokeStyle = "#9fb2c2"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(0, floorY - rh); ctx.lineTo(20, floorY - rh); ctx.quadraticCurveTo(x0 * .55, floorY - rh * .45, x0, floorY); ctx.lineTo(0, floorY); ctx.closePath(); ctx.fill(); ctx.stroke();
       ctx.fillStyle = "#0d1d36"; ctx.textAlign = "left"; ctx.fillText(`${c.height} cm`, 24, floorY - rh - 8);
       // car position
       let cx, cy, ang = 0;
@@ -110,9 +114,10 @@
       else if (rollT < 0.3) { const k = rollT / 0.3; cx = 30 + (x0 - 30) * k; cy = floorY - rh + 8 + (rh - 8) * k; ang = Math.atan2(rh, x0 - 20); }
       else { const k = (rollT - 0.3) / 0.7; const e = 1 - Math.pow(1 - k, 2); cx = x0 + dist * PX * e; cy = floorY; }
       ctx.save(); ctx.translate(cx, cy); ctx.rotate(ang);
-      ctx.fillStyle = "#ec7a2f"; ctx.fillRect(-2, -18, 36, 12);
-      if (c.mass === "heavy") { ctx.fillStyle = "#8a96a3"; for (let k = 0; k < 4; k++) { ctx.beginPath(); ctx.arc(6 + k * 7, -21, 3.5, 0, Math.PI * 2); ctx.fill(); } }
-      ctx.fillStyle = "#0d1d36"; ctx.beginPath(); ctx.arc(6, -5, 5, 0, Math.PI * 2); ctx.arc(28, -5, 5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#c9302c"; ctx.fillRect(0, -14, 34, 8);
+      ctx.strokeStyle = "#0d1d36"; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(-2, -2); ctx.lineTo(32, -2); ctx.quadraticCurveTo(40, -2, 38, -10); ctx.stroke();
+      ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(6, -6); ctx.lineTo(6, -2); ctx.moveTo(26, -6); ctx.lineTo(26, -2); ctx.stroke();
+      if (c.mass === "heavy") { ctx.fillStyle = "#8a96a3"; for (let k = 0; k < 4; k++) { ctx.beginPath(); ctx.arc(6 + k * 7, -17, 3.5, 0, Math.PI * 2); ctx.fill(); } }
       ctx.restore();
       if (rollT !== null && rollT >= 1) {
         ctx.fillStyle = "#0b7471"; ctx.fillRect(x0 + dist * PX + 16, floorY - 40, 3, 40);
@@ -178,7 +183,7 @@
         const px = (v) => pl + ((v - 10) / 40) * (w - pl - pr);
         marks = data.map((t, i) => `<circle cx="${(px(t.height) + (data.filter((d, j) => j < i && d.height === t.height).length % 5 - 2) * 4).toFixed(1)}" cy="${py(t.dist).toFixed(1)}" r="5" class="dot"/>`).join("");
         if (L.vary === "none" && data.length > 1) { const a = avg(data.map((t) => t.dist)); marks += `<line x1="${pl}" x2="${w - pr}" y1="${py(a)}" y2="${py(a)}" class="avg-line"/><text x="${w - pr}" y="${py(a) - 6}" text-anchor="end" class="avg-label">average ${a} cm</text>`; }
-        xAxis = [10, 20, 30, 40, 50].map((v) => `<text x="${px(v)}" y="${h - pb + 18}" text-anchor="middle" class="axis-label">${v}</text>`).join("") + `<text x="${(w + pl) / 2}" y="${h - 2}" text-anchor="middle" class="axis-label">ramp height (cm)</text>`;
+        xAxis = [10, 20, 30, 40, 50].map((v) => `<text x="${px(v)}" y="${h - pb + 18}" text-anchor="middle" class="axis-label">${v}</text>`).join("") + `<text x="${(w + pl) / 2}" y="${h - 2}" text-anchor="middle" class="axis-label">hill height (cm)</text>`;
       } else {
         const groups = L.vary === "surface" ? Object.keys(SURFACES) : Object.keys(MASSES);
         const names = L.vary === "surface" ? SURFACES : MASSES;
@@ -226,10 +231,10 @@
         const heights = new Set(fair.map((x) => x.height));
         if (heights.size >= 3) {
           answered = true;
-          ask("What does your data show?", ["Higher ramps make the car roll farther", "Higher ramps make the car roll shorter", "Height makes no difference"], 0,
+          ask("What does your data show?", ["Higher hills make the sled slide farther", "Higher hills make the sled slide shorter", "Height makes no difference"], 0,
             () => api.win({ trials: trials.length, prediction }),
-            `Right. ${prediction === "Farther" ? "Your prediction was supported." : "Your prediction wasn't supported, and that's fine: the evidence decides."} A higher start means the car is going faster at the bottom.`,
-            "Look at your graph again. As the dots move right (higher ramp), do they go up or down?");
+            `Right. ${prediction === "Farther" ? "Your prediction was supported." : "Your prediction wasn't supported, and that's fine: the evidence decides."} A higher start means the sled is going faster at the bottom.`,
+            "Look at your graph again. As the dots move right (higher hill), do they go up or down?");
         }
       }
       if (idx === 1 && fair.length >= 4) {
@@ -238,16 +243,16 @@
         answered = true;
         ask(`Your distances ranged from ${mn} to ${mx} cm. What's the best result to report?`, [`The first trial: ${vals[0]} cm`, `The longest one: ${mx} cm`, `The average: ${a} cm`], 2,
           () => api.win({ trials: trials.length, range: mx - mn }),
-          "Yes. Tiny differences (how the car was let go, a speck of dust) change each trial. Averaging several trials cancels out the random wobble.",
+          "Yes. Tiny differences (how the sled was let go, a bump in the snow) change each trial. Averaging several trials cancels out the random wobble.",
           "Picking one trial, especially the best one, can be misleading. Which number uses all of your data?");
       }
       if (idx === 2) {
         const counts = Object.keys(SURFACES).map((s) => fair.filter((x) => x.surface === s).length);
         if (counts.every((n) => n >= 2)) {
           answered = true;
-          ask("Which surface let the car roll farthest?", ["Carpet", "Wood", "Tile"], 2,
+          ask("Which kind of snow let the sled slide farthest?", ["Fresh powder", "Packed snow", "Ice"], 2,
             () => api.win({ trials: trials.length }),
-            "Right. Tile is the smoothest, so there's the least friction slowing the car down. Carpet has the most friction.",
+            "Right. Ice is the smoothest, so there's the least friction slowing the sled down. Fluffy fresh powder has the most friction, which is why sled runs get faster after a few rides pack the snow down.",
             "Look at the bar graph. Which bar is tallest?");
         }
       }
@@ -256,7 +261,7 @@
         if (counts.every((n) => n >= 3)) {
           answered = true;
           const al = avg(fair.filter((x) => x.mass === "light").map((x) => x.dist)), ah = avg(fair.filter((x) => x.mass === "heavy").map((x) => x.dist));
-          ask(`Averages: car only ${al} cm, with washers ${ah} cm. What can you conclude?`, ["The heavier car goes much farther", "The heavier car goes much shorter", "Weight made little or no difference"], 2,
+          ask(`Averages: sled only ${al} cm, with washers ${ah} cm. What can you conclude?`, ["The heavier sled goes much farther", "The heavier sled goes much shorter", "Weight made little or no difference"], 2,
             () => api.win({ trials: trials.length, prediction }),
             `Yes. A difference of ${Math.abs(al - ah)} cm is about the same size as the normal trial-to-trial wobble. ${prediction === "About the same" ? "Your prediction was supported!" : "Changing your mind because of evidence is exactly what scientists do."}`,
             "Compare the size of the difference to the wobble between repeated trials. Is it bigger?");
@@ -272,10 +277,10 @@
         <div id="cer" class="cer">
           <h3>Write your scientific explanation</h3>
           <fieldset class="cer__part"><legend><b>Claim</b> · your answer to the question</legend>
-            ${["Higher ramps make the car roll farther.", "Lower ramps make the car roll farther.", "Ramp height doesn't affect distance."].map((t, i) => `<label class="check-row"><input type="radio" name="cer-claim" value="${i}"> ${esc(t)}</label>`).join("")}</fieldset>
+            ${["Higher hills make the sled slide farther.", "Lower hills make the sled slide farther.", "Hill height doesn't affect distance."].map((t, i) => `<label class="check-row"><input type="radio" name="cer-claim" value="${i}"> ${esc(t)}</label>`).join("")}</fieldset>
           <div class="cer__part"><b>Evidence</b> · check at least 2 rows in your data table where only the height changed.</div>
           <fieldset class="cer__part"><legend><b>Reasoning</b> · why the evidence supports the claim</legend>
-            ${["A car that starts higher is going faster at the bottom of the ramp, so it rolls farther before friction stops it.", "Higher ramps are made of better wood.", "The car wanted to go farther."].map((t, i) => `<label class="check-row"><input type="radio" name="cer-reason" value="${i}"> ${esc(t)}</label>`).join("")}</fieldset>
+            ${["A sled that starts higher is going faster at the bottom of the hill, so it slides farther before friction stops it.", "Higher hills have better snow.", "The sled wanted to go farther."].map((t, i) => `<label class="check-row"><input type="radio" name="cer-reason" value="${i}"> ${esc(t)}</label>`).join("")}</fieldset>
           <button type="button" class="btn btn--primary" id="cer-check">${icon("check")}Check my explanation</button>
         </div>`;
       box.querySelector("#cer-check").addEventListener("click", () => {
@@ -287,10 +292,10 @@
         if (ev.some((t) => !t.fair)) return api.say("One of your evidence rows isn't a fair comparison. Use rows where only the height changed.", "warn");
         if (new Set(ev.map((t) => t.height)).size < 2) return api.say("Your evidence rows all have the same height. Pick rows with different heights so they show the effect.", "warn");
         const sorted = ev.slice().sort((a, b) => a.height - b.height);
-        if (sorted[sorted.length - 1].dist <= sorted[0].dist) return api.say("In the rows you picked, the higher ramp didn't go farther. Pick rows that clearly show the pattern, or run more trials.", "warn");
-        if (!reason || reason.value !== "0") return api.say("Your reasoning should explain WHY using science: what's different about a car that starts higher?", "warn");
+        if (sorted[sorted.length - 1].dist <= sorted[0].dist) return api.say("In the rows you picked, the higher hill didn't go farther. Pick rows that clearly show the pattern, or run more trials.", "warn");
+        if (!reason || reason.value !== "0") return api.say("Your reasoning should explain WHY using science: what's different about a sled that starts higher?", "warn");
         const lo = sorted[0], hi = sorted[sorted.length - 1];
-        api.say(`Strong explanation: at ${lo.height} cm the car rolled ${lo.dist} cm, and at ${hi.height} cm it rolled ${hi.dist} cm.`, "good");
+        api.say(`Strong explanation: at ${lo.height} cm the sled slid ${lo.dist} cm, and at ${hi.height} cm it slid ${hi.dist} cm.`, "good");
         api.win({ evidence: ev.length });
       });
     }
@@ -305,8 +310,8 @@
   SE.labs.register({
     id: "ramp-racers",
     area: "science",
-    title: "Ramp Racers",
-    tagline: "Run a real investigation: predict, test, repeat, keep it fair, graph your data, and explain what you found.",
+    title: "Sled Hill Science",
+    tagline: "It's a snow day in Maine. Run a real investigation on a model sledding hill: predict, test, repeat, keep it fair, graph your data, and explain what you found.",
     levels: LEVELS,
     mount
   });

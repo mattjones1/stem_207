@@ -1,5 +1,5 @@
 /*
- * STEM Explorer Academy — router, header, and app start-up.
+ * STEM 207 — router, header, and app start-up.
  */
 (function () {
   "use strict";
@@ -73,17 +73,17 @@
     const [a, b, c] = parts;
     const isAuthRoute = a === "signin" || a === "signup";
     let navKey = "";
-    let title = "STEM Explorer Academy";
+    let title = "STEM 207";
 
     document.querySelectorAll(".overlay").forEach((o) => o.remove());
     document.body.classList.remove("has-overlay");
 
     if (!user && !isAuthRoute) { location.replace("#/signin"); return; }
 
-    if (a === "signin" && !b) { SE.views.signin(); title = "Sign in · STEM Explorer Academy"; }
-    else if (a === "signin" && b === "student") { SE.views.signinStudent(); title = "Student sign in · STEM Explorer Academy"; }
-    else if (a === "signin" && b === "educator") { SE.views.signinEducator(); title = "Educator sign in · STEM Explorer Academy"; }
-    else if (a === "signup") { SE.views.signup(); title = "Create account · STEM Explorer Academy"; }
+    if (a === "signin" && !b) { SE.views.signin(); title = "Sign in · STEM 207"; }
+    else if (a === "signin" && b === "student") { SE.views.signinStudent(); title = "Student sign in · STEM 207"; }
+    else if (a === "signin" && b === "educator") { SE.views.signinEducator(); title = "Educator sign in · STEM 207"; }
+    else if (a === "signup") { SE.views.signup(); title = "Create account · STEM 207"; }
     else if (a === "teach") {
       if (user.role !== "educator") { location.replace("#/signin/educator"); return; }
       navKey = "teach";
@@ -93,7 +93,7 @@
       else if (b === "reflections") SE.views.teachReflections(user);
       else if (b === "class") SE.views.teachClass(user);
       else SE.views.notFound();
-      title = "Educator dashboard · STEM Explorer Academy";
+      title = "Educator dashboard · STEM 207";
     }
     else if (!a || a === "library") {
       if (!a && user.role === "educator") { location.replace("#/teach"); return; }
@@ -102,16 +102,16 @@
     }
     else if (a === "me") {
       if (user.role !== "student") { location.replace("#/"); return; }
-      SE.views.me(user); navKey = "me"; title = "My profile · STEM Explorer Academy";
+      SE.views.me(user); navKey = "me"; title = "My profile · STEM 207";
     }
-    else if (a === "area") { SE.views.area(user, b); title = `${SE.areaById[b] ? SE.areaById[b].name : "Not found"} · STEM Explorer Academy`; }
-    else if (a === "activity") { SE.views.activity(user, b); title = `${SE.activityById[b] ? SE.activityById[b].title : "Not found"} · STEM Explorer Academy`; }
+    else if (a === "area") { SE.views.area(user, b); title = `${SE.areaById[b] ? SE.areaById[b].name : "Not found"} · STEM 207`; }
+    else if (a === "activity") { SE.views.activity(user, b); title = `${SE.activityById[b] ? SE.activityById[b].title : "Not found"} · STEM 207`; }
     else if (a === "lab") {
       SE.views.lab(user, b, c);
       const lab = SE.labs.byId(b);
-      title = `${lab ? lab.title : "Lab"} · STEM Explorer Academy`;
+      title = `${lab ? lab.title : "Lab"} · STEM 207`;
     }
-    else if (a === "pathway") { SE.views.pathway(user); navKey = "pathway"; title = "Coding pathway · STEM Explorer Academy"; }
+    else if (a === "pathway") { SE.views.pathway(user); navKey = "pathway"; title = "Coding pathway · STEM 207"; }
     else SE.views.notFound();
 
     document.title = title;
@@ -150,6 +150,7 @@
 
   /* ───────── Start ───────── */
   let booted = false;
+  SE.paintBrand();
   try { if (localStorage.getItem("stem-explorers-projector") === "1") document.documentElement.classList.add("projector"); } catch (e) { /* ignore */ }
   window.addEventListener("hashchange", () => route(false));
   window.addEventListener("resize", setScrollPad);

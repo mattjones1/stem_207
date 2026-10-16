@@ -1,5 +1,5 @@
 /*
- * STEM Explorer Academy — student views: expedition home, mission debrief,
+ * STEM 207 — student views: expedition home, mission debrief,
  * mission-complete celebration, and the explorer profile.
  */
 (function () {
@@ -49,7 +49,7 @@
     const firstName = user.displayName.split(" ")[0];
 
     return `
-      <section class="xhero" aria-labelledby="xhero-title">
+      <section class="xhero ridge" aria-labelledby="xhero-title">
         <div class="wrap xhero__inner">
           <div class="xhero__id">
             ${SE.insignia(prof.rank, 64)}
@@ -100,8 +100,8 @@
 
       <section class="section wrap" aria-labelledby="map-title">
         <div class="section__head">
-          <div><span class="eyebrow">Expedition map</span><h2 id="map-title">Light up every star</h2></div>
-          <p>Each star is a mission. Finish one and it lights up and joins its constellation. Glowing rings are suggested for you.</p>
+          <div><span class="eyebrow">Expedition map</span><h2 id="map-title">Light up the Maine night sky</h2></div>
+          <p>Far from city lights, Maine's North Woods have some of the darkest skies in the East. Each star is a mission. Finish one and it lights up and joins its constellation. Glowing rings are suggested for you.</p>
         </div>
         <div class="map-frame">${SE.starMap(prof, recs.map((r) => r.activity.id))}</div>
       </section>

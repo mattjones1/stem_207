@@ -1,5 +1,5 @@
 /*
- * STEM Explorer Academy — activity library.
+ * STEM 207 — activity library.
  *
  * Every activity follows the same shape. To add one, copy an existing entry,
  * give it a unique `id`, and fill in each field. See README.md for the full
@@ -28,7 +28,6 @@ window.STEM.activities = [
     format: "collaborative",
     equipment: ["computer"],
     source: "original",
-    featured: true,
     pathwayStage: 1,
     keywords: ["algorithm", "sequence", "maze", "blockly", "unplugged", "directions"],
     access: { account: "none", cost: "free", supervision: false, hardware: [] },
@@ -1339,12 +1338,413 @@ window.STEM.activities = [
     ]
   },
 
-  /* ───────────────────────────── Interactive labs (run inside STEM Explorer Academy) ───────────────────────────── */
+  /* ───────────────────────────── Made in Maine ─────────────────────────────
+     Activities rooted in Maine places, work, and wildlife. All are original lessons
+     with full directions on the page. */
+  {
+    id: "lobster-trap-logic",
+    title: "Lobster Trap Logic",
+    area: "coding",
+    summary: "Write the if–else rules a Maine lobsterman uses to decide which lobsters to keep and which go back.",
+    level: "beginner",
+    grades: ["2-3", "4-5", "6-8"],
+    duration: 30,
+    format: "collaborative",
+    equipment: ["unplugged"],
+    source: "original",
+    featured: true,
+    pathwayStage: 4,
+    keywords: ["maine", "lobster", "conditionals", "if else", "flowchart", "algorithm", "unplugged", "conservation", "gulf of maine"],
+    access: { account: "none", cost: "free", supervision: false, hardware: [] },
+    launch: { status: "none" },
+    mission:
+      "You're the sternman on a lobster boat off Stonington. Every trap you haul has lobsters in it, but Maine law says some must go back in the water. Write a set of if–else rules so anyone on the crew can sort every lobster the same way, every time.",
+    learn: [
+      "Write conditionals (if, else) that make a decision from data.",
+      "Put several conditions in the right order in a flowchart.",
+      "Explain how rules like these protect the lobster population for the future."
+    ],
+    before: {
+      materials: [
+        "Lobster cards: index cards with a lobster drawing, its carapace (body shell) length in inches, and two yes/no boxes: “eggs under tail” and “V-notch in tail”",
+        "A ruler for each team",
+        "Chart paper and markers for flowcharts",
+        "Two bins or boxes labeled KEEP and BACK IN THE WATER"
+      ],
+      setup: [
+        "Make 20 lobster cards. Include lengths from 2½ to 5½ inches, a few with eggs, and a few with a V-notch.",
+        "Write the classroom version of the rules on the board: a lobster can be kept only if its carapace is at least 3¼ inches and no more than 5 inches, it has no eggs, and it has no V-notch."
+      ],
+      prerequisites: "None. Students who have tried Robot Maze Mission will recognize the step-by-step thinking."
+    },
+    steps: [
+      "Read the rules together. Why might Maine protect small lobsters, very big lobsters, and females with eggs?",
+      "In teams, draw a flowchart. Each diamond asks one yes/no question. Each arrow leads to another question or to KEEP or BACK.",
+      "Run your flowchart: one teammate reads a card, another follows the arrows out loud, a third drops the card in a bin.",
+      "Trade flowcharts with another team and run their cards through it. Did both flowcharts sort every lobster the same way?",
+      "Debug: the teacher shows a flowchart that only checks “Is it at least 3¼ inches?” Find the lobster cards it gets wrong.",
+      "Rewrite your rules as code-like text: IF eggs THEN back. ELSE IF V-notch THEN back. ELSE IF …"
+    ],
+    reflect: "Does it matter which question your flowchart asks first? Try putting the questions in a different order. Does it still sort correctly?",
+    extend: "A lobsterman V-notches a female with eggs before putting her back, so she stays protected even after the eggs hatch. Add that step to your flowchart as an action.",
+    teacherNotes: [
+      "These are the main Maine lobster rules: a 3¼-inch minimum and 5-inch maximum carapace, and egg-bearing and V-notched females go back. Real rules include more detail and can change, so check the Maine Department of Marine Resources for the current version if students want to go deeper.",
+      "The V-notch is a small notch fishermen cut in the tail of an egg-bearing female. It marks her as a proven breeder that must be released by anyone who catches her later.",
+      "Order mostly doesn't matter here because every condition leads to BACK. That's a great discussion: when does order matter in a program, and when doesn't it?",
+      "Connect to Harbor Code Lab level 8 (“Maybe a trap”), which uses an if block inside a loop."
+    ]
+  },
+  {
+    id: "tide-watchers",
+    title: "Tide Watchers: Portland vs. Eastport",
+    area: "science",
+    summary: "Graph a day of tides at two Maine harbors and discover why one rises more than twice as high as the other.",
+    level: "intermediate",
+    grades: ["4-5", "6-8"],
+    duration: 45,
+    format: "collaborative",
+    equipment: ["unplugged", "projector"],
+    source: "original",
+    keywords: ["maine", "tides", "ocean", "data", "graph", "pattern", "moon", "gulf of maine", "bay of fundy", "eastport", "portland"],
+    access: { account: "none", cost: "free", supervision: false, hardware: [] },
+    launch: { status: "none" },
+    mission:
+      "A harbormaster needs to know when boats can safely reach the town float. Graph the water level over one day at Portland and at Eastport, find the pattern, and explain the big difference between them.",
+    learn: [
+      "Plot data over time and read patterns from a line graph.",
+      "Describe the tide cycle: about two high tides and two low tides each day.",
+      "Use evidence to compare two places and propose an explanation."
+    ],
+    before: {
+      materials: [
+        "A printed table of tide predictions for one day at Portland and at Eastport (high and low times and heights)",
+        "Graph paper and two colored pencils per team",
+        "A map of the Maine coast"
+      ],
+      setup: [
+        "Print the tide predictions for the same date at both stations from NOAA Tides & Currents (tidesandcurrents.noaa.gov). Choose any date; the pattern is always there.",
+        "Draw the axes on the board: time of day across the bottom, water height in feet up the side."
+      ],
+      prerequisites: "Comfortable reading times and plotting points."
+    },
+    steps: [
+      "Find Portland and Eastport on the map. Predict: will the tides be the same size at both places?",
+      "Plot Portland's high and low tides as points. Connect them with a smooth, wavy line.",
+      "In a second color, plot Eastport on the same graph.",
+      "Count the high tides and low tides for each place. How long is it from one high tide to the next?",
+      "Measure the tidal range (high minus low) at each harbor. How many times bigger is Eastport's?",
+      "Look at the map again. Eastport sits at the mouth of the Bay of Fundy. Talk with your team: why might the shape of a bay make tides bigger?"
+    ],
+    reflect: "If you were a harbormaster in Eastport, what would you warn visiting boaters about? Use your graph as evidence.",
+    extend: "Plot a full week of high tides for Portland. Each day, the high tide comes a little later. About how much later? (Hint: the Moon rises about 50 minutes later each day.)",
+    teacherNotes: [
+      "Expect a range of roughly 9 feet at Portland and close to 20 feet at Eastport. The Bay of Fundy, next door to Eastport, has some of the biggest tides in the world because the bay's shape and size funnel the water.",
+      "Maine's tides are semidiurnal: about two highs and two lows a day, roughly 12 hours and 25 minutes apart.",
+      "Field Station 360's Maine tide pool level shows what lives in the zone that floods and drains with each tide."
+    ]
+  },
+  {
+    id: "lighthouse-beam",
+    title: "Lighthouse Beam Challenge",
+    area: "engineering",
+    summary: "Engineer a reflector that turns a weak flashlight into a beam bright enough to guide a boat home.",
+    level: "beginner",
+    grades: ["2-3", "4-5", "6-8"],
+    duration: 45,
+    format: "collaborative",
+    equipment: ["building"],
+    source: "original",
+    keywords: ["maine", "lighthouse", "light", "reflection", "design", "iteration", "portland head light", "engineering design"],
+    access: { account: "none", cost: "free", supervision: true, hardware: [] },
+    launch: { status: "none" },
+    mission:
+      "Maine has more than 60 lighthouses, and each one has to throw light far out to sea. Your team gets one small flashlight. Design a reflector that makes its beam reach the far wall as a small, bright spot.",
+    learn: [
+      "Observe how light reflects off shiny and curved surfaces.",
+      "Test a design, measure the result, and improve it.",
+      "Connect a design to how real lighthouses focus light."
+    ],
+    before: {
+      materials: [
+        "One small LED flashlight per team (or a phone flashlight held by an adult)",
+        "Aluminum foil, paper cups, cardstock, tape, and scissors",
+        "A tape measure and a sheet of white paper taped to a far wall as the “ship”"
+      ],
+      setup: [
+        "Darken the room as much as you can.",
+        "Mark a launch line on the floor 3 meters from the wall."
+      ],
+      prerequisites: "None."
+    },
+    steps: [
+      "Shine the bare flashlight at the wall from the launch line. Trace the spot on the paper. This is your baseline.",
+      "Sketch a reflector idea: a cone, a bowl, a tube? Predict which shape will make the smallest, brightest spot.",
+      "Build it with foil (shiny side in), cups, and cardstock. Fit the flashlight inside.",
+      "Test from the launch line and trace the new spot. Is it smaller? Brighter?",
+      "Change one thing (shape, depth, or smoothness of the foil) and test again.",
+      "Share your best design and the spot it made. Which shapes worked best across the class?"
+    ],
+    reflect: "What did the reflector do to the light that the bare flashlight couldn't? What evidence do you have?",
+    extend: "Real lighthouses also flash in a pattern so sailors can tell them apart. Give your lighthouse a signature, like two flashes then a pause, and see if other teams can identify it.",
+    teacherNotes: [
+      "A deep, smooth, bowl-shaped reflector (close to a parabola) gathers light that would spread sideways and sends it forward, so the spot gets smaller and brighter. Crumpled foil scatters light and makes a dimmer spot.",
+      "Many historic Maine lighthouses, like Portland Head Light, used large glass Fresnel lenses that bend light instead of only reflecting it.",
+      "Never shine flashlights in anyone's eyes. Keep the beams pointed at the wall."
+    ]
+  },
+  {
+    id: "float-a-turbine",
+    title: "Float a Wind Turbine",
+    area: "engineering",
+    summary: "Design a floating platform that keeps a model wind turbine upright in waves, like the ones Maine engineers test for the Gulf of Maine.",
+    level: "advanced",
+    grades: ["6-8"],
+    duration: 45,
+    format: "collaborative",
+    equipment: ["building"],
+    source: "original",
+    keywords: ["maine", "offshore wind", "energy", "buoyancy", "stability", "design", "umaine", "volturnus", "gulf of maine", "waves"],
+    access: { account: "none", cost: "free", supervision: true, hardware: [] },
+    launch: { status: "none" },
+    mission:
+      "The Gulf of Maine is windy, but its water is too deep for turbines that stand on the sea floor. Your team must design a floating base that keeps a tall turbine tower upright, even when the waves roll in.",
+    learn: [
+      "Explain how buoyancy and a low center of gravity keep something stable.",
+      "Run repeatable tests and compare designs with data.",
+      "Weigh trade-offs between stability, materials, and cost."
+    ],
+    before: {
+      materials: [
+        "A plastic tub of water (a storage bin works) and a ruler to make waves",
+        "Plastic cups, foam blocks, straws, craft sticks, washers, string, and tape",
+        "A 30 cm tower: a straw or dowel with a paper pinwheel on top",
+        "Optional: a small desk fan for wind"
+      ],
+      setup: [
+        "Fill the tub about two-thirds full.",
+        "Set a budget: each team gets 10 “materials dollars” and a price list (for example, a cup costs $1, a foam block $2, a washer $1)."
+      ],
+      prerequisites: "Sink or Float or another buoyancy activity helps."
+    },
+    steps: [
+      "Look at the tower. Predict: what will happen if you float it on one cup?",
+      "Sketch a platform design and list what it costs.",
+      "Build it and set it in calm water. Does the tower stand straight?",
+      "Make waves: push the ruler back and forth 10 times. Count how many times the tower tips past 45° or falls over.",
+      "Try adding weight low down (washers hanging below) or spreading the base wider. Test again with the same 10 waves.",
+      "Record each design, its cost, and its result in a table. Choose your best design and explain why it works."
+    ],
+    reflect: "Which change helped most: making the base wider, or putting weight lower? How do you know it wasn't luck?",
+    extend: "Turn on the fan. Does wind on the blades change which design works best? What would engineers have to think about for a winter storm?",
+    teacherNotes: [
+      "In 2013 the University of Maine floated VolturnUS, a one-eighth-scale prototype, off Castine. It was the first grid-connected floating offshore wind turbine in the Americas.",
+      "The key ideas: a wide base resists tipping, and weight hung low lowers the center of gravity. Many real floating platforms use both.",
+      "Insist on the same 10-wave test every time. That's the fair-test habit students need for the comparison to mean anything."
+    ]
+  },
+  {
+    id: "blueberry-sorter",
+    title: "Blueberry Sorting Machine",
+    area: "ai",
+    summary: "Be the machine: learn to sort wild blueberries from example cards, then find out what happens when the examples are missing something.",
+    level: "beginner",
+    grades: ["2-3", "4-5"],
+    duration: 30,
+    format: "teacher-led",
+    equipment: ["unplugged"],
+    source: "original",
+    keywords: ["maine", "blueberry", "wild blueberries", "training data", "examples", "classification", "unplugged", "bias", "farming"],
+    access: { account: "none", cost: "free", supervision: false, hardware: [] },
+    launch: { status: "none" },
+    mission:
+      "Maine grows more wild blueberries than any other state, and at harvest, machines help sort berries from leaves and stems. Today, a volunteer becomes the sorting machine. The class trains it with examples, then tests what it learned.",
+    learn: [
+      "Explain that a machine learns to sort from labeled examples.",
+      "Show that missing examples cause wrong answers.",
+      "Describe why people still check the machine's work."
+    ],
+    before: {
+      materials: [
+        "About 24 picture cards: ripe blueberries (deep blue), unripe berries (green or red), leaves, twigs, and a few tricky ones like a dusty-blue leaf or a very small ripe berry",
+        "Two paper plates labeled KEEP and TOSS"
+      ],
+      setup: [
+        "Make a training set of 8 cards that leaves out the tricky ones.",
+        "Keep the rest face down as the test set."
+      ],
+      prerequisites: "None. How Does an AI Sort? is a good follow-up."
+    },
+    steps: [
+      "Explain the job: the machine sorts berries into KEEP and leaves, twigs, and unripe berries into TOSS.",
+      "Training: the class shows the volunteer each training card and says KEEP or TOSS. The volunteer can't ask why.",
+      "Testing: flip test cards one at a time. The volunteer sorts each one. The class tracks right and wrong on the board.",
+      "Look at the mistakes together. What was the machine missing? (Maybe it never saw a dusty-blue leaf.)",
+      "Retrain with a few of the tricky cards, then test again with new cards. Did it get better?"
+    ],
+    reflect: "The machine only knew what it was shown. What kinds of examples should we always include so it doesn't get fooled?",
+    extend: "Invent a new tricky card the machine has never seen. Predict what it will do, then test it.",
+    teacherNotes: [
+      "Maine is the largest producer of wild (lowbush) blueberries in the United States. Wild blueberries grow on low plants in fields called barrens, mostly Down East.",
+      "Keep the volunteer honest: they should sort only by what they learned from the cards, not by their own blueberry knowledge. This mirrors how a model only knows its training data.",
+      "Pairs with Pattern Machine Lab level 4 (bias), where students fix a lopsided training set on the computer."
+    ]
+  },
+  {
+    id: "sap-run-detectives",
+    title: "Sap Run Detectives",
+    area: "science",
+    summary: "Use temperature data to figure out the weather maple trees need before sap starts to flow, then do the sugaring math.",
+    level: "intermediate",
+    grades: ["4-5", "6-8"],
+    duration: 30,
+    format: "collaborative",
+    equipment: ["unplugged"],
+    source: "original",
+    keywords: ["maine", "maple", "sap", "syrup", "temperature", "data", "pattern", "ratio", "math", "maine maple sunday"],
+    access: { account: "none", cost: "free", supervision: false, hardware: [] },
+    launch: { status: "none" },
+    mission:
+      "A sugarhouse in western Maine has a two-week log of temperatures and how much sap came out of its taps each day. Find the weather pattern that makes sap run, then figure out how much sap it takes to fill a jug of syrup.",
+    learn: [
+      "Find a pattern in a data table and describe it with evidence.",
+      "Connect freezing and thawing to how sap moves in a tree.",
+      "Use a ratio to solve a real-world problem."
+    ],
+    before: {
+      materials: [
+        "A practice data table (made up for this lesson) with 14 days of nighttime low, daytime high, and gallons of sap collected",
+        "Colored pencils"
+      ],
+      setup: [
+        "Build the table so sap only flows on days that follow a freezing night (below 32°F) and have a thawing day (above 32°F). Include a few days that stay frozen all day and a few warm nights.",
+        "Tell students the data is practice data, made up to show a real pattern."
+      ],
+      prerequisites: "Reading a table and comparing numbers to 32°F (freezing)."
+    },
+    steps: [
+      "Circle the days with the most sap. What do you notice about the night before and the day itself?",
+      "Color each night blue if it froze and each day orange if it thawed. Where do blue nights and orange days line up?",
+      "Write a rule: “Sap runs when …” Test your rule on every day in the table.",
+      "Sugaring math: it takes about 40 gallons of sap to make 1 gallon of syrup. How much sap for a quart (¼ gallon)? For 5 gallons?",
+      "The whole log collected a certain amount of sap. How much syrup could the sugarhouse make?"
+    ],
+    reflect: "Why do you think a warm winter could be a problem for maple sugaring? Use your rule to explain.",
+    extend: "Maple sap is mostly water with about 2% sugar. Syrup is about two-thirds sugar. Explain where all that water goes when sap is boiled.",
+    teacherNotes: [
+      "Sap flows best when nights freeze and days thaw. The freeze and thaw change the pressure inside the tree, which pushes sap out of the tap hole.",
+      "The 40-to-1 ratio is a rule of thumb; it depends on how sweet the sap is.",
+      "Maine Maple Sunday, held in March, is when many Maine sugarhouses open to visitors: a natural field-trip tie-in."
+    ]
+  },
+  {
+    id: "acadia-from-above",
+    title: "Acadia from Above",
+    area: "vr",
+    summary: "Fly over Acadia National Park in a virtual globe, find famous landmarks, and read the land like a geologist.",
+    level: "beginner",
+    grades: ["2-3", "4-5", "6-8"],
+    duration: 30,
+    format: "teacher-led",
+    equipment: ["computer", "projector"],
+    source: "original",
+    keywords: ["maine", "acadia", "virtual field trip", "google earth", "cadillac mountain", "lighthouse", "glaciers", "map", "compass"],
+    access: { account: "none", cost: "free", supervision: true, hardware: [] },
+    launch: {
+      status: "ready",
+      label: "Open Google Earth",
+      url: "https://earth.google.com/web/",
+      provider: "Google Earth",
+      note: "Free. No account needed. Works best in Chrome."
+    },
+    vr: {
+      setup: [
+        "Run this from the teacher computer on the projector. Search each landmark by name.",
+        "Use the 3D button to tilt the view so mountains and cliffs stand up."
+      ],
+      nonHeadset: "This trip is designed for a projector or laptops. No headset needed."
+    },
+    mission:
+      "You're leading a class trip to Acadia National Park on Mount Desert Island, without leaving the room. Visit four landmarks, use compass directions to get between them, and find evidence that glaciers once covered this land.",
+    learn: [
+      "Use a virtual globe to explore a real place from many angles.",
+      "Give directions using compass headings.",
+      "Read clues in the landscape, like scraped rock and U-shaped valleys."
+    ],
+    before: {
+      materials: ["Teacher computer and projector", "A student “trip log” with four boxes: I see / I think / I wonder"],
+      setup: ["Search “Acadia National Park” ahead of time and check that 3D view loads."],
+      prerequisites: "None."
+    },
+    steps: [
+      "Fly to Cadillac Mountain. Tilt to 3D and turn all the way around. What can you see in each direction?",
+      "Fly to Sand Beach. Which direction is the open ocean from here?",
+      "Fly to Bass Harbor Head Light. Why do you think the lighthouse was built right here?",
+      "Fly to Somes Sound, the long, narrow bay that cuts into the island. Describe its shape.",
+      "In your trip log, write one observation, one inference, and one question from each stop."
+    ],
+    reflect: "Somes Sound and the smooth, rounded tops of Acadia's mountains were shaped by glaciers. What clues did you see that ice once moved across this land?",
+    extend: "Plan a route that visits all four stops with the shortest drive. Use the measure tool to compare two routes.",
+    teacherNotes: [
+      "In fall and winter, Cadillac Mountain is one of the first places in the United States to see the sunrise.",
+      "Glaciers scraped and rounded Acadia's pink granite mountains and carved Somes Sound into a long valley that the sea later filled.",
+      "Pair with Field Station 360's Maine tide pool level for a full Maine coast unit."
+    ]
+  },
+  {
+    id: "maine-postcard",
+    title: "Animated Maine Postcard",
+    area: "creative",
+    summary: "Design an animated postcard of your favorite Maine place: a sweeping lighthouse beam, falling snow, or a loon diving.",
+    level: "intermediate",
+    grades: ["4-5", "6-8"],
+    duration: 45,
+    format: "independent",
+    equipment: ["computer"],
+    source: "original",
+    keywords: ["maine", "animation", "postcard", "scratch", "storyboard", "digital art", "lighthouse", "loon", "snow"],
+    access: { account: "optional", accountNote: "An account is needed only to save projects online. Students can download projects to the computer instead.", cost: "free", supervision: false, hardware: [] },
+    launch: {
+      status: "ready",
+      label: "Open the Scratch editor",
+      url: "https://scratch.mit.edu/projects/editor/",
+      provider: "Scratch (MIT)",
+      note: "Free. An account is optional and only needed to save online."
+    },
+    mission:
+      "Make a postcard that moves. Pick a Maine place you love or want to visit, draw it, and add one thing that animates on a loop, so anyone who opens it feels like they're there.",
+    learn: [
+      "Plan an animation with a storyboard.",
+      "Use loops and costume changes to make motion repeat smoothly.",
+      "Combine art and code to communicate a feeling about a place."
+    ],
+    before: {
+      materials: ["Laptop or Chromebook", "Paper for a 4-box storyboard"],
+      setup: ["Show two or three example ideas: a lighthouse with a turning beam, snow on a pine, a lobster boat bobbing."],
+      prerequisites: "Animate Your Initials or the Pixel Animation Studio is a good warm-up."
+    },
+    steps: [
+      "Choose your place and write a one-line greeting, like “Greetings from Monhegan!”",
+      "Sketch a 4-box storyboard: what's still (the backdrop) and what moves?",
+      "In Scratch, paint the backdrop. Add a sprite for the moving part.",
+      "Make 2–4 costumes for the sprite, or use glide and turn blocks.",
+      "Put the motion inside a forever loop. Adjust the wait time until it looks right.",
+      "Add your greeting text. Share your postcard with a partner and ask what place it makes them think of."
+    ],
+    reflect: "What did you change after you saw your animation run for the first time? Why?",
+    extend: "Add a sound that fits your place, like waves, a foghorn, or a loon call, recorded or made yourself.",
+    teacherNotes: [
+      "Students who finish early can add a second moving element that runs at a different speed.",
+      "Remind students not to put their own name, school, or photo in a shared project.",
+      "Postcards make a great hallway display: print the backdrop and add a QR code to the project if you share them."
+    ]
+  },
+
+  /* ───────────────────────────── Interactive labs (run inside STEM 207) ───────────────────────────── */
   {
     id: "lab-rover",
-    title: "Rover Code Lab",
+    title: "Harbor Code Lab",
     area: "coding",
-    summary: "Program a rover with code blocks through 12 levels, from first steps to your own functions.",
+    summary: "Program a lobster boat with code blocks through 12 levels: haul traps, dodge granite ledges, and write your own functions.",
     level: "beginner",
     grades: ["2-3", "4-5", "6-8"],
     duration: 45,
@@ -1352,10 +1752,10 @@ window.STEM.activities = [
     equipment: ["computer", "tablet"],
     source: "original",
     featured: false,
-    keywords: ["lab", "blocks", "sequence", "loops", "conditionals", "variables", "functions", "debugging", "rover", "interactive"],
+    keywords: ["lab", "maine", "blocks", "sequence", "loops", "conditionals", "variables", "functions", "debugging", "lobster boat", "harbor", "interactive"],
     access: { account: "none", cost: "free", supervision: false, hardware: [] },
-    launch: { status: "lab", labId: "rover", label: "Open the Rover Code Lab", note: "Runs inside STEM Explorer Academy. No outside account or website needed." },
-    mission: "Get the rover to the flag. Each level adds a new coding idea, and later levels limit how many blocks you can use, so you'll need loops, conditionals, variables, and your own blocks.",
+    launch: { status: "lab", labId: "rover", label: "Open the Harbor Code Lab", note: "Runs inside STEM 207. No outside account or website needed." },
+    mission: "You're the captain of a lobster boat in a Maine harbor. Steer it to the wharf, haul your traps, and find your way through the fog. Each level adds a new coding idea, and later levels limit how many blocks you can use, so you'll need loops, conditionals, variables, and your own blocks.",
     learn: [
       "Build and run a program as a sequence of instructions.",
       "Use loops, if–else, and a variable to write shorter, smarter programs.",
@@ -1369,8 +1769,8 @@ window.STEM.activities = [
     steps: [
       "Open the lab and read the goal for the level.",
       "Tap blocks to add them to your program. Tap a gap to choose where new blocks go.",
-      "Press Run to watch the rover, or Step to run one block at a time.",
-      "If the rover bumps a wall, find the highlighted block and fix it.",
+      "Press Run to watch the boat, or Step to run one block at a time.",
+      "If the boat bumps a granite ledge, find the highlighted block and fix it.",
       "When you finish a level, read “What you just learned,” then try the next one."
     ],
     reflect: "Which level made you change how you were thinking about the problem? What did you do differently?",
@@ -1386,25 +1786,25 @@ window.STEM.activities = [
     id: "lab-field-station",
     title: "Field Station 360",
     area: "vr",
-    summary: "Look all around a rainforest, desert, and coral reef. Find clues, use a compass, and think like a field scientist.",
+    summary: "Start in a Gulf of Maine tide pool and a North Woods pond, then visit a rainforest, desert, and coral reef. Find clues, use a compass, and think like a field scientist.",
     level: "beginner",
     grades: ["2-3", "4-5", "6-8"],
     duration: 45,
     format: "independent",
     equipment: ["computer", "tablet", "vr", "projector"],
     source: "original",
-    keywords: ["lab", "360", "field trip", "habitat", "adaptations", "compass", "observation", "inference", "interactive"],
+    keywords: ["lab", "maine", "360", "field trip", "habitat", "adaptations", "compass", "observation", "inference", "tide pool", "north woods", "moose", "katahdin", "interactive"],
     access: { account: "none", cost: "free", supervision: false, hardware: [] },
-    launch: { status: "lab", labId: "field-station", label: "Open Field Station 360", note: "Runs inside STEM Explorer Academy. Drag, use arrow keys, or open it in a VR headset's web browser." },
+    launch: { status: "lab", labId: "field-station", label: "Open Field Station 360", note: "Runs inside STEM 207. Drag, use arrow keys, or open it in a VR headset's web browser." },
     vr: {
       setup: [
-        "On a VR headset with a web browser, open STEM Explorer Academy and go to this lab. Students drag with the controller to look around.",
+        "On a VR headset with a web browser, open STEM 207 and go to this lab. Students drag with the controller to look around.",
         "Keep headset turns to 10–15 minutes, seated or standing clear of furniture.",
         "The lab saves nothing to the headset; students can sign in with their picture code to save progress."
       ],
       nonHeadset: "The lab is built for laptops, Chromebooks, tablets, and projectors. Students drag, tap the Look arrows, or use arrow keys to turn. On a projector, students can take turns as the navigator."
     },
-    mission: "You're a field scientist at three research stations. Turn around to find hidden clues, separate what you see from what you think it means, and complete each station's compass check.",
+    mission: "You're a field scientist, starting at home. Explore a Maine tide pool at low tide and a North Woods pond below Katahdin, then travel to three habitats far from Maine. Turn around to find hidden clues, separate what you see from what you think it means, and complete each station's compass check.",
     learn: [
       "Tell the difference between an observation and an inference.",
       "Explain how adaptations help living things survive in a habitat.",
@@ -1420,14 +1820,15 @@ window.STEM.activities = [
       "Look all the way around. Tap a search marker when you find one.",
       "Read the observation, then choose the inference that fits best.",
       "Complete the compass check by turning to the heading you're given.",
-      "After the three habitats, compare them and practice sorting observations from inferences."
+      "After the five habitats, compare them and practice sorting observations from inferences."
     ],
     reflect: "Which clue surprised you most? What did you observe, and what did you infer from it?",
-    extend: "Pick a habitat near your school. List three observations you could make there and one inference for each.",
+    extend: "Pick a habitat near your school: a schoolyard, a stream, a patch of woods, or a beach. List three observations you could make there and one inference for each.",
     teacherNotes: [
       "The core skill is separating observation from inference. Ask students: “Could you point to that, or is it your explanation?”",
       "“Scan for a clue” turns the view toward the nearest unfound clue. It supports students who are struggling to navigate.",
-      "Compass headings connect to math (angles) and geography. Have students stand and physically face each direction before the check."
+      "Compass headings connect to math (angles) and geography. Have students stand and physically face each direction before the check.",
+      "The two Maine levels pair with Tide Watchers and Acadia from Above for a Maine coast-and-woods unit."
     ]
   },
   {
@@ -1443,7 +1844,7 @@ window.STEM.activities = [
     source: "original",
     keywords: ["lab", "machine learning", "training data", "bias", "confidence", "responsible ai", "classifier", "interactive"],
     access: { account: "none", cost: "free", supervision: true, hardware: [] },
-    launch: { status: "lab", labId: "pattern-machine", label: "Open the Pattern Machine Lab", note: "Runs inside STEM Explorer Academy. Uses made-up creatures only: no cameras, photos, or personal information." },
+    launch: { status: "lab", labId: "pattern-machine", label: "Open the Pattern Machine Lab", note: "Runs inside STEM 207. Uses made-up creatures only: no cameras, photos, or personal information." },
     mission: "Teach a machine to sort creatures, then put it to the test. You'll see how the number and variety of examples change what it learns, catch it learning the wrong lesson, and decide when AI should and shouldn't be trusted.",
     learn: [
       "Explain that AI learns patterns from labeled training examples.",
@@ -1473,19 +1874,19 @@ window.STEM.activities = [
   },
   {
     id: "lab-launcher",
-    title: "Launcher Lab",
+    title: "Pumpkin Launcher Lab",
     area: "engineering",
-    summary: "Design and tune a catapult. Predict, test, change one thing at a time, and work within a budget.",
+    summary: "Design and tune a catapult for a fall-fair pumpkin toss. Predict, test, change one thing at a time, and work within a budget.",
     level: "intermediate",
     grades: ["4-5", "6-8"],
     duration: 45,
     format: "collaborative",
     equipment: ["computer", "tablet"],
     source: "original",
-    keywords: ["lab", "catapult", "design", "iteration", "fair test", "budget", "optimize", "engineering notebook", "interactive"],
+    keywords: ["lab", "maine", "catapult", "pumpkin", "fall fair", "design", "iteration", "fair test", "budget", "optimize", "engineering notebook", "interactive"],
     access: { account: "none", cost: "free", supervision: false, hardware: [] },
-    launch: { status: "lab", labId: "launcher", label: "Open the Launcher Lab", note: "Runs inside STEM Explorer Academy." },
-    mission: "Your team is building a launcher for a field-day challenge. Hit the targets, clear the wall, stay on budget, and record every trial in your engineering notebook.",
+    launch: { status: "lab", labId: "launcher", label: "Open the Pumpkin Launcher Lab", note: "Runs inside STEM 207." },
+    mission: "It's fall in Maine, and your team is building a launcher for the fair's pumpkin toss. Land pumpkins on the hay bale targets, clear the bale stack, stay on budget, and record every trial in your engineering notebook.",
     learn: [
       "Use test results to decide what to change next (iteration).",
       "Change one variable at a time to run a fair test.",
@@ -1513,19 +1914,19 @@ window.STEM.activities = [
   },
   {
     id: "lab-line-follower",
-    title: "Line Follower Lab",
+    title: "Snowplow Robot Lab",
     area: "engineering",
-    summary: "Write sense → think → act rules so a robot can follow a track on its own.",
+    summary: "A nor'easter buried the roads. Write sense → think → act rules so a robot plow follows the road on its own.",
     level: "intermediate",
     grades: ["4-5", "6-8"],
     duration: 30,
     format: "independent",
     equipment: ["computer", "tablet"],
     source: "original",
-    keywords: ["lab", "robot", "sensors", "rules", "robot behavior", "if then", "debugging", "trade-offs", "interactive"],
+    keywords: ["lab", "maine", "robot", "snowplow", "snow", "sensors", "rules", "robot behavior", "if then", "debugging", "trade-offs", "interactive"],
     access: { account: "none", cost: "free", supervision: false, hardware: [] },
-    launch: { status: "lab", labId: "line-follower", label: "Open the Line Follower Lab", note: "Runs inside STEM Explorer Academy." },
-    mission: "Your robot has two light sensors. Give it rules for everything it might sense so it can drive a full lap, recover from sharp corners, and race the clock.",
+    launch: { status: "lab", labId: "line-follower", label: "Open the Snowplow Robot Lab", note: "Runs inside STEM 207." },
+    mission: "Your town's robot plow has two light sensors that can tell the dark road line from white snow. Give it rules for everything it might sense so it can plow a full lap, handle sharp village corners, and clear the roads before the buses come.",
     learn: [
       "Describe the sense → think → act loop that robots use.",
       "Write if–then rules for each sensor state.",
@@ -1552,40 +1953,40 @@ window.STEM.activities = [
   },
   {
     id: "lab-ramp-racers",
-    title: "Ramp Racers",
+    title: "Sled Hill Science",
     area: "science",
-    summary: "Run a real investigation: predict, repeat trials, keep it fair, graph your data, and explain your results.",
+    summary: "It's a snow day. Run a real investigation on a model sledding hill: predict, repeat trials, keep it fair, graph your data, and explain your results.",
     level: "intermediate",
     grades: ["4-5", "6-8"],
     duration: 45,
     format: "independent",
     equipment: ["computer", "tablet"],
     source: "original",
-    keywords: ["lab", "experiment", "variables", "fair test", "data", "graph", "average", "claim evidence reasoning", "friction", "interactive"],
+    keywords: ["lab", "maine", "experiment", "sled", "snow", "variables", "fair test", "data", "graph", "average", "claim evidence reasoning", "friction", "interactive"],
     access: { account: "none", cost: "free", supervision: false, hardware: [] },
-    launch: { status: "lab", labId: "ramp-racers", label: "Open Ramp Racers", note: "Runs inside STEM Explorer Academy." },
-    mission: "Find out what makes a car roll farther. You'll test ramp height, floor surface, and the car's weight, then write a scientific explanation backed by your own data.",
+    launch: { status: "lab", labId: "ramp-racers", label: "Open Sled Hill Science", note: "Runs inside STEM 207." },
+    mission: "Find out what makes a sled go farther. On a model sledding hill, you'll test the hill's height, the kind of snow, and the sled's weight, then write a scientific explanation backed by your own data.",
     learn: [
       "Repeat trials and use the average because measurements vary.",
       "Control variables so a test is fair.",
       "Write a claim supported by evidence and reasoning."
     ],
     before: {
-      materials: ["Laptop, Chromebook, or tablet", "Optional: a real ramp, toy car, and tape measure to compare"],
+      materials: ["Laptop, Chromebook, or tablet", "Optional: a tray ramp, a small toy sled or block, and a tape measure to compare"],
       setup: ["Results include small random variation, just like a real experiment."],
       prerequisites: "Sink or Float or any prediction activity."
     },
     steps: [
       "Read the question and make a prediction.",
-      "Set up the ramp, floor, and car, then run a trial.",
+      "Set up the hill, the snow, and the sled, then run a trial.",
       "Run more trials and watch the data table and graph.",
       "Keep everything the same except the one thing you're testing.",
       "Answer the question using your data."
     ],
     reflect: "Was there a time your data didn't match your prediction? What did you do?",
-    extend: "Build a real ramp with books and a ruler. Do your real results show the same pattern as the lab?",
+    extend: "On the next snow day (or with a tray ramp and books), test a real sled or block. Do your real results show the same pattern as the lab?",
     teacherNotes: [
-      "Level 4 (mass) targets a common misconception: most students predict a heavier car goes farther. Let the data do the persuading.",
+      "Level 4 (mass) targets a common misconception: most students predict a heavier sled goes farther. Let the data do the persuading.",
       "Unfair trials are marked in the table and left off the graph, so students see why control matters.",
       "The CER level works well as an exit ticket. You can see each student's chosen evidence on your dashboard."
     ]
@@ -1594,16 +1995,16 @@ window.STEM.activities = [
     id: "lab-pixel-studio",
     title: "Pixel Animation Studio",
     area: "creative",
-    summary: "Draw pixel art, turn pictures into code, and bring them to life frame by frame.",
+    summary: "Draw pixel art, decode a picture of a lighthouse, and bring your own Maine postcard to life frame by frame.",
     level: "beginner",
     grades: ["2-3", "4-5", "6-8"],
     duration: 45,
     format: "independent",
     equipment: ["computer", "tablet"],
     source: "original",
-    keywords: ["lab", "pixels", "resolution", "encoding", "animation", "frames", "fps", "digital art", "interactive"],
+    keywords: ["lab", "pixels", "resolution", "encoding", "animation", "frames", "fps", "digital art", "lighthouse", "interactive"],
     access: { account: "none", cost: "free", supervision: false, hardware: [] },
-    launch: { status: "lab", labId: "pixel-studio", label: "Open the Pixel Animation Studio", note: "Runs inside STEM Explorer Academy. Signed-in students' animations are saved to their gallery." },
+    launch: { status: "lab", labId: "pixel-studio", label: "Open the Pixel Animation Studio", note: "Runs inside STEM 207. Signed-in students' animations are saved to their gallery." },
     mission: "Learn how computers store pictures, then make your own looping animation and save it to your gallery.",
     learn: [
       "Explain that digital images are made of pixels and that resolution changes detail.",
@@ -1612,7 +2013,7 @@ window.STEM.activities = [
     ],
     before: {
       materials: ["Laptop, Chromebook, or tablet (touch screens work well)"],
-      setup: ["Pairs well after the unplugged Pixel Art Code activity."],
+      setup: ["Pairs well after the unplugged Pixel Art Code activity, and before Animated Maine Postcard."],
       prerequisites: "None."
     },
     steps: [

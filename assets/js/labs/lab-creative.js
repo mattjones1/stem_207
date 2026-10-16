@@ -43,21 +43,22 @@
     return `<svg viewBox="0 0 ${n} ${n}" width="${size}" height="${size}" class="pixel-svg" ${label ? `role="img" aria-label="${esc(label)}"` : 'aria-hidden="true"'} shape-rendering="crispEdges"><rect width="${n}" height="${n}" fill="#f4f1e6"/>${rects}</svg>`;
   };
 
-  const ROCKET = ["...KK...", "..KWWK..", "..KBBK..", "..KWWK..", ".KKWWKK.", "KRKWWKRK", "K.KKKK.K", "...OO..."];
+  /* The decode target: a Maine lighthouse on the water. */
+  const ROCKET = ["...KK...", "..KYYK..", "..KKKK..", "...WW...", "..RRRR..", "..WWWW..", ".RRRRRR.", "BBBBBBBB"];
 
   const LEVELS = [
     { title: "Every picture is pixels", concept: "Pixels", n: 8,
       goal: "Draw a picture on an 8 × 8 grid using at least 3 colors and at least 12 pixels.",
-      hint: "Try something simple and blocky: a heart, a face, a mushroom, or a house. Pick a color, then tap or drag on the grid.",
+      hint: "Try something simple and blocky: a pine tree, a lobster buoy, a blueberry, or a house. Pick a color, then tap or drag on the grid.",
       learned: "Every digital picture is a grid of tiny squares called pixels. Each pixel is one color. Screens show millions of them." },
     { title: "Resolution", concept: "Resolution", n: 16,
       goal: "Draw a round shape on a 16 × 16 grid (at least 30 pixels), then answer the question about resolution.",
       hint: "Look at the three circles under the grid. More pixels in the same space means smaller pixels and smoother curves.",
       learned: "Resolution is how many pixels make up an image. Higher resolution shows more detail and smoother curves, but takes more data to store." },
     { title: "Pictures as code", concept: "Encoding", n: 8,
-      goal: "Read the code and paint the picture it describes exactly.",
+      goal: "Read the code and paint the picture it describes exactly. (Hint: it's something you'd see on the Maine coast.)",
       steps: ["Each row of code describes one row of the grid, left to right.", "“3.” means 3 empty pixels. “2K” means 2 black pixels."],
-      hint: "Go one row at a time. For row 1, “3. 2K 3.” means: skip 3, paint 2 black, skip 3.",
+      hint: "Go one row at a time. For row 1, “3. 2K 3.” means: skip 3, paint 2 black, skip 3. The last row is all water.",
       learned: "Computers store images as numbers. Run-length encoding (“3 empty, 2 black”) is a real compression trick that makes files smaller when colors repeat." },
     { title: "Blink", concept: "Frames", n: 12,
       goal: "Make a 2-frame animation where something small changes, like eyes blinking. Press Play to watch it.",
@@ -70,7 +71,7 @@
       learned: "Frames per second (fps) controls the speed. Movies use 24 fps. More frames with smaller moves make smoother motion." },
     { title: "Your animation", concept: "Create", n: 16,
       goal: "Create a looping animation with at least 4 frames and save it to your gallery.",
-      hint: "Plan it first: what happens, and how does it loop back to the start? Ideas: a bouncing ball, a flickering flame, a waving flag.",
+      hint: "Plan it first: what happens, and how does it loop back to the start? Ideas: a lighthouse beam sweeping, a lobster boat bobbing, snow falling on a pine, or a loon diving.",
       learned: "You planned, drew, timed, and saved an original animation, combining art, math, and computer science." }
   ];
 
@@ -110,7 +111,7 @@
           </div>` : ""}
         </div>
         <div class="pix__side">
-          ${idx === 2 ? `<div class="lab-panel"><h3>The code</h3><ol class="pix__code pix__code--target">${ROCKET.map((r) => `<li>${encodeRow(r)}</li>`).join("")}</ol><p class="muted">Letters: . empty · K black · W white · B blue · R red · O orange</p></div>` : ""}
+          ${idx === 2 ? `<div class="lab-panel"><h3>The code</h3><ol class="pix__code pix__code--target">${ROCKET.map((r) => `<li>${encodeRow(r)}</li>`).join("")}</ol><p class="muted">Letters: . empty · K black · Y yellow · W white · R red · B blue</p></div>` : ""}
           <div class="lab-panel"><h3>${idx === 2 ? "Your picture as code" : "Your picture as code"}</h3><ol class="pix__code" id="px-code"></ol><p class="muted" id="px-size"></p></div>
           ${idx === 1 ? `<div class="lab-panel"><h3>Same circle, three resolutions</h3><div class="res-row" id="px-res"></div>
             <p><strong>Which shows the curve most smoothly?</strong></p><div class="choice-grid">${["4 × 4", "8 × 8", "16 × 16"].map((t, i) => `<button type="button" class="choice" data-res="${i}">${t}</button>`).join("")}</div></div>` : ""}
@@ -288,7 +289,7 @@
     id: "pixel-studio",
     area: "creative",
     title: "Pixel Animation Studio",
-    tagline: "Draw pixel art, turn pictures into code, and bring them to life frame by frame.",
+    tagline: "Draw pixel art, decode a lighthouse, and bring a Maine postcard to life frame by frame.",
     levels: LEVELS,
     mount
   });

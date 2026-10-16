@@ -1,6 +1,8 @@
 /*
- * Rover Code Lab — Coding & Computer Science
- * Students build block programs that drive a rover across a grid.
+ * Harbor Code Lab — Coding & Computer Science
+ * Students build block programs that steer a lobster boat around a Maine harbor:
+ * haul traps, dodge granite ledges, and get home to the wharf.
+ * (The lab id stays "rover" so saved progress carries over.)
  * Levels climb the coding pathway: sequences → debugging → loops →
  * conditionals → variables → functions → creating independently.
  */
@@ -14,11 +16,11 @@
     move: { label: "Forward", kind: "motion", glyph: "arrowRight" },
     left: { label: "Turn left", kind: "motion", glyph: "refresh", flip: true },
     right: { label: "Turn right", kind: "motion", glyph: "refresh" },
-    pick: { label: "Pick up gem", kind: "action", glyph: "crystal" },
+    pick: { label: "Haul trap", kind: "action", glyph: "buoy" },
     repeat: { label: "Repeat", kind: "control", glyph: "refresh", container: true, count: true },
-    untilGoal: { label: "Repeat until at flag", kind: "control", glyph: "flag", container: true },
-    ifGem: { label: "If on a gem", kind: "control", glyph: "question", container: true },
-    ifWall: { label: "If wall ahead", kind: "control", glyph: "question", container: true, hasElse: true },
+    untilGoal: { label: "Repeat until at wharf", kind: "control", glyph: "flag", container: true },
+    ifGem: { label: "If at a trap", kind: "control", glyph: "question", container: true },
+    ifWall: { label: "If ledge ahead", kind: "control", glyph: "question", container: true, hasElse: true },
     setVar: { label: "Set steps to", kind: "variable", glyph: "box", count: true },
     changeVar: { label: "Change steps by", kind: "variable", glyph: "plus", count: true },
     repeatVar: { label: "Repeat steps times", kind: "control", glyph: "refresh", container: true },
@@ -62,75 +64,75 @@
   const LEVELS = [
     {
       title: "First steps", concept: "Sequence", stage: 1,
-      goal: "Drive the rover to the flag.",
+      goal: "Steer the boat out of the cove to the wharf.",
       steps: ["Tap Forward to add it to your program.", "Add as many as you need.", "Press Run and watch."],
-      hint: "Count the squares between the rover and the flag. That's how many Forward blocks you need.",
+      hint: "Count the squares between the boat and the wharf (the flag). That's how many Forward blocks you need.",
       learned: "A program is a sequence: a list of instructions the computer follows in order, one at a time.",
       grid: ["######", "#S..G#", "######"], dir: "E", blocks: BASIC
     },
     {
       title: "Turn the corner", concept: "Sequence", stage: 1,
-      goal: "Reach the flag. The path turns a corner.",
-      hint: "Turns don't move the rover. They only change which way it faces. Imagine you are the rover: which way is right?",
+      goal: "Reach the wharf. The channel turns a corner.",
+      hint: "Turns don't move the boat. They only change which way it faces. Imagine you are at the wheel: which way is right?",
       learned: "Order matters. The same blocks in a different order give a different result. Turning and moving are separate steps.",
       grid: ["######", "#S..##", "###.##", "###G##", "######"], dir: "E", blocks: BASIC
     },
     {
       title: "Bug hunt", concept: "Debugging", stage: 1, debug: true,
-      goal: "This program has a bug. Find it and fix it so the rover reaches the flag.",
+      goal: "Another captain wrote this program, and it runs the boat onto a ledge. Find the bug and fix it so the boat reaches the wharf.",
       steps: ["Press Step to run one block at a time.", "Watch for the first block that goes wrong.", "Delete it or change it, then run again."],
-      hint: "Step through slowly. The rover crashes right after the bug. Look at the turn just before the crash.",
+      hint: "Step through slowly. The boat bumps a ledge right after the bug. Look at the turn just before the crash.",
       learned: "Debugging means finding the first step that goes wrong. Stepping through a program one block at a time is how programmers find bugs.",
       grid: ["#######", "#S.####", "##..###", "###..##", "####G##", "#######"], dir: "E", blocks: BASIC,
       starter: "F R F L F L F L F R F"
     },
     {
       title: "Loop it", concept: "Loops", stage: 3,
-      goal: "Reach the flag using only 2 blocks.",
+      goal: "Run straight down the harbor to the wharf using only 2 blocks.",
       hint: "Put a Repeat block in your program, then add Forward inside it. Use + and − to change how many times it repeats.",
       learned: "A loop repeats instructions. Instead of writing Forward 7 times, you can say Repeat 7: Forward. Shorter programs are easier to read and fix.",
       grid: ["##########", "#S......G#", "##########"], dir: "E", blocks: [...BASIC, "repeat"], maxBlocks: 2
     },
     {
-      title: "Staircase", concept: "Loops", stage: 3,
-      goal: "Climb the stairs to the flag using 5 blocks or fewer.",
-      hint: "Find the pattern for one stair step: Forward, Turn left, Forward, Turn right. How many stairs are there?",
+      title: "Zigzag channel", concept: "Loops", stage: 3,
+      goal: "Zigzag up the channel between the ledges to the wharf using 5 blocks or fewer.",
+      hint: "Find the pattern for one zig: Forward, Turn left, Forward, Turn right. How many zigs are there?",
       learned: "Spotting a pattern is the key to using loops. Figure out the part that repeats, then loop it.",
       grid: ["######", "####G#", "###..#", "##..##", "#S.###", "######"], dir: "E", blocks: [...BASIC, "repeat"], maxBlocks: 5
     },
     {
       title: "Loop bug", concept: "Debugging loops", stage: 3, debug: true,
-      goal: "The rover should drive around the block to the flag. Fix the bug.",
+      goal: "The boat should circle around the little island to the wharf. Fix the bug.",
       hint: "One trip through the loop should be one side of the square. Which way does the path turn at each corner?",
       learned: "A bug inside a loop happens every time the loop runs. Fix it once, and every repeat is fixed.",
       grid: ["#####", "#S..#", "#.#.#", "#G..#", "#####"], dir: "E", blocks: [...BASIC, "repeat"],
       starter: "[3 F F L]"
     },
     {
-      title: "Gem collector", concept: "Actions", stage: 2,
-      goal: "Pick up both gems, then stop on the flag.",
-      hint: "Pick up gem only works when the rover is on a gem. Move onto the gem first.",
-      learned: "Programs can do more than move. Actions like picking something up change the world, and they only work at the right moment.",
+      title: "Haul the traps", concept: "Actions", stage: 2,
+      goal: "Haul both traps (the buoys), then tie up at the wharf.",
+      hint: "Haul trap only works when the boat is right at a buoy. Move onto the buoy first.",
+      learned: "Programs can do more than move. Actions like hauling a trap change the world, and they only work at the right moment.",
       grid: ["########", "#S*.*.G#", "########"], dir: "E", blocks: [...BASIC, "pick", "repeat"], needGems: true
     },
     {
-      title: "Maybe a gem", concept: "Conditionals", stage: 4,
-      goal: "Pick up every gem and reach the flag using 4 blocks or fewer.",
-      hint: "Repeat: move forward, then IF there's a gem here, pick it up. The rover checks each square for you.",
-      learned: "A conditional (if) lets a program make a choice. The rover checks a condition, and only acts when it's true.",
+      title: "Maybe a trap", concept: "Conditionals", stage: 4,
+      goal: "Haul every trap on the string and reach the wharf using 4 blocks or fewer.",
+      hint: "Repeat: move forward, then IF there's a trap here, haul it. The boat checks each square for you.",
+      learned: "A conditional (if) lets a program make a choice. The boat checks a condition, and only acts when it's true.",
       grid: ["###########", "#S*.**.*.G#", "###########"], dir: "E", blocks: [...BASIC, "pick", "repeat", "ifGem"], maxBlocks: 4, needGems: true
     },
     {
-      title: "Wall sensor", concept: "Conditionals", stage: 4,
-      goal: "Reach the center of the maze using 4 blocks or fewer.",
-      steps: ["Use Repeat until at flag.", "Inside it, check: If wall ahead → turn right. Otherwise (else) → forward."],
-      hint: "Put If wall ahead inside the Repeat until block. Put Turn right in the top part and Forward in the else part.",
-      learned: "If–else picks between two actions. With a sensor and one rule, the rover can solve a whole maze it has never seen. That's how many real robots work.",
+      title: "Fog sensor", concept: "Conditionals", stage: 4,
+      goal: "Thick fog rolled in, so you can only see one square ahead. Reach the mooring in the middle of the ledges using 4 blocks or fewer.",
+      steps: ["Use Repeat until at wharf.", "Inside it, check: If ledge ahead → turn right. Otherwise (else) → forward."],
+      hint: "Put If ledge ahead inside the Repeat until block. Put Turn right in the top part and Forward in the else part.",
+      learned: "If–else picks between two actions. With a sensor and one rule, the boat found its way through ledges it had never seen. Real boats use radar and sonar the same way, and so do many robots.",
       grid: ["#######", "#S....#", "#####.#", "#..G#.#", "#.###.#", "#.....#", "#######"], dir: "E", blocks: ["move", "left", "right", "untilGoal", "ifWall"], maxBlocks: 4
     },
     {
       title: "Growing spiral", concept: "Variables", stage: 5,
-      goal: "Spiral out to the flag using 6 blocks or fewer.",
+      goal: "Spiral out of the harbor to the wharf using 6 blocks or fewer.",
       steps: ["Each side of the spiral is one step longer than the last: 1, 2, 3, 4.", "A variable called steps can remember a number and change it."],
       hint: "Set steps to 1. Repeat 4: { Repeat steps times: Forward. Turn right. Change steps by 1. }",
       learned: "A variable stores a value that can change while the program runs. Here, steps grew by 1 each time, so the same loop drew longer and longer sides.",
@@ -139,8 +141,8 @@
     },
     {
       title: "Make your own block", concept: "Functions", stage: 6,
-      goal: "Build a Zig block, then use it to reach the flag with 6 blocks or fewer in your main program.",
-      steps: ["In the Zig box, build one stair step.", "In your main program, use Zig like any other block."],
+      goal: "Build a Zig block, then use it to reach the wharf with 6 blocks or fewer in your main program.",
+      steps: ["In the Zig box, build one zig of the channel.", "In your main program, use Zig like any other block."],
       hint: "Zig = Forward, Turn left, Forward, Turn right. Main program: Zig, Zig, Forward, Forward, Zig, Zig.",
       learned: "A function is a named group of instructions you can reuse. Breaking a problem into named parts (decomposition) makes big programs manageable.",
       grid: ["#########", "#########", "#######G#", "######..#", "###....##", "##..#####", "#S.######", "#########"], dir: "E",
@@ -148,9 +150,9 @@
     },
     {
       title: "Free build", concept: "Create", stage: 7,
-      goal: "Collect all 4 gems and finish on the flag. Use any blocks you like.",
+      goal: "Haul all 4 traps and finish at the wharf. Use any blocks you like.",
       hint: "Plan your route on paper first. Look for patterns you can loop. Test small parts as you go.",
-      learned: "You planned, built, tested, and debugged a program on your own. That's what programmers do every day.",
+      learned: "You planned, built, tested, and debugged a program on your own, like a captain planning a day on the water. That's what programmers do every day.",
       grid: ["#########", "#S..#..*#", "#.*.#.#.#", "#...*...#", "#.#.#.#.#", "#*..#..G#", "#########"], dir: "E",
       blocks: ["move", "left", "right", "pick", "repeat", "untilGoal", "ifGem", "ifWall"], needGems: true, par: 24
     }
@@ -241,12 +243,14 @@
   }
 
   /* ───────── Drawing ───────── */
+  /* Top-down lobster boat, bow pointing east. */
   const ROVER = `<svg viewBox="0 0 40 40" class="rover__svg" aria-hidden="true">
-      <rect x="7" y="9" width="24" height="22" rx="5" fill="#ec7a2f" stroke="#0d1d36" stroke-width="2"/>
-      <rect x="4" y="6" width="8" height="8" rx="2" fill="#0d1d36"/><rect x="4" y="26" width="8" height="8" rx="2" fill="#0d1d36"/>
-      <rect x="26" y="6" width="8" height="8" rx="2" fill="#0d1d36"/><rect x="26" y="26" width="8" height="8" rx="2" fill="#0d1d36"/>
-      <path d="M31 14 L38 20 L31 26 Z" fill="#7fd8d3" stroke="#0d1d36" stroke-width="1.6"/>
-      <circle cx="17" cy="20" r="4" fill="#f6efe2" stroke="#0d1d36" stroke-width="1.6"/>
+      <path d="M2 30 Q-1 20 2 10" fill="none" stroke="#ffffff" stroke-opacity=".7" stroke-width="2" stroke-linecap="round"/>
+      <path d="M5 11 H25 Q36 13 39 20 Q36 27 25 29 H5 Q3.5 20 5 11 Z" fill="#f7f6f0" stroke="#1d1647" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M6 14.5 H25 Q32 16 35 20 Q32 24 25 25.5 H6" fill="none" stroke="#8cc832" stroke-width="2"/>
+      <rect x="15" y="14" width="10" height="12" rx="2" fill="#302568"/>
+      <rect x="22" y="15.5" width="2.5" height="9" rx="1" fill="#b9e2f5"/>
+      <rect x="7" y="16" width="5" height="8" rx="1" fill="#e9603f" stroke="#1d1647" stroke-width="1"/>
     </svg>`;
 
   function mount(el, idx, api) {
@@ -262,15 +266,15 @@
     el.innerHTML = `
       <div class="rover">
         <div class="rover__world">
-          <div class="rover__grid" style="--cols:${g.w};--rows:${g.h}" role="img" aria-label="Map: the rover starts at the left; reach the flag${g.gems.length ? `, collecting ${g.gems.length} gems` : ""}.">
+          <div class="rover__grid" style="--cols:${g.w};--rows:${g.h}" role="img" aria-label="Harbor chart: the boat starts at the left; reach the wharf${g.gems.length ? `, hauling ${g.gems.length} traps` : ""}. Dark squares are granite ledges.">
             ${g.rows.map((r, y) => [...r].map((ch, x) => `<div class="cell ${ch === "#" ? "cell--wall" : ""}" data-x="${x}" data-y="${y}">
-              ${ch === "G" ? `<span class="cell__flag">${icon("flag")}</span>` : ""}${ch === "*" ? `<span class="cell__gem" data-gem="${x},${y}">${icon("crystal")}</span>` : ""}</div>`).join("")).join("")}
+              ${ch === "G" ? `<span class="cell__flag">${icon("flag")}</span>` : ""}${ch === "*" ? `<span class="cell__gem" data-gem="${x},${y}">${icon("buoy")}</span>` : ""}</div>`).join("")).join("")}
             <div class="rover__bot" id="rover-bot">${ROVER}</div>
           </div>
           <div class="rover__readout" aria-live="polite">
             <span id="rover-status">Ready</span>
             ${L.usesVar ? `<span class="var-chip">steps = <b id="var-steps">0</b></span>` : ""}
-            ${g.gems.length ? `<span class="var-chip">gems <b id="gem-count">0</b>/${g.gems.length}</span>` : ""}
+            ${g.gems.length ? `<span class="var-chip">traps <b id="gem-count">0</b>/${g.gems.length}</span>` : ""}
           </div>
           <div class="rover__controls">
             <button type="button" class="btn btn--launch" id="rv-run">${icon("rocket")}Run</button>
@@ -448,25 +452,25 @@
         const c = el.querySelector(`.cell[data-x="${st.x + dx}"][data-y="${st.y + dy}"]`);
         if (c) c.classList.add("is-crash");
         setStatus("Bump!");
-        api.say("Bump! The rover hit a wall. The highlighted block is where it went wrong. What should it have done instead?", "warn");
+        api.say("Bump! The boat hit a granite ledge. The highlighted block is where it went wrong. What should it have done instead?", "warn");
         api.log("lab_bug", { kind: "crash" });
       } else if (st.error === "nogem") {
-        setStatus("No gem here");
-        api.say("The rover tried to pick up a gem, but there isn't one on this square. Move onto a gem first.", "warn");
+        setStatus("No trap here");
+        api.say("The boat tried to haul a trap, but there isn't a buoy on this square. Move onto a buoy first.", "warn");
       } else if (st.error === "loop") {
         setStatus("Stuck in a loop");
-        api.say("The rover got stuck repeating forever. Make sure something inside the loop moves the rover closer to the flag.", "warn");
+        api.say("The boat got stuck going in circles forever. Make sure something inside the loop moves the boat closer to the wharf.", "warn");
       } else if (atGoal && (!L.needGems || allGems)) {
         setStatus("Mission complete");
         const n = countBlocks(program);
-        api.say(L.par ? `You did it in ${n} blocks${n <= L.par ? ". That's at or under par!" : `. Par is ${L.par}. Can you find a shorter program?`}` : "The rover made it!", "good");
+        api.say(L.par ? `You did it in ${n} blocks${n <= L.par ? ". That's at or under par!" : `. Par is ${L.par}. Can you find a shorter program?`}` : "The boat made it home to the wharf!", "good");
         api.win({ blocks: n, program: summarize(program) });
       } else if (atGoal) {
-        setStatus("Gems missing");
-        api.say(`The rover reached the flag, but it only has ${st.got.size} of ${g.gems.length} gems.`, "warn");
+        setStatus("Traps missing");
+        api.say(`The boat reached the wharf, but it only hauled ${st.got.size} of ${g.gems.length} traps.`, "warn");
       } else {
         setStatus("Stopped");
-        api.say("The program ended, but the rover isn't on the flag yet. Add more blocks or check your turns.", "warn");
+        api.say("The program ended, but the boat isn't at the wharf yet. Add more blocks or check your turns.", "warn");
       }
     }
     const summarize = (list) => list.map((b) => b.type + (b.n != null ? b.n : "") + (b.body ? `[${summarize(b.body)}]` : "") + (b.else ? `{${summarize(b.else)}}` : "")).join(",");
@@ -490,7 +494,7 @@
 
     resetWorld();
     renderProgram();
-    if (L.debug) api.say("This program was written by another explorer. Run it to see what goes wrong.", "info");
+    if (L.debug) api.say("This program was written by another captain. Run it to see what goes wrong.", "info");
     if (saved && saved.blocks) api.say(`Last time you solved this with ${saved.blocks} blocks.`, "info");
     return () => stop();
   }
@@ -498,8 +502,8 @@
   SE.labs.register({
     id: "rover",
     area: "coding",
-    title: "Rover Code Lab",
-    tagline: "Program a rover with code blocks. Twelve levels from first steps to building your own functions.",
+    title: "Harbor Code Lab",
+    tagline: "Program a lobster boat with code blocks: haul traps, dodge ledges, and make it home. Twelve levels from first steps to your own functions.",
     levels: LEVELS,
     mount
   });

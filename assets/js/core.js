@@ -1,5 +1,5 @@
 /*
- * STEM Explorer Academy — shared helpers, icons, and lookups.
+ * STEM 207 — shared helpers, icons, and lookups.
  * Every other script hangs off the global `SE` namespace.
  */
 (function () {
@@ -67,18 +67,17 @@
     leaf: '<path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15"/><path d="M5 19l8-8"/>',
     crystal: '<path d="M12 2l6 6-6 14-6-14z"/><path d="M6 8h12M10 8l2 14 2-14"/>',
     telescope: '<path d="M3 11l13-5 2 5-13 5z"/><path d="M10 14l-3 7M11 14l3 7M18 8.5l3-1"/>',
+    pine: '<path d="M12 2.5 7.2 9h3L6 14.5h4L6 19.5h12l-4-5h4L13.8 9h3z"/><path d="M12 19.5v3"/>',
+    boat: '<path d="M2.5 15h19l-2.6 5H5.2z"/><path d="M6.5 15v-5h7l2.5 5"/><path d="M9 10V5.5M9 5.5h3"/>',
+    snowflake: '<path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7"/><path d="M9.5 3.6 12 6l2.5-2.4M9.5 20.4 12 18l2.5 2.4"/>',
+    buoy: '<rect x="9" y="6" width="6" height="12" rx="3"/><path d="M9 11h6M12 6V2.5M5 21c2.3-1.4 4.7 1.4 7 0s4.7 1.4 7 0"/>',
     lighthouse: '<path d="M9 21l1.2-12h3.6L15 21z"/><path d="M8.5 9h7M10 6h4l-.5 3h-3z"/><path d="M12 3v3M4 6l4 1.5M20 6l-4 1.5M6 21h12"/>'
   };
   SE.icon = (name, extra = "") =>
     `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" ${extra}>${ICONS[name] || ""}</svg>`;
   SE.iconPaths = (name) => ICONS[name] || "";
 
-  /* Brand mark: ring and letters use currentColor so the logo adapts to light and dark surfaces. */
-  const BRAND_MARK = `<path d="M89.8 102.6 A52 52 0 1 1 107.1 82.0" fill="none" stroke="currentColor" stroke-width="9"/>
-  <path d="M56 8.5h8l-4 11z M8.5 56v8l11-4z M111.5 56v8l-11-4z" fill="currentColor"/>
-  <text x="57" y="79" text-anchor="middle" font-family="Montserrat, 'Arial Black', 'Helvetica Neue', Arial, sans-serif" font-weight="800" font-size="56" letter-spacing="-3" fill="currentColor">SE</text>
-  <path d="M84 85 L97.5 83.5 L98.5 72.5 L115 104 Z" fill="#91C440"/>`;
-  SE.brandMark = (size = 48, cls = "") => `<svg class="brand-mark ${cls}" viewBox="0 0 120 120" width="${size}" height="${size}" aria-hidden="true">${BRAND_MARK}</svg>`;
+  /* Brand artwork (logo, Maine mark, pine) lives in brand.js. */
 
   /* ───────── Text and number helpers ───────── */
   SE.esc = (s) =>
