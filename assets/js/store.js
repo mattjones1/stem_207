@@ -1,5 +1,5 @@
 /*
- * STEM Explorers — accounts, sessions, and the activity log.
+ * STEM Explorer Academy — accounts, sessions, and the activity log.
  *
  * PROTOTYPE STORAGE: everything is kept in this browser's localStorage.
  * That's enough to try the experience on one device, but it is NOT a secure
@@ -85,7 +85,7 @@
    * A made-up class so the educator dashboard has something to show.
    * Every demo record has isDemo: true and the UI labels it as sample data. */
   const DEMO = {
-    email: "demo@stemexplorers.example",
+    email: "demo@stemexploreracademy.example",
     password: "explore",
     classCode: "ORBIT7",
     studentName: "Ava R.",
@@ -272,8 +272,8 @@
 
   function init() {
     db = readDb();
-    if (!db || db.version !== 4) {
-      db = { version: 4, educators: [], classes: [], students: [], events: [] };
+    if (!db || db.version !== 5) {
+      db = { version: 5, educators: [], classes: [], students: [], events: [] };
       installDemo();
       save();
     }

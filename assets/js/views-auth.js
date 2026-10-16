@@ -1,5 +1,5 @@
 /*
- * STEM Explorers — sign in and sign up.
+ * STEM Explorer Academy — sign in and sign up.
  *
  * Students: class code → tap your name → tap your three secret pictures.
  *   No email, no typed password, no personal information. Teachers hand out
@@ -28,8 +28,8 @@
   SE.views.signin = function () {
     app().innerHTML = shell(`
       <div class="auth__brand">
-        <span class="eyebrow">STEM Coliseum and Learning Center</span>
-        <h1 tabindex="-1">STEM Explorers</h1>
+        <span class="auth__logo">${SE.brandMark(96)}</span>
+        <h1 tabindex="-1" class="auth__name"><span>STEM Explorer</span> Academy</h1>
         <p>Big ideas start with curious minds. Who's exploring today?</p>
       </div>
       <div class="doors">

@@ -1,6 +1,8 @@
-# STEM Explorers
+<p><img src="assets/img/brand/logo.svg" alt="STEM Explorer Academy" width="420"></p>
 
-The classroom dashboard for the **STEM Explorers** program at the **STEM Coliseum and Learning Center**. Teachers and students in grades 2–8 choose an exploration area, find an activity that fits their time and equipment, read the mission, and launch it.
+# STEM Explorer Academy
+
+The classroom dashboard for **STEM Explorer Academy**. Teachers and students in grades 2–8 choose an exploration area, find an activity that fits their time and equipment, read the mission, and launch it.
 
 **Choose an exploration area → Select an activity → Understand the mission → Launch the experience.**
 
@@ -16,7 +18,7 @@ The classroom dashboard for the **STEM Explorers** program at the **STEM Coliseu
 
 ## Interactive labs
 
-Each exploration area has its own leveled, interactive lab that runs inside STEM Explorers, with no outside account or website. Every level teaches one idea, gives a hint on request, checks the student's work, and ends with "What you just learned." Signed-in students earn XP for each level (+30), and lab work counts toward patches and the weekly streak.
+Each exploration area has its own leveled, interactive lab that runs inside STEM Explorer Academy, with no outside account or website. Every level teaches one idea, gives a hint on request, checks the student's work, and ends with "What you just learned." Signed-in students earn XP for each level (+30), and lab work counts toward patches and the weekly streak.
 
 | Area | Lab | Levels | What students learn |
 | --- | --- | --- | --- |
@@ -42,7 +44,7 @@ Lab code lives in `assets/js/labs/`. `lab-shell.js` provides the shared layout, 
 
 | | |
 | --- | --- |
-| Educator | `demo@stemexplorers.example` / `explore` |
+| Educator | `demo@stemexploreracademy.example` / `explore` |
 | Student | class code `ORBIT7` → **Ava R.** → Moon, Comet, Compass |
 
 The sample class has eight made-up students with two and a half weeks of made-up activity, so the educator dashboard has something to show. It is labeled as sample data everywhere it appears, and **Reset sample data** on the dashboard restores it.
@@ -80,7 +82,7 @@ This prototype keeps all accounts and activity in the browser's local storage. I
 
 ## Running it
 
-- **One-file version:** run `python tools/build_single_file.py` to create `dist/STEM Explorers.html`. Double-click that file to run the whole app offline, with no server needed. You can copy it to any computer.
+- **One-file version:** run `python tools/build_single_file.py` to create `dist/STEM Explorer Academy.html`. Double-click that file to run the whole app offline, with no server needed. You can copy it to any computer.
 
 It's a static site with no build step and no dependencies.
 
@@ -118,7 +120,7 @@ Copy any entry in `assets/js/data/activities.js`, give it a new `id`, and fill i
 | `duration` | Minutes. Used by the 20/30/45 time filter |
 | `format` | `independent`, `collaborative`, or `teacher-led` |
 | `equipment` | Keys from `equipment` in `areas.js` (for example, `computer`, `unplugged`, `vr`) |
-| `source` | `"original"` shows the "Original STEM Explorers sample lesson" label |
+| `source` | `"original"` shows the "Original STEM Explorer Academy lesson" label |
 | `featured` | `true` on one activity makes it the featured classroom mission |
 | `pathwayStage` | Optional. Links a coding activity to a pathway stage (1–7) |
 | `keywords` | Extra words for search |
@@ -146,6 +148,10 @@ Check every external link before adding it, and record whether it needs an accou
 | [Google Earth](https://earth.google.com/web/) | Explore a Virtual Ecosystem | Free; works best in Chrome |
 
 Two activities are marked **Resource coming soon** until the program picks a resource: the 360° Notice & Wonder Challenge (needs a 360° scene) and Stop-Motion Story Studio (needs a stop-motion app). The ecosystem field trip uses Google Earth now and still needs a headset experience.
+
+## Brand
+
+The SE compass logo is redrawn as vector art in `assets/img/brand/` (`mark.svg`, `logo.svg`), with the original file kept as `logo-original.png`. Brand colors are indigo `#2E286E` and lime `#91C440`. Headings use Montserrat and body text uses Atkinson Hyperlegible. Color tokens live at the top of `assets/css/styles.css`.
 
 ## Accessibility
 

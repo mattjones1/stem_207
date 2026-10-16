@@ -1,5 +1,5 @@
 /*
- * STEM Explorers — student views: expedition home, mission debrief,
+ * STEM Explorer Academy — student views: expedition home, mission debrief,
  * mission-complete celebration, and the explorer profile.
  */
 (function () {

@@ -1,5 +1,5 @@
 /*
- * STEM Explorers — library views: dashboard, exploration areas, activity pages, coding pathway.
+ * STEM Explorer Academy — library views: dashboard, exploration areas, activity pages, coding pathway.
  * These views adapt to who is signed in: guests browse, students earn progress,
  * educators see how their class is doing.
  */
@@ -227,11 +227,11 @@
     }).join("");
     return `
       <svg viewBox="-40 -10 420 360" role="img" aria-label="Mission scope showing the six exploration areas">
-        <defs><linearGradient id="sweepGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7fd8d3" stop-opacity="0"/><stop offset="1" stop-color="#7fd8d3" stop-opacity=".28"/></linearGradient></defs>
+        <defs><linearGradient id="sweepGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b9e27f" stop-opacity="0"/><stop offset="1" stop-color="#b9e27f" stop-opacity=".3"/></linearGradient></defs>
         <circle class="ring" cx="170" cy="170" r="145"/><circle class="ring" cx="170" cy="170" r="105"/><circle class="ring" cx="170" cy="170" r="62"/>
         <line class="axis" x1="25" y1="170" x2="315" y2="170"/><line class="axis" x1="170" y1="25" x2="170" y2="315"/>
         <path class="sweep" d="M170 170 L315 170 A145 145 0 0 0 272.5 67.5 Z"/>
-        <circle cx="170" cy="170" r="5" fill="#ec7a2f"/>${blips}
+        <circle cx="170" cy="170" r="5" fill="#91c440"/>${blips}
       </svg>`;
   }
 
@@ -430,7 +430,7 @@
           <p class="launch-panel__note">${esc(a.launch.note)}</p>
           ${lab ? `<div class="lab-progress"><span>${done.size} of ${lab.levels.length} levels complete</span><span class="meter"><span style="width:${(done.size / lab.levels.length) * 100}%"></span></span></div>` : ""}
           <a class="btn btn--launch" href="#/lab/${esc(a.launch.labId)}">${icon("rocket")}${done.size ? "Continue the lab" : esc(a.launch.label)}</a>
-          <p class="launch-panel__small">The lab opens right here in STEM Explorers. Use the Dashboard button to come back anytime.</p>
+          <p class="launch-panel__small">The lab opens right here in STEM Explorer Academy. Use the Dashboard button to come back anytime.</p>
         </section>`;
     }
     if (a.launch.status === "ready") {
@@ -523,7 +523,7 @@
           </div>
           <p class="page-top__lede">${esc(a.summary)}</p>
           <div class="page-top__tags">
-            ${a.source === "original" ? `<span class="label-original">${icon("flag")}Original STEM Explorers sample lesson</span>` : ""}
+            ${a.source === "original" ? `<span class="label-original">${icon("flag")}Original STEM Explorer Academy lesson</span>` : ""}
             ${isStudent ? (lastCompletion
               ? `<span class="chip chip--done-dark">${icon("check")}Completed ${SE.dateShort(lastCompletion.event.at)}</span>`
               : `<span class="chip chip--xp-dark">Worth ${SE.game.baseXp(a)} XP</span>`) : ""}

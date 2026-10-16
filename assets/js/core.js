@@ -1,5 +1,5 @@
 /*
- * STEM Explorers — shared helpers, icons, and lookups.
+ * STEM Explorer Academy — shared helpers, icons, and lookups.
  * Every other script hangs off the global `SE` namespace.
  */
 (function () {
@@ -72,6 +72,13 @@
   SE.icon = (name, extra = "") =>
     `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" ${extra}>${ICONS[name] || ""}</svg>`;
   SE.iconPaths = (name) => ICONS[name] || "";
+
+  /* Brand mark: ring and letters use currentColor so the logo adapts to light and dark surfaces. */
+  const BRAND_MARK = `<path d="M89.8 102.6 A52 52 0 1 1 107.1 82.0" fill="none" stroke="currentColor" stroke-width="9"/>
+  <path d="M56 8.5h8l-4 11z M8.5 56v8l11-4z M111.5 56v8l-11-4z" fill="currentColor"/>
+  <text x="57" y="79" text-anchor="middle" font-family="Montserrat, 'Arial Black', 'Helvetica Neue', Arial, sans-serif" font-weight="800" font-size="56" letter-spacing="-3" fill="currentColor">SE</text>
+  <path d="M84 85 L97.5 83.5 L98.5 72.5 L115 104 Z" fill="#91C440"/>`;
+  SE.brandMark = (size = 48, cls = "") => `<svg class="brand-mark ${cls}" viewBox="0 0 120 120" width="${size}" height="${size}" aria-hidden="true">${BRAND_MARK}</svg>`;
 
   /* ───────── Text and number helpers ───────── */
   SE.esc = (s) =>

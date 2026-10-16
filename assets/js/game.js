@@ -1,5 +1,5 @@
 /*
- * STEM Explorers — progression engine.
+ * STEM Explorer Academy — progression engine.
  * Turns a student's activity log into XP, rank, patches, and pathway status.
  * Rules live in data/progression.js.
  */

@@ -1,5 +1,5 @@
 /*
- * STEM Explorers — exploration areas and shared vocabularies.
+ * STEM Explorer Academy — exploration areas and shared vocabularies.
  *
  * Everything the filters and badges display is defined here, so adding a new
  * piece of equipment or a new area only means editing this file.

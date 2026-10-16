@@ -1,5 +1,5 @@
 /*
- * STEM Explorers — activity library.
+ * STEM Explorer Academy — activity library.
  *
  * Every activity follows the same shape. To add one, copy an existing entry,
  * give it a unique `id`, and fill in each field. See README.md for the full
@@ -1339,7 +1339,7 @@ window.STEM.activities = [
     ]
   },
 
-  /* ───────────────────────────── Interactive labs (run inside STEM Explorers) ───────────────────────────── */
+  /* ───────────────────────────── Interactive labs (run inside STEM Explorer Academy) ───────────────────────────── */
   {
     id: "lab-rover",
     title: "Rover Code Lab",
@@ -1354,7 +1354,7 @@ window.STEM.activities = [
     featured: false,
     keywords: ["lab", "blocks", "sequence", "loops", "conditionals", "variables", "functions", "debugging", "rover", "interactive"],
     access: { account: "none", cost: "free", supervision: false, hardware: [] },
-    launch: { status: "lab", labId: "rover", label: "Open the Rover Code Lab", note: "Runs inside STEM Explorers. No outside account or website needed." },
+    launch: { status: "lab", labId: "rover", label: "Open the Rover Code Lab", note: "Runs inside STEM Explorer Academy. No outside account or website needed." },
     mission: "Get the rover to the flag. Each level adds a new coding idea, and later levels limit how many blocks you can use, so you'll need loops, conditionals, variables, and your own blocks.",
     learn: [
       "Build and run a program as a sequence of instructions.",
@@ -1395,10 +1395,10 @@ window.STEM.activities = [
     source: "original",
     keywords: ["lab", "360", "field trip", "habitat", "adaptations", "compass", "observation", "inference", "interactive"],
     access: { account: "none", cost: "free", supervision: false, hardware: [] },
-    launch: { status: "lab", labId: "field-station", label: "Open Field Station 360", note: "Runs inside STEM Explorers. Drag, use arrow keys, or open it in a VR headset's web browser." },
+    launch: { status: "lab", labId: "field-station", label: "Open Field Station 360", note: "Runs inside STEM Explorer Academy. Drag, use arrow keys, or open it in a VR headset's web browser." },
     vr: {
       setup: [
-        "On a VR headset with a web browser, open STEM Explorers and go to this lab. Students drag with the controller to look around.",
+        "On a VR headset with a web browser, open STEM Explorer Academy and go to this lab. Students drag with the controller to look around.",
         "Keep headset turns to 10–15 minutes, seated or standing clear of furniture.",
         "The lab saves nothing to the headset; students can sign in with their picture code to save progress."
       ],
@@ -1443,7 +1443,7 @@ window.STEM.activities = [
     source: "original",
     keywords: ["lab", "machine learning", "training data", "bias", "confidence", "responsible ai", "classifier", "interactive"],
     access: { account: "none", cost: "free", supervision: true, hardware: [] },
-    launch: { status: "lab", labId: "pattern-machine", label: "Open the Pattern Machine Lab", note: "Runs inside STEM Explorers. Uses made-up creatures only: no cameras, photos, or personal information." },
+    launch: { status: "lab", labId: "pattern-machine", label: "Open the Pattern Machine Lab", note: "Runs inside STEM Explorer Academy. Uses made-up creatures only: no cameras, photos, or personal information." },
     mission: "Teach a machine to sort creatures, then put it to the test. You'll see how the number and variety of examples change what it learns, catch it learning the wrong lesson, and decide when AI should and shouldn't be trusted.",
     learn: [
       "Explain that AI learns patterns from labeled training examples.",
@@ -1484,7 +1484,7 @@ window.STEM.activities = [
     source: "original",
     keywords: ["lab", "catapult", "design", "iteration", "fair test", "budget", "optimize", "engineering notebook", "interactive"],
     access: { account: "none", cost: "free", supervision: false, hardware: [] },
-    launch: { status: "lab", labId: "launcher", label: "Open the Launcher Lab", note: "Runs inside STEM Explorers." },
+    launch: { status: "lab", labId: "launcher", label: "Open the Launcher Lab", note: "Runs inside STEM Explorer Academy." },
     mission: "Your team is building a launcher for a field-day challenge. Hit the targets, clear the wall, stay on budget, and record every trial in your engineering notebook.",
     learn: [
       "Use test results to decide what to change next (iteration).",
@@ -1524,7 +1524,7 @@ window.STEM.activities = [
     source: "original",
     keywords: ["lab", "robot", "sensors", "rules", "robot behavior", "if then", "debugging", "trade-offs", "interactive"],
     access: { account: "none", cost: "free", supervision: false, hardware: [] },
-    launch: { status: "lab", labId: "line-follower", label: "Open the Line Follower Lab", note: "Runs inside STEM Explorers." },
+    launch: { status: "lab", labId: "line-follower", label: "Open the Line Follower Lab", note: "Runs inside STEM Explorer Academy." },
     mission: "Your robot has two light sensors. Give it rules for everything it might sense so it can drive a full lap, recover from sharp corners, and race the clock.",
     learn: [
       "Describe the sense → think → act loop that robots use.",
@@ -1563,7 +1563,7 @@ window.STEM.activities = [
     source: "original",
     keywords: ["lab", "experiment", "variables", "fair test", "data", "graph", "average", "claim evidence reasoning", "friction", "interactive"],
     access: { account: "none", cost: "free", supervision: false, hardware: [] },
-    launch: { status: "lab", labId: "ramp-racers", label: "Open Ramp Racers", note: "Runs inside STEM Explorers." },
+    launch: { status: "lab", labId: "ramp-racers", label: "Open Ramp Racers", note: "Runs inside STEM Explorer Academy." },
     mission: "Find out what makes a car roll farther. You'll test ramp height, floor surface, and the car's weight, then write a scientific explanation backed by your own data.",
     learn: [
       "Repeat trials and use the average because measurements vary.",
@@ -1603,7 +1603,7 @@ window.STEM.activities = [
     source: "original",
     keywords: ["lab", "pixels", "resolution", "encoding", "animation", "frames", "fps", "digital art", "interactive"],
     access: { account: "none", cost: "free", supervision: false, hardware: [] },
-    launch: { status: "lab", labId: "pixel-studio", label: "Open the Pixel Animation Studio", note: "Runs inside STEM Explorers. Signed-in students' animations are saved to their gallery." },
+    launch: { status: "lab", labId: "pixel-studio", label: "Open the Pixel Animation Studio", note: "Runs inside STEM Explorer Academy. Signed-in students' animations are saved to their gallery." },
     mission: "Learn how computers store pictures, then make your own looping animation and save it to your gallery.",
     learn: [
       "Explain that digital images are made of pixels and that resolution changes detail.",

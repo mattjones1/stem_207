@@ -1,5 +1,5 @@
 /*
- * STEM Explorers — drawn elements: rank insignia, mission patches,
+ * STEM Explorer Academy — drawn elements: rank insignia, mission patches,
  * the expedition star map, and the class goal track.
  */
 (function () {
@@ -11,7 +11,7 @@
 
   /* Fixed object colors: insignia and patches are "physical" objects, so they keep
      their colors in both themes, like a real embroidered patch would. */
-  const C = { navy: "#142b4c", navyDeep: "#0d1d36", teal: "#0b7471", tealLight: "#7fd8d3", orange: "#ec7a2f", cream: "#f6efe2", ink: "#0d1d36" };
+  const C = { navy: "#2e286e", navyDeep: "#1a1745", teal: "#4741b0", tealLight: "#b9e27f", orange: "#91c440", cream: "#f6f5ff", ink: "#1e1a4d" };
 
   function starPath(cx, cy, r) {
     const pts = [];
@@ -43,15 +43,16 @@
   SE.patchArt = (patch, earned, size = 96) => {
     const id = `arc${++uid}`;
     const ring = { teal: C.teal, orange: C.orange, navy: C.navy }[patch.ring] || C.teal;
-    const inner = patch.ring === "navy" ? "#0b4f4d" : C.navy;
+    const inner = patch.ring === "navy" ? "#4741b0" : C.navy;
     const cls = earned ? "patch" : "patch patch--locked";
+    const ink = patch.ring === "orange" ? C.ink : C.cream; // dark lettering on the lime ring
     return `<svg class="${cls}" width="${size}" height="${size}" viewBox="0 0 120 120" role="img" aria-label="${SE.esc(patch.name)} patch${earned ? "" : ", not earned yet"}">
       <defs><path id="${id}" d="M 13 60 A 47 47 0 0 0 107 60"/></defs>
       <circle class="patch__ring" cx="60" cy="60" r="57" fill="${ring}"/>
-      <circle class="patch__stitch" cx="60" cy="60" r="53" fill="none" stroke="${C.cream}" stroke-width="1.6" stroke-dasharray="3 3"/>
+      <circle class="patch__stitch" cx="60" cy="60" r="53" fill="none" stroke="${ink}" stroke-width="1.6" stroke-dasharray="3 3"/>
       <circle class="patch__inner" cx="60" cy="60" r="42" fill="${inner}"/>
       <g class="patch__icon" transform="translate(39 31) scale(1.75)" fill="none" stroke="${C.cream}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${SE.iconPaths(patch.icon)}</g>
-      <text class="patch__text" font-family="Chakra Petch, sans-serif" font-weight="700" font-size="10" letter-spacing="1.4" fill="${C.cream}">
+      <text class="patch__text" font-family="Montserrat, sans-serif" font-weight="700" font-size="9.5" letter-spacing="1" fill="${ink}">
         <textPath href="#${id}" startOffset="50%" text-anchor="middle">${SE.esc(patch.name.toUpperCase())}</textPath>
       </text>
       ${earned ? "" : `<g transform="translate(46 46)"><circle cx="14" cy="14" r="14" class="patch__lockbg"/><g transform="translate(5 5) scale(.75)" fill="none" class="patch__lock" stroke-width="2.4" stroke-linecap="round">${SE.iconPaths("lock")}</g></g>`}

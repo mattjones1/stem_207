@@ -1,5 +1,5 @@
 /*
- * STEM Explorers — progression rules.
+ * STEM Explorer Academy — progression rules.
  *
  * Everything a student earns is calculated from their activity log, so these
  * rules can be tuned at any time and every student's rank and patches update
