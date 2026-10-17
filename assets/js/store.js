@@ -1,12 +1,17 @@
 /*
  * STEM 207 — accounts, sessions, and the activity log.
  *
- * PROTOTYPE STORAGE: everything is kept in this browser's localStorage.
- * That's enough to try the experience on one device, but it is NOT a secure
- * or shared account system. To go live, replace the functions in the
- * "Persistence" section with calls to a real backend (for example Firebase,
- * Supabase, or a district SSO service). The rest of the app only talks to the
- * `SE.store` API below, so nothing else has to change.
+ * Two modes, same API (the rest of the app only talks to `SE.store`):
+ *
+ *   LOCAL (default): everything is kept in this browser's localStorage. Good for
+ *   trying the app on one device, but not shared and not secure.
+ *
+ *   CLOUD: when assets/js/config.js has a Supabase URL and key. Educators sign in
+ *   with Supabase Auth; students sign in through database functions; data is shared
+ *   across devices and protected by row-level security (see supabase/schema.sql).
+ *   Reads come from an in-memory copy loaded at sign-in, so every screen stays fast
+ *   and synchronous. Writes update that copy right away and are sent to the server
+ *   in order in the background, with automatic retries if the connection drops.
  */
 (function () {
   "use strict";
@@ -14,6 +19,7 @@
   const STEM = window.STEM;
   const KEY = "stem-explorers:v2";
   const SESSION_KEY = "stem-explorers:session";
+  const CLOUD = !!(SE.cloud && SE.cloud.enabled);
 
   /* ───────── Persistence ───────── */
   let memoryDb = null;      // used when localStorage is blocked
@@ -123,11 +129,12 @@
     ]
   };
 
-  function seedDemo() {
+  function seedDemo(opts = {}) {
+    const sfx = opts.suffix || "";
     const rand = SE.rng("stem-explorers-demo");
     const now = Date.now();
     const educator = {
-      id: "edu_demo",
+      id: opts.educatorId || "edu_demo",
       name: "Demo Educator",
       email: DEMO.email,
       salt: "demo-salt",
@@ -136,9 +143,9 @@
       createdAt: now - 30 * SE.DAY
     };
     const cls = {
-      id: "cls_demo",
+      id: `cls_demo${sfx}`,
       name: "Room 12 (sample class)",
-      code: DEMO.classCode,
+      code: opts.code || DEMO.classCode,
       educatorId: educator.id,
       isDemo: true,
       createdAt: now - 30 * SE.DAY
@@ -148,7 +155,7 @@
       ["Lena M.", "4-5", 0.6], ["Darius T.", "4-5", 0.8], ["Sofia G.", "2-3", 0.55], ["Eli W.", "4-5", 0.15]
     ];
     const students = people.map(([name, band], i) => ({
-      id: `stu_demo_${i}`,
+      id: `stu_demo_${i}${sfx}`,
       classId: cls.id,
       displayName: name,
       gradeBand: band,
@@ -159,7 +166,7 @@
 
     const events = [];
     const ev = (student, type, at, data = {}) => {
-      const e = { id: `ev_demo_${events.length}`, studentId: student.id, classId: cls.id, type, at, data, isDemo: true };
+      const e = { id: `ev_demo_${events.length}${sfx}`, studentId: student.id, classId: cls.id, type, at, data, isDemo: true };
       events.push(e);
       return e;
     };
@@ -201,7 +208,7 @@
         // Older reflections have been reviewed; the last few are waiting.
         if (answered && (dayOffset > 2 ? rand() < 0.95 : rand() < 0.4)) {
           events.push({
-            id: `ev_demo_${events.length}`, studentId: s.id, classId: cls.id, type: "reflection_reviewed",
+            id: `ev_demo_${events.length}${sfx}`, studentId: s.id, classId: cls.id, type: "reflection_reviewed",
             at: done.at + SE.DAY, data: { completionId: done.id, note: rand() < 0.4 ? "Great evidence in this answer." : "" },
             by: educator.id, isDemo: true
           });
@@ -212,7 +219,7 @@
           ev(s, "ican_claimed", done.at + 60000, { stage });
           if (dayOffset > 2 || rand() < 0.5) {
             events.push({
-              id: `ev_demo_${events.length}`, studentId: s.id, classId: cls.id, type: "ican_verified",
+              id: `ev_demo_${events.length}${sfx}`, studentId: s.id, classId: cls.id, type: "ican_verified",
               at: done.at + SE.DAY, data: { stage }, by: educator.id, isDemo: true
             });
             completedStages = stage;
@@ -280,14 +287,158 @@
     return ensureDemoHash();
   }
 
+
+  /* ═════════════════════════ Cloud mode (Supabase) ═════════════════════════ */
+  const ms = (t) => (t ? new Date(t).getTime() : Date.now());
+  const iso = (n) => new Date(n || Date.now()).toISOString();
+  const fromRow = {
+    educator: (r) => ({ id: r.id, name: r.name, email: r.email, createdAt: ms(r.created_at) }),
+    cls: (r) => ({ id: r.id, name: r.name, code: r.code, educatorId: r.educator_id, isDemo: r.is_demo, createdAt: ms(r.created_at) }),
+    student: (r) => ({ id: r.id, classId: r.class_id, displayName: r.display_name, gradeBand: r.grade_band, picCode: r.pic_code, isDemo: r.is_demo, createdAt: ms(r.created_at) }),
+    event: (r) => ({ id: r.id, studentId: r.student_id, classId: r.class_id, type: r.type, at: Number(r.at), data: r.data || {}, by: r.by || undefined, isDemo: r.is_demo })
+  };
+  const toRow = {
+    cls: (c) => ({ id: c.id, educator_id: c.educatorId, name: c.name, code: c.code, is_demo: !!c.isDemo, created_at: iso(c.createdAt) }),
+    student: (s) => ({ id: s.id, class_id: s.classId, display_name: s.displayName, grade_band: s.gradeBand, pic_code: s.picCode, is_demo: !!s.isDemo, created_at: iso(s.createdAt) }),
+    event: (e) => ({ id: e.id, student_id: e.studentId, class_id: e.classId, type: e.type, at: e.at, data: e.data || {}, by: e.by || null, is_demo: !!e.isDemo })
+  };
+  const emptyDb = () => ({ version: 7, educators: [], classes: [], students: [], events: [] });
+  const cloudCode = () => `${CODE_WORDS[Math.floor(Math.random() * CODE_WORDS.length)]}${Math.floor(Math.random() * 900 + 100)}`;
+
+  async function loadEducator(user) {
+    const [eds, classes, students, events] = await Promise.all([
+      SE.cloud.selectAll("educators", `id=eq.${user.id}`),
+      SE.cloud.selectAll("classes", "order=created_at.asc"),
+      SE.cloud.selectAll("students", "order=created_at.asc"),
+      SE.cloud.selectAll("events", "order=at.asc")
+    ]);
+    if (!eds.length) {
+      // The sign-up trigger normally creates this row; make it here if it's missing.
+      const row = { id: user.id, name: user.name || user.email.split("@")[0], email: user.email };
+      await SE.cloud.rest("POST", "/educators", row, "resolution=ignore-duplicates");
+      eds.push(row);
+    }
+    db = { version: 7, educators: eds.map(fromRow.educator), classes: classes.map(fromRow.cls), students: students.map(fromRow.student), events: events.map(fromRow.event) };
+  }
+  function loadStudentState(state) {
+    db = emptyDb();
+    db.classes.push({ ...state.class, educatorId: null });
+    db.students.push({ ...state.student, picCode: [] });
+    db.events = (state.events || []).map((e) => ({ ...e, at: Number(e.at), data: e.data || {} }));
+  }
+
+  /* Outbox: writes go to the server one at a time, in order, retrying when offline. */
+  const outbox = [];
+  let flushing = null, failures = 0, warnedOffline = false;
+  const sleep = (t) => new Promise((r) => setTimeout(r, t));
+  function send(op) { outbox.push(op); return flush(); }
+  function flush() {
+    if (!flushing) flushing = (async () => {
+      while (outbox.length) {
+        const op = outbox[0];
+        try {
+          await op.run();
+          outbox.shift();
+          failures = 0;
+          if (warnedOffline) { warnedOffline = false; SE.toast && SE.toast("Back online. Your work is saved."); }
+        } catch (e) {
+          if (e.offline || e.status >= 500 || e.status === 429) {
+            failures++;
+            if (!warnedOffline && failures >= 2) { warnedOffline = true; SE.toast && SE.toast("Can't reach the server. Your work will save when you're back online."); }
+            await sleep(Math.min(30000, 1000 * 2 ** Math.min(failures, 5)));
+            continue;
+          }
+          outbox.shift();
+          if (op.onError && (await op.onError(e))) continue;
+          console.warn("STEM 207: a change couldn't be saved", e);
+          if (e.status === 401) { SE.toast && SE.toast("Your sign-in expired. Please sign in again."); outbox.length = 0; }
+          else SE.toast && SE.toast("One change couldn't be saved. Refresh the page to see the latest.");
+        }
+      }
+    })().finally(() => { flushing = null; });
+    return flushing;
+  }
+  window.addEventListener("beforeunload", (e) => { if (outbox.length) { e.preventDefault(); e.returnValue = ""; } });
+
+  const restOp = (method, path, body, prefer, onError) => ({ run: () => SE.cloud.rest(method, path, body, prefer), onError });
+  const insertClassOp = (cls, tries = 0) => restOp("POST", "/classes", toRow.cls(cls), "return=minimal", async (e) => {
+    if ((e.status !== 409 && e.code !== "23505") || tries >= 8) {
+      db.classes = db.classes.filter((c) => c.id !== cls.id); // never reached the server; take it back out
+      SE.toast && SE.toast(`Couldn't create ${cls.name}. Try again.`);
+      return true;
+    }
+    cls.code = cloudCode(); // class code already taken by another teacher: pick a new one and retry
+    outbox.unshift(insertClassOp(cls, tries + 1));
+    SE.toast && SE.toast(`Class code changed to ${cls.code}`);
+    return true;
+  });
+
+  async function initCloud() {
+    db = emptyDb();
+    const s = readSession();
+    if (!s || !s.cloud) { if (s && s.role !== "guest") writeSession(null); return; }
+    try {
+      if (s.role === "educator") {
+        const a = SE.cloud.auth();
+        if (!a) { writeSession(null); return; }
+        await loadEducator(a.user);
+      } else if (s.role === "student") {
+        const st = await SE.cloud.rpc("student_state", { p_token: s.token });
+        if (!st || !st.ok) { writeSession(null); return; }
+        loadStudentState(st);
+      }
+    } catch (e) {
+      if (e.status === 401 || e.status === 400) { writeSession(null); SE.cloud.forgetAuth(); }
+      else { SE.store.loadError = e; console.warn("STEM 207: couldn't load your data", e); }
+    }
+  }
+
+  async function installDemoCloud(educatorId) {
+    const own = db.classes.filter((c) => c.isDemo && c.educatorId === educatorId);
+    for (const c of own) await SE.cloud.rest("DELETE", `/classes?id=eq.${encodeURIComponent(c.id)}`);
+    const d = seedDemo({ suffix: `_${SE.uid("d").slice(-8)}`, educatorId, code: cloudCode() });
+    for (let tries = 0; ; tries++) {
+      try { await SE.cloud.rest("POST", "/classes", toRow.cls(d.cls), "return=minimal"); break; }
+      catch (e) { if ((e.status === 409 || e.code === "23505") && tries < 5) d.cls.code = cloudCode(); else throw e; }
+    }
+    await SE.cloud.rest("POST", "/students", d.students.map(toRow.student), "return=minimal");
+    for (let i = 0; i < d.events.length; i += 500) await SE.cloud.rest("POST", "/events", d.events.slice(i, i + 500).map(toRow.event), "return=minimal");
+    const a = SE.cloud.auth();
+    await loadEducator(a.user);
+    return d.cls;
+  }
+
+  const authError = (e) => {
+    const m = `${e.code || ""} ${e.message || ""}`.toLowerCase();
+    if (e.offline) return { field: "email", error: "Can't reach the server. Check your internet connection and try again." };
+    if (m.includes("not_confirmed") || m.includes("not confirmed")) return { field: "email", error: "Confirm your email first: open the link Supabase sent you, then sign in." };
+    if (m.includes("invalid") && (m.includes("credential") || m.includes("grant") || m.includes("login"))) return { field: "password", error: "That email and password don't match. Check for typos and try again." };
+    if (m.includes("already") || m.includes("exists")) return { field: "email", error: "An account with this email already exists. Sign in instead." };
+    if (m.includes("password")) return { field: "password", error: e.message };
+    return { field: "email", error: e.message || "Something went wrong. Try again." };
+  };
+
   /* ───────── Public API ───────── */
   SE.store = {
     DEMO,
+    mode: CLOUD ? "cloud" : "local",
     ready: null,
+    loadError: null,
+    pendingWrites: () => outbox.length,
+    flush: () => flush(),
 
     /* Session */
     session: () => readSession(),
-    signOut() { writeSession(null); },
+    async signOut() {
+      const s = readSession();
+      if (CLOUD) {
+        await Promise.race([flush(), sleep(4000)]);
+        if (s && s.role === "student" && s.token) SE.cloud.rpc("student_sign_out", { p_token: s.token }).catch(() => {});
+        if (s && s.role === "educator") await SE.cloud.signOut();
+        db = emptyDb();
+      }
+      writeSession(null);
+    },
     startGuest() { writeSession({ role: "guest" }); },
     currentUser() {
       const s = readSession();
@@ -311,6 +462,18 @@
       if (!name) return { ok: false, field: "name", error: "Enter your name as students will see it, like Ms. Lopez." };
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, field: "email", error: "Enter a full email address, like name@school.org." };
       if (String(password || "").length < 8) return { ok: false, field: "password", error: "Use at least 8 characters for your password." };
+      if (CLOUD) {
+        try {
+          const r = await SE.cloud.signUp(email, password, name);
+          if (r.needsConfirm) return { ok: false, field: "email", error: "Almost done: check your email for a link to confirm your account, then sign in." };
+          await loadEducator(r.session.user);
+          const cls = { id: SE.uid("cls"), name: String(className || "").trim() || `${name}'s class`, code: cloudCode(), educatorId: r.session.user.id, createdAt: Date.now() };
+          db.classes.push(cls);
+          writeSession({ role: "educator", id: r.session.user.id, cloud: true });
+          await send(insertClassOp(cls));
+          return { ok: true, educator: db.educators[0], cls };
+        } catch (e) { return { ok: false, ...authError(e) }; }
+      }
       if (db.educators.some((e) => e.email === email)) return { ok: false, field: "email", error: "An account with this email already exists. Sign in instead." };
       const salt = SE.uid("salt");
       const educator = { id: SE.uid("edu"), name, email, salt, hash: await hash(password, salt), createdAt: Date.now() };
@@ -324,6 +487,15 @@
 
     async signInEducator(email, password) {
       email = String(email || "").trim().toLowerCase();
+      if (CLOUD) {
+        if (!email) return { ok: false, field: "email", error: "Enter the email you signed up with." };
+        try {
+          const a = await SE.cloud.signIn(email, password);
+          await loadEducator(a.user);
+          writeSession({ role: "educator", id: a.user.id, cloud: true });
+          return { ok: true, educator: db.educators[0] };
+        } catch (e) { return { ok: false, ...authError(e) }; }
+      }
       const edu = db.educators.find((e) => e.email === email);
       if (!edu) return { ok: false, field: "email", error: "We couldn't find an educator account with that email." };
       if ((await hash(password, edu.salt)) !== edu.hash) return { ok: false, field: "password", error: "That password doesn't match. Check for typos and try again." };
@@ -335,10 +507,19 @@
     classesFor: (educatorId) => db.classes.filter((c) => c.educatorId === educatorId),
     classById: (id) => db.classes.find((c) => c.id === id),
     classByCode: (code) => db.classes.find((c) => c.code === String(code || "").trim().toUpperCase().replace(/\s+/g, "")),
+    /* Student sign-in step 1: the class and its roster (names only), or null. */
+    async findClass(code) {
+      if (CLOUD) {
+        const r = await SE.cloud.rpc("class_roster", { p_code: String(code || "") });
+        return r ? { id: r.id, name: r.name, code: r.code, students: r.students || [] } : null;
+      }
+      const cls = SE.store.classByCode(code);
+      return cls ? { ...cls, students: SE.store.studentsIn(cls.id).map(({ id, displayName, gradeBand }) => ({ id, displayName, gradeBand })) } : null;
+    },
     createClass(educatorId, name) {
-      const cls = { id: SE.uid("cls"), name: String(name || "").trim() || "New class", code: newClassCode(), educatorId, createdAt: Date.now() };
+      const cls = { id: SE.uid("cls"), name: String(name || "").trim() || "New class", code: CLOUD ? cloudCode() : newClassCode(), educatorId, createdAt: Date.now() };
       db.classes.push(cls);
-      save();
+      if (CLOUD) send(insertClassOp(cls)); else save();
       return cls;
     },
 
@@ -353,28 +534,46 @@
         return { ok: false, error: `${name} is already in this class. Add a last initial to tell them apart.` };
       const student = { id: SE.uid("stu"), classId, displayName: name, gradeBand: gradeBand || "4-5", picCode: newPictureCode(), createdAt: Date.now() };
       db.students.push(student);
-      save();
+      if (CLOUD) send(restOp("POST", "/students", toRow.student(student), "return=minimal")); else save();
       return { ok: true, student };
     },
     updateStudent(id, patch) {
       const s = db.students.find((x) => x.id === id);
       if (!s) return;
       Object.assign(s, patch);
-      save();
+      if (CLOUD) {
+        const row = {};
+        if (patch.gradeBand) row.grade_band = patch.gradeBand;
+        if (patch.displayName) row.display_name = patch.displayName;
+        if (patch.picCode) row.pic_code = patch.picCode;
+        send(restOp("PATCH", `/students?id=eq.${encodeURIComponent(id)}`, row, "return=minimal"));
+      } else save();
     },
     newPictureCodeFor(id) {
       const s = db.students.find((x) => x.id === id);
       if (!s) return;
-      s.picCode = newPictureCode();
-      save();
+      SE.store.updateStudent(id, { picCode: newPictureCode() });
       return s.picCode;
     },
     removeStudent(id) {
       db.students = db.students.filter((s) => s.id !== id);
       db.events = db.events.filter((e) => e.studentId !== id);
-      save();
+      if (CLOUD) send(restOp("DELETE", `/students?id=eq.${encodeURIComponent(id)}`, undefined, "return=minimal")); else save();
     },
-    signInStudent(studentId, code) {
+    async signInStudent(studentId, code) {
+      if (CLOUD) {
+        let r;
+        try { r = await SE.cloud.rpc("student_sign_in", { p_student_id: studentId, p_code: code }); }
+        catch (e) { return { ok: false, error: e.offline ? "Can't reach the server. Check the internet connection and try again." : "Something went wrong. Try again." }; }
+        if (!r || !r.ok) {
+          const msg = { locked: "Too many tries. Wait 10 minutes, or ask your teacher for your login card.", missing: "We couldn't find that explorer." }[r && r.error];
+          return { ok: false, error: msg || "Those pictures don't match. Try again, or ask your teacher for your login card." };
+        }
+        loadStudentState(r);
+        writeSession({ role: "student", id: r.student.id, token: r.token, cloud: true });
+        SE.store.log("signed_in");
+        return { ok: true, student: db.students[0] };
+      }
       const s = db.students.find((x) => x.id === studentId);
       if (!s) return { ok: false, error: "We couldn't find that explorer." };
       if (code.join("|") !== s.picCode.join("|")) return { ok: false, error: "Those pictures don't match. Try again, or ask your teacher for your login card." };
@@ -391,7 +590,14 @@
       if (!st) return null;
       const e = { id: SE.uid("ev"), studentId: st.id, classId: st.classId, type, at: Date.now(), data };
       db.events.push(e);
-      save();
+      if (CLOUD) {
+        send({
+          run: async () => {
+            const r = await SE.cloud.rpc("student_log", { p_token: s.token, p_event: { id: e.id, type, at: e.at, data } });
+            if (r && r.ok === false) { const err = new Error("Your sign-in expired. Please sign in again."); err.status = 401; throw err; }
+          }
+        });
+      } else save();
       return e;
     },
     teacherLog(studentId, type, data = {}) {
@@ -400,19 +606,27 @@
       if (!s || s.role !== "educator" || !st) return null;
       const e = { id: SE.uid("ev"), studentId, classId: st.classId, type, at: Date.now(), data, by: s.id };
       db.events.push(e);
-      save();
+      if (CLOUD) send(restOp("POST", "/events", toRow.event(e), "return=minimal")); else save();
       return e;
     },
     eventsFor: (studentId) => db.events.filter((e) => e.studentId === studentId),
     eventsForClass: (classId) => db.events.filter((e) => e.classId === classId),
 
-    /* Demo */
+    /* Demo: in local mode, restores the built-in sample class. In cloud mode, adds a
+       fresh sample class to the signed-in educator's account (replacing an older one). */
     async resetDemo() {
+      if (CLOUD) {
+        const s = readSession();
+        if (!s || s.role !== "educator") return null;
+        await flush();
+        return installDemoCloud(s.id);
+      }
       installDemo();
       save();
       await ensureDemoHash();
+      return db.classes.find((c) => c.isDemo);
     }
   };
 
-  SE.store.ready = init();
+  SE.store.ready = CLOUD ? initCloud() : init();
 })();

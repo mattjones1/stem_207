@@ -72,13 +72,43 @@ The sample class has eight made-up students with two and a half weeks of made-up
 
 Each student action is saved as an event: signed in, opened a mission, checked a step, launched a resource, completed a mission (with answer, challenge, and confidence), claimed a pathway stage. Teacher actions are also events: confirmed a stage, said not yet, read or replied to a reflection. XP, ranks, and patches are calculated from the events using the rules in `assets/js/data/progression.js`, so changing a rule updates everyone.
 
+## Back end (Supabase, free)
+
+STEM 207 runs in one of two modes, chosen by `assets/js/config.js`:
+
+| | Local mode (default) | Cloud mode |
+| --- | --- | --- |
+| Turn on by | Leaving `config.js` empty | Pasting a Supabase URL and publishable key into `config.js` |
+| Where data lives | This browser only | Your Supabase Postgres database, shared across every device |
+| Educator passwords | Hashed in the browser | Handled by Supabase Auth |
+| Student sign-in | Checked in the browser | Checked by the database; 8 wrong tries in 10 minutes pauses sign-in |
+| Sample class | Built in (`demo@stem207.example`) | Any educator can add one from **Class & logins** |
+| Works offline | Always | Keeps working; changes save when the connection returns |
+
+### Set up the free back end (about 10 minutes)
+
+1. Create a free account at [supabase.com](https://supabase.com) and click **New project**. Pick a region near Maine (for example US East) and save the database password somewhere safe.
+2. In the project, open **SQL Editor → New query**, paste all of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**. It creates the tables, the security rules, and the student sign-in functions. Running it again is safe.
+3. Open **Authentication → Sign In / Providers → Email** and turn off **Confirm email** while you're prototyping, so new educator accounts work right away. (If you leave it on, teachers must click the link in a confirmation email first. In that case, set **Authentication → URL Configuration → Site URL** to wherever your site lives.)
+4. Open **Project Settings → API Keys**. Copy the **Project URL** and the **publishable** key (older projects call it the **anon public** key) into `assets/js/config.js`. Never use a secret or `service_role` key here.
+5. Commit and push. GitHub Pages serves the site with the back end on. To make the one-file version use it too, run `python tools/build_single_file.py` again.
+6. Open the site, choose **I'm an educator → Create an educator account**, then add students or **Add a sample class** to explore the dashboard with made-up data.
+
+Free projects pause after about a week with no activity. If that happens, open the project in the Supabase dashboard and click **Restore**.
+
+### How it works
+
+- `supabase/schema.sql` defines five tables (`educators`, `classes`, `students`, `events`, plus private `student_sessions` and `sign_in_attempts`) with row-level security. Each educator can read and change only their own classes, students, and events.
+- Students never get a Supabase account. They sign in through database functions (`class_roster`, `student_sign_in`, `student_state`, `student_log`, `student_sign_out`) that check the picture code on the server and hand back a 7-day session token. Picture codes are visible only to the student's educator.
+- `assets/js/cloud.js` is a small client for Supabase Auth, REST, and RPC with no extra libraries, so the app still runs as plain files.
+- `assets/js/store.js` keeps the same `SE.store` API in both modes. In cloud mode it loads the signed-in person's data once, serves every screen from memory, and sends each change to the server in order in the background, retrying if the connection drops.
+- `tests/backend/` has a Supabase stand-in for testing the rules and sync on plain Postgres. See its README.
+
 ### Before using with real students
 
-This prototype keeps all accounts and activity in the browser's local storage. It works for a demo on one device, but data isn't shared between devices and passwords are only hashed in the browser. To go live:
-
-1. Replace the storage functions in `assets/js/store.js` with a real backend (for example Firebase, Supabase, or your district's sign-in service). The rest of the app only uses the `SE.store` API.
-2. Review student-data requirements (COPPA, FERPA, and district policy) and get the approvals your program needs.
-3. Keep collecting only display names and grade bands for students.
+1. Review student-data requirements (COPPA, FERPA, Maine student privacy law, and district policy) and get the approvals your program needs. Supabase's free tier is meant for prototypes; a district rollout should use a paid plan with a data processing agreement.
+2. Keep collecting only display names and grade bands for students.
+3. Keep **Confirm email** on once real educators are signing up.
 
 ## Made in Maine
 
@@ -114,7 +144,11 @@ assets/js/data/activities.js  The activity library
 assets/js/data/pathway.js     The seven coding pathway stages
 assets/js/data/progression.js XP rules, ranks, patches, class goal, picture codes
 assets/js/core.js             Shared helpers and icons
-assets/js/store.js            Accounts, sessions, activity log, sample class (swap for a backend)
+assets/js/config.js           Back-end settings: empty = local mode, Supabase URL + key = cloud mode
+assets/js/cloud.js            Small Supabase client (Auth, REST, RPC)
+assets/js/store.js            Accounts, sessions, activity log, sample class, cloud sync
+supabase/schema.sql           Database tables, security rules, and student sign-in functions
+tests/backend/                Supabase stand-in for testing cloud mode on plain Postgres
 assets/js/game.js             Turns the activity log into XP, rank, patches, and pathway status
 assets/js/art.js              Insignia, patches, expedition map, class goal track
 assets/js/views-*.js          Library, student, sign-in, and educator views

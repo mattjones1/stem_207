@@ -88,7 +88,7 @@
       ${cls && cls.isDemo ? `
         <div class="wrap"><div class="demo-banner">
           ${icon("flag")}
-          <p><strong>Sample class.</strong> These students and their activity are made up to show how the dashboard works. Changes you make here are saved in this browser.</p>
+          <p><strong>Sample class.</strong> These students and their activity are made up to show how the dashboard works. ${SE.store.mode === "cloud" ? "It lives in your account so you can explore; remove it anytime by resetting it or ignore it." : "Changes you make here are saved in this browser."}</p>
           <button type="button" class="btn btn--ghost btn--small" id="reset-demo">${icon("refresh")}Reset sample data</button>
         </div></div>` : ""}
       ${body}`;
@@ -98,7 +98,9 @@
     const sw = document.getElementById("class-switch");
     if (sw) sw.addEventListener("change", () => { currentClassId = sw.value; SE.route(true); });
     const rd = document.getElementById("reset-demo");
-    if (rd) rd.addEventListener("click", async () => { await SE.store.resetDemo(); SE.toast("Sample data reset"); SE.route(true); });
+    if (rd) rd.addEventListener("click", async () => { rd.disabled = true; try { const c = await SE.store.resetDemo(); if (c) currentClassId = c.id; SE.toast("Sample data reset"); } catch (e) { SE.toast("Couldn't reset the sample class. Try again."); } SE.route(true); });
+    const ad = document.getElementById("add-demo");
+    if (ad) ad.addEventListener("click", async () => { ad.disabled = true; ad.textContent = "Adding the sample class…"; try { const c = await SE.store.resetDemo(); if (c) currentClassId = c.id; SE.toast("Sample class added"); location.hash = "#/teach"; } catch (e) { SE.toast("Couldn't add the sample class. Try again."); } SE.route(true); });
   }
 
   function pendingReflections(summary) {
@@ -124,7 +126,9 @@
         <p>You'll get a class code students use to sign in.</p>
         <form id="new-class" class="inline-form"><label class="visually-hidden" for="nc-name">Class name</label>
           <input id="nc-name" class="input" placeholder="Class name, like Room 12"><button class="btn btn--primary" type="submit">${icon("plus")}Create class</button></form>
+        ${SE.store.mode === "cloud" ? `<p class="muted">Or explore first: <button type="button" class="linkish" id="add-demo">add a sample class with made-up students</button>.</p>` : ""}
       </div></section>`);
+    bindFrame(user);
     document.getElementById("new-class").addEventListener("submit", (e) => {
       e.preventDefault();
       const c = SE.store.createClass(user.id, document.getElementById("nc-name").value);
@@ -543,6 +547,7 @@
             <input id="nc-name" class="input" placeholder="Add another class">
             <button class="btn btn--ghost btn--small" type="submit">${icon("plus")}Create</button>
           </form>
+          ${SE.store.mode === "cloud" && !classes.some((c) => c.isDemo) ? `<p class="muted">Want to see the dashboard with data? <button type="button" class="linkish" id="add-demo">Add a sample class</button></p>` : ""}
         </div>
       </section>
 

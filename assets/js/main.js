@@ -30,9 +30,10 @@
       <button type="button" class="projector-toggle" id="projector-toggle" aria-pressed="${document.documentElement.classList.contains("projector")}" title="Projector mode">
         ${icon("eye")}<span>Projector</span>
       </button>`;
-    nav.querySelectorAll("[data-signout]").forEach((b) => b.addEventListener("click", (e) => {
+    nav.querySelectorAll("[data-signout]").forEach((b) => b.addEventListener("click", async (e) => {
       if (b.tagName === "BUTTON") e.preventDefault();
-      SE.store.signOut();
+      b.disabled = true;
+      await SE.store.signOut();
       location.hash = "#/signin";
       route(true);
     }));
@@ -155,6 +156,9 @@
   window.addEventListener("hashchange", () => route(false));
   window.addEventListener("resize", setScrollPad);
   SE.store.ready.then(() => {
+    const note = document.getElementById("storage-note");
+    if (note && SE.store.mode === "cloud") note.textContent = "Data is saved in your school's STEM 207 database.";
+    if (SE.store.loadError) SE.toast("We couldn't load your latest data. Check the internet connection, then refresh.");
     route(false);
     booted = true;
     setScrollPad();

@@ -22,7 +22,10 @@
       </div>
     </section>`;
 
-  const prototypeNote = `<p class="auth__fine">${icon("lock", 'class="inline-icon"')}Prototype: accounts are saved only in this browser on this device.</p>`;
+  const CLOUD = SE.store.mode === "cloud";
+  const prototypeNote = CLOUD
+    ? `<p class="auth__fine">${icon("lock", 'class="inline-icon"')}Accounts and progress are saved securely in your school's STEM 207 database.</p>`
+    : `<p class="auth__fine">${icon("lock", 'class="inline-icon"')}Prototype: accounts are saved only in this browser on this device.</p>`;
 
   /* ───────── Welcome / choose a door ───────── */
   SE.views.signin = function () {
@@ -86,16 +89,18 @@
         </div>
         <button class="btn btn--launch btn--big" type="submit">Next ${icon("arrowRight")}</button>
       </form>
-      <div class="demo-hint">${icon("flag")}<p><strong>Trying the prototype?</strong> Use class code <code>${demo.classCode}</code>, then pick <strong>${demo.studentName}</strong> and the pictures ${demo.studentCode.map((p) => `<span class="pic-inline">${icon(p)}${esc(SE.pictureById[p].name)}</span>`).join(", ")}.</p></div>
+      ${CLOUD ? "" : `<div class="demo-hint">${icon("flag")}<p><strong>Trying the prototype?</strong> Use class code <code>${demo.classCode}</code>, then pick <strong>${demo.studentName}</strong> and the pictures ${demo.studentCode.map((p) => `<span class="pic-inline">${icon(p)}${esc(SE.pictureById[p].name)}</span>`).join(", ")}.</p></div>`}
       ${prototypeNote}`);
     const input = document.getElementById("class-code");
     input.value = studentFlow.cls ? studentFlow.cls.code : "";
     input.focus();
-    document.getElementById("code-form").addEventListener("submit", (e) => {
+    document.getElementById("code-form").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const cls = SE.store.classByCode(input.value);
       const err = document.getElementById("code-err");
       if (!input.value.trim()) { err.textContent = "Type the class code from your teacher."; input.setAttribute("aria-invalid", "true"); return; }
+      let cls;
+      try { cls = await SE.store.findClass(input.value); }
+      catch (ex) { err.textContent = "We can't reach the server right now. Check the internet connection and try again."; return; }
       if (!cls) { err.textContent = "We couldn't find that class. Check the spelling with your teacher."; input.setAttribute("aria-invalid", "true"); return; }
       Object.assign(studentFlow, { step: 2, cls, student: null, picks: [], tries: 0 });
       SE.views.signinStudent();
@@ -103,7 +108,7 @@
   }
 
   function studentStepName() {
-    const students = SE.store.studentsIn(studentFlow.cls.id);
+    const students = studentFlow.cls.students || [];
     app().innerHTML = shell(`
       <button type="button" class="auth__back linkish" id="back-1">${icon("arrowLeft")}Different class</button>
       ${stepper(2)}
@@ -115,7 +120,7 @@
       ${prototypeNote}`, true);
     document.getElementById("back-1").addEventListener("click", () => { studentFlow.step = 1; SE.views.signinStudent(); });
     app().querySelectorAll(".name-btn").forEach((b) => b.addEventListener("click", () => {
-      studentFlow.student = SE.store.studentById(b.dataset.id);
+      studentFlow.student = students.find((x) => x.id === b.dataset.id);
       studentFlow.step = 3;
       studentFlow.picks = [];
       SE.views.signinStudent();
@@ -147,12 +152,15 @@
     draw();
     document.getElementById("back-2").addEventListener("click", () => { studentFlow.step = 2; SE.views.signinStudent(); });
     document.getElementById("pic-clear").addEventListener("click", () => { studentFlow.picks = []; draw(); document.getElementById("pic-err").textContent = ""; });
-    app().querySelectorAll(".pic-btn").forEach((b) => b.addEventListener("click", () => {
-      if (studentFlow.picks.length >= 3) return;
+    let checking = false;
+    app().querySelectorAll(".pic-btn").forEach((b) => b.addEventListener("click", async () => {
+      if (studentFlow.picks.length >= 3 || checking) return;
       studentFlow.picks.push(b.dataset.pic);
       draw();
       if (studentFlow.picks.length === 3) {
-        const res = SE.store.signInStudent(s.id, studentFlow.picks);
+        checking = true;
+        const res = await SE.store.signInStudent(s.id, studentFlow.picks);
+        checking = false;
         if (res.ok) {
           Object.assign(studentFlow, { step: 1, cls: null, student: null, picks: [], tries: 0 });
           location.hash = "#/";
@@ -189,11 +197,11 @@
         </div>
         <button class="btn btn--primary btn--big" type="submit">Sign in</button>
       </form>
-      <div class="demo-hint">${icon("flag")}<p><strong>Trying the prototype?</strong> Sign in to the sample class with <code>${demo.email}</code> and password <code>${demo.password}</code>. <button type="button" class="linkish" id="fill-demo">Fill it in for me</button></p></div>
+      ${CLOUD ? "" : `<div class="demo-hint">${icon("flag")}<p><strong>Trying the prototype?</strong> Sign in to the sample class with <code>${demo.email}</code> and password <code>${demo.password}</code>. <button type="button" class="linkish" id="fill-demo">Fill it in for me</button></p></div>`}
       <p class="auth__alt">New here? <a href="#/signup">Create an educator account</a></p>
       ${prototypeNote}`);
     bindPwToggle();
-    document.getElementById("fill-demo").addEventListener("click", () => {
+    if (document.getElementById("fill-demo")) document.getElementById("fill-demo").addEventListener("click", () => {
       document.getElementById("edu-email").value = demo.email;
       document.getElementById("edu-pw").value = demo.password;
       document.querySelector("#edu-form button[type=submit]").focus();
@@ -201,7 +209,10 @@
     document.getElementById("edu-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       clearErrors();
+      const btn = e.submitter || document.querySelector("#edu-form button[type=submit]");
+      btn.disabled = true;
       const res = await SE.store.signInEducator(document.getElementById("edu-email").value, document.getElementById("edu-pw").value);
+      btn.disabled = false;
       if (!res.ok) return showError(res.field === "email" ? "edu-email" : "edu-pw", res.error);
       location.hash = "#/teach";
       SE.route(true);
@@ -245,12 +256,15 @@
     document.getElementById("su-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       clearErrors();
+      const btn = document.querySelector("#su-form button[type=submit]");
+      btn.disabled = true;
       const res = await SE.store.createEducator({
         name: document.getElementById("su-name").value,
         className: document.getElementById("su-class").value,
         email: document.getElementById("su-email").value,
         password: document.getElementById("su-pw").value
       });
+      btn.disabled = false;
       if (!res.ok) return showError({ name: "su-name", email: "su-email", password: "su-pw" }[res.field], res.error);
       SE.toast(`Welcome, ${res.educator.name}. Your class code is ${res.cls.code}.`);
       location.hash = "#/teach/class";
