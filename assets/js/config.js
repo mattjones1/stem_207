@@ -12,6 +12,6 @@
  * Never paste a secret or "service_role" key here.
  */
 window.STEM207_CONFIG = {
-  supabaseUrl: "",   // like "https://abcdefghijkl.supabase.co"
-  supabaseKey: ""    // like "sb_publishable_..." (or the legacy "anon public" key)
+  supabaseUrl: "https://gzmmenzdonuwxupnkboj.supabase.co",
+  supabaseKey: "sb_publishable_91YKNxlcZmoP7q0uGkjkPA_hDDIcBbu"  // publishable key: safe to share
 };
