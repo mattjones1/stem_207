@@ -9,6 +9,7 @@
  * A lab definition:
  *   id, area, title, tagline, intro
  *   levels: [{ title, concept, goal, steps?: [], hint, learned }]
+ *   chapters (optional): [{ title, short, from, to, blurb }] groups levels (indexes from..to)
  *   mount(el, levelIndex, api) → optional cleanup function
  *
  * The api passed to mount:
@@ -55,6 +56,11 @@
     if (idx < 0) idx = 0;
     const level = lab.levels[idx];
     const activity = STEM_activityForLab(lab.id);
+    const chapters = lab.chapters || null;
+    const chapterOf = (i) => (chapters ? chapters.findIndex((c) => i >= c.from && i <= c.to) : -1);
+    const ch = chapterOf(idx);
+    const inView = (i) => !chapters || (i >= chapters[ch].from && i <= chapters[ch].to);
+    const firstOpen = (c) => { for (let i = c.from; i <= c.to; i++) if (!done.has(i)) return i; return c.from; };
 
     app().innerHTML = `
       <section class="page-top page-top--lab">
@@ -71,8 +77,13 @@
               <p class="page-top__lede">${esc(lab.tagline)}</p>
             </div>
           </div>
-          <ol class="lab-levels" aria-label="Levels">
-            ${lab.levels.map((l, i) => `
+          ${chapters ? `<nav class="lab-chapters" aria-label="Voyages">${chapters.map((c, ci) => {
+            const n = c.to - c.from + 1, d = [...done].filter((i) => i >= c.from && i <= c.to).length;
+            return `<a href="#/lab/${lab.id}/${firstOpen(c) + 1}" class="lab-chapter ${ci === ch ? "is-current" : ""} ${d === n ? "is-done" : ""}" ${ci === ch ? 'aria-current="true"' : ""}>
+              <span class="lab-chapter__t">${esc(c.title)}</span><span class="lab-chapter__n">${d === n ? icon("check") : ""}${d} of ${n} levels</span></a>`;
+          }).join("")}</nav>` : ""}
+          <ol class="lab-levels" aria-label="${chapters ? `${esc(chapters[ch].title)} levels` : "Levels"}">
+            ${lab.levels.map((l, i) => !inView(i) ? "" : `
               <li><a href="#/lab/${lab.id}/${i + 1}" class="${i === idx ? "is-current" : ""} ${done.has(i) ? "is-done" : ""}" ${i === idx ? 'aria-current="step"' : ""}>
                 <span class="lab-levels__n">${done.has(i) ? icon("check") : i + 1}</span>
                 <span class="lab-levels__t">${esc(l.title)}</span>
@@ -83,6 +94,7 @@
 
       <div class="wrap lab-body">
         <section class="lab-brief" aria-labelledby="lvl-title">
+          ${chapters ? `<p class="lab-voyage">${esc(chapters[ch].title)} · level ${idx - chapters[ch].from + 1} of ${chapters[ch].to - chapters[ch].from + 1}</p>${idx === chapters[ch].from ? `<p class="lab-voyage__blurb">${esc(chapters[ch].blurb)}</p>` : ""}` : ""}
           <span class="lab-concept">${icon("bulb")}${esc(level.concept)}</span>
           <h2 id="lvl-title">Level ${idx + 1}: ${esc(level.title)}</h2>
           <p class="lab-goal"><strong>Your goal:</strong> ${esc(level.goal)}</p>
@@ -149,7 +161,7 @@
           <div class="lab-win__learned"><span class="eyebrow">What you just learned</span><p>${esc(level.learned)}</p></div>
           ${newPatches.length ? `<div class="patch-row">${newPatches.map((p) => `<figure class="patch-tile patch-tile--new">${SE.patchArt(p.patch, true, 76)}<figcaption><strong>${esc(p.patch.name)}</strong></figcaption></figure>`).join("")}</div>` : ""}
           <div class="lab-win__actions">
-            ${next !== null ? `<a class="btn btn--launch" href="#/lab/${lab.id}/${next + 1}">${icon("arrowRight")}Next level: ${esc(lab.levels[next].title)}</a>` : ""}
+            ${next !== null ? `<a class="btn btn--launch" href="#/lab/${lab.id}/${next + 1}">${icon("arrowRight")}${chapters && chapterOf(next) !== ch ? `Start ${esc(chapters[chapterOf(next)].title)}` : `Next level: ${esc(lab.levels[next].title)}`}</a>` : ""}
             <button type="button" class="btn btn--ghost" id="lab-replay">${icon("refresh")}Try this level again</button>
             ${next === null && activity ? `<a class="btn btn--primary" href="#/activity/${activity.id}#s-debrief">${icon("flag")}Finish with the mission debrief</a>` : ""}
           </div>`;

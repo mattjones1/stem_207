@@ -1653,3 +1653,11 @@ h1, h2, h3, h4 { letter-spacing: -.015em; }
 .cards--rail > * { scroll-snap-align: start; }
 @media (max-width: 640px) { .cards--rail { grid-auto-columns: 82%; } }
 .maine .maine-tag { display: none; }
+
+.stage__lab { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; margin-bottom: .2rem; }
+.stage__lab > span { display: inline-flex; align-items: center; gap: .35rem; font-weight: 700; font-size: .9rem; margin-right: .25rem; }
+.stage__lab > span svg { width: 1.05rem; height: 1.05rem; fill: none; stroke: var(--teal); stroke-width: 2; }
+.lvl-chip { display: inline-flex; align-items: center; justify-content: center; gap: .15rem; min-width: 2.3rem; min-height: 2.3rem; padding: 0 .5rem; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--fg); font-weight: 700; font-size: .88rem; text-decoration: none; }
+.lvl-chip:hover { border-color: var(--teal); }
+.lvl-chip.is-done { background: var(--orange-soft); border-color: var(--orange); color: var(--orange-ink); }
+.lvl-chip svg { width: .85rem; height: .85rem; fill: none; stroke: currentColor; stroke-width: 3; }

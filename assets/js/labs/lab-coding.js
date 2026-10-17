@@ -2,6 +2,9 @@
  * Harbor Code Lab — Coding & Computer Science
  * Students build block programs that steer a lobster boat around a Maine harbor:
  * haul traps, dodge granite ledges, and get home to the wharf.
+ * Three voyages of 12 levels each (Casco Bay, Penobscot Bay, Down East). Each voyage climbs
+ * the same pathway at the same skill level with new harbors, so students get more practice
+ * with every idea before they're asked to stretch.
  * (The lab id stays "rover" so saved progress carries over.)
  * Levels climb the coding pathway: sequences → debugging → loops →
  * conditionals → variables → functions → creating independently.
@@ -17,9 +20,11 @@
     left: { label: "Turn left", kind: "motion", glyph: "refresh", flip: true },
     right: { label: "Turn right", kind: "motion", glyph: "refresh" },
     pick: { label: "Haul trap", kind: "action", glyph: "buoy" },
+    drop: { label: "Set trap", kind: "action", glyph: "plus" },
     repeat: { label: "Repeat", kind: "control", glyph: "refresh", container: true, count: true },
     untilGoal: { label: "Repeat until at wharf", kind: "control", glyph: "flag", container: true },
-    ifGem: { label: "If at a trap", kind: "control", glyph: "question", container: true },
+    ifGem: { label: "If at a buoy", kind: "control", glyph: "question", container: true },
+    ifSpot: { label: "If at a dashed spot", kind: "control", glyph: "question", container: true },
     ifWall: { label: "If ledge ahead", kind: "control", glyph: "question", container: true, hasElse: true },
     setVar: { label: "Set steps to", kind: "variable", glyph: "box", count: true },
     changeVar: { label: "Change steps by", kind: "variable", glyph: "plus", count: true },
@@ -42,9 +47,9 @@
   });
   const countBlocks = (list) => list.reduce((n, b) => n + 1 + (b.body ? countBlocks(b.body) : 0) + (b.else ? countBlocks(b.else) : 0), 0);
 
-  /* Starter programs written in a tiny shorthand: F L R P, [n ...] for repeat. */
+  /* Starter programs written in a tiny shorthand: F L R P D, [n ...] for repeat. */
   function parse(src) {
-    const tokens = src.match(/\[\d+|\]|F|L|R|P/g) || [];
+    const tokens = src.match(/\[\d+|\]|F|L|R|P|D/g) || [];
     let i = 0;
     const read = () => {
       const out = [];
@@ -52,7 +57,7 @@
         const t = tokens[i++];
         if (t === "]") return out;
         if (t[0] === "[") out.push(make("repeat", { n: Number(t.slice(1)), body: read() }));
-        else out.push(make({ F: "move", L: "left", R: "right", P: "pick" }[t]));
+        else out.push(make({ F: "move", L: "left", R: "right", P: "pick", D: "drop" }[t]));
       }
       return out;
     };
@@ -118,7 +123,7 @@
     {
       title: "Maybe a trap", concept: "Conditionals", stage: 4,
       goal: "Haul every trap on the string and reach the wharf using 4 blocks or fewer.",
-      hint: "Repeat: move forward, then IF there's a trap here, haul it. The boat checks each square for you.",
+      hint: "Repeat: move forward, then IF the boat is at a buoy, haul the trap. The boat checks each square for you.",
       learned: "A conditional (if) lets a program make a choice. The boat checks a condition, and only acts when it's true.",
       grid: ["###########", "#S*.**.*.G#", "###########"], dir: "E", blocks: [...BASIC, "pick", "repeat", "ifGem"], maxBlocks: 4, needGems: true
     },
@@ -155,7 +160,203 @@
       learned: "You planned, built, tested, and debugged a program on your own, like a captain planning a day on the water. That's what programmers do every day.",
       grid: ["#########", "#S..#..*#", "#.*.#.#.#", "#...*...#", "#.#.#.#.#", "#*..#..G#", "#########"], dir: "E",
       blocks: ["move", "left", "right", "pick", "repeat", "untilGoal", "ifGem", "ifWall"], needGems: true, par: 24
+    },
+    /* ═════════ Voyage 2: Penobscot Bay ═════════ */
+    {
+      title: "Stonington morning", concept: "Sequence", stage: 1,
+      goal: "It's 5 a.m. in Stonington, the busiest lobster port in Maine. Steer out past the ledges to the wharf on the far side of the harbor.",
+      hint: "Plan it one stretch at a time: how many squares east, then which way do you turn? Say the route out loud before you build it.",
+      learned: "Long programs are just short sequences stuck together. Breaking a route into stretches makes it easier to build and check.",
+      grid: ["#######", "#S..###", "###.###", "###...#", "#####G#", "#######"], dir: "E", blocks: BASIC
+    },
+    {
+      title: "Around the lobster car", concept: "Sequence", stage: 1,
+      goal: "A lobster car (a floating crate that keeps lobsters fresh) is tied up in the middle of the harbor. Go all the way around it to reach the wharf.",
+      hint: "You'll turn the same way twice. After the second turn the boat faces back the way it came.",
+      learned: "Two right turns make a U-turn. Thinking about which way the boat faces after each turn is a big part of writing a correct sequence.",
+      grid: ["######", "#S...#", "####.#", "#G...#", "######"], dir: "E", blocks: BASIC
+    },
+    {
+      title: "Wrong turn at Deer Isle", concept: "Debugging", stage: 1, debug: true,
+      goal: "A visiting captain wrote this route under the Deer Isle bridge, but the boat bumps a ledge. Find the bug and fix it.",
+      steps: ["Press Step to run one block at a time.", "Stop at the first block where the boat goes the wrong way.", "Fix just that block, then run it again."],
+      hint: "Everything is right until the boat comes out of the narrow part. Which way should it turn there: toward the open water or away from it?",
+      learned: "One wrong block can wreck a whole program. Programmers fix the first mistake, then test again, because one fix often solves everything after it.",
+      grid: ["########", "#S.#####", "##.#####", "##....##", "#####.##", "#####G##", "########"], dir: "E", blocks: BASIC,
+      starter: "F R F F R F F F R F F"
+    },
+    {
+      title: "Down the thoroughfare", concept: "Loops", stage: 3,
+      goal: "Run the Fox Islands Thoroughfare to North Haven's wharf using 5 blocks or fewer.",
+      hint: "There are two long, straight stretches. Each one can be a Repeat block with Forward inside. What goes between them?",
+      learned: "A program can have more than one loop. Each loop handles one repeating part, and the steps between them connect the parts.",
+      grid: ["#######", "#S....#", "#####.#", "#####.#", "#####.#", "#####G#", "#######"], dir: "E", blocks: [...BASIC, "repeat"], maxBlocks: 5
+    },
+    {
+      title: "Down the ledges", concept: "Loops", stage: 3,
+      goal: "Step down between the ledges off Vinalhaven to the wharf using 5 blocks or fewer.",
+      hint: "One step down is: Forward, Turn right, Forward, Turn left. Count the steps, then loop that pattern.",
+      learned: "The same pattern can go up or down, left or right. Once you find the part that repeats, a loop does the rest.",
+      grid: ["#######", "#S.####", "##..###", "###..##", "####..#", "#####G#", "#######"], dir: "E", blocks: [...BASIC, "repeat"], maxBlocks: 5
+    },
+    {
+      title: "Around Hurricane Island", concept: "Debugging loops", stage: 3, debug: true,
+      goal: "This loop should take the boat around Hurricane Island to the wharf, but it bumps a ledge right away. Fix the bug.",
+      hint: "Run it once. After the first side of the island, which way does the boat turn? Which way should it turn?",
+      learned: "When a loop goes wrong, check one trip through it. If one trip is right, every repeat will be right too.",
+      grid: ["######", "#S...#", "#.##.#", "#.##.#", "#G...#", "######"], dir: "E", blocks: [...BASIC, "repeat"],
+      starter: "[3 F F F L]"
+    },
+    {
+      title: "Set a string of traps", concept: "Actions", stage: 2,
+      goal: "Lobstermen set traps in a line called a string. Set a trap on both dashed circles, then tie up at the wharf.",
+      steps: ["Drive onto a dashed circle.", "Use Set trap to drop a trap there.", "Keep going to the wharf."],
+      hint: "Set trap only works when the boat is right on a dashed circle. Move first, then set.",
+      learned: "Some actions put something new into the world. Like hauling, setting a trap only works in the right spot, so the order of your blocks matters.",
+      grid: ["#########", "#S.o.o.G#", "#########"], dir: "E", blocks: [...BASIC, "drop", "repeat"], needDrops: true
+    },
+    {
+      title: "Maybe a spot", concept: "Conditionals", stage: 4,
+      goal: "Set a trap on every dashed circle and reach the wharf using 4 blocks or fewer. The circles aren't evenly spaced.",
+      hint: "Repeat: move forward, then IF the boat is at a dashed spot, set a trap. How many squares to the wharf?",
+      learned: "A conditional lets one loop handle an uneven pattern. The boat checks every square and only acts where the condition is true.",
+      grid: ["###########", "#S.oo.o.oG#", "###########"], dir: "E", blocks: [...BASIC, "drop", "repeat", "ifSpot"], maxBlocks: 4, needDrops: true
+    },
+    {
+      title: "Fog off Owls Head", concept: "Conditionals", stage: 4,
+      goal: "Fog again! This time the channel curls the other way. Reach the wharf using 4 blocks or fewer.",
+      steps: ["Use Repeat until at wharf.", "Inside it: If ledge ahead → turn left. Otherwise (else) → forward."],
+      hint: "It's the same idea as Fog sensor, but the channel turns left at every ledge. Which turn goes in the top part of the If?",
+      learned: "The same rule shape works in a new place if you change one part. Choosing the right action for each case is the heart of if–else.",
+      grid: ["#######", "#.....#", "#.###.#", "#..G#.#", "#####.#", "##S...#", "#######"], dir: "E", blocks: ["move", "left", "right", "untilGoal", "ifWall"], maxBlocks: 4
+    },
+    {
+      title: "Shrinking spiral", concept: "Variables", stage: 5,
+      goal: "Spiral in toward the wharf in the middle of the cove using 6 blocks or fewer. Each side is one shorter than the last: 4, 3, 2, 1.",
+      steps: ["Start steps at 4.", "After each side, change steps by −1 so the next side is shorter."],
+      hint: "Set steps to 4. Repeat 4: { Repeat steps times: Forward. Turn right. Change steps by −1. }",
+      learned: "A variable can go down as well as up. Changing it by a negative number made each side shorter, so the same loop drew a spiral inward.",
+      grid: ["#######", "#S....#", "#####.#", "###G#.#", "###...#", "#######"], dir: "E",
+      blocks: ["move", "left", "right", "repeat", "setVar", "repeatVar", "changeVar"], maxBlocks: 6, usesVar: true
+    },
+    {
+      title: "Make a Haul block", concept: "Functions", stage: 6, fnName: "Haul",
+      goal: "Build a Haul block that moves to the next trap and hauls it. Then haul all 4 traps and reach the wharf with 6 blocks or fewer in your main program.",
+      steps: ["In the Haul box, build: Forward, Forward, Haul trap.", "In your main program, use Haul like any other block."],
+      hint: "The traps are 2 squares apart. Main program: Haul, Haul, Turn right, Haul, Haul, Forward.",
+      learned: "A function can include actions, not just moves. Naming a job (Haul) lets you think about what the boat does instead of every single step.",
+      grid: ["#######", "#S.*.*#", "#####.#", "#####*#", "#####.#", "#####*#", "#####G#", "#######"], dir: "E",
+      blocks: ["move", "left", "right", "pick", "repeat", "call"], maxBlocks: 6, usesFn: true, needGems: true
+    },
+    {
+      title: "Penobscot free build", concept: "Create", stage: 7,
+      goal: "Haul all 3 traps, set new traps on both dashed circles, and finish at the wharf. Use any blocks you like.",
+      hint: "Haul first, set second: you can only set traps you have aboard. Plan the route on paper, then build and test it in parts.",
+      learned: "You combined moving, hauling, setting, and checking into one plan. Big programs are made of small ideas you already know.",
+      grid: ["########", "#S..*..#", "#.##.#.#", "#o.....#", "#.#.##*#", "#*..o.G#", "########"], dir: "E",
+      blocks: ["move", "left", "right", "pick", "drop", "repeat", "untilGoal", "ifGem", "ifSpot", "ifWall"], needGems: true, needDrops: true, carry: true, par: 26
+    },
+
+    /* ═════════ Voyage 3: Down East ═════════ */
+    {
+      title: "Schoodic Point", concept: "Sequence", stage: 1,
+      goal: "Waves crash on the granite at Schoodic Point. Weave between the ledges to the wharf.",
+      hint: "This route turns left, then right, then left. Check which way the boat faces before each turn.",
+      learned: "Left and right depend on which way the boat is facing, not which way you're facing. Picturing yourself at the wheel helps.",
+      grid: ["#######", "#####G#", "#####.#", "###...#", "###.###", "#S..###", "#######"], dir: "E", blocks: BASIC
+    },
+    {
+      title: "Lubec Narrows", concept: "Sequence", stage: 1,
+      goal: "The tide rips through Lubec Narrows, right on the border with Canada. Make it through the twists to the wharf.",
+      hint: "Break it into stretches: 1 east, 2 south, 4 east, 2 south, then all the way west.",
+      learned: "Careful counting and planning make even a long sequence work on the first try. Programmers often sketch the route before they code it.",
+      grid: ["########", "#S.#####", "##.#####", "##.....#", "######.#", "#G.....#", "########"], dir: "E", blocks: BASIC
+    },
+    {
+      title: "Fog at West Quoddy", concept: "Debugging", stage: 1, debug: true,
+      goal: "West Quoddy Head is the easternmost point in the United States. This program to get past it has one extra block. Find it and remove it.",
+      hint: "Step through it. The boat bumps a ledge right away. Count how many squares it can really go before the first turn.",
+      learned: "Bugs aren't always wrong blocks. Sometimes there's one block too many. Stepping through and counting finds it.",
+      grid: ["#######", "#S..###", "###.###", "###.###", "###...#", "#####G#", "#######"], dir: "E", blocks: BASIC,
+      starter: "F F F R F F F L F F R F"
+    },
+    {
+      title: "Breakwater run", concept: "Loops", stage: 3,
+      goal: "Run the whole length of the Eastport breakwater to the wharf using only 2 blocks.",
+      hint: "It's one long straight line. Use a Repeat block with Forward inside, and count the squares.",
+      learned: "A loop doesn't care how long the job is. Changing one number makes it go 3 squares or 9.",
+      grid: ["############", "#S........G#", "############"], dir: "E", blocks: [...BASIC, "repeat"], maxBlocks: 2
+    },
+    {
+      title: "Ledge ladder", concept: "Loops", stage: 3,
+      goal: "Work down the ledges off Jonesport to the wharf using 6 blocks or fewer.",
+      hint: "One rung of the ladder is: Forward, Forward, Turn right, Forward, Turn left. How many rungs are there?",
+      learned: "Loops can hold longer patterns. The trick is finding exactly where one repeat ends and the next begins.",
+      grid: ["#########", "#S..#####", "###...###", "#####...#", "#######G#", "#########"], dir: "E", blocks: [...BASIC, "repeat"], maxBlocks: 6
+    },
+    {
+      title: "Around Roque Island", concept: "Debugging loops", stage: 3, debug: true,
+      goal: "This loop takes the boat partway around Roque Island, then stops short of the wharf. Fix the bug.",
+      hint: "The blocks inside the loop are right. Watch how far it gets. How many times does the loop need to repeat?",
+      learned: "Sometimes the bug is the number, not the blocks. Loops that run too few or too many times are one of the most common bugs there is.",
+      grid: ["#####", "#G..#", "###.#", "#S..#", "#####"], dir: "E", blocks: [...BASIC, "repeat"],
+      starter: "[2 F F L]"
+    },
+    {
+      title: "Haul and reset", concept: "Actions", stage: 2,
+      goal: "Haul the 2 old traps, then set them again on the dashed circles before you tie up at the wharf.",
+      hint: "You can only set a trap you've already hauled. Haul both traps first, then set them on the circles.",
+      learned: "Actions can depend on each other. You can't set a trap you don't have, so the order of actions matters, not just where the boat is.",
+      grid: ["###########", "#S*.*.o.oG#", "###########"], dir: "E", blocks: [...BASIC, "pick", "drop", "repeat"], needGems: true, needDrops: true, carry: true
+    },
+    {
+      title: "Haul or set?", concept: "Conditionals", stage: 4,
+      goal: "Haul every trap, set a trap on every dashed circle, and reach the wharf using 6 blocks or fewer.",
+      hint: "Repeat: Forward, then IF at a buoy → haul the trap, then IF at a dashed spot → set a trap. Two If blocks can sit side by side in one loop.",
+      learned: "A loop can check more than one condition each time. Each If handles its own case, so the boat does the right thing on every square.",
+      grid: ["############", "#S*.o*.o*oG#", "############"], dir: "E", blocks: [...BASIC, "pick", "drop", "repeat", "ifGem", "ifSpot"], maxBlocks: 6, needGems: true, needDrops: true, carry: true
+    },
+    {
+      title: "Spiral out of Cobscook", concept: "Variables", stage: 5,
+      goal: "Spiral out of Cobscook Bay to the wharf using 6 blocks or fewer. This spiral turns left, and the sides grow: 1, 2, 3, 4.",
+      hint: "Set steps to 1. Repeat 4: { Repeat steps times: Forward. Turn left. Change steps by 1. }",
+      learned: "You reused the variable idea in a new shape. The variable keeps track of a number for you, so one loop can make every side a different length.",
+      grid: ["#######", "#....##", "#.##.##", "#.#S.##", "#.#####", "#G#####", "#######"], dir: "E",
+      blocks: ["move", "left", "right", "repeat", "setVar", "repeatVar", "changeVar"], maxBlocks: 6, usesVar: true
+    },
+    {
+      title: "Wider and wider", concept: "Variables", stage: 5,
+      goal: "The traps get farther apart: 2 squares, then 3, then 4. Haul all 3 and reach the wharf using 7 blocks or fewer.",
+      steps: ["Start steps at 2.", "Each time: move steps squares, haul, then add 1 to steps."],
+      hint: "Set steps to 2. Repeat 3: { Repeat steps times: Forward. Haul trap. Change steps by 1. } Then one more Forward.",
+      learned: "A variable can count distance. Because steps grew each time, the same three blocks reached traps that were farther and farther apart.",
+      grid: ["#############", "#S.*..*...*G#", "#############"], dir: "E",
+      blocks: ["move", "left", "right", "pick", "repeat", "setVar", "repeatVar", "changeVar"], maxBlocks: 7, usesVar: true, needGems: true
+    },
+    {
+      title: "Make a Dodge block", concept: "Functions", stage: 6, fnName: "Dodge",
+      goal: "Three ledges sit in the channel. Build a Dodge block that goes up and over one ledge, then reach the wharf with 7 blocks or fewer in your main program.",
+      steps: ["In the Dodge box, build the path up, across, and back down around one ledge.", "In your main program, use Dodge each time you reach a ledge."],
+      hint: "Dodge = Turn left, Forward, Turn right, Forward, Forward, Turn right, Forward, Turn left. Main program: Forward, Dodge, Forward, Dodge, Forward, Dodge, Forward.",
+      learned: "A function packs a tricky move into one block. Once Dodge worked, you could use it again and again without rebuilding it.",
+      grid: ["#############", "#...........#", "#S.#..#..#.G#", "#############"], dir: "E",
+      blocks: ["move", "left", "right", "call"], maxBlocks: 7, usesFn: true
+    },
+    {
+      title: "Down East free build", concept: "Create", stage: 7,
+      goal: "Your last voyage: haul all 4 traps, set traps on both dashed circles, and finish at the wharf. Use any blocks you like.",
+      hint: "Haul before you set. Look for stretches you can loop, and test each part before you add the next.",
+      learned: "You planned, built, tested, and debugged a long program on your own, across three voyages of the Maine coast. That's real programming.",
+      grid: ["#########", "#S...#.o#", "#.#*.#..#", "#.#..*..#", "#*.#.##.#", "#o...*.G#", "#########"], dir: "E",
+      blocks: ["move", "left", "right", "pick", "drop", "repeat", "untilGoal", "ifGem", "ifSpot", "ifWall"], needGems: true, needDrops: true, carry: true, par: 36
     }
+
+  ];
+
+  const VOYAGES = [
+    { title: "Voyage 1: Casco Bay", short: "Casco Bay", from: 0, to: 11, blurb: "Learn the ropes around Portland: sequences, debugging, loops, actions, conditionals, variables, and functions." },
+    { title: "Voyage 2: Penobscot Bay", short: "Penobscot Bay", from: 12, to: 23, blurb: "Same ideas, new harbor: Stonington, Vinalhaven, and Owls Head, plus setting traps of your own." },
+    { title: "Voyage 3: Down East", short: "Down East", from: 24, to: 35, blurb: "Out to Schoodic, Lubec, and Eastport, where the tides are huge and every trap counts." }
   ];
 
   const DIRS = { N: [0, -1], E: [1, 0], S: [0, 1], W: [-1, 0] };
@@ -165,13 +366,14 @@
 
   function parseGrid(rows) {
     let start = null, goal = null;
-    const gems = [];
+    const gems = [], spots = [];
     rows.forEach((r, y) => [...r].forEach((ch, x) => {
       if (ch === "S") start = [x, y];
       if (ch === "G") goal = [x, y];
       if (ch === "*") gems.push(`${x},${y}`);
+      if (ch === "o") spots.push(`${x},${y}`);
     }));
-    return { rows, w: rows[0].length, h: rows.length, start, goal, gems };
+    return { rows, w: rows[0].length, h: rows.length, start, goal, gems, spots };
   }
   const isWall = (g, x, y) => x < 0 || y < 0 || x >= g.w || y >= g.h || g.rows[y][x] === "#";
 
@@ -192,6 +394,13 @@
           const k = `${st.x},${st.y}`;
           if (st.gems.has(k) && !st.got.has(k)) { st.got.add(k); yield b; }
           else { st.error = "nogem"; yield b; return; }
+          break;
+        }
+        case "drop": {
+          const k = `${st.x},${st.y}`;
+          if (!st.spots.has(k) || st.dropped.has(k)) { st.error = "nospot"; yield b; return; }
+          if (ctx.carry && st.got.size - st.dropped.size <= 0) { st.error = "empty"; yield b; return; }
+          st.dropped.add(k); yield b;
           break;
         }
         case "repeat":
@@ -217,6 +426,13 @@
           const k = `${st.x},${st.y}`;
           yield { ...b, checking: true };
           if (st.gems.has(k) && !st.got.has(k)) yield* run(b.body, st, ctx);
+          if (st.error) return;
+          break;
+        }
+        case "ifSpot": {
+          const k = `${st.x},${st.y}`;
+          yield { ...b, checking: true };
+          if (st.spots.has(k) && !st.dropped.has(k)) yield* run(b.body, st, ctx);
           if (st.error) return;
           break;
         }
@@ -255,6 +471,8 @@
 
   function mount(el, idx, api) {
     const L = LEVELS[idx];
+    const fnName = L.fnName || "Zig";
+    const labelOf = (type) => (type === "call" ? fnName : BLOCKS[type].label);
     const g = parseGrid(L.grid);
     const saved = api.saved();
     let program = L.starter ? parse(L.starter) : [];
@@ -266,15 +484,16 @@
     el.innerHTML = `
       <div class="rover">
         <div class="rover__world">
-          <div class="rover__grid" style="--cols:${g.w};--rows:${g.h}" role="img" aria-label="Harbor chart: the boat starts at the left; reach the wharf${g.gems.length ? `, hauling ${g.gems.length} traps` : ""}. Dark squares are granite ledges.">
+          <div class="rover__grid" style="--cols:${g.w};--rows:${g.h}" role="img" aria-label="Harbor chart: the boat starts at the left; reach the wharf${g.gems.length ? `, hauling ${g.gems.length} traps` : ""}${g.spots.length ? `, setting traps on ${g.spots.length} dashed circles` : ""}. Dark squares are granite ledges.">
             ${g.rows.map((r, y) => [...r].map((ch, x) => `<div class="cell ${ch === "#" ? "cell--wall" : ""}" data-x="${x}" data-y="${y}">
-              ${ch === "G" ? `<span class="cell__flag">${icon("flag")}</span>` : ""}${ch === "*" ? `<span class="cell__gem" data-gem="${x},${y}">${icon("buoy")}</span>` : ""}</div>`).join("")).join("")}
+              ${ch === "G" ? `<span class="cell__flag">${icon("flag")}</span>` : ""}${ch === "*" ? `<span class="cell__gem" data-gem="${x},${y}">${icon("buoy")}</span>` : ""}${ch === "o" ? `<span class="cell__spot" data-spot="${x},${y}"><i></i>${icon("buoy")}</span>` : ""}</div>`).join("")).join("")}
             <div class="rover__bot" id="rover-bot">${ROVER}</div>
           </div>
           <div class="rover__readout" aria-live="polite">
             <span id="rover-status">Ready</span>
             ${L.usesVar ? `<span class="var-chip">steps = <b id="var-steps">0</b></span>` : ""}
-            ${g.gems.length ? `<span class="var-chip">traps <b id="gem-count">0</b>/${g.gems.length}</span>` : ""}
+            ${g.gems.length ? `<span class="var-chip">hauled <b id="gem-count">0</b>/${g.gems.length}</span>` : ""}
+            ${g.spots.length ? `<span class="var-chip">set <b id="spot-count">0</b>/${g.spots.length}</span>` : ""}
           </div>
           <div class="rover__controls">
             <button type="button" class="btn btn--launch" id="rv-run">${icon("rocket")}Run</button>
@@ -287,9 +506,9 @@
         </div>
         <div class="rover__code">
           <div class="palette" role="group" aria-label="Blocks you can use">
-            ${L.blocks.map((t) => `<button type="button" class="blk blk--${BLOCKS[t].kind} blk--btn" data-add="${t}">${icon(BLOCKS[t].glyph, BLOCKS[t].flip ? 'style="transform:scaleX(-1)"' : "")}${esc(BLOCKS[t].label)}${BLOCKS[t].count ? " #" : ""}</button>`).join("")}
+            ${L.blocks.map((t) => `<button type="button" class="blk blk--${BLOCKS[t].kind} blk--btn" data-add="${t}">${icon(BLOCKS[t].glyph, BLOCKS[t].flip ? 'style="transform:scaleX(-1)"' : "")}${esc(labelOf(t))}${BLOCKS[t].count ? " #" : ""}</button>`).join("")}
           </div>
-          ${L.usesFn ? `<div class="prog prog--fn"><div class="prog__head"><strong>${icon("star", 'class="inline-icon"')}Zig =</strong><span class="muted" id="fn-count"></span></div><div id="fn-list"></div></div>` : ""}
+          ${L.usesFn ? `<div class="prog prog--fn"><div class="prog__head"><strong>${icon("star", 'class="inline-icon"')}${esc(fnName)} =</strong><span class="muted" id="fn-count"></span></div><div id="fn-list"></div></div>` : ""}
           <div class="prog">
             <div class="prog__head"><strong>Your program</strong><span id="blk-count" class="blk-count"></span>
               <button type="button" class="linkish" id="rv-clear">${icon("trash")}Clear</button></div>
@@ -313,11 +532,12 @@
 
     function resetWorld() {
       stop();
-      st = { x: g.start[0], y: g.start[1], dir: L.dir, gems: new Set(g.gems), got: new Set(), vars: { steps: 0 }, ops: 0, error: null, done: false };
+      st = { x: g.start[0], y: g.start[1], dir: L.dir, gems: new Set(g.gems), got: new Set(), spots: new Set(g.spots), dropped: new Set(), vars: { steps: 0 }, ops: 0, error: null, done: false };
       gen = null;
       finished = false;
       place(st.x, st.y, st.dir, false);
       el.querySelectorAll("[data-gem]").forEach((n) => n.classList.remove("is-got"));
+      el.querySelectorAll("[data-spot]").forEach((n) => n.classList.remove("is-set"));
       el.querySelectorAll(".blk.is-active").forEach((n) => n.classList.remove("is-active"));
       el.querySelectorAll(".cell.is-crash").forEach((n) => n.classList.remove("is-crash"));
       setStatus("Ready");
@@ -326,6 +546,7 @@
     function readouts() {
       const v = el.querySelector("#var-steps"); if (v) v.textContent = st.vars.steps;
       const gc = el.querySelector("#gem-count"); if (gc) gc.textContent = st.got.size;
+      const sc = el.querySelector("#spot-count"); if (sc) sc.textContent = st.dropped.size;
     }
     const setStatus = (t) => { el.querySelector("#rover-status").textContent = t; };
 
@@ -350,9 +571,9 @@
         html += `<li class="blk blk--${def.kind}" data-bid="${b.id}">
           <div class="blk__row">
             ${icon(def.glyph, def.flip ? 'style="transform:scaleX(-1)"' : "")}
-            <span class="blk__label">${esc(def.label)}</span>
+            <span class="blk__label">${esc(labelOf(b.type))}</span>
             ${def.count ? `<span class="blk__count"><button type="button" data-dec="${b.id}" aria-label="Decrease">−</button><b>${b.n}</b><button type="button" data-inc="${b.id}" aria-label="Increase">+</button>${b.type === "repeat" ? "<span>times</span>" : ""}</span>` : ""}
-            <button type="button" class="blk__del" data-del="${b.id}" aria-label="Remove ${esc(def.label)}">✕</button>
+            <button type="button" class="blk__del" data-del="${b.id}" aria-label="Remove ${esc(labelOf(b.type))}">✕</button>
           </div>
           ${def.container ? `<div class="blk__body">${renderList(b.body, b.id, "body")}</div>` : ""}
           ${def.hasElse ? `<div class="blk__else"><span>else</span></div><div class="blk__body">${renderList(b.else, b.id, "else")}</div>` : ""}
@@ -426,7 +647,7 @@
           stop(); return false;
         }
         if (!program.length) { api.say("Your program is empty. Tap a block to add it.", "warn"); stop(); return false; }
-        gen = run(program, st, { g, fn, depth: 0 });
+        gen = run(program, st, { g, fn, depth: 0, carry: !!L.carry });
         api.log("lab_test_run", { blocks: countBlocks(program) });
       }
       const r = gen.next();
@@ -435,8 +656,9 @@
         place(st.x, st.y, st.dir);
         readouts();
         el.querySelectorAll("[data-gem]").forEach((n) => n.classList.toggle("is-got", st.got.has(n.dataset.gem)));
+        el.querySelectorAll("[data-spot]").forEach((n) => n.classList.toggle("is-set", st.dropped.has(n.dataset.spot)));
         if (st.error) { finish(); return false; }
-        setStatus(r.value.checking ? `Checking: ${BLOCKS[r.value.type].label}` : BLOCKS[r.value.type].label);
+        setStatus(r.value.checking ? `Checking: ${labelOf(r.value.type)}` : labelOf(r.value.type));
         return true;
       }
       finish();
@@ -447,6 +669,7 @@
       finished = true;
       const atGoal = st.x === g.goal[0] && st.y === g.goal[1];
       const allGems = st.got.size === g.gems.length;
+      const allSpots = st.dropped.size === g.spots.length;
       if (st.error === "crash") {
         const [dx, dy] = DIRS[st.dir];
         const c = el.querySelector(`.cell[data-x="${st.x + dx}"][data-y="${st.y + dy}"]`);
@@ -457,17 +680,26 @@
       } else if (st.error === "nogem") {
         setStatus("No trap here");
         api.say("The boat tried to haul a trap, but there isn't a buoy on this square. Move onto a buoy first.", "warn");
+      } else if (st.error === "nospot") {
+        setStatus("No trap spot here");
+        api.say("The boat tried to set a trap, but this square isn't an empty dashed circle. Move onto a dashed circle first.", "warn");
+      } else if (st.error === "empty") {
+        setStatus("No traps aboard");
+        api.say("There are no traps on the boat to set. Haul a trap first, then set it on a dashed circle.", "warn");
       } else if (st.error === "loop") {
         setStatus("Stuck in a loop");
         api.say("The boat got stuck going in circles forever. Make sure something inside the loop moves the boat closer to the wharf.", "warn");
-      } else if (atGoal && (!L.needGems || allGems)) {
+      } else if (atGoal && (!L.needGems || allGems) && (!L.needDrops || allSpots)) {
         setStatus("Mission complete");
         const n = countBlocks(program);
         api.say(L.par ? `You did it in ${n} blocks${n <= L.par ? ". That's at or under par!" : `. Par is ${L.par}. Can you find a shorter program?`}` : "The boat made it home to the wharf!", "good");
         api.win({ blocks: n, program: summarize(program) });
-      } else if (atGoal) {
+      } else if (atGoal && L.needGems && !allGems) {
         setStatus("Traps missing");
         api.say(`The boat reached the wharf, but it only hauled ${st.got.size} of ${g.gems.length} traps.`, "warn");
+      } else if (atGoal) {
+        setStatus("Traps not set");
+        api.say(`The boat reached the wharf, but it only set ${st.dropped.size} of ${g.spots.length} traps. Every dashed circle needs one.`, "warn");
       } else {
         setStatus("Stopped");
         api.say("The program ended, but the boat isn't at the wharf yet. Add more blocks or check your turns.", "warn");
@@ -503,9 +735,11 @@
     id: "rover",
     area: "coding",
     title: "Harbor Code Lab",
-    tagline: "Program a lobster boat with code blocks: haul traps, dodge ledges, and make it home. Twelve levels from first steps to your own functions.",
+    tagline: "Program a lobster boat with code blocks: haul and set traps, dodge ledges, and make it home. Three voyages and 36 levels, from first steps to your own functions.",
     levels: LEVELS,
+    chapters: VOYAGES,
     mount
   });
+  SE.harbor = { LEVELS, BLOCKS, parseGrid, run }; // exposed for tests and teacher tools
   SE.roverLevels = LEVELS; // used by the pathway page to link stages to levels
 })();

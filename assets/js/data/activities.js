@@ -1744,7 +1744,7 @@ window.STEM.activities = [
     id: "lab-rover",
     title: "Harbor Code Lab",
     area: "coding",
-    summary: "Program a lobster boat with code blocks through 12 levels: haul traps, dodge granite ledges, and write your own functions.",
+    summary: "Program a lobster boat with code blocks across three voyages and 36 levels: haul and set traps, dodge granite ledges, and write your own functions.",
     level: "beginner",
     grades: ["2-3", "4-5", "6-8"],
     duration: 45,
@@ -1752,10 +1752,10 @@ window.STEM.activities = [
     equipment: ["computer", "tablet"],
     source: "original",
     featured: false,
-    keywords: ["lab", "maine", "blocks", "sequence", "loops", "conditionals", "variables", "functions", "debugging", "lobster boat", "harbor", "interactive"],
+    keywords: ["lab", "maine", "blocks", "voyages", "sequence", "loops", "conditionals", "variables", "functions", "debugging", "lobster boat", "harbor", "interactive"],
     access: { account: "none", cost: "free", supervision: false, hardware: [] },
     launch: { status: "lab", labId: "rover", label: "Open the Harbor Code Lab", note: "Runs inside STEM 207. No outside account or website needed." },
-    mission: "You're the captain of a lobster boat in a Maine harbor. Steer it to the wharf, haul your traps, and find your way through the fog. Each level adds a new coding idea, and later levels limit how many blocks you can use, so you'll need loops, conditionals, variables, and your own blocks.",
+    mission: "You're the captain of a lobster boat working the Maine coast. Start in Casco Bay, then sail on to Penobscot Bay and Down East. Steer to the wharf, haul and set your traps, and find your way through the fog. Each voyage climbs through the same coding ideas with new harbors, and later levels limit how many blocks you can use, so you'll need loops, conditionals, variables, and your own blocks.",
     learn: [
       "Build and run a program as a sequence of instructions.",
       "Use loops, if–else, and a variable to write shorter, smarter programs.",
@@ -1763,7 +1763,7 @@ window.STEM.activities = [
     ],
     before: {
       materials: ["Laptop, Chromebook, or tablet"],
-      setup: ["Students can sign in to save progress, or explore as guests.", "Levels 1–3 suit any beginner. Levels 8–12 suit students ready for conditionals, variables, and functions."],
+      setup: ["Students can sign in to save progress, or explore as guests.", "The lab has three voyages of 12 levels. Every voyage starts with beginner sequences and builds to functions and a free build, so students who finish Voyage 1 can keep practicing at the same level in Voyages 2 and 3.", "Within a voyage, levels 1–3 suit any beginner. Levels 8–12 suit students ready for conditionals, variables, and functions."],
       prerequisites: "None. The lab starts at the very beginning and climbs the coding pathway."
     },
     steps: [
@@ -1771,12 +1771,15 @@ window.STEM.activities = [
       "Tap blocks to add them to your program. Tap a gap to choose where new blocks go.",
       "Press Run to watch the boat, or Step to run one block at a time.",
       "If the boat bumps a granite ledge, find the highlighted block and fix it.",
-      "When you finish a level, read “What you just learned,” then try the next one."
+      "When you finish a level, read “What you just learned,” then try the next one.",
+      "When a voyage is done, pick the next voyage at the top of the lab."
     ],
     reflect: "Which level made you change how you were thinking about the problem? What did you do differently?",
-    extend: "On Free build, solve the level, then try to beat par by using loops and conditionals to make your program shorter.",
+    extend: "On each voyage's free build, solve the level, then try to beat par by using loops and conditionals to make your program shorter.",
     teacherNotes: [
-      "Levels map to the coding pathway: 1–3 sequencing and debugging (Stage 1), 4–6 loops (Stage 3), 7–9 actions and conditionals (Stages 2 and 4), 10 variables (Stage 5), 11 functions (Stage 6), 12 independent creation (Stage 7).",
+      "Each voyage follows the same map to the coding pathway: levels 1–3 sequencing and debugging (Stage 1), 4–6 loops (Stage 3), 7–9 actions and conditionals (Stages 2 and 4), 10 variables (Stage 5), 11 functions (Stage 6), 12 independent creation (Stage 7). The coding pathway page links to every matching level.",
+      "Voyage 2 (Penobscot Bay) adds Set trap and If at a dashed spot. Voyage 3 (Down East) adds a simple rule: you can only set a trap you have already hauled. Both are actions and conditionals at the same skill level as Voyage 1.",
+      "Debug levels vary the kind of bug: a wrong turn, an extra block, a wrong turn inside a loop, and a loop that repeats too few times.",
       "Block limits on later levels are intentional. They push students to find the pattern instead of brute-forcing with many Forward blocks.",
       "Step-through is the key debugging habit. Ask “Which block went wrong first?” before helping.",
       "Your dashboard shows each student's level progress, test runs, and hints used."

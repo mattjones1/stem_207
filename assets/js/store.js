@@ -222,7 +222,7 @@
     });
 
     /* Interactive lab progress for the sample class */
-    const LAB_PLAN = [["rover", 12], ["field-station", 7], ["pattern-machine", 6], ["launcher", 6], ["line-follower", 4], ["ramp-racers", 5], ["pixel-studio", 6]];
+    const LAB_PLAN = [["rover", 36], ["field-station", 7], ["pattern-machine", 6], ["launcher", 6], ["line-follower", 4], ["ramp-racers", 5], ["pixel-studio", 6]];
     const rle = (grid) => grid.map((row) => { const out = []; let i = 0; while (i < row.length) { let j = i; while (j < row.length && row[j] === row[i]) j++; out.push(`${j - i}${row[i]}`); i = j; } return out.join(" "); }).join("/");
     const canvas = (n) => Array.from({ length: n }, () => Array(n).fill("."));
     const disc = (g, cx, cy, r, c) => g.forEach((row, y) => row.forEach((_, x) => { if ((x - cx) ** 2 + (y - cy) ** 2 <= r * r) g[y][x] = c; }));
@@ -272,8 +272,8 @@
 
   function init() {
     db = readDb();
-    if (!db || db.version !== 6) {
-      db = { version: 6, educators: [], classes: [], students: [], events: [] };
+    if (!db || db.version !== 7) {
+      db = { version: 7, educators: [], classes: [], students: [], events: [] };
       installDemo();
       save();
     }

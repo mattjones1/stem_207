@@ -688,7 +688,8 @@
   };
 
   /* ───────── Pathway ───────── */
-  const ROVER_FOR_STAGE = { 1: [1, 2, 3], 2: [7], 3: [4, 5, 6], 4: [8, 9], 5: [10], 6: [11], 7: [12] };
+  /* Harbor Code Lab levels that practice each pathway stage (from each level's `stage`). */
+  const roverLevelsFor = (stage) => (SE.roverLevels || []).map((l, i) => (l.stage === stage ? i + 1 : 0)).filter(Boolean);
   SE.views.pathway = function (user) {
     const isStudent = user && user.role === "student";
     const prof = isStudent ? SE.game.profile(user.id) : null;
@@ -741,7 +742,7 @@
               </div>
               <div class="ican">${icon("check")}<span><span class="visually-hidden">Readiness check: </span>${esc(s.iCan)}</span>${claimBtn}</div>
               <div class="stage__links">
-                ${(ROVER_FOR_STAGE[s.stage] || []).map((lv) => `<a class="btn btn--ghost btn--small btn--lab" href="#/lab/rover/${lv}">${icon("flask")}Harbor Code Lab · level ${lv}${prof && SE.labs.progressFor(prof, "rover").has(lv - 1) ? " ✓" : ""}</a>`).join("")}
+                ${roverLevelsFor(s.stage).length ? `<div class="stage__lab"><span>${icon("flask")}Harbor Code Lab levels</span>${roverLevelsFor(s.stage).map((lv) => { const d = prof && SE.labs.progressFor(prof, "rover").has(lv - 1); return `<a class="lvl-chip ${d ? "is-done" : ""}" href="#/lab/rover/${lv}" aria-label="Harbor Code Lab level ${lv}${d ? ", finished" : ""}">${d ? icon("check") : ""}${lv}</a>`; }).join("")}</div>` : ""}
                 ${s.activities.map((id) => SE.activityById[id]).filter(Boolean).map((a) => `
                   <a class="btn btn--ghost btn--small ${prof && prof.completedIds.has(a.id) ? "is-done" : ""}" href="#/activity/${a.id}">${icon(prof && prof.completedIds.has(a.id) ? "check" : SE.areaById[a.area].icon)}${esc(a.title)} · ${a.duration} min</a>`).join("")}
               </div>
