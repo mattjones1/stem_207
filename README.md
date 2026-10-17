@@ -2,6 +2,8 @@
 
 # STEM 207
 
+**Live site:** https://mattjones1.github.io/stem_explorer/
+
 **Maine's STEM explorer for grades 2–8.** Teachers and students choose an exploration area, find an activity that fits their time and equipment, read the mission, and launch it. The content is rooted in Maine: lobster boats and tide pools, the North Woods and Katahdin, sugarhouses, nor'easters, and fall fairs.
 
 **Choose an exploration area → Select an activity → Understand the mission → Launch the experience.**
