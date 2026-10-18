@@ -226,6 +226,8 @@ Two activities are marked **Resource coming soon** until the program picks a res
 
 The STEM 207 wordmark lives in `assets/img/brand/`: `stem207-logo.svg` (the vector master), `stem207-logo-reverse.svg` (white letters for dark backgrounds), `stem207-mark.svg` (the Maine "0" on an indigo tile, used as the favicon), and `stem207-pine.svg` (the pine from the M). In the app, `assets/js/brand.js` draws the same artwork inline so the letters can turn white in dark mode. Brand colors are indigo `#302568` and lime `#8CC832`. Headings use Montserrat and body text uses Atkinson Hyperlegible. Color tokens live at the top of `assets/css/styles.css`.
 
+The mission, in these exact words, is **Keep the humanity in technology.** The startup marketing kit (social posts, web banner, workshop flyer and partner sheet templates, concept artwork) is in `brand/marketing-kit/`, and `brand/BRAND.md` sums up its rules for voice, color, imagery and claims.
+
 Maine design touches: a pine-ridge edge cut from the logo's own pine (on the hero, student home, star map, and footer), a coastal hero scene with a working lighthouse beam and one lobster buoy per exploration area, and a fog-white page background.
 
 ## Accessibility

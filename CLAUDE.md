@@ -1,6 +1,6 @@
 # STEM 207: working notes for Claude
 
-STEM learning site for grades 2–8, branded **STEM 207** (Maine theme; tagline: "Keeping the humanity in technology").
+STEM learning site for grades 2–8, branded **STEM 207** (Maine theme). Mission, exact wording: **"Keep the humanity in technology."**
 Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattjones1/stem_207`; pushes deploy in about a minute).
 
 ## Stack and layout
@@ -42,6 +42,11 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 ## Learning-route fields and pages (Batch 5)
 - `starter: { file, label, how }`: a downloadable starter project (built by `python3 tools/build_starters.py` into `assets/starters/`). `figure: "<key>"`: a drawn block picture from `FIGURES` in `views-library.js` (with a text version). `bridge: { from, text }`: "You've seen this idea before" link from a lab to a platform activity.
 - `STEM.startHere` and `STEM.aiRoute` live in `pathway.js`. Pages: the pathway's "New to coding? Start here" and `#/ai-route`. Test: `python3 tests/site/test_batch5.py`.
+
+## Brand
+- Read `brand/BRAND.md` before any branding, marketing, or visual-identity work. The marketing kit (social posts, banner, flyer and partner templates, concept artwork) is in `brand/marketing-kit/`.
+- The logo master is `assets/img/brand/stem207-logo.svg`, the same file as the kit's approved logo. Indigo `#302568` = `--navy`, lime `#8CC832` = `--orange`.
+- Marketing images show no people. The kit artwork is AI-generated concept art, so never present it as real equipment or programs.
 
 ## Classroom and design rules
 - Grades 2–8: short sentences, large controls, buttons instead of dragging, keyboard access, and a visible focus outline. Never rely on color or sound alone.
