@@ -693,3 +693,5 @@
 .mg-log td:last-child { white-space: normal; min-width: 9rem; }
 .lab-sim { display: flex; gap: .5rem; align-items: flex-start; padding: .6rem .75rem; border-radius: var(--radius-sm); background: var(--warn-soft); color: var(--fg); font-size: .92rem; }
 .lab-sim svg { width: 1.1rem; height: 1.1rem; flex: none; margin-top: .15rem; fill: none; stroke: var(--warn-ink); stroke-width: 2; }
+.oi-reason { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; font-weight: 700; font-size: .92rem; }
+.oi-reason select { max-width: 100%; }

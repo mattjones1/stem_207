@@ -105,8 +105,9 @@
           (act.keywords || []).forEach((k) => { c.keywords[k] = (c.keywords[k] || 0) + 1; });
           if (e.data.confidence === "teach") c.confident++;
         } else {
-          const r = Math.round(baseXp(act) * P.xp.replay);
-          gained += r; parts.push(["Mission replayed", r]);
+          // Repeats are practice. They're recorded (so a teacher can read the new answer) but earn no XP.
+          const r = Math.round(baseXp(act) * (P.xp.replay || 0));
+          if (r) { gained += r; parts.push(["Mission replayed", r]); }
         }
         xp += gained;
         completedIds.add(act.id);
@@ -193,8 +194,17 @@
     const assignedIds = new Set(student.classId ? SE.store.assignmentsFor(student.classId).map((x) => x.activityId) : []);
     // Only suggest what a student can start alone: no teacher-led activities, hands-on activities
     // that need materials, or placeholders. Teachers can still assign any of these.
-    const canStartAlone = (a) => a.format !== "teacher-led" && (a.launch.status === "lab" || a.launch.status === "ready");
-    const notDone = (a) => !prof.completedIds.has(a.id) && !assignedIds.has(a.id) && canStartAlone(a);
+    const canStartAlone = (a) => a.format !== "teacher-led" && (a.launch.status === "lab" || a.launch.status === "ready")
+      && !(a.access && (a.access.supervision || (a.access.hardware || []).length));
+    // Respect prerequisites: no coding activity beyond the student's next pathway stage, and no
+    // advanced activity until they've finished an intermediate one in the same area.
+    const stageOf = (a) => a.pathwayStage || (STEM.pathway.find((s) => s.activities.includes(a.id)) || {}).stage || 0;
+    let reach = 1;
+    while (prof.stages[reach] && prof.stages[reach].status === "cleared") reach++;
+    prof.completions.forEach((c) => { reach = Math.max(reach, stageOf(c.activity) + 1); });
+    const doneLevel = (area, level) => prof.completions.some((c) => c.activity.area === area && c.activity.level === level);
+    const ready = (a) => (stageOf(a) <= reach) && (a.level !== "advanced" || doneLevel(a.area, "intermediate"));
+    const notDone = (a) => !prof.completedIds.has(a.id) && !assignedIds.has(a.id) && canStartAlone(a) && ready(a);
     const picks = [];
     const add = (a, reason) => { if (a && !picks.some((p) => p.activity.id === a.id)) picks.push({ activity: a, reason }); };
 

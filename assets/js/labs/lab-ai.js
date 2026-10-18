@@ -344,45 +344,104 @@
   }
 
   /* ───────── Level 6: responsible use ───────── */
+  /* Responsible use. Each case has a decision and a reason.
+   *   floor: decisions ruled out by a fact or a safety, privacy, or honesty rule (null = a judgment call)
+   *   fits:  reasons that actually apply to the case
+   *   view:  what many people think, shown as one perspective, not the answer
+   * A case passes when the decision is allowed and the reason fits. Judgment calls accept any
+   * allowed decision with a fitting reason, and are flagged for class discussion. */
+  const REASONS = {
+    small: "A mistake would be small and easy to catch",
+    help: "It saves people time on a slow or boring job",
+    choice: "People still make the final choice",
+    harm: "A mistake could hurt someone",
+    unfair: "It could treat some people unfairly",
+    private: "It uses private information",
+    honest: "It wouldn't be honest",
+    cantknow: "The AI can't really know this from the data"
+  };
+  const BIN = { good: "Good use", human: "OK if a person checks", not: "Not OK" };
   const USES = [
-    ["Counting puffins in photos from a Maine seabird island", "good", "Low risk, and it saves scientists hours. If it miscounts, a person can spot-check the photos, and no one is harmed."],
-    ["Sorting Maine wild blueberries from leaves and stems on a conveyor belt", "good", "Low risk. A mistake means one leaf slips through, and machines like this help farms work faster."],
-    ["Suggesting a library book you might like", "good", "Helpful and low risk. You still choose what to read."],
-        ["Spotting something worrying on an X-ray", "human", "It can help doctors find things faster, but a doctor must check, because a mistake could hurt someone."],
-    ["Grading a student's science report", "human", "A teacher should review it. AI can miss creative thinking or be unfair to some kinds of writing."],
-    ["Choosing which people get a job interview", "human", "AI trained on past choices can copy past unfairness. People need to check the results."],
-    ["Writing a whole essay and turning it in as your own", "not", "That's not your work. Using AI to brainstorm can be OK if your teacher allows it, but passing off its writing as yours isn't honest."],
-    ["Asking kids to type their home address into a chatbot", "not", "Never share personal information like your address with an AI tool."],
-    ["Guessing someone's mood from a photo to put them in a group", "not", "Faces don't reliably show feelings, and it's not fair or private to sort people this way."]
+    { text: "Counting puffins in photos from a Maine seabird island", floor: null, fits: ["small", "help"],
+      view: "Many people call this a good use: it saves scientists hours, and a person can spot-check the photos." },
+    { text: "Sorting Maine wild blueberries from leaves and stems on a conveyor belt", floor: null, fits: ["small", "help"],
+      view: "Many people call this a good use: a mistake means one leaf slips through." },
+    { text: "Suggesting a library book you might like", floor: null, fits: ["small", "choice", "private"],
+      view: "Many people call this a good use because you still choose what to read. Some worry about apps keeping a record of what you read." },
+    { text: "Spotting something worrying on an X-ray", floor: ["good"], fits: ["harm", "help"],
+      rule: "A missed or wrong finding could hurt a patient, so this can't be left to AI alone. A doctor has to check.",
+      view: "Many people say it's OK if a doctor checks: AI can help doctors find things faster." },
+    { text: "Grading a student's science report", floor: ["good"], fits: ["unfair", "harm", "cantknow"],
+      rule: "Grades affect students, and AI can miss creative thinking or be unfair to some kinds of writing, so it can't grade alone.",
+      view: "Many people say a teacher should review any AI suggestions." },
+    { text: "Choosing which people get a job interview", floor: ["good"], fits: ["unfair", "harm"],
+      rule: "AI trained on past choices can copy past unfairness, and the decision affects people's lives, so it can't decide alone.",
+      view: "Many people say people must check the results, and some say AI shouldn't be used for this at all." },
+    { text: "Writing a whole essay and turning it in as your own", floor: ["good", "human"], fits: ["honest"],
+      rule: "Turning in AI writing as your own work isn't honest, even if someone checks it. (Brainstorming with AI can be OK if your teacher allows it.)",
+      view: "" },
+    { text: "Asking kids to type their home address into a chatbot", floor: ["good", "human"], fits: ["private", "harm"],
+      rule: "Never share personal information like your address with an AI tool. That's a safety rule.",
+      view: "" },
+    { text: "Guessing someone's mood from a photo to put them in a group", floor: ["good"], fits: ["cantknow", "unfair", "private"],
+      rule: "Faces don't reliably show feelings, so the AI can't really know someone's mood. Sorting people this way isn't fair or private.",
+      view: "Many people say this is not OK at all." }
   ];
+  /* Pure check for one case: { ok, kind: "rule" | "reason" | "ok", discuss } */
+  function judgeUse(i, decision, reason) {
+    const u = USES[i];
+    if (u.floor && u.floor.includes(decision)) return { ok: false, kind: "rule" };
+    if (!u.fits.includes(reason)) return { ok: false, kind: "reason" };
+    return { ok: true, kind: "ok", discuss: !u.floor || u.floor.length < 2 };
+  }
+  SE.patternMachine = { judgeUse, USES, REASONS };
+
   function mountResponsible(el, api) {
     const order = SE.shuffle(USES.map((_, i) => i), "resp");
-    const answered = {};
-    const BIN = { good: "Good use", human: "OK if a person checks", not: "Not OK" };
+    const pick = {};   // case index -> { d, r }
+    const passed = {};
+    const reasonOrder = Object.keys(REASONS);
     el.innerHTML = `
       <div class="lab-panel">
         <h3>Should we use AI for this?</h3>
-        <p class="muted">For each idea, choose: a good use, OK only if a person checks the AI's work, or not OK.</p>
+        <p class="muted">For each idea, choose what you think, then choose your best reason. Some cases have a firm rule. Others are judgment calls where people disagree, and a good reason matters most.</p>
         <ol class="oi-list">${order.map((i) => `
-          <li data-row="${i}"><p>${esc(USES[i][0])}</p>
-            <div class="seg" role="group" aria-label="Your choice">${Object.entries(BIN).map(([k, v]) => `<button type="button" data-u="${k}" data-i="${i}">${v}</button>`).join("")}</div>
+          <li data-row="${i}"><p>${esc(USES[i].text)}</p>
+            <div class="seg" role="group" aria-label="Your choice for: ${esc(USES[i].text)}">${Object.entries(BIN).map(([k, v]) => `<button type="button" data-u="${k}" data-i="${i}" aria-pressed="false">${v}</button>`).join("")}</div>
+            <label class="oi-reason">Why? <select class="input input--small" data-r="${i}"><option value="">Choose a reason…</option>${reasonOrder.map((k) => `<option value="${k}">${esc(REASONS[k])}</option>`).join("")}</select></label>
             <p class="oi-why" hidden></p></li>`).join("")}</ol>
       </div>`;
+    const judge = (i) => {
+      const row = el.querySelector(`[data-row="${i}"]`), why = row.querySelector(".oi-why");
+      const p = pick[i] || {};
+      if (!p.d || !p.r) return;
+      const res = judgeUse(i, p.d, p.r), u = USES[i];
+      why.hidden = false;
+      why.className = `oi-why ${res.ok ? "is-right" : "is-wrong"}`;
+      if (res.kind === "rule") why.textContent = `Look again: ${u.rule}`;
+      else if (res.kind === "reason") why.textContent = `“${REASONS[p.r]}” doesn't really fit this case. Think about who could be affected, and how.`;
+      else why.textContent = `Your choice and reason hold up.${res.discuss ? " People disagree on this one, so talk it over with your teacher." : ""}${u.view ? ` One view: ${u.view}` : ""}`;
+      passed[i] = res.ok;
+      const n = Object.values(passed).filter(Boolean).length;
+      if (n === USES.length) {
+        api.say("You gave a sound reason for every case. Firm rules (safety, privacy, honesty) don't bend, and for the rest, the bigger the possible harm, the more a person needs to be in charge.", "good");
+        api.win({ choices: USES.map((_, k) => `${k}:${pick[k].d}:${pick[k].r}`) });
+      } else api.say(`${n} of ${USES.length} cases have a choice and a reason that hold up.`, "info");
+    };
     el.addEventListener("click", (e) => {
       const b = e.target.closest("[data-u]");
       if (!b) return;
       const i = Number(b.dataset.i);
-      const row = el.querySelector(`[data-row="${i}"]`);
-      const right = USES[i][1] === b.dataset.u;
-      row.querySelectorAll("[data-u]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-      const why = row.querySelector(".oi-why");
-      why.hidden = false;
-      why.className = `oi-why ${right ? "is-right" : "is-wrong"}`;
-      why.textContent = `${right ? "Agreed." : `Many people would say “${BIN[USES[i][1]]}.”`} ${USES[i][2]}`;
-      answered[i] = right;
-      const n = Object.values(answered).filter(Boolean).length;
-      if (n === USES.length) { api.say("You thought through every case. The bigger the possible harm, the more a human needs to be in charge.", "good"); api.win({ correct: n }); }
-      else api.say(`${n} of ${USES.length} match. Think about: how bad is a mistake, and who could be harmed?`, "info");
+      el.querySelectorAll(`[data-row="${i}"] [data-u]`).forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      pick[i] = { ...(pick[i] || {}), d: b.dataset.u };
+      judge(i);
+    });
+    el.addEventListener("change", (e) => {
+      const s = e.target.closest("[data-r]");
+      if (!s) return;
+      const i = Number(s.dataset.r);
+      pick[i] = { ...(pick[i] || {}), r: s.value };
+      judge(i);
     });
   }
 
@@ -407,11 +466,11 @@
     { title: "Know when you don't know", concept: "Confidence and limits",
       goal: "Set a confidence threshold so the machine is never confidently wrong, but still answers at least half.",
       hint: "Slide slowly and watch the counts. Which creatures does the machine get wrong? Are they like anything it saw in training? Look at their confidence.",
-      learned: "AI always produces an answer, even when it shouldn't. Good AI tools show how confident they are and hand hard cases to a person." },
+      learned: "An AI system can produce an answer when it should express uncertainty. Some systems can also refuse or say they are unsure. A high confidence score can still accompany a mistake, so a threshold helps, and a person still decides which mistakes are too costly." },
     { title: "Use AI responsibly", concept: "Responsible use",
-      goal: "Decide whether AI should be used in 9 situations.",
-      hint: "Ask two questions: How bad would a mistake be? Does it involve someone's private information?",
-      learned: "Whether to use AI depends on the stakes. Low-risk uses are fine; high-stakes decisions need a human in charge; some uses aren't fair, honest, or private." }
+      goal: "For 9 ideas, decide whether AI should be used, and give your best reason for each.",
+      hints: ["For each case, ask: how bad would a mistake be, and who could be harmed?", "Some cases have a firm rule about safety, privacy, or honesty. The others are judgment calls: any choice can work if your reason really fits the case."],
+      learned: "Deciding whether to use AI means weighing harm, fairness, privacy, and honesty. Some lines are firm rules. For the rest, people can disagree, so explain your reason and listen to other people's." }
   ];
 
   SE.labs.register({

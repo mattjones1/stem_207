@@ -189,7 +189,7 @@
     const first = !last;
     const xpLine = first
       ? `Worth <strong>${base} XP</strong>${!prof.counts.sectors.has(a.area) ? ` + ${P.xp.newSector} for a new area` : ""}. Answer the question for +${P.xp.reflection}, try the challenge for +${P.xp.extension}.`
-      : `You've done this one. Doing it again earns <strong>${Math.round(base * P.xp.replay)} XP</strong>.`;
+      : `You've done this one. Doing it again is practice: it doesn't add XP, but your teacher can read your new answer.`;
 
     return `
       ${last ? `
@@ -229,8 +229,13 @@
   SE.views.bindDebrief = function (user, a) {
     const form = document.getElementById("debrief-form");
     if (!form) return;
+    let sent = false;
     form.addEventListener("submit", (e) => {
       e.preventDefault();
+      if (sent) return;   // a double-click or a second Enter must not record twice
+      sent = true;
+      const btn = form.querySelector("button[type=submit]");
+      if (btn) { btn.disabled = true; btn.setAttribute("aria-disabled", "true"); }
       const before = SE.game.profile(user.id);
       const stepsDone = (before.steps[a.id] || new Set()).size;
       SE.store.log("mission_completed", {
@@ -260,10 +265,10 @@
     wrap.innerHTML = `
       <div class="celebrate" role="dialog" aria-modal="true" aria-labelledby="cel-title">
         <div class="celebrate__stamp">${SE.patchArt({ name: "Mission complete", icon: SE.areaById[a.area].icon, ring: "orange" }, true, 120)}</div>
-        <h2 id="cel-title" tabindex="-1">${rankUp ? `Promoted to ${esc(after.rank.name)}!` : "Mission complete!"}</h2>
+        <h2 id="cel-title" tabindex="-1">${rankUp ? `Promoted to ${esc(after.rank.name)}!` : gained.first ? "Mission complete!" : "Practice saved"}</h2>
         <p class="celebrate__sub">${esc(a.title)}</p>
-        <p class="celebrate__xp">+<span id="cel-xp">${reduce ? gained.xp : 0}</span> XP</p>
-        <ul class="celebrate__parts">${gained.parts.map(([label, n]) => `<li><span>${esc(label)}</span><b>+${n}</b></li>`).join("")}</ul>
+        ${gained.xp ? `<p class="celebrate__xp">+<span id="cel-xp">${reduce ? gained.xp : 0}</span> XP</p>
+        <ul class="celebrate__parts">${gained.parts.map(([label, n]) => `<li><span>${esc(label)}</span><b>+${n}</b></li>`).join("")}</ul>` : `<p class="celebrate__note">Repeats are practice, so they don't add XP. Your teacher can read your new answer.</p>`}
         ${rankUp ? `<div class="celebrate__rank">${SE.insignia(after.rank, 56)}<p><strong>${esc(after.rank.name)}</strong><br>${esc(after.rank.motto)}</p></div>` : ""}
         <div class="celebrate__bar">${rankBar(after, true)}</div>
         ${SE.base.unlockStrip(SE.base.newUnlocks(before, after))}
@@ -284,7 +289,7 @@
     const title = wrap.querySelector("#cel-title");
     title.focus();
 
-    if (!reduce) {
+    if (!reduce && gained.xp) {
       const el = wrap.querySelector("#cel-xp");
       const t0 = performance.now();
       const step = (t) => {

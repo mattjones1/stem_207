@@ -1837,3 +1837,10 @@ h1, h2, h3, h4 { letter-spacing: -.015em; }
 
 /* Completions a student marked themselves (not checked by a lab or a teacher). */
 .self-rep { display: inline-block; padding: .05rem .45rem; border-radius: 999px; border: 1.5px dashed var(--line); color: var(--muted); font-size: .75rem; font-weight: 700; letter-spacing: .02em; vertical-align: .1em; white-space: nowrap; }
+.self-rep--legacy { border-style: dotted; font-style: italic; }
+.celebrate__note { color: var(--muted); max-width: 28rem; margin-inline: auto; }
+.prep-line { display: block; margin-top: .25rem; font-size: .85rem; color: var(--muted); }
+.prep-line summary { cursor: pointer; display: inline-flex; align-items: center; gap: .3rem; font-weight: 700; }
+.prep-line svg, span.prep-line svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; vertical-align: -2px; }
+.prep-line p { margin: .3rem 0 0; }
+.prep-line summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }

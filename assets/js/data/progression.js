@@ -17,8 +17,12 @@ window.STEM.progression = {
     newSector: 50,           // first mission in an exploration area
     stageCleared: 100,       // teacher confirmed a pathway "I can"
     labLevel: 30,            // finished a level in an interactive lab (first time)
-    replay: 0.25             // repeating a mission earns a quarter of its base XP
+    replay: 0                // repeating a mission is practice: no new XP
   },
+
+  /* Completions recorded before this date (ms) came from the old one-click flow, so teacher
+     views label them "legacy" instead of treating them as current evidence. Sample data is exempt. */
+  legacyBefore: Date.UTC(2026, 9, 18, 14, 0),
 
   /* Explorer ranks, Maine-style: from the dock to the top of Katahdin.
      Insignia are drawn from `chevrons` and `stars`. */

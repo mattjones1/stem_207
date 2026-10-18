@@ -15,6 +15,21 @@
   const app = () => document.getElementById("app");
 
   let currentClassId = null;
+  /* How a student-marked completion is labeled for teachers: "legacy" for records from the old
+     one-click flow, "self-reported" for everything since. Lab checks are reported separately. */
+  const completionTag = (e) => {
+    const legacy = !e.isDemo && e.at < (STEM.progression.legacyBefore || 0);
+    return legacy
+      ? '<span class="self-rep self-rep--legacy" title="Recorded before completions were labeled. Treat as unverified.">legacy</span>'
+      : '<span class="self-rep" title="The student marked this complete. Read their answer to check understanding.">self-reported</span>';
+  };
+  /* What a teacher needs before class, from the activity's own materials and setup. */
+  const prepLine = (a) => {
+    if (a.launch.status === "lab") return `<span class="prep-line">${icon("check")}No prep: runs inside STEM 207</span>`;
+    const mats = (a.before && a.before.materials) || [], setup = (a.before && a.before.setup) || [];
+    return `<details class="prep-line"><summary>${icon("clipboard")}Teacher prep: ${mats.length} material${mats.length === 1 ? "" : "s"}${setup.length ? `, ${setup.length} setup step${setup.length === 1 ? "" : "s"}` : ""}</summary>
+      ${mats.length ? `<p><strong>Materials:</strong> ${mats.map(esc).join("; ")}</p>` : ""}${setup.length ? `<p><strong>Setup:</strong> ${setup.map(esc).join(" ")}</p>` : ""}</details>`;
+  };
   const FEED_NOISE = ["step_checked", "signed_in", "lab_test_run", "lab_opened", "lab_hint", "lab_clue", "lab_compass", "lab_fps", "lab_play", "lab_prediction", "lab_trained", "lab_bug", "lab_miss", "profile_custom"];
   const TIMELINE_NOISE = ["lab_test_run", "lab_clue", "lab_compass", "lab_fps", "lab_play", "lab_prediction", "lab_trained", "lab_bug", "lab_miss", "profile_custom"];
   let rosterSort = { key: "name", dir: 1 };
@@ -38,7 +53,7 @@
       case "mission_opened": return { icon: "eye", text: `${who}opened ${title}` };
       case "launched": return { icon: "external", text: `${who}launched ${a ? esc(a.launch.provider) : "a resource"} for ${title}` };
       case "step_checked": return { icon: "list", text: `${who}${e.data.checked ? "checked off" : "unchecked"} step ${e.data.step + 1} of ${title}` };
-      case "mission_completed": return { icon: "check", text: `${who}marked ${title} complete <span class="self-rep">self-reported</span>`, strong: true };
+      case "mission_completed": return { icon: "check", text: `${who}marked ${title} complete ${completionTag(e)}`, strong: true };
       case "ican_claimed": return { icon: "flag", text: `${who}said “I can” for pathway stage ${e.data.stage}` };
       case "ican_verified": return { icon: "shield", text: `${withName ? who : ""}Stage ${e.data.stage} confirmed by teacher` };
       case "ican_returned": return { icon: "refresh", text: `${withName ? who : ""}Stage ${e.data.stage}: teacher said “not yet”` };
@@ -212,7 +227,7 @@
           const list = SE.store.assignmentsFor(cls.id).map((x) => ({ x, a: SE.activityById[x.activityId] })).filter((r) => r.a);
           return `<div class="block">
             <div class="block__head"><h2>Assigned missions</h2><a class="muted" href="#/teach/missions">${list.length ? "Manage" : "Assign missions"}</a></div>
-            ${list.length ? `<ul class="alist alist--compact">${list.map(({ x, a }) => `<li class="alist__item"><div class="alist__main"><a href="#/activity/${a.id}">${esc(a.title)}</a><small>${x.dueDate ? esc(dueText(x.dueDate)) : "No due date"}</small></div>${progressMarkup(classProgress(sum, a))}</li>`).join("")}</ul>`
+            ${list.length ? `<ul class="alist alist--compact">${list.map(({ x, a }) => `<li class="alist__item"><div class="alist__main"><a href="#/activity/${a.id}">${esc(a.title)}</a><small>${x.dueDate ? esc(dueText(x.dueDate)) : "No due date"}</small>${prepLine(a)}</div>${progressMarkup(classProgress(sum, a))}</li>`).join("")}</ul>`
               : `<p class="muted">Pick missions by discipline on the <a href="#/teach/missions">Missions</a> tab. They'll show up first on every student's home screen.</p>`}
           </div>`;
         })()}
@@ -438,7 +453,7 @@
           <span class="icon-badge">${icon(SE.areaById[c.activity.area].icon)}</span>
           <div>
             ${withName ? `<a href="#/teach/student/${student.id}"><strong>${esc(student.displayName)}</strong></a> · ` : ""}<a href="#/activity/${c.activity.id}">${withName ? esc(c.activity.title) : `<strong>${esc(c.activity.title)}</strong>`}</a>
-            <span>${SE.dateShort(c.event.at)} · <span class="self-rep">self-reported</span> · ${c.event.data.stepsDone || 0}/${c.event.data.stepsTotal || c.activity.steps.length} steps · ${c.event.data.extension ? "tried the challenge" : "no challenge"}</span>
+            <span>${SE.dateShort(c.event.at)} · ${completionTag(c.event)} · ${c.event.data.stepsDone || 0}/${c.event.data.stepsTotal || c.activity.steps.length} steps · ${c.event.data.extension ? "tried the challenge" : "no challenge"}</span>
           </div>
           ${conf ? `<span class="conf conf--${conf.id}">${esc(conf.name)}</span>` : ""}
         </div>
@@ -761,7 +776,7 @@
             const late = x.dueDate && new Date(`${x.dueDate}T23:59:59`).getTime() < Date.now();
             return `<li class="alist__item">
               <span class="icon-badge">${icon(SE.areaById[a.area].icon)}</span>
-              <div class="alist__main"><a href="#/activity/${a.id}">${esc(a.title)}</a><small>${esc(SE.areaById[a.area].short)} · ${a.duration} min · ${SE.gradesText(a.grades)}</small></div>
+              <div class="alist__main"><a href="#/activity/${a.id}">${esc(a.title)}</a><small>${esc(SE.areaById[a.area].short)} · ${a.duration} min · ${SE.gradesText(a.grades)}</small>${prepLine(a)}</div>
               ${progressMarkup(pr)}
               <label class="alist__due ${late && pr.done < pr.total ? "is-late" : ""}"><span>Due</span><input type="date" class="input input--small" value="${x.dueDate || ""}" data-due="${a.id}" aria-label="Due date for ${esc(a.title)}"></label>
               <button type="button" class="icon-btn" data-assign="${a.id}" aria-pressed="true" aria-label="Unassign ${esc(a.title)}" title="Unassign">✕</button>
