@@ -91,6 +91,7 @@
       if (!b) SE.views.teach(user);
       else if (b === "student") SE.views.teachStudent(user, c);
       else if (b === "pathway") SE.views.teachPathway(user);
+      else if (b === "missions") SE.views.teachMissions(user, c);
       else if (b === "reflections") SE.views.teachReflections(user);
       else if (b === "class") SE.views.teachClass(user);
       else SE.views.notFound();

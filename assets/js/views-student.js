@@ -75,6 +75,35 @@
         <p><strong>Note from your teacher</strong> on <a href="#/activity/${notes.c.activity.id}">${esc(notes.c.activity.title)}</a>: “${esc(notes.r.data.note)}”</p>
       </div></div>` : ""}
 
+      ${(() => {
+        const list = SE.store.assignmentsFor(user.classId).map((x) => ({ x, a: SE.activityById[x.activityId] })).filter((r) => r.a);
+        if (!list.length) return "";
+        const done = list.filter(({ a }) => SE.game.missionDone(prof, a)).length;
+        const order = list.slice().sort((p, q) => SE.game.missionDone(prof, p.a) - SE.game.missionDone(prof, q.a) || (p.x.dueDate || "9999").localeCompare(q.x.dueDate || "9999"));
+        return `
+      <section class="section wrap" aria-labelledby="assigned-title">
+        <div class="section__head">
+          <div><span class="eyebrow">From your teacher</span><h2 id="assigned-title">Your assigned missions</h2></div>
+          <p class="assigned-count"><b>${done}</b> of ${list.length} done</p>
+        </div>
+        <div class="mini-meter assigned-meter" aria-hidden="true"><span style="width:${(done / list.length) * 100}%"></span></div>
+        <div class="next-grid next-grid--assigned">
+          ${order.map(({ x, a }) => {
+            const d = SE.game.missionDone(prof, a);
+            const late = !d && x.dueDate && new Date(`${x.dueDate}T23:59:59`).getTime() < Date.now();
+            const lab = a.launch.status === "lab" && SE.labs.byId(a.launch.labId);
+            const lv = lab ? (prof.labLevels[lab.id] || new Set()).size : 0;
+            return `<a class="next-card next-card--assigned ${d ? "is-done" : ""} ${late ? "is-late" : ""}" href="${lab && !d ? `#/lab/${lab.id}` : `#/activity/${a.id}`}">
+              <span class="next-card__tag">${icon(d ? "check" : SE.areaById[a.area].icon)}${d ? "Done" : x.dueDate ? esc(SE.dueText(x.dueDate)) : "Assigned"}</span>
+              <strong>${esc(a.title)}</strong>
+              <span>${esc(a.summary)}</span>
+              <span class="next-card__meta">${lab ? `${lv} of ${lab.levels.length} lab levels` : `${a.duration} min · +${SE.game.baseXp(a)} XP`}</span>
+            </a>`;
+          }).join("")}
+        </div>
+      </section>`;
+      })()}
+
       <section class="section wrap" aria-labelledby="next-title">
         <div class="section__head">
           <div><span class="eyebrow">Choose your next adventure</span><h2 id="next-title">${inProgress ? "Pick up where you left off" : "Suggested missions"}</h2></div>

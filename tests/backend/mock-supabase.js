@@ -10,7 +10,7 @@
  *   node tests/backend/mock-supabase.js        (needs psql; see tests/backend/README.md)
  *
  * Settings (environment variables): PORT (8787), PGURL (postgres connection string),
- * TOKEN_TTL (access-token lifetime in seconds, default 3600).
+ * TOKEN_TTL (access-token lifetime in seconds, default 3600), LOCAL_MODE (set to serve the app in local mode).
  */
 "use strict";
 const http = require("http");
@@ -167,6 +167,8 @@ http.createServer(async (req, res) => {
     }
     // Static app files, with config.js pointed at this server.
     if (u.pathname === "/assets/js/config.js") {
+      // LOCAL_MODE=1 serves an empty config so the app runs in local (browser-only) mode.
+      if (process.env.LOCAL_MODE) return send(200, `window.STEM207_CONFIG = { supabaseUrl: "", supabaseKey: "" };`, "text/javascript");
       return send(200, `window.STEM207_CONFIG = { supabaseUrl: "http://localhost:${PORT}", supabaseKey: "${ANON_KEY}" };`, "text/javascript");
     }
     const file = path.join(ROOT, u.pathname === "/" ? "index.html" : decodeURIComponent(u.pathname));

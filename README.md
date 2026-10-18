@@ -64,6 +64,7 @@ The sample class has eight made-up students with two and a half weeks of made-up
 
 ### What educators get (`#/teach`)
 
+- **Missions**: the whole library organized by discipline (Coding pathway, Coding, Virtual Reality, AI, Engineering, Science, Creative). Filter by grade band, time, or Made in Maine; see how many students have finished each mission; and **Assign** missions to the class, one at a time or a whole pathway stage at once. Add due dates in the Assigned list. Assigned missions show first on every student's home screen and are tagged on the mission page. You can also assign from any mission page.
 - **Overview**: active students this week, missions this week compared with last week, reflections and "I can" checks waiting, a 14-day chart, which areas the class is exploring, a "needs a check-in" list (inactive for a week, or "still figuring it out" on recent missions), the class goal, a sortable roster, and a live activity log.
 - **Student detail**: rank, XP, patches, pathway with Confirm / Not yet, every completed mission with answers and confidence, and a full activity timeline.
 - **Pathway checks**: pending "I can" claims and a class-by-stage readiness map.
@@ -90,7 +91,7 @@ STEM 207 runs in one of two modes, chosen by `assets/js/config.js`:
 ### Set up the free back end (about 10 minutes)
 
 1. Create a free account at [supabase.com](https://supabase.com) and click **New project**. Pick a region near Maine (for example US East) and save the database password somewhere safe.
-2. In the project, open **SQL Editor → New query**, paste all of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**. It creates the tables, the security rules, and the student sign-in functions. Running it again is safe.
+2. In the project, open **SQL Editor → New query**, paste all of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**. (Already set up before assigned missions were added? Run [`supabase/update-2-assignments.sql`](supabase/update-2-assignments.sql) once.) It creates the tables, the security rules, and the student sign-in functions. Running it again is safe.
 3. Open **Authentication → Sign In / Providers → Email** and turn off **Confirm email** while you're prototyping, so new educator accounts work right away. (If you leave it on, teachers must click the link in a confirmation email first. In that case, set **Authentication → URL Configuration → Site URL** to wherever your site lives.)
 4. Open **Project Settings → API Keys**. Copy the **Project URL** and the **publishable** key (older projects call it the **anon public** key) into `assets/js/config.js`. Never use a secret or `service_role` key here.
 5. Commit and push. GitHub Pages serves the site with the back end on. To make the one-file version use it too, run `python tools/build_single_file.py` again.
