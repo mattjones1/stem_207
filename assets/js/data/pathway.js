@@ -54,7 +54,7 @@ window.STEM.pathway = [
     project: "Build an interactive story where the reader's choice changes the ending.",
     debugging: "Test every branch, including answers you didn't plan for.",
     iCan: "I can use if–then–else to make a program choose what to do, and test every path.",
-    activities: ["interactive-story", "sense-think-act"]
+    activities: ["interactive-story", "sense-think-act", "lab-moon-gate"]
   },
   {
     stage: 5,

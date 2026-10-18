@@ -1871,6 +1871,49 @@ window.STEM.activities = [
     ]
   },
   {
+    id: "lab-moon-gate",
+    title: "Moon Base Gatekeeper",
+    area: "coding",
+    summary: "Write an IF / ELSE rule for a moon base gate, predict what each robot visitor will do, and test every badge. Then find the bug in a rule that lets everyone in.",
+    level: "beginner",
+    grades: ["2-3", "4-5", "6-8"],
+    duration: 20,
+    format: "independent",
+    equipment: ["computer", "tablet"],
+    source: "original",
+    keywords: ["lab", "conditionals", "if else", "equals", "testing", "debugging", "branches", "space", "moon", "interactive"],
+    access: { account: "none", cost: "free", supervision: false, hardware: [] },
+    launch: { status: "lab", labId: "moon-gate", label: "Open Moon Base Gatekeeper", note: "Runs inside STEM 207. About 15–20 minutes. No outside account or website needed." },
+    mission: "You run the gate at a moon base. Robot visitors arrive wearing Moon, Star, or Planet badges, and your IF / ELSE rule decides who gets in. Predict, test, fix a broken rule, and get the Star team into their meeting.",
+    learn: [
+      "Explain that a conditional checks a rule and chooses one of two actions.",
+      "Trace which branch (THEN or ELSE) runs for a given input.",
+      "Explain why a rule must be tested with inputs that match and inputs that don't."
+    ],
+    before: {
+      materials: ["Laptop, Chromebook, or tablet"],
+      setup: ["Best after students know events and stored values (Robot Dance Party and Feed the Space Blob).", "Optional opener: you are the gate. Students hold up badge cards and the class says “open” or “closed” using a rule on the board."],
+      prerequisites: "Understands simple events and that a program can store a value."
+    },
+    steps: [
+      "Level 1: Predict what happens to a Moon visitor, then test.",
+      "Level 2: Predict and test a Star visitor.",
+      "Level 3: Change which badge gets in, then test a visitor that matches and one that doesn't.",
+      "Level 4: A rule is broken. Find a visitor that shows the bug, fix the rule, and test again.",
+      "Level 5: Challenge. Only Star visitors get in. Test all three badges."
+    ],
+    reflect: "Your first test passed in Level 4, but the rule was still broken. How many tests do you need to trust a rule?",
+    extend: "Write a rule on paper for a different base (for example, only Planet visitors stay out). List the tests you'd run before you trust it.",
+    teacherNotes: [
+      "Conditionals: IF checks one thing, here whether the visitor's badge equals the badge in the rule. The answer is true or false, and that decides what happens next.",
+      "Branch selection: true runs THEN; false runs ELSE. Exactly one branch runs every time. The trace and the highlighted code show which branch ran and which was skipped.",
+      "Why one test isn't enough: in Level 4, the broken rule says THEN Open gate and ELSE Open gate. A Moon visitor gets in, so the rule looks fine. Only a visitor who doesn't match shows the bug. Good testers try a case that should pass and a case that should fail.",
+      "The challenge only counts tests of the current rule. If a student edits the rule, earlier results are crossed out and they must test all three badges again. Ask: “Why don't your old tests count anymore?”",
+      "Common mistake: thinking ELSE is the “wrong answer.” ELSE is just what happens when the check is false. It can open or close the gate.",
+      "Ask afterward: “If a rule worked for one visitor, how could it still be broken?”"
+    ]
+  },
+  {
     id: "lab-field-station",
     title: "Field Station 360",
     area: "vr",

@@ -608,3 +608,86 @@
   .sb-blob[data-mood="do-chomp"] .sb-mouth--open { opacity: 1; }
   .sb-blob[data-mood="do-chomp"] .sb-mouth--idle { opacity: 0; }
 }
+
+/* ───────── Moon Base Gatekeeper ───────── */
+.mg { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 1rem; align-items: start; }
+@media (max-width: 1100px) { .mg { grid-template-columns: minmax(0, 1fr); } }
+.mg-left, .mg-right { display: grid; gap: .8rem; min-width: 0; }
+.mg-scene { position: relative; aspect-ratio: 5 / 3.3; border-radius: var(--radius); overflow: hidden; border: 1.5px solid var(--line); background: #120d33; }
+.mg-sky { position: absolute; inset: 0; background: radial-gradient(#fff 1px, transparent 1.6px) 0 0 / 38px 38px, radial-gradient(#b9e27f 1px, transparent 1.6px) 17px 23px / 61px 61px, linear-gradient(#120d33, #302568); opacity: .9; }
+.mg-earth { position: absolute; right: 8%; top: 10%; width: 13%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #8fd3e8, #3f7fc9 60%, #24476b); box-shadow: inset -8px -6px 0 rgba(0,0,0,.25); }
+.mg-ground { position: absolute; left: -5%; right: -5%; bottom: -20%; height: 46%; border-radius: 50% 50% 0 0; background: #c9c4d9; box-shadow: inset 0 10px 0 #ddd8ea; }
+.mg-ground::before, .mg-ground::after { content: ""; position: absolute; border-radius: 50%; background: #b3adc8; }
+.mg-ground::before { left: 15%; top: 18%; width: 9%; height: 10%; }
+.mg-ground::after { left: 70%; top: 30%; width: 6%; height: 7%; }
+.mg-base { position: absolute; right: 0; bottom: 26%; width: 46%; height: 52%; }
+.mg-dome { position: absolute; right: 6%; bottom: 30%; width: 70%; height: 80%; border-radius: 50% 50% 0 0; background: radial-gradient(circle at 40% 30%, rgba(255,255,255,.6), rgba(143, 211, 232, .35) 50%, rgba(63, 127, 201, .4)); border: 3px solid #e8e3f7; }
+.mg-wall { position: absolute; left: 0; right: 0; bottom: 0; height: 34%; background: #e8e3f7; border-top: 4px solid #8cc832; }
+.mg-gate { position: absolute; left: 50%; bottom: 26%; width: 15%; height: 38%; transform: translateX(-30%); background: #1d1647; border: 4px solid #e8e3f7; border-bottom: 0; border-radius: 10px 10px 0 0; overflow: hidden; }
+.mg-door { position: absolute; top: 0; bottom: 0; width: 50%; background: repeating-linear-gradient(0deg, #8b8a83 0 10px, #a6a59e 10px 12px); transition: transform .45s ease; }
+.mg-door--l { left: 0; border-right: 2px solid #1d1647; }
+.mg-door--r { right: 0; border-left: 2px solid #1d1647; }
+.mg-scene[data-gate="open"] .mg-door--l { transform: translateX(-92%); }
+.mg-scene[data-gate="open"] .mg-door--r { transform: translateX(92%); }
+.mg-sign { position: absolute; left: 50%; top: 6%; transform: translateX(-50%); padding: .1rem .4rem; border-radius: 6px; font-family: var(--font-display); font-weight: 800; font-size: clamp(.6rem, 1.4vw, .8rem); letter-spacing: .05em; background: #e9603f; color: #fff; border: 2px solid #1d1647; z-index: 1; }
+.mg-scene[data-gate="open"] .mg-sign { background: #8cc832; color: #1d1647; }
+.mg-visitor { position: absolute; left: 14%; bottom: 20%; width: 17%; transition: transform .6s ease; z-index: 2; }
+.mg-bot { display: block; width: 100%; height: auto; }
+.mg-held { position: absolute; left: -58%; top: 46%; display: grid; justify-items: center; padding: .15rem .3rem; border-radius: 10px; background: #fff; border: 2px solid #1d1647; font-weight: 800; font-size: clamp(.6rem, 1.3vw, .8rem); color: #1d1647; }
+.mg-held .mg-badge-art { width: clamp(22px, 4vw, 40px); height: auto; }
+.mg-scene.is-walking[data-gate="open"] .mg-visitor { transform: translateX(150%) scale(.85); opacity: .9; }
+.mg-scene.is-walking[data-gate="closed"] .mg-visitor { animation: mg-wait .6s ease; }
+@keyframes mg-wait { 30% { transform: translateX(40%); } 60% { transform: translateX(30%) rotate(-4deg); } 100% { transform: translateX(0); } }
+
+.mg-panel, .mg-code, .mg-trace-box, .mg-log-box { background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 1rem; display: grid; gap: .6rem; min-width: 0; }
+.mg-panel h3, .mg-trace-box h3, .mg-log-box h3 { font-size: 1.02rem; }
+.mg-seg { display: flex; flex-wrap: wrap; gap: .4rem; }
+.mg-opt { display: inline-flex; align-items: center; gap: .4rem; min-height: 48px; padding: .35rem .8rem; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); color: var(--fg); font: inherit; font-weight: 800; cursor: pointer; }
+.mg-opt:hover { border-color: var(--teal); }
+.mg-opt[aria-pressed="true"] { border-color: var(--navy); background: var(--teal-soft); box-shadow: inset 0 0 0 1px var(--navy); }
+.mg-opt[aria-pressed="true"]::after { content: "✓"; color: var(--teal); }
+.mg-act-glyph { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.mg-test { min-height: 58px; font-size: 1.15rem; justify-self: start; padding-inline: 1.5rem; }
+
+.mg-code { gap: .5rem; background: #1d1647; border-color: #1d1647; }
+.mg-line { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; padding: .6rem .7rem; border-radius: 12px; color: #fff; font-weight: 700; border: 3px solid transparent; }
+.mg-line--if { background: #4a3ba6; }
+.mg-line--branch { background: #2a2068; margin-left: 1.4rem; }
+.mg-kw { font-family: var(--font-display); font-weight: 800; letter-spacing: .06em; padding: .2rem .55rem; border-radius: 8px; background: #8cc832; color: #1d1647; }
+.mg-code .mg-opt { background: rgba(255, 255, 255, .95); border-color: transparent; min-height: 44px; }
+.mg-code .mg-opt[aria-pressed="true"] { background: #fff; border-color: #8cc832; box-shadow: 0 0 0 2px #8cc832; }
+.mg-code .mg-opt[aria-pressed="false"] { opacity: .7; }
+.mg-result { margin-left: auto; padding: .25rem .6rem; border-radius: 999px; font-weight: 800; }
+.mg-result.is-yes { background: #8cc832; color: #1d1647; }
+.mg-result.is-no { background: #f6d8b8; color: #6b2f08; }
+.mg-line.is-taken { border-color: #8cc832; box-shadow: 0 0 0 3px rgba(140, 200, 50, .35); }
+.mg-line.is-skipped { opacity: .55; border-style: dashed; border-color: rgba(255, 255, 255, .3); }
+.mg-flag { margin-left: auto; padding: .15rem .55rem; border-radius: 999px; font-size: .8rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; background: rgba(255, 255, 255, .15); }
+.mg-line.is-taken .mg-flag { background: #8cc832; color: #1d1647; }
+.mg-stale { display: flex; gap: .5rem; align-items: center; padding: .7rem .9rem; border-radius: var(--radius-sm); background: var(--warn-soft); color: var(--warn-ink); border: 2px solid var(--warn); font-weight: 700; }
+.mg-stale[hidden] { display: none; }
+.mg-stale svg { width: 22px; height: 22px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; }
+.mg-goals { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
+.mg-goals li { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; padding: .5rem .7rem; border-radius: 10px; border: 2px dashed var(--line); background: var(--surface); }
+.mg-goals li.is-pass { border-style: solid; border-color: var(--teal); background: var(--teal-soft); }
+.mg-goals li.is-fail { border-style: solid; border-color: var(--warn); background: var(--warn-soft); }
+.mg-goal-state { margin-left: auto; }
+.mg-badge-tag { display: inline-flex; align-items: center; gap: .3rem; font-weight: 800; }
+.mg-trace { margin: 0; padding-left: 1.4rem; display: grid; gap: .35rem; }
+.mg-trace li.mg-trace__check, .mg-trace li.mg-trace__branch { padding: .3rem .5rem; border-radius: 8px; background: var(--teal-soft); }
+.mg-yes { color: var(--teal); }
+.mg-no { color: var(--warn-ink); }
+.mg-log-wrap { overflow-x: auto; }
+.mg-log td, .mg-log th { text-align: left; }
+.mg-log tr.is-stale td { opacity: .5; text-decoration: line-through; }
+.mg-log tr.is-stale td:last-child small { text-decoration: none; }
+.mg-ok { color: var(--teal); font-weight: 800; }
+.mg-bad { color: var(--warn-ink); font-weight: 800; }
+.mg button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.mg-code button:focus-visible { outline-color: #b9e27f; }
+@media (prefers-reduced-motion: reduce) {
+  .mg-door, .mg-visitor { transition: none; }
+  .mg-scene.is-walking .mg-visitor { animation: none; }
+}
+.mg-badge-tag svg, .mg-opt .mg-badge-art { flex: none; min-width: 22px; }
+.mg-log td:last-child { white-space: normal; min-width: 9rem; }
