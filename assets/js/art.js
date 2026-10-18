@@ -61,7 +61,7 @@
 
   /* Expedition map: each exploration area is a constellation; each activity a star. */
   const SECTORS = [[170, 125], [480, 95], [800, 130], [250, 315], [570, 320], [860, 310]];
-  SE.starMap = (prof, recIds = []) => {
+  SE.starMap = (prof, recIds = [], opts = {}) => {
     const parts = [];
     const labels = [];
     // Faint background stars
@@ -71,7 +71,7 @@
     }
     STEM.areas.forEach((area, ai) => {
       const [cx, cy] = SECTORS[ai];
-      const acts = STEM.activities.filter((a) => a.area === area.id);
+      const acts = STEM.activities.filter((a) => a.area === area.id && !(SE.hiddenForUser && SE.hiddenForUser(a)));
       const r = SE.rng(`sector-${area.id}`);
       const pts = acts.map((a, i) => {
         const ang = (i / acts.length) * Math.PI * 2 + r() * 0.8;
@@ -95,7 +95,8 @@
           : isRec
             ? `<circle class="map-pulse" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="9" fill="none" stroke="${C.tealLight}" stroke-width="2"/><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4" fill="${C.tealLight}"/>`
             : `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.6" fill="${C.cream}" opacity=".55"/>`;
-        parts.push(`<a href="#/activity/${p.a.id}" class="map-star" aria-label="${SE.esc(p.a.title)}, ${state}">
+        // Decorative maps (the sign-in background) draw stars without links, so they aren't tab stops.
+        parts.push(opts.decorative ? `<g>${mark}</g>` : `<a href="#/activity/${p.a.id}" class="map-star" aria-label="${SE.esc(p.a.title)}, ${state}">
           <title>${SE.esc(p.a.title)} (${state})</title>
           <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="16" fill="transparent"/>${mark}</a>`);
       });

@@ -38,7 +38,7 @@
       case "mission_opened": return { icon: "eye", text: `${who}opened ${title}` };
       case "launched": return { icon: "external", text: `${who}launched ${a ? esc(a.launch.provider) : "a resource"} for ${title}` };
       case "step_checked": return { icon: "list", text: `${who}${e.data.checked ? "checked off" : "unchecked"} step ${e.data.step + 1} of ${title}` };
-      case "mission_completed": return { icon: "check", text: `${who}completed ${title}`, strong: true };
+      case "mission_completed": return { icon: "check", text: `${who}marked ${title} complete <span class="self-rep">self-reported</span>`, strong: true };
       case "ican_claimed": return { icon: "flag", text: `${who}said “I can” for pathway stage ${e.data.stage}` };
       case "ican_verified": return { icon: "shield", text: `${withName ? who : ""}Stage ${e.data.stage} confirmed by teacher` };
       case "ican_returned": return { icon: "refresh", text: `${withName ? who : ""}Stage ${e.data.stage}: teacher said “not yet”` };
@@ -438,7 +438,7 @@
           <span class="icon-badge">${icon(SE.areaById[c.activity.area].icon)}</span>
           <div>
             ${withName ? `<a href="#/teach/student/${student.id}"><strong>${esc(student.displayName)}</strong></a> · ` : ""}<a href="#/activity/${c.activity.id}">${withName ? esc(c.activity.title) : `<strong>${esc(c.activity.title)}</strong>`}</a>
-            <span>${SE.dateShort(c.event.at)} · ${c.event.data.stepsDone || 0}/${c.event.data.stepsTotal || c.activity.steps.length} steps · ${c.event.data.extension ? "tried the challenge" : "no challenge"}</span>
+            <span>${SE.dateShort(c.event.at)} · <span class="self-rep">self-reported</span> · ${c.event.data.stepsDone || 0}/${c.event.data.stepsTotal || c.activity.steps.length} steps · ${c.event.data.extension ? "tried the challenge" : "no challenge"}</span>
           </div>
           ${conf ? `<span class="conf conf--${conf.id}">${esc(conf.name)}</span>` : ""}
         </div>
@@ -647,12 +647,13 @@
   function classProgress(sum, a) {
     const done = sum.profiles.filter((p) => SE.game.missionDone(p.prof, a)).length;
     const started = sum.profiles.filter((p) => !SE.game.missionDone(p.prof, a) && (p.prof.opened.has(a.id) || (a.launch.labId && (p.prof.labLevels[a.launch.labId] || new Set()).size))).length;
-    return { done, started, total: sum.students.length };
+    // Lab missions are checked by the lab itself; anything else is marked complete by the student.
+    return { done, started, total: sum.students.length, self: !a.launch.labId };
   }
   const progressMarkup = (pr) => `
-    <span class="mprog" aria-label="${pr.done} of ${pr.total} students finished${pr.started ? `, ${pr.started} started` : ""}">
+    <span class="mprog" aria-label="${pr.done} of ${pr.total} students ${pr.self ? "marked it complete (self-reported)" : "finished"}${pr.started ? `, ${pr.started} started` : ""}">
       <span class="mprog__bar"><span style="width:${pr.total ? (pr.done / pr.total) * 100 : 0}%"></span><span class="mprog__started" style="width:${pr.total ? (pr.started / pr.total) * 100 : 0}%"></span></span>
-      <span class="mprog__text"><b>${pr.done}</b>/${pr.total} done${pr.started ? ` · ${pr.started} started` : ""}</span>
+      <span class="mprog__text"><b>${pr.done}</b>/${pr.total} done${pr.self ? ' <span class="self-rep" title="Students marked this complete themselves. Read their reflections to check understanding.">self-reported</span>' : ""}${pr.started ? ` · ${pr.started} started` : ""}</span>
     </span>`;
   const assignBtn = (a, assigned) => `<button type="button" class="btn btn--small ${assigned ? "btn--assigned" : "btn--ghost"}" data-assign="${a.id}" aria-pressed="${!!assigned}">${icon(assigned ? "check" : "plus")}${assigned ? "Assigned" : "Assign"}</button>`;
   const dueText = (d) => {

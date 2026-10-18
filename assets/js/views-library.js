@@ -82,7 +82,10 @@
   let filters = defaultFilters();
   let filtersFor = null; // the user the filters were set up for
 
+  /* Placeholders ("Resource coming soon") stay out of student lists until a resource is chosen. */
+  SE.hiddenForUser = (a) => a.launch.status === "coming-soon" && ((SE.store.currentUser && SE.store.currentUser()) || {}).role === "student";
   function matches(a, f, prof) {
+    if (SE.hiddenForUser(a)) return false;
     if (f.area && a.area !== f.area) return false;
     if (f.level && a.level !== f.level) return false;
     if (f.grade && !a.grades.includes(f.grade)) return false;
@@ -304,7 +307,7 @@
         </div>
         <div class="areas">
           ${areas.map((a) => {
-            const total = activities.filter((x) => x.area === a.id).length;
+            const total = activities.filter((x) => x.area === a.id && !SE.hiddenForUser(x)).length;
             const done = prof ? (prof.counts.areas[a.id] || 0) : null;
             return `
             <a class="area-card" href="#/area/${a.id}">
@@ -321,7 +324,7 @@
 
   /* Made in Maine: activities and labs rooted in Maine places, work, and wildlife. */
   function maineSection(prof) {
-    const list = activities.filter((a) => SE.isMaine(a) && !a.launch.labId);
+    const list = activities.filter((a) => SE.isMaine(a) && !a.launch.labId && !SE.hiddenForUser(a));
     return `
       <section class="section wrap maine" aria-labelledby="maine-title">
         <div class="section__head">
@@ -425,7 +428,7 @@
     const area = SE.areaById[id];
     if (!area) return SE.views.notFound();
     const prof = user && user.role === "student" ? SE.game.profile(user.id) : null;
-    const list = sortActivities(activities.filter((a) => a.area === id));
+    const list = sortActivities(activities.filter((a) => a.area === id && !SE.hiddenForUser(a)));
     const done = prof ? list.filter((a) => prof.completedIds.has(a.id)).length : 0;
 
     app().innerHTML = `
@@ -560,7 +563,7 @@
     const stage = a.pathwayStage ? pathway.find((s) => s.stage === a.pathwayStage) : null;
     const isStudent = user && user.role === "student";
     const prof = isStudent ? SE.game.profile(user.id) : null;
-    const related = sortActivities(activities.filter((x) => x.area === a.area && x.id !== a.id)).slice(0, 3);
+    const related = sortActivities(activities.filter((x) => x.area === a.area && x.id !== a.id && !SE.hiddenForUser(x))).slice(0, 3);
     const checked = prof ? (prof.steps[a.id] || new Set()) : new Set();
     const lastCompletion = prof ? prof.completions.filter((c) => c.activity.id === a.id).pop() : null;
 

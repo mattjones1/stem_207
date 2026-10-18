@@ -191,7 +191,10 @@
     const inBand = (a) => !student.gradeBand || a.grades.includes(student.gradeBand);
     // Assigned missions get their own section on the student home, so suggestions skip them.
     const assignedIds = new Set(student.classId ? SE.store.assignmentsFor(student.classId).map((x) => x.activityId) : []);
-    const notDone = (a) => !prof.completedIds.has(a.id) && !assignedIds.has(a.id);
+    // Only suggest what a student can start alone: no teacher-led activities, hands-on activities
+    // that need materials, or placeholders. Teachers can still assign any of these.
+    const canStartAlone = (a) => a.format !== "teacher-led" && (a.launch.status === "lab" || a.launch.status === "ready");
+    const notDone = (a) => !prof.completedIds.has(a.id) && !assignedIds.has(a.id) && canStartAlone(a);
     const picks = [];
     const add = (a, reason) => { if (a && !picks.some((p) => p.activity.id === a.id)) picks.push({ activity: a, reason }); };
 

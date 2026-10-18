@@ -576,7 +576,8 @@ window.STEM.activities = [
     teacherNotes: [
       "Model the difference between an observation (\"tall trees with big leaves\") and an inference (\"it rains a lot\").",
       "On the projector, let students take turns as the \"pilot\" who controls the view.",
-      "Keep the search box teacher-controlled for younger students so the trip stays on course."
+      "Keep the search box teacher-controlled for younger students so the trip stays on course.",
+      "Google Earth's menus have changed and now include \"Ask Google Earth,\" an AI search. Decide before class whether students may use it. If they do, treat its answers as claims to check against what students can see. Run through your route once on your classroom device, since button names may differ from these steps."
     ]
   },
   {
@@ -1751,7 +1752,8 @@ window.STEM.activities = [
     teacherNotes: [
       "In fall and winter, Cadillac Mountain is one of the first places in the United States to see the sunrise.",
       "Glaciers scraped and rounded Acadia's pink granite mountains and carved Somes Sound into a long valley that the sea later filled.",
-      "Pair with Field Station 360's Maine tide pool level for a full Maine coast unit."
+      "Pair with Field Station 360's Maine tide pool level for a full Maine coast unit.",
+      "Google Earth's menus have changed and now include \"Ask Google Earth,\" an AI search. Run the four stops once before class to confirm the 3D view and the measure tool are where you expect, and decide whether students may use the AI search. If they do, check its answers against the landscape."
     ]
   },
   {
@@ -1990,10 +1992,10 @@ window.STEM.activities = [
     source: "original",
     keywords: ["lab", "maine", "360", "field trip", "habitat", "adaptations", "compass", "observation", "inference", "tide pool", "north woods", "moose", "katahdin", "interactive"],
     access: { account: "none", cost: "free", supervision: false, hardware: [] },
-    launch: { status: "lab", labId: "field-station", label: "Open Field Station 360", note: "Runs inside STEM 207. Drag, use arrow keys, or open it in a VR headset's web browser." },
+    launch: { status: "lab", labId: "field-station", label: "Open Field Station 360", note: "Runs inside STEM 207. Drag, tap the Look arrows, or use arrow keys to look around. This is a 360° page, not an immersive headset experience." },
     vr: {
       setup: [
-        "On a VR headset with a web browser, open STEM 207 and go to this lab. Students drag with the controller to look around.",
+        "This lab is not an immersive VR experience. A headset's web browser shows it as a flat page, so laptops, tablets, or a projector work better.",
         "Keep headset turns to 10–15 minutes, seated or standing clear of furniture.",
         "The lab saves nothing to the headset; students can sign in with their picture code to save progress."
       ],

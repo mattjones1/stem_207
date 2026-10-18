@@ -9,6 +9,7 @@
  * A lab definition:
  *   id, area, title, tagline, intro
  *   levels: [{ title, concept, goal, steps?: [], hint, learned }]
+ *   simulation (optional): a sentence telling students the lab is a model, not real-world data
  *   chapters (optional): [{ title, short, from, to, blurb }] groups levels (indexes from..to)
  *   mount(el, levelIndex, api) → optional cleanup function
  *
@@ -97,6 +98,7 @@
           ${chapters ? `<p class="lab-voyage">${esc(chapters[ch].title)} · level ${idx - chapters[ch].from + 1} of ${chapters[ch].to - chapters[ch].from + 1}</p>${idx === chapters[ch].from ? `<p class="lab-voyage__blurb">${esc(chapters[ch].blurb)}</p>` : ""}` : ""}
           <span class="lab-concept">${icon("bulb")}${esc(level.concept)}</span>
           <h2 id="lvl-title">Level ${idx + 1}: ${esc(level.title)}</h2>
+          ${lab.simulation ? `<p class="lab-sim">${icon("alert")}<span><strong>Simulation.</strong> ${esc(lab.simulation)}</span></p>` : ""}
           <p class="lab-goal"><strong>Your goal:</strong> ${esc(level.goal)}</p>
           ${level.steps ? `<ol class="lab-steps">${level.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>` : ""}
           <div class="lab-brief__tools">

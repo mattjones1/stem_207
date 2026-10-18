@@ -251,6 +251,7 @@
 
   SE.labs.register({
     id: "launcher",
+    simulation: "This catapult is a computer simulation built from a simple physics model. A real catapult has friction, wobble, and wind that the model leaves out. What would change if you built one for real?",
     area: "engineering",
     title: "Pumpkin Launcher Lab",
     tagline: "Design and tune a catapult for a Maine fall-fair pumpkin toss. Predict, test, change one thing at a time, and keep an engineering notebook.",
@@ -458,6 +459,7 @@
 
   SE.labs.register({
     id: "line-follower",
+    simulation: "This plow is a simulated robot. Real sensors can be fooled by snow, glare, and dirt that the simulation leaves out. What could go wrong with a real one?",
     area: "engineering",
     title: "Snowplow Robot Lab",
     tagline: "A Maine nor'easter just hit. Program a robot plow's sense → think → act rules so it follows the road on its own.",

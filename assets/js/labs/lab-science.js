@@ -309,9 +309,10 @@
 
   SE.labs.register({
     id: "ramp-racers",
+    simulation: "This hill is a computer simulation built from a simple model of sliding. Real hills, sleds, and snow can behave differently. What would you need to test this on a real hill?",
     area: "science",
     title: "Sled Hill Science",
-    tagline: "It's a snow day in Maine. Run a real investigation on a model sledding hill: predict, test, repeat, keep it fair, graph your data, and explain what you found.",
+    tagline: "It's a snow day in Maine. Run an investigation on a simulated sledding hill: predict, test, repeat, keep it fair, graph your data, and explain what you found.",
     levels: LEVELS,
     mount
   });

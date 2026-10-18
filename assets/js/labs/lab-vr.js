@@ -4,7 +4,8 @@
  * tide pool and a North Woods pond under Katahdin), then travel to a rainforest,
  * a desert, and a coral reef. They turn to compass headings, find clues,
  * separate observations from inferences, and compare adaptations.
- * Works with a mouse, touch, keyboard, or a VR headset's web browser.
+ * Works with a mouse, touch, or keyboard. It is a 360° look-around page, not an immersive
+ * VR view: in a headset's web browser it appears as a flat page.
  */
 (function () {
   "use strict";
@@ -745,7 +746,7 @@
     id: "field-station",
     area: "vr",
     title: "Field Station 360",
-    tagline: "Start in Maine's tide pools and North Woods, then travel the world. Look all around five habitats, find clues, and think like a field scientist. Works with a mouse, touch screen, or a VR headset's browser.",
+    tagline: "Start in Maine's tide pools and North Woods, then travel the world. Look all around five habitats, find clues, and think like a field scientist. Drag, tap, or use arrow keys to look around.",
     levels: LEVELS,
     mount(el, idx, api) {
       const L = LEVELS[idx];
