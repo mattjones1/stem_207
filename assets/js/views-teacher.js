@@ -15,8 +15,8 @@
   const app = () => document.getElementById("app");
 
   let currentClassId = null;
-  const FEED_NOISE = ["step_checked", "signed_in", "lab_test_run", "lab_opened", "lab_hint", "lab_clue", "lab_compass", "lab_fps", "lab_play", "lab_prediction", "lab_trained", "lab_bug", "lab_miss"];
-  const TIMELINE_NOISE = ["lab_test_run", "lab_clue", "lab_compass", "lab_fps", "lab_play", "lab_prediction", "lab_trained", "lab_bug", "lab_miss"];
+  const FEED_NOISE = ["step_checked", "signed_in", "lab_test_run", "lab_opened", "lab_hint", "lab_clue", "lab_compass", "lab_fps", "lab_play", "lab_prediction", "lab_trained", "lab_bug", "lab_miss", "profile_custom"];
+  const TIMELINE_NOISE = ["lab_test_run", "lab_clue", "lab_compass", "lab_fps", "lab_play", "lab_prediction", "lab_trained", "lab_bug", "lab_miss", "profile_custom"];
   let rosterSort = { key: "name", dir: 1 };
   let showReviewed = false;
   let pendingRemove = null;
@@ -293,7 +293,7 @@
             ${rows.map(({ student, prof, stage }) => {
               const stale = !prof.lastActive || Date.now() - prof.lastActive > 7 * SE.DAY;
               return `<tr>
-                <th scope="row"><a href="#/teach/student/${student.id}">${esc(student.displayName)}</a><small>${esc(SE.gradeById[student.gradeBand] ? SE.gradeById[student.gradeBand].name : "")}</small></th>
+                <th scope="row"><a class="roster-name" href="#/teach/student/${student.id}">${SE.studentAvatar(student.id, 30, prof)}${esc(student.displayName)}</a><small>${esc(SE.gradeById[student.gradeBand] ? SE.gradeById[student.gradeBand].name : "")}</small></th>
                 <td><span class="rank-cell">${SE.insignia(prof.rank, 22)}${esc(prof.rank.name)}</span></td>
                 <td class="num">${SE.num(prof.xp)}</td>
                 <td class="num">${prof.counts.missions}</td>
@@ -334,7 +334,7 @@
       <section class="wrap section">
         <a class="btn btn--ghost btn--small" href="#/teach">${icon("arrowLeft")}Back to class overview</a>
         <div class="student-head">
-          ${SE.insignia(prof.rank, 64)}
+          ${SE.studentAvatar(student.id, 72, prof)}
           <div>
             <h2>${esc(student.displayName)}</h2>
             <p class="muted">${esc(prof.rank.name)} · ${esc(SE.gradeById[student.gradeBand] ? SE.gradeById[student.gradeBand].name : "")} · last active ${prof.lastActive ? SE.timeAgo(prof.lastActive) : "never"}</p>
@@ -517,7 +517,7 @@
         <div class="table-wrap">
           <table class="matrix">
             <thead><tr><th scope="col">Explorer</th>${STEM.pathway.map((s) => `<th scope="col" title="${esc(s.title)}"><span>Stage ${s.stage}</span><small>${esc(s.title)}</small></th>`).join("")}</tr></thead>
-            <tbody>${sum.profiles.map(({ student, prof }) => `<tr><th scope="row"><a href="#/teach/student/${student.id}">${esc(student.displayName)}</a></th>${STEM.pathway.map((s) => {
+            <tbody>${sum.profiles.map(({ student, prof }) => `<tr><th scope="row"><a class="roster-name" href="#/teach/student/${student.id}">${SE.studentAvatar(student.id, 30, prof)}${esc(student.displayName)}</a></th>${STEM.pathway.map((s) => {
               const st = prof.stages[s.stage];
               return `<td class="${st ? `is-${st.status}` : ""}">${st ? (st.status === "cleared" ? `${icon("check")}<span class="visually-hidden">Cleared</span>` : `${icon("clock")}<span class="visually-hidden">Waiting for check</span>`) : `<span class="visually-hidden">Not yet</span>`}</td>`;
             }).join("")}</tr>`).join("")}</tbody>

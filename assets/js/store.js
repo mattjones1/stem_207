@@ -257,6 +257,13 @@
       });
     });
 
+    // Sample explorers (all but the first, who designs their own), using free gear only.
+    const hairs = ["short", "curly", "long", "bun", "braids", "buzz", "puffs"], hats = ["none", "beanie", "cap"], jackets = ["indigo", "red", "spruce", "harbor"];
+    students.slice(1).forEach((s, i) => ev(s, "profile_custom", now - (15 - i) * SE.DAY, {
+      look: { skin: (i * 2 + 1) % 6, hair: hairs[(i * 3) % 7], hairColor: (i * 5) % 8, hat: hats[i % 3], jacket: jackets[(i + 1) % 4], gear: i % 4 === 2 ? "glasses" : "none", back: ["sky", "fog", "sunset", "pine"][i % 4] },
+      boat: { hull: i % 6, stripe: (i + 2) % 8, a: i % 12, b: (i * 5) % 12, buoy: [i % 8, (i + 3) % 8, (i + 5) % 8] }
+    }));
+
     events.sort((a, b) => a.at - b.at);
 
     // Missions the sample teacher has assigned to the class, a couple with due dates.

@@ -61,6 +61,8 @@ The sample class has eight made-up students with two and a half weeks of made-up
 - **18 mission patches** for things like first mission, reflections, team missions, debugging, each area, pathway stages, and interactive labs.
 - **Class expedition**: everyone's XP moves the class across Maine, from Kittery to Portland Head, Penobscot Bay, Acadia, Moosehead, and the summit of Katahdin. It's cooperative, so there's no leaderboard.
 - **Coding pathway**: an "I can do this" button sends a stage to the teacher to check.
+- **My harbor** (`#/base`): each student designs an illustrated explorer (skin tone, hair, hats, jackets, gear, background) and a home harbor that grows as they learn. A pine grows for every mission and a buoy for every 2 lab levels, in the student's own buoy colors. Ranks and patches unlock 31 items: a lobster boat they name and paint at Tidepooler, a camp cabin, a lighthouse, a sailboat, puffins, a loon, a moose, the northern lights, and Katahdin. New unlocks show up on the Mission complete and lab level screens. Avatars appear in the header, on the home screen, and in the teacher's roster.
+- **No personal info in avatars**: avatars are drawings built from preset parts, and boat names are picked from two word lists, so students never type free text or upload photos. Choices are saved as `profile_custom` events in the activity log, so they work in local and cloud mode with no database change.
 
 ### What educators get (`#/teach`)
 
@@ -154,6 +156,7 @@ supabase/schema.sql           Database tables, security rules, and student sign-
 tests/backend/                Supabase stand-in for testing cloud mode on plain Postgres
 assets/js/game.js             Turns the activity log into XP, rank, patches, and pathway status
 assets/js/art.js              Insignia, patches, expedition map, class goal track
+assets/js/base.js             Student avatars, the "My harbor" scene, and gear/harbor unlocks
 assets/js/views-*.js          Library, student, sign-in, and educator views
 assets/js/main.js             Router and header
 ```

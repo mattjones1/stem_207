@@ -18,8 +18,8 @@
         `<a href="#/signin" class="nav-signin" data-signout>${icon("user")}Sign in</a>`;
     } else if (user.role === "student") {
       const prof = SE.game.profile(user.id);
-      html = link("#/", "dashboard", "My expedition") + link("#/library", "library", "Missions") + link("#/pathway", "pathway", "Coding pathway") +
-        `<a href="#/me" class="user-chip" ${navKey === "me" ? 'aria-current="page"' : ""}>${SE.insignia(prof.rank, 24)}<span><b>${esc(user.displayName)}</b><small>${SE.num(prof.xp)} XP · ${esc(prof.rank.name)}</small></span></a>` +
+      html = link("#/", "dashboard", "My expedition") + link("#/library", "library", "Missions") + link("#/pathway", "pathway", "Coding pathway") + link("#/base", "base", "My harbor") +
+        `<a href="#/me" class="user-chip" ${navKey === "me" ? 'aria-current="page"' : ""}>${SE.ownAvatar(user.id, 28)}<span><b>${esc(user.displayName)}</b><small>${SE.num(prof.xp)} XP · ${esc(prof.rank.name)}</small></span></a>` +
         `<button type="button" class="nav-out" data-signout>${icon("logout")}<span>Sign out</span></button>`;
     } else {
       html = link("#/teach", "teach", "Educator dashboard") + link("#/library", "library", "Activity library") + link("#/pathway", "pathway", "Coding pathway") +
@@ -105,6 +105,10 @@
     else if (a === "me") {
       if (user.role !== "student") { location.replace("#/"); return; }
       SE.views.me(user); navKey = "me"; title = "My profile · STEM 207";
+    }
+    else if (a === "base") {
+      if (user.role !== "student") { location.replace("#/"); return; }
+      SE.views.base(user); navKey = "base"; title = "My harbor · STEM 207";
     }
     else if (a === "area") { SE.views.area(user, b); title = `${SE.areaById[b] ? SE.areaById[b].name : "Not found"} · STEM 207`; }
     else if (a === "activity") { SE.views.activity(user, b); title = `${SE.activityById[b] ? SE.activityById[b].title : "Not found"} · STEM 207`; }

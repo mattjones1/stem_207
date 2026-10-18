@@ -123,7 +123,7 @@
     });
 
     let won = false;
-    const api = {
+    const api = SE.labs.active = {
       user,
       levelIndex: idx,
       say(text, kind = "info") {
@@ -160,6 +160,7 @@
           </div>
           <div class="lab-win__learned"><span class="eyebrow">What you just learned</span><p>${esc(level.learned)}</p></div>
           ${newPatches.length ? `<div class="patch-row">${newPatches.map((p) => `<figure class="patch-tile patch-tile--new">${SE.patchArt(p.patch, true, 76)}<figcaption><strong>${esc(p.patch.name)}</strong></figcaption></figure>`).join("")}</div>` : ""}
+          ${isStudent ? SE.base.unlockStrip(SE.base.newUnlocks(before, after)) : ""}
           <div class="lab-win__actions">
             ${next !== null ? `<a class="btn btn--launch" href="#/lab/${lab.id}/${next + 1}">${icon("arrowRight")}${chapters && chapterOf(next) !== ch ? `Start ${esc(chapters[chapterOf(next)].title)}` : `Next level: ${esc(lab.levels[next].title)}`}</a>` : ""}
             <button type="button" class="btn btn--ghost" id="lab-replay">${icon("refresh")}Try this level again</button>
