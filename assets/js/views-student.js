@@ -194,7 +194,16 @@
     const startedOn = (a) => prof.opened.has(a.id) || (prof.steps[a.id] && prof.steps[a.id].size > 0) || (labOf(a) && (prof.labLevels[a.launch.labId] || new Set()).size > 0);
     const inProgress = Object.entries(prof.steps).filter(([id, set]) => set.size > 0 && !prof.completedIds.has(id)).map(([id]) => SE.activityById[id]).filter(Boolean)[0];
     let main = null, why = "";
-    if (open.length) { main = open[0].a; why = open[0].x.dueDate ? `From your teacher · ${SE.dueText(open[0].x.dueDate)}` : "From your teacher"; }
+    let retry = null;
+    // A teacher's "try again" comes first, assigned or not: it's direction from the teacher.
+    const retryA = STEM.activities.map((a) => ({ a, st: SE.game.statusFor(prof, a) })).filter((r) => r.st.state === "tryagain").sort((p, q) => q.st.tryAgain.at - p.st.tryAgain.at)[0];
+    if (retryA) { main = retryA.a; retry = retryA.st.tryAgain; why = "Your teacher asked you to try again"; }
+    else if (open.length) {
+      main = open[0].a;
+      const st = SE.game.statusFor(prof, main);
+      if (st.state === "tryagain") { retry = st.tryAgain; why = "Your teacher asked you to try again"; }
+      else why = open[0].x.dueDate ? `From your teacher · ${SE.dueText(open[0].x.dueDate)}` : "From your teacher";
+    }
     else if (inProgress) { main = inProgress; why = "Pick up where you left off"; }
     else { const r = SE.game.recommendations(user, prof, 1)[0]; if (r) { main = r.activity; why = r.reason === "Ready for you" ? "A good next step" : r.reason; } }
     const notes = prof.completions.map((c) => ({ c, r: prof.reviewed[c.event.id] })).filter((x) => x.r && x.r.data.note && Date.now() - x.r.at < 14 * SE.DAY).slice(-1)[0];
@@ -217,6 +226,7 @@
         <article class="today-card" aria-labelledby="today-mission">
           <span class="today-card__why">${icon(SE.areaById[main.area].icon)}${esc(why)}</span>
           <h2 id="today-mission">${esc(main.title)}</h2>
+          ${retry && retry.data.note ? `<p class="today-card__retry">${icon("message")}<span><strong>Your teacher says:</strong> “${esc(retry.data.note)}”</span></p>` : ""}
           <p class="today-card__what">${esc(main.summary)}</p>
           <p class="today-card__meta">${icon("clock")}${SE.timeText(main)}${lab ? ` · ${(prof.labLevels[lab.id] || new Set()).size} of ${lab.levels.length} levels done` : ""}</p>
           ${main.stopAt ? `<p class="today-card__stop">${icon("flag")}<span><strong>You're done when:</strong> ${esc(main.stopAt)}</span></p>` : ""}
@@ -270,38 +280,64 @@
   };
 
   /* ───────── Mission debrief (bottom of an activity page) ───────── */
+  /* ───────── Mission debrief: show what you know ─────────
+   * A submission needs evidence: a written answer, or "I'll show or tell my teacher" (no typing).
+   * It's recorded as Submitted. A teacher can then confirm it or ask the student to try again,
+   * and the student can revise and send it again at any time. */
+  const STATUS_TEXT = {
+    submitted: "Submitted. Your teacher will check it.",
+    checked: "Checked in the lab. Your teacher may still ask you to show it.",
+    confirmed: "Your teacher confirmed it. Nice work!",
+    tryagain: "Your teacher asked you to try again."
+  };
   SE.views.debrief = function (user, a, prof) {
     const past = prof.completions.filter((c) => c.activity.id === a.id);
     const last = past[past.length - 1];
     const review = last ? prof.reviewed[last.event.id] : null;
+    const st = SE.game.statusFor(prof, a);
     const base = SE.game.baseXp(a);
     const first = !last;
+    const prompt = a.check || a.reflect;
     const xpLine = first
-      ? `Worth <strong>${base} XP</strong>${!prof.counts.sectors.has(a.area) ? ` + ${P.xp.newSector} for a new area` : ""}. Answer the question for +${P.xp.reflection}, try the challenge for +${P.xp.extension}.`
-      : `You've done this one. Doing it again is practice: it doesn't add XP, but your teacher can read your new answer.`;
-
+      ? `Worth <strong>${base} XP</strong>${!prof.counts.sectors.has(a.area) ? ` + ${P.xp.newSector} for a new area` : ""} when you send it.`
+      : st.state === "tryagain" ? "Fix it up and send it again. Your teacher will look at your new answer."
+      : "Sending it again is practice: it doesn't add XP, but your teacher can read your new answer.";
+    const how = (st.confirmed && st.confirmed.data.how) ? ` (${esc({ oral: "spoken check", demo: "watched you show it", work: "reviewed your work" }[st.confirmed.data.how] || st.confirmed.data.how)})` : "";
     return `
-      ${last ? `
-      <section class="block block--complete" aria-labelledby="s-done">
-        <h2 id="s-done">${icon("check")}Mission complete</h2>
-        <p>You finished this on ${SE.dateShort(last.event.at)} and earned <strong>${last.xp} XP</strong>.</p>
-        ${last.event.data.reflection ? `<blockquote class="your-answer"><span>Your answer to “${esc(a.reflect)}”</span>${esc(last.event.data.reflection)}</blockquote>` : ""}
-        ${review && review.data.note ? `<p class="teacher-reply">${icon("message")}<span><strong>Your teacher wrote:</strong> ${esc(review.data.note)}</span></p>` : review ? `<p class="muted">${icon("eye", 'class="inline-icon"')}Your teacher read your answer.</p>` : ""}
+      ${last || st.confirmed ? `
+      <section class="block block--complete status--${st.state}" aria-labelledby="s-done">
+        <h2 id="s-done">${icon(st.state === "tryagain" ? "refresh" : "check")}${esc(st.label === "Legacy" ? "Marked complete" : st.label)}</h2>
+        <p>${esc(STATUS_TEXT[st.state] || "")}${how}${last ? ` You sent it on ${SE.dateShort(last.event.at)}.` : ""}</p>
+        ${st.state === "tryagain" && st.tryAgain.data.note ? `<p class="teacher-reply">${icon("message")}<span><strong>Your teacher wrote:</strong> ${esc(st.tryAgain.data.note)}</span></p>` : ""}
+        ${st.state === "confirmed" && st.confirmed.data.note ? `<p class="teacher-reply">${icon("message")}<span><strong>Your teacher wrote:</strong> ${esc(st.confirmed.data.note)}</span></p>` : ""}
+        ${last && last.event.data.reflection ? `<blockquote class="your-answer"><span>Your answer</span>${esc(last.event.data.reflection)}</blockquote>` : last && last.event.data.evidence === "show" ? `<p class="muted">You chose to show or tell your teacher.</p>` : ""}
+        ${review && review.data.note ? `<p class="teacher-reply">${icon("message")}<span><strong>Your teacher wrote:</strong> ${esc(review.data.note)}</span></p>` : ""}
       </section>` : ""}
 
       <section class="block block--debrief" aria-labelledby="s-debrief">
-        <h2 id="s-debrief">${icon("flag")}${last ? "Do it again" : "Mission debrief"}</h2>
+        <h2 id="s-debrief">${icon("flag")}${first ? "Show what you know" : st.state === "tryagain" ? "Try it again" : "Send a new answer"}</h2>
         <p class="block__hint">${xpLine}</p>
         <form id="debrief-form" novalidate>
           <div class="debrief-q">
-            <label for="d-reflect"><span class="debrief-q__tag">${icon("question")}Think about it</span>${esc(a.reflect)}</label>
-            <textarea id="d-reflect" rows="4" maxlength="600" placeholder="Write what you noticed or figured out."></textarea>
-            <p class="field-help">Write about your thinking. Don't include personal details like your full name, address, or phone number.</p>
+            <p class="debrief-q__prompt"><span class="debrief-q__tag">${icon("question")}${a.check ? "Show what you know" : "Think about it"}</span>${esc(prompt)}</p>
+            <fieldset class="evidence">
+              <legend>How will you show it?</legend>
+              <label class="evidence__opt"><input type="radio" name="d-ev" value="written" checked><span>${icon("message")}Write it here</span></label>
+              <label class="evidence__opt"><input type="radio" name="d-ev" value="show"><span>${icon("users")}Show or tell my teacher</span></label>
+            </fieldset>
+            <div id="d-write">
+              <label for="d-reflect" class="visually-hidden">Your answer</label>
+              <textarea id="d-reflect" rows="4" maxlength="600" placeholder="Write what you did and what you figured out."></textarea>
+              <p class="field-help">Don't include personal details like your full name, address, or phone number.</p>
+            </div>
+            <p class="field-help" id="d-show-help" hidden>Great. Your teacher will ask you to say it or show it. You can still add a few words below if you want.</p>
+            <p class="form__error" id="d-err" role="alert"></p>
           </div>
           <div class="debrief-q debrief-q--extend">
-            <span class="debrief-q__tag">${icon("rocket")}Take it further</span>
+            <span class="debrief-q__tag">${icon("rocket")}Take it further (optional)</span>
             <p>${esc(a.extend)}</p>
-            <label class="check-row"><input type="checkbox" id="d-extend"> I tried this challenge</label>
+            <label for="d-extend-note">Did you try it? What happened?</label>
+            <input id="d-extend-note" class="input" maxlength="200" placeholder="Optional">
           </div>
           <fieldset class="debrief-q confidence">
             <legend><span class="debrief-q__tag">${icon("target")}How did it go?</span></legend>
@@ -310,7 +346,7 @@
                 <label class="confidence__opt"><input type="radio" name="d-conf" value="${c.id}" ${i === 1 ? "checked" : ""}><span>${esc(c.name)}</span></label>`).join("")}
             </div>
           </fieldset>
-          <button type="submit" class="btn btn--launch btn--big">${icon("check")}${last ? "Complete it again" : "Complete mission"}</button>
+          <button type="submit" class="btn btn--launch btn--big">${icon("check")}${first ? "Send it" : "Send again"}</button>
         </form>
       </section>`;
   };
@@ -318,10 +354,25 @@
   SE.views.bindDebrief = function (user, a) {
     const form = document.getElementById("debrief-form");
     if (!form) return;
+    const sync = () => {
+      const show = form.querySelector("input[name=d-ev]:checked").value === "show";
+      document.getElementById("d-show-help").hidden = !show;
+      document.getElementById("d-reflect").placeholder = show ? "Optional: a few words" : "Write what you did and what you figured out.";
+    };
+    form.querySelectorAll("input[name=d-ev]").forEach((r) => r.addEventListener("change", sync));
     let sent = false;
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       if (sent) return;   // a double-click or a second Enter must not record twice
+      const evidence = form.querySelector("input[name=d-ev]:checked").value;
+      const text = document.getElementById("d-reflect").value.trim().slice(0, 600);
+      const err = document.getElementById("d-err");
+      if (evidence === "written" && !/[a-z0-9]/i.test(text)) {
+        err.textContent = "Write your answer first, or choose “Show or tell my teacher.”";
+        document.getElementById("d-reflect").focus();
+        return;
+      }
+      err.textContent = "";
       sent = true;
       const btn = form.querySelector("button[type=submit]");
       if (btn) { btn.disabled = true; btn.setAttribute("aria-disabled", "true"); }
@@ -329,8 +380,9 @@
       const stepsDone = (before.steps[a.id] || new Set()).size;
       SE.store.log("mission_completed", {
         activityId: a.id,
-        reflection: document.getElementById("d-reflect").value.trim().slice(0, 600),
-        extension: document.getElementById("d-extend").checked,
+        evidence,
+        reflection: text,
+        extensionNote: document.getElementById("d-extend-note").value.trim().slice(0, 200),
         confidence: (form.querySelector("input[name=d-conf]:checked") || {}).value || "got-it",
         stepsDone,
         stepsTotal: a.steps.length
@@ -354,8 +406,9 @@
     wrap.innerHTML = `
       <div class="celebrate" role="dialog" aria-modal="true" aria-labelledby="cel-title">
         <div class="celebrate__stamp">${SE.patchArt({ name: "Mission complete", icon: SE.areaById[a.area].icon, ring: "orange" }, true, 120)}</div>
-        <h2 id="cel-title" tabindex="-1">${rankUp ? `Promoted to ${esc(after.rank.name)}!` : gained.first ? "Mission complete!" : "Practice saved"}</h2>
+        <h2 id="cel-title" tabindex="-1">${rankUp ? `Promoted to ${esc(after.rank.name)}!` : gained.first ? (gained.event.data.evidence === "show" ? "Sent! Now show your teacher." : "Sent to your teacher!") : "Practice saved"}</h2>
         <p class="celebrate__sub">${esc(a.title)}</p>
+        ${gained.event.data.evidence === "show" ? `<p class="celebrate__note celebrate__note--show">${icon("users")}Now show or tell your teacher what you did.</p>` : ""}
         ${gained.xp ? `<p class="celebrate__xp">+<span id="cel-xp">${reduce ? gained.xp : 0}</span> XP</p>
         <ul class="celebrate__parts">${gained.parts.map(([label, n]) => `<li><span>${esc(label)}</span><b>+${n}</b></li>`).join("")}</ul>` : `<p class="celebrate__note">Repeats are practice, so they don't add XP. Your teacher can read your new answer.</p>`}
         ${rankUp ? `<div class="celebrate__rank">${SE.insignia(after.rank, 56)}<p><strong>${esc(after.rank.name)}</strong><br>${esc(after.rank.motto)}</p></div>` : ""}

@@ -28,6 +28,8 @@ Some missions run on outside platforms. Their full teaching packs are Markdown f
 
 Six missions are marked as the pilot set (teachers can filter for them): Robot Dance Party, Robot Maze Mission, Click Tap Go! Event Party, Feed the Space Blob, How Does an AI Sort?, and Pattern Predictors. Each lists student core time and teacher prep separately (pilot estimates until timed in a classroom), a "You're done when" stopping point, a "Show what you know" check that students can say, show, or write, student-visible "Stuck?" hints, and a next step. Students start on **Today**, which shows one assigned or eligible mission with Start or Continue and an "I need help" button that tells the teacher. Rehearsal and observation sheets are in [`pilot/`](pilot/).
 
+**Completion statuses.** Each mission shows one status per student: *Started*, *Submitted* (the student sent written evidence or chose "Show or tell my teacher"), *Checked in lab* (the lab's own check passed, for what it tests), *Teacher confirmed* (spoken check, watched demo, or reviewed work), or *Try again* (with the teacher's note; the student can revise and send it again). Older one-click records show as *legacy*. XP no longer depends on mission length, and repeats earn none.
+
 ## Interactive labs
 
 Each exploration area has its own leveled, interactive lab that runs inside STEM 207, with no outside account or website. Every level teaches one idea, gives a hint on request, checks the student's work, and ends with "What you just learned." Signed-in students earn XP for each level (+30), and lab work counts toward patches and the weekly streak.

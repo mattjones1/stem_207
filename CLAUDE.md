@@ -33,6 +33,12 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - Student home is the **Today** view (`SE.views.today`, route `#/`). `#/explore` is the expedition page (map, patches, class goal). `#/library` is the mission finder.
 - Pilot materials are in `pilot/` (rehearsal checklist, observation sheet). Test: `python3 tests/site/test_today_pilot.py`.
 
+## Completion statuses (Batch 4)
+- `SE.game.statusFor(prof, activity)` → `confirmed` · `tryagain` · `checked` (lab core levels passed; `coreLevels` on the activity, else all) · `submitted` · `started` · `none`, plus `legacy` for old one-click records. All derived from the event log; no database change.
+- Student debrief needs evidence: `evidence: "written"` (non-empty) or `"show"` (show or tell the teacher, no typing). Repeats add no XP. Base XP is flat (`P.xp.mission`); `teacher_confirmed` adds `P.xp.teacherConfirmed` once.
+- Teachers record checks with `teacher_confirmed` `{ activityId, how: oral|demo|work, note }` or `teacher_try_again` `{ activityId, note }` (note required). Try again reopens the mission on the student's Today until they send it again.
+- Test: `python3 tests/site/test_evidence.py [local] [cloud|skip]` (cloud needs Postgres + the mock on 8787).
+
 ## Classroom and design rules
 - Grades 2–8: short sentences, large controls, buttons instead of dragging, keyboard access, and a visible focus outline. Never rely on color or sound alone.
 - Collect no student personal information. Students have a display name and picture codes only. Camera activities frame hands or objects, never faces.

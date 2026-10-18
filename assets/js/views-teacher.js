@@ -18,11 +18,50 @@
   /* How a student-marked completion is labeled for teachers: "legacy" for records from the old
      one-click flow, "self-reported" for everything since. Lab checks are reported separately. */
   const completionTag = (e) => {
-    const legacy = !e.isDemo && e.at < (STEM.progression.legacyBefore || 0);
-    return legacy
-      ? '<span class="self-rep self-rep--legacy" title="Recorded before completions were labeled. Treat as unverified.">legacy</span>'
-      : '<span class="self-rep" title="The student marked this complete. Read their answer to check understanding.">self-reported</span>';
+    const legacy = !e.data.evidence && !e.isDemo && e.at < (STEM.progression.legacyBefore || 0);
+    if (legacy) return '<span class="self-rep self-rep--legacy" title="Recorded before completions were labeled. Treat as unverified.">legacy</span>';
+    if (e.data.evidence === "show") return '<span class="self-rep" title="The student chose to show or tell you. Record a check when you have.">will show you</span>';
+    return '<span class="self-rep" title="The student submitted this. It isn\'t confirmed until you check it.">submitted</span>';
   };
+  /* A student's status on one mission, as a small chip (word + shape, not color alone). */
+  const STATUS_ICON = { confirmed: "shield", tryagain: "refresh", checked: "flask", submitted: "check", started: "clock", none: "clock" };
+  const statusChip = (st) => `<span class="st-chip st-chip--${st.state}">${icon(STATUS_ICON[st.state])}${esc(st.label)}</span>`;
+  /* Record a teacher check: confirm the target skill (spoken, demo, or work) or ask for another try. */
+  const checkActions = (student, a, st) => st.state === "confirmed" ? "" : `
+    <details class="check-act">
+      <summary>${icon("shield")}Record a check</summary>
+      <form class="check-act__form" data-check-student="${student.id}" data-check-activity="${a.id}">
+        ${a.check ? `<p class="muted small"><strong>Check:</strong> ${esc(a.check)}</p>` : ""}
+        <label>How did you check? <select class="input input--small" name="how">
+          <option value="oral">Spoken check (they told me)</option><option value="demo">Watched them show it</option><option value="work">Reviewed their work</option></select></label>
+        <label>Note for ${esc(student.displayName.split(" ")[0])} <span class="muted">(needed for Try again)</span>
+          <input class="input input--small" name="note" maxlength="200" placeholder="What to try next, or what they did well"></label>
+        <div class="check-act__btns">
+          <button type="submit" class="btn btn--primary btn--small" name="act" value="confirm">${icon("check")}Confirm</button>
+          <button type="submit" class="btn btn--ghost btn--small" name="act" value="again">${icon("refresh")}Try again</button>
+        </div>
+        <p class="form__error" role="alert"></p>
+      </form>
+    </details>`;
+  let checkBound = false;
+  function bindCheckActions() {
+    if (checkBound) return;
+    checkBound = true;
+    document.addEventListener("submit", (e) => {
+      const f = e.target.closest("[data-check-student]");
+      if (!f) return;
+      e.preventDefault();
+      const act = (e.submitter && e.submitter.value) || "confirm";
+      const note = f.note.value.trim();
+      if (act === "again" && !note) { f.querySelector(".form__error").textContent = "Add a short note so they know what to try next."; f.note.focus(); return; }
+      f.querySelectorAll("button").forEach((b) => { b.disabled = true; });
+      const data = { activityId: f.dataset.checkActivity, note };
+      if (act === "confirm") data.how = f.how.value;
+      SE.store.teacherLog(f.dataset.checkStudent, act === "confirm" ? "teacher_confirmed" : "teacher_try_again", data);
+      SE.toast(act === "confirm" ? "Confirmed" : "Sent back with your note");
+      SE.route(true);
+    });
+  }
   /* What a teacher needs before class, from the activity's own materials and setup. */
   const prepLine = (a) => {
     if (a.launch.status === "lab") return `<span class="prep-line">${icon("check")}${a.time && a.time.prep ? `Teacher prep: about ${a.time.prep} min to check devices. Runs inside STEM 207.` : "No prep: runs inside STEM 207"}</span>`;
@@ -50,11 +89,13 @@
     const who = withName ? `<strong>${esc((SE.store.studentById(e.studentId) || {}).displayName || "A student")}</strong> ` : "";
     switch (e.type) {
       case "signed_in": return { icon: "user", text: `${who}signed in` };
+      case "teacher_confirmed": return { icon: "shield", text: `Teacher confirmed ${withName ? esc((SE.store.studentById(e.studentId) || {}).displayName) + "’s " : ""}${title}${e.data.how ? ` (${esc({ oral: "spoken check", demo: "watched a demo", work: "reviewed work" }[e.data.how] || "")})` : ""}`, strong: true };
+      case "teacher_try_again": return { icon: "refresh", text: `Teacher asked ${withName ? esc((SE.store.studentById(e.studentId) || {}).displayName) : "them"} to try again on ${title}` };
       case "help_requested": return { icon: "question", text: `${who}asked for help on ${title}`, strong: true };
       case "mission_opened": return { icon: "eye", text: `${who}opened ${title}` };
       case "launched": return { icon: "external", text: `${who}launched ${a ? esc(a.launch.provider) : "a resource"} for ${title}` };
       case "step_checked": return { icon: "list", text: `${who}${e.data.checked ? "checked off" : "unchecked"} step ${e.data.step + 1} of ${title}` };
-      case "mission_completed": return { icon: "check", text: `${who}marked ${title} complete ${completionTag(e)}`, strong: true };
+      case "mission_completed": return { icon: "check", text: `${who}${e.data.evidence ? "sent" : "marked"} ${title}${e.data.evidence ? "" : " complete"} ${completionTag(e)}`, strong: true };
       case "ican_claimed": return { icon: "flag", text: `${who}said “I can” for pathway stage ${e.data.stage}` };
       case "ican_verified": return { icon: "shield", text: `${withName ? who : ""}Stage ${e.data.stage} confirmed by teacher` };
       case "ican_returned": return { icon: "refresh", text: `${withName ? who : ""}Stage ${e.data.stage}: teacher said “not yet”` };
@@ -124,7 +165,14 @@
     const out = [];
     summary.profiles.forEach(({ student, prof }) => {
       prof.completions.forEach((c) => {
+        // Waiting for you: unread written answers, and "I'll show you" submissions not yet checked.
+        // A teacher check (confirm or try again) after the submission also counts as reviewed.
+        const st = SE.game.statusFor(prof, c.activity);
+        const checkedSince = (st.confirmed && st.confirmed.at > c.event.at) || (st.tryAgain && st.tryAgain.at > c.event.at);
+        const latest = st.sub && st.sub.id === c.event.id;
+        if (checkedSince) return;
         if ((c.event.data.reflection || "").trim() && !prof.reviewed[c.event.id]) out.push({ student, prof, c });
+        else if (latest && c.event.data.evidence === "show" && st.state === "submitted") out.push({ student, prof, c });
       });
     });
     return out.sort((a, b) => b.c.event.at - a.c.event.at);
@@ -375,7 +423,8 @@
           return `<div class="block">
             <div class="block__head"><h2>Assigned missions</h2><span class="muted">${doneN} of ${list.length} done</span></div>
             <ul class="astatus">${list.map(({ x, a }) => { const d = SE.game.missionDone(prof, a); const late = !d && x.dueDate && new Date(`${x.dueDate}T23:59:59`).getTime() < Date.now();
-              return `<li class="${d ? "is-done" : late ? "is-late" : ""}">${icon(d ? "check" : late ? "alert" : "clock")}<a href="#/activity/${a.id}">${esc(a.title)}</a><small>${d ? "Done" : prof.opened.has(a.id) ? "Started" : "Not started"}${x.dueDate ? ` · ${esc(dueText(x.dueDate))}` : ""}</small></li>`; }).join("")}</ul>
+              const st = SE.game.statusFor(prof, a);
+              return `<li class="${d ? "is-done" : late ? "is-late" : ""}">${icon(d ? "check" : late ? "alert" : "clock")}<span class="astatus__main"><a href="#/activity/${a.id}">${esc(a.title)}</a><small>${x.dueDate ? esc(dueText(x.dueDate)) : "No due date"}</small></span>${statusChip(st)}${checkActions(student, a, st)}</li>`; }).join("")}</ul>
           </div>`;
         })()}
         <div class="block">
@@ -407,7 +456,9 @@
           <ul class="lab-prog-list">${SE.labs.all().map((lab) => {
             const n = (prof.labLevels[lab.id] || new Set()).size;
             const st = prof.labStats[lab.id] || { runs: 0, hints: 0 };
-            return `<li><span><a href="#/lab/${lab.id}">${esc(lab.title)}</a><small>${n} of ${lab.levels.length} levels · ${st.runs} tests · ${st.hints} hints</small></span><span class="meter"><span style="width:${(n / lab.levels.length) * 100}%"></span></span></li>`;
+            const la = STEM.activities.find((x) => x.launch && x.launch.labId === lab.id);
+            const ls = la ? SE.game.statusFor(prof, la) : null;
+            return `<li><span><a href="#/lab/${lab.id}">${esc(lab.title)}</a><small>${n} of ${lab.levels.length} levels · ${st.runs} tests · ${st.hints} hints</small>${ls && ["checked", "confirmed", "tryagain"].includes(ls.state) ? statusChip(ls) : ""}</span><span class="meter"><span style="width:${(n / lab.levels.length) * 100}%"></span></span></li>`;
           }).join("")}</ul>
         </div>
         <div class="block">
@@ -430,6 +481,7 @@
     bindFrame(user);
     bindStageButtons();
     bindReflectionActions();
+    bindCheckActions();
   };
 
   function bindStageButtons() {
@@ -460,7 +512,9 @@
           </div>
           ${conf ? `<span class="conf conf--${conf.id}">${esc(conf.name)}</span>` : ""}
         </div>
-        ${answer ? `<p class="mission-log__q">${esc(c.activity.reflect)}</p><p class="mission-log__answer">“${esc(answer)}”</p>` : `<p class="muted">No answer to the reflection question.</p>`}
+        ${(() => { const st = SE.game.statusFor(prof, c.activity); return st.sub && st.sub.id === c.event.id ? `<div class="check-row-wrap">${statusChip(st)}${checkActions(student, c.activity, st)}</div>` : ""; })()}
+        ${c.event.data.extensionNote ? `<p class="muted small"><strong>Take it further:</strong> “${esc(c.event.data.extensionNote)}”</p>` : ""}
+        ${answer ? `<p class="mission-log__q">${esc(c.event.data.evidence && c.activity.check ? c.activity.check : c.activity.reflect)}</p><p class="mission-log__answer">“${esc(answer)}”</p>` : (c.event.data.evidence === "show" ? `<p class="muted">${icon("users", 'class="inline-icon"')}Chose to show or tell you instead of writing.</p>` : `<p class="muted">No answer to the reflection question.</p>`)}
         ${r ? (r.data.note ? `<p class="teacher-reply">${icon("message")}<span><strong>You replied:</strong> ${esc(r.data.note)}</span></p>` : `<p class="muted">${icon("eye", 'class="inline-icon"')}Marked as read</p>`)
           : answer ? `
           <form class="reply-form" data-completion="${c.event.id}" data-student="${student.id}">
@@ -506,6 +560,7 @@
     app().innerHTML = frame(user, cls, classes, "reflections", body);
     bindFrame(user);
     bindReflectionActions();
+    bindCheckActions();
     document.getElementById("show-reviewed").addEventListener("change", (e) => { showReviewed = e.target.checked; SE.route(true); });
   };
 
@@ -663,16 +718,24 @@
   const LEVEL_ORDER = { beginner: 0, intermediate: 1, advanced: 2 };
 
   function classProgress(sum, a) {
+    const by = { confirmed: 0, checked: 0, submitted: 0, tryagain: 0, started: 0 };
+    sum.profiles.forEach((p) => { const s = SE.game.statusFor(p.prof, a).state; if (by[s] != null) by[s]++; });
     const done = sum.profiles.filter((p) => SE.game.missionDone(p.prof, a)).length;
     const started = sum.profiles.filter((p) => !SE.game.missionDone(p.prof, a) && (p.prof.opened.has(a.id) || (a.launch.labId && (p.prof.labLevels[a.launch.labId] || new Set()).size))).length;
     // Lab missions are checked by the lab itself; anything else is marked complete by the student.
-    return { done, started, total: sum.students.length, self: !a.launch.labId };
+    return { done, started, total: sum.students.length, self: !a.launch.labId, by };
   }
-  const progressMarkup = (pr) => `
-    <span class="mprog" aria-label="${pr.done} of ${pr.total} students ${pr.self ? "marked it complete (self-reported)" : "finished"}${pr.started ? `, ${pr.started} started` : ""}">
-      <span class="mprog__bar"><span style="width:${pr.total ? (pr.done / pr.total) * 100 : 0}%"></span><span class="mprog__started" style="width:${pr.total ? (pr.started / pr.total) * 100 : 0}%"></span></span>
-      <span class="mprog__text"><b>${pr.done}</b>/${pr.total} done${pr.self ? ' <span class="self-rep" title="Students marked this complete themselves. Read their reflections to check understanding.">self-reported</span>' : ""}${pr.started ? ` · ${pr.started} started` : ""}</span>
+  const progressMarkup = (pr) => {
+    const b = pr.by || {};
+    const parts = [b.confirmed && `${b.confirmed} confirmed`, b.checked && `${b.checked} checked in lab`, b.submitted && `${b.submitted} submitted`, b.tryagain && `${b.tryagain} try again`, b.started && `${b.started} started`].filter(Boolean);
+    const solid = (b.confirmed || 0) + (b.checked || 0), sent = b.submitted || 0, began = (b.started || 0) + (b.tryagain || 0);
+    const w = (n) => (pr.total ? (n / pr.total) * 100 : 0);
+    return `
+    <span class="mprog" aria-label="${pr.total} students: ${parts.join(", ") || "none started"}">
+      <span class="mprog__bar"><span style="width:${w(solid)}%"></span><span class="mprog__sent" style="width:${w(sent)}%"></span><span class="mprog__started" style="width:${w(began)}%"></span></span>
+      <span class="mprog__text">${parts.length ? `${parts.join(" · ")}<span class="muted"> of ${pr.total}</span>` : "No one has started yet"}</span>
     </span>`;
+  };
   const assignBtn = (a, assigned) => `<button type="button" class="btn btn--small ${assigned ? "btn--assigned" : "btn--ghost"}" data-assign="${a.id}" aria-pressed="${!!assigned}">${icon(assigned ? "check" : "plus")}${assigned ? "Assigned" : "Assign"}</button>`;
   const dueText = (d) => {
     if (!d) return "";

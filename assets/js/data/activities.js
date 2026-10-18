@@ -1879,6 +1879,7 @@ window.STEM.activities = [
   },
   {
     id: "lab-dance-party",
+    coreLevels: 2,
     pilot: true,
     time: { prep: 5, core: [10, 15], verified: false },
     stopAt: "You finish level 2 (Swap two steps). Levels 3 and 4 are bonus.",
@@ -1927,6 +1928,7 @@ window.STEM.activities = [
   },
   {
     id: "lab-space-blob",
+    coreLevels: 3,
     pilot: true,
     time: { prep: 5, core: [15, 20], verified: false },
     stopAt: "You finish level 3 (Lost the reset?). The challenge, level 4, is bonus.",

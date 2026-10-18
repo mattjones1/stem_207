@@ -11,7 +11,8 @@
 
   function baseXp(act) {
     const d = act.duration <= 20 ? 20 : act.duration <= 30 ? 30 : 45;
-    return P.xp.missionByDuration[d] + (P.xp.levelBonus[act.level] || 0);
+    // Flat base: longer missions don't earn more. (d is kept so older settings still load.)
+    return (P.xp.mission || P.xp.missionByDuration[d]) + (P.xp.levelBonus[act.level] || 0);
   }
 
   function rankFor(xp) {
@@ -67,6 +68,7 @@
     const earned = {}; // patchId -> at
     const opened = new Set();
     const steps = {}; // activityId -> Set of checked step indexes
+    const missions = {}; // activityId -> { submitted, confirmed, tryAgain } (latest events)
     let lastActive = 0;
 
     const checkPatches = (at) => {
@@ -93,11 +95,13 @@
         const parts = [];
         if (first) {
           const b = baseXp(act);
-          gained += b; parts.push(["Mission complete", b]);
+          gained += b; parts.push(["Mission sent", b]);
           if (!c.sectors.has(act.area)) { gained += P.xp.newSector; parts.push([`New area: ${SE.areaById[act.area].short}`, P.xp.newSector]); }
           const answered = (e.data.reflection || "").trim().length >= 3;
           if (answered) { gained += P.xp.reflection; parts.push(["Answered Think about it", P.xp.reflection]); c.reflections++; }
-          if (e.data.extension) { gained += P.xp.extension; parts.push(["Tried Take it further", P.xp.extension]); c.extensions++; }
+          // New debriefs ask what happened (extensionNote); older ones used a checkbox.
+          const tried = e.data.evidence ? !!(e.data.extensionNote || "").trim() : !!e.data.extension;
+          if (tried) { gained += P.xp.extension; parts.push(["Tried Take it further", P.xp.extension]); c.extensions++; }
           c.missions++;
           c.sectors.add(act.area);
           c.areas[act.area] = (c.areas[act.area] || 0) + 1;
@@ -112,7 +116,19 @@
         xp += gained;
         completedIds.add(act.id);
         completions.push({ event: e, activity: act, xp: gained, parts, first });
+        const ms = (missions[act.id] = missions[act.id] || {});
+        ms.submitted = e; if (ms.tryAgain && ms.tryAgain.at < e.at) ms.tryAgain = null;
         checkPatches(e.at);
+      }
+      // Teacher checks. Confirmation sticks; "try again" holds until the student submits again.
+      if (e.type === "teacher_confirmed" && act) {
+        const ms = (missions[act.id] = missions[act.id] || {});
+        if (!ms.confirmed) { xp += P.xp.teacherConfirmed || 0; }
+        ms.confirmed = e; ms.tryAgain = null;
+      }
+      if (e.type === "teacher_try_again" && act) {
+        const ms = (missions[act.id] = missions[act.id] || {});
+        if (!ms.confirmed) ms.tryAgain = e;
       }
 
       if (e.type === "ican_claimed") {
@@ -183,7 +199,8 @@
       streak,
       labLevels,
       labResults,
-      labStats
+      labStats,
+      missions
     };
   }
 
@@ -253,11 +270,44 @@
 
   /* Has this student finished a mission? For lab missions, finishing every level counts too. */
   function missionDone(prof, a) {
+    const ms = prof.missions[a.id] || {};
+    if (ms.confirmed) return true;
+    if (ms.tryAgain) return false;   // the teacher reopened it
     if (prof.completedIds.has(a.id)) return true;
     const labId = a.launch && a.launch.labId;
     const lab = labId && SE.labs && SE.labs.byId(labId);
-    return !!(lab && (prof.labLevels[labId] || new Set()).size >= lab.levels.length);
+    if (!lab) return false;
+    // A lab mission is done when its core levels pass (all levels unless coreLevels is set).
+    const lv = prof.labLevels[labId] || new Set();
+    const core = Math.min(lab.levels.length, a.coreLevels || lab.levels.length);
+    return [...Array(core).keys()].every((i) => lv.has(i));
   }
 
-  SE.game = { profile, recommendations, classSummary, classGoal, rankFor, baseXp, missionDone };
+  /* One status per mission for a student, strongest first:
+   *   confirmed  Teacher confirmed the target skill (spoken check, watched a demo, or reviewed work)
+   *   tryagain   Teacher asked for more work; holds until the student submits again
+   *   checked    The lab's own check passed for its core levels (only what the lab tests)
+   *   submitted  The student submitted evidence (written, or "I'll show my teacher"); not yet confirmed
+   *   started    Opened it, checked a step, or finished a lab level
+   *   none       Not started
+   * legacy: the latest submission came from the old one-click flow. */
+  function statusFor(prof, a) {
+    const ms = prof.missions[a.id] || {};
+    const labId = a.launch && a.launch.labId;
+    const lab = labId && SE.labs && SE.labs.byId(labId);
+    const lv = lab ? (prof.labLevels[labId] || new Set()) : null;
+    const core = lab ? Math.min(lab.levels.length, a.coreLevels || lab.levels.length) : 0;
+    const coreDone = lab && [...Array(core).keys()].every((i) => lv.has(i));
+    const sub = ms.submitted;
+    const legacy = !!sub && !sub.data.evidence && !sub.isDemo && sub.at < (P.legacyBefore || 0);
+    const base = { sub, legacy, confirmed: ms.confirmed, tryAgain: ms.tryAgain };
+    if (ms.confirmed) return { ...base, state: "confirmed", label: "Teacher confirmed" };
+    if (ms.tryAgain) return { ...base, state: "tryagain", label: "Try again" };
+    if (coreDone) return { ...base, state: "checked", label: "Checked in lab" };
+    if (sub) return { ...base, state: "submitted", label: legacy ? "Legacy" : sub.data.evidence === "show" ? "Submitted (will show teacher)" : "Submitted" };
+    const started = prof.opened.has(a.id) || (prof.steps[a.id] && prof.steps[a.id].size > 0) || (lv && lv.size > 0);
+    return { ...base, state: started ? "started" : "none", label: started ? "Started" : "Not started" };
+  }
+
+  SE.game = { profile, recommendations, classSummary, classGoal, rankFor, baseXp, missionDone, statusFor };
 })();

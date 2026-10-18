@@ -10,7 +10,9 @@ window.STEM = window.STEM || {};
 window.STEM.progression = {
   /* Experience points (XP) for each kind of accomplishment. */
   xp: {
-    missionByDuration: { 20: 100, 30: 150, 45: 200 },
+    mission: 150,            // first submission with evidence (no extra XP for longer missions)
+    missionByDuration: { 20: 150, 30: 150, 45: 150 },   // kept for older code; all equal now
+    teacherConfirmed: 50,    // a teacher confirmed the target skill (once per mission)
     levelBonus: { beginner: 0, intermediate: 50, advanced: 100 },
     reflection: 25,          // answered "Think about it"
     extension: 50,           // tried "Take it further"
