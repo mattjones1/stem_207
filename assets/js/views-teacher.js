@@ -25,9 +25,9 @@
   };
   /* What a teacher needs before class, from the activity's own materials and setup. */
   const prepLine = (a) => {
-    if (a.launch.status === "lab") return `<span class="prep-line">${icon("check")}No prep: runs inside STEM 207</span>`;
+    if (a.launch.status === "lab") return `<span class="prep-line">${icon("check")}${a.time && a.time.prep ? `Teacher prep: about ${a.time.prep} min to check devices. Runs inside STEM 207.` : "No prep: runs inside STEM 207"}</span>`;
     const mats = (a.before && a.before.materials) || [], setup = (a.before && a.before.setup) || [];
-    return `<details class="prep-line"><summary>${icon("clipboard")}Teacher prep: ${mats.length} material${mats.length === 1 ? "" : "s"}${setup.length ? `, ${setup.length} setup step${setup.length === 1 ? "" : "s"}` : ""}</summary>
+    return `<details class="prep-line"><summary>${icon("clipboard")}Teacher prep: ${a.time && a.time.prep ? `about ${a.time.prep} min, ` : ""}${mats.length} material${mats.length === 1 ? "" : "s"}${setup.length ? `, ${setup.length} setup step${setup.length === 1 ? "" : "s"}` : ""}</summary>
       ${mats.length ? `<p><strong>Materials:</strong> ${mats.map(esc).join("; ")}</p>` : ""}${setup.length ? `<p><strong>Setup:</strong> ${setup.map(esc).join(" ")}</p>` : ""}</details>`;
   };
   const FEED_NOISE = ["step_checked", "signed_in", "lab_test_run", "lab_opened", "lab_hint", "lab_clue", "lab_compass", "lab_fps", "lab_play", "lab_prediction", "lab_trained", "lab_bug", "lab_miss", "profile_custom"];
@@ -50,6 +50,7 @@
     const who = withName ? `<strong>${esc((SE.store.studentById(e.studentId) || {}).displayName || "A student")}</strong> ` : "";
     switch (e.type) {
       case "signed_in": return { icon: "user", text: `${who}signed in` };
+      case "help_requested": return { icon: "question", text: `${who}asked for help on ${title}`, strong: true };
       case "mission_opened": return { icon: "eye", text: `${who}opened ${title}` };
       case "launched": return { icon: "external", text: `${who}launched ${a ? esc(a.launch.provider) : "a resource"} for ${title}` };
       case "step_checked": return { icon: "list", text: `${who}${e.data.checked ? "checked off" : "unchecked"} step ${e.data.step + 1} of ${title}` };
@@ -176,6 +177,8 @@
       const recent = prof.completions.slice(-3);
       const stuck = recent.filter((c) => c.event.data.confidence === "figuring").length;
       if (stuck >= 2) attention.push({ student, why: `Said “still figuring it out” on ${stuck} of their last ${recent.length} missions`, icon: "question" });
+      const help = SE.store.eventsFor(student.id).filter((e) => e.type === "help_requested" && now - e.at < SE.DAY).pop();
+      if (help) { const ha = SE.activityById[help.data.activityId]; attention.unshift({ student, why: `Asked for help ${SE.timeAgo(help.at)}${ha ? ` on ${ha.title}` : ""}`, icon: "message" }); }
     });
 
     // 14-day chart
@@ -656,7 +659,7 @@
     { id: "pathway", name: "Coding pathway", short: "Pathway", icon: "list", blurb: "Seven readiness-based stages, from first instructions to independent projects. Assign a whole stage or pick missions inside it." },
     ...STEM.areas.map((a) => ({ id: a.id, name: a.name, short: a.short, icon: a.icon, blurb: a.description }))
   ];
-  const missionFilters = { grade: "", time: "", q: "", maine: false };
+  const missionFilters = { grade: "", time: "", q: "", maine: false, pilot: false };
   const LEVEL_ORDER = { beginner: 0, intermediate: 1, advanced: 2 };
 
   function classProgress(sum, a) {
@@ -697,7 +700,7 @@
           <div class="mrow__meta">
             <span>${SE.levelMarkup(a.level)}</span>
             <span>${icon("grade")}${SE.gradesText(a.grades)}</span>
-            <span>${icon("clock")}${a.duration} min</span>
+            <span>${icon("clock")}${SE.timeText(a)}</span>${a.pilot ? `<span class="mtag mtag--pilot">${icon("flag")}Pilot</span>` : ""}
             <span>${icon("users")}${esc(STEM.formats[a.format].name)}</span>
             <span>${icon("tools")}${esc(SE.equipmentText(a.equipment))}</span>
           </div>
@@ -714,7 +717,8 @@
     const q = missionFilters.q.trim().toLowerCase();
     return list.filter((a) =>
       (!missionFilters.grade || a.grades.includes(missionFilters.grade)) &&
-      (!missionFilters.time || a.duration <= Number(missionFilters.time)) &&
+      (!missionFilters.time || SE.timeMax(a) <= Number(missionFilters.time)) &&
+      (!missionFilters.pilot || a.pilot) &&
       (!missionFilters.maine || (SE.isMaine && SE.isMaine(a))) &&
       (!q || `${a.title} ${a.summary} ${(a.keywords || []).join(" ")}`.toLowerCase().includes(q)));
   }
@@ -776,7 +780,7 @@
             const late = x.dueDate && new Date(`${x.dueDate}T23:59:59`).getTime() < Date.now();
             return `<li class="alist__item">
               <span class="icon-badge">${icon(SE.areaById[a.area].icon)}</span>
-              <div class="alist__main"><a href="#/activity/${a.id}">${esc(a.title)}</a><small>${esc(SE.areaById[a.area].short)} · ${a.duration} min · ${SE.gradesText(a.grades)}</small>${prepLine(a)}</div>
+              <div class="alist__main"><a href="#/activity/${a.id}">${esc(a.title)}</a><small>${esc(SE.areaById[a.area].short)} · ${SE.timeText(a)} · ${SE.gradesText(a.grades)}</small>${prepLine(a)}</div>
               ${progressMarkup(pr)}
               <label class="alist__due ${late && pr.done < pr.total ? "is-late" : ""}"><span>Due</span><input type="date" class="input input--small" value="${x.dueDate || ""}" data-due="${a.id}" aria-label="Due date for ${esc(a.title)}"></label>
               <button type="button" class="icon-btn" data-assign="${a.id}" aria-pressed="true" aria-label="Unassign ${esc(a.title)}" title="Unassign">✕</button>
@@ -813,6 +817,7 @@
             <label><span>Time</span><select class="input input--small" name="time"><option value="">Any length</option>${STEM.durations.map((d) => `<option value="${d.max}" ${missionFilters.time === String(d.max) ? "selected" : ""}>${esc(d.name)}</option>`).join("")}</select></label>
             <label class="mfilters__q"><span>Search</span><input class="input input--small" name="q" type="search" value="${esc(missionFilters.q)}" placeholder="loops, tides, robots…"></label>
             <label class="check-row"><input type="checkbox" name="maine" ${missionFilters.maine ? "checked" : ""}> Made in Maine only</label>
+            <label class="check-row"><input type="checkbox" name="pilot" ${missionFilters.pilot ? "checked" : ""}> Pilot missions only</label>
           </form>
           <div id="disc-body">${disciplineBody(disc, cls, sum)}</div>
         </div>
@@ -823,7 +828,7 @@
     const form = document.getElementById("mfilters");
     const refresh = () => { document.getElementById("disc-body").innerHTML = disciplineBody(disc, cls, SE.game.classSummary(cls.id)); };
     form.addEventListener("input", () => {
-      missionFilters.grade = form.grade.value; missionFilters.time = form.time.value; missionFilters.q = form.q.value; missionFilters.maine = form.maine.checked;
+      missionFilters.grade = form.grade.value; missionFilters.time = form.time.value; missionFilters.q = form.q.value; missionFilters.maine = form.maine.checked; missionFilters.pilot = form.pilot.checked;
       refresh();
     });
     form.addEventListener("submit", (e) => e.preventDefault());
@@ -836,7 +841,7 @@
 
   /* Assign / unassign buttons work anywhere on the page (Missions tab, activity pages). */
   document.addEventListener("click", (e) => {
-    if (e.target.closest("[data-clear-filters]")) { Object.assign(missionFilters, { grade: "", time: "", q: "", maine: false }); SE.route(true); return; }
+    if (e.target.closest("[data-clear-filters]")) { Object.assign(missionFilters, { grade: "", time: "", q: "", maine: false, pilot: false }); SE.route(true); return; }
     const one = e.target.closest("[data-assign]");
     const many = e.target.closest("[data-assign-many]");
     if (!one && !many) return;

@@ -26,6 +26,13 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 5. If the lab practices a pathway stage, add its activity id to that stage in `pathway.js`.
 6. Add a row to the lab table in `README.md`.
 
+## Pilot mission fields (optional on any activity)
+- `pilot: true` puts it in the teacher "Pilot missions" filters.
+- `time: { prep, core: [min, max], verified }`: shown as student time and teacher prep, and used by the time filters. Keep `duration` (20/30/45) for XP. Set `verified: true` only after classroom timing.
+- `stopAt` ("You're done when"), `check` (the "Show what you know" prompt; spoken, shown, or written), `stuck` (student-visible hints), `next` (activity id).
+- Student home is the **Today** view (`SE.views.today`, route `#/`). `#/explore` is the expedition page (map, patches, class goal). `#/library` is the mission finder.
+- Pilot materials are in `pilot/` (rehearsal checklist, observation sheet). Test: `python3 tests/site/test_today_pilot.py`.
+
 ## Classroom and design rules
 - Grades 2–8: short sentences, large controls, buttons instead of dragging, keyboard access, and a visible focus outline. Never rely on color or sound alone.
 - Collect no student personal information. Students have a display name and picture codes only. Camera activities frame hands or objects, never faces.

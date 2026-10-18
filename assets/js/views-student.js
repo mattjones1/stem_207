@@ -109,7 +109,7 @@
               <span class="next-card__tag">${icon(d ? "check" : SE.areaById[a.area].icon)}${d ? "Done" : x.dueDate ? esc(SE.dueText(x.dueDate)) : "Assigned"}</span>
               <strong>${esc(a.title)}</strong>
               <span>${esc(a.summary)}</span>
-              <span class="next-card__meta">${lab ? `${lv} of ${lab.levels.length} lab levels` : `${a.duration} min · +${SE.game.baseXp(a)} XP`}</span>
+              <span class="next-card__meta">${lab ? `${lv} of ${lab.levels.length} lab levels` : `${SE.timeText(a)} · +${SE.game.baseXp(a)} XP`}</span>
             </a>`;
           }).join("")}
         </div>
@@ -134,7 +134,7 @@
               <span class="next-card__tag">${icon(SE.areaById[r.activity.area].icon)}${esc(r.reason)}</span>
               <strong>${esc(r.activity.title)}</strong>
               <span>${esc(r.activity.summary)}</span>
-              <span class="next-card__meta">${r.activity.duration} min · +${SE.game.baseXp(r.activity)} XP</span>
+              <span class="next-card__meta">${SE.timeText(r.activity)} · +${SE.game.baseXp(r.activity)} XP</span>
             </a>`).join("")}
         </div>
       </section>
@@ -179,6 +179,95 @@
   };
 
   SE.views.bindExpeditionHome = function () {};
+
+  /* ───────── Today: one clear next action ─────────
+   * Leads with the teacher's assignment (or work in progress, or one eligible next step),
+   * a big Start/Continue button, and a visible way to ask for help. Everything else
+   * (map, patches, harbor, the full library) lives behind "More to explore". */
+  SE.views.today = function (user) {
+    const prof = SE.game.profile(user.id);
+    const due = (r) => r.x.dueDate || "9999";
+    const assigned = SE.store.assignmentsFor(user.classId).map((x) => ({ x, a: SE.activityById[x.activityId] })).filter((r) => r.a && !SE.hiddenForUser(r.a));
+    const open = assigned.filter((r) => !SE.game.missionDone(prof, r.a)).sort((p, q) => due(p).localeCompare(due(q)));
+    const doneN = assigned.length - open.length;
+    const labOf = (a) => a.launch.status === "lab" && SE.labs.byId(a.launch.labId);
+    const startedOn = (a) => prof.opened.has(a.id) || (prof.steps[a.id] && prof.steps[a.id].size > 0) || (labOf(a) && (prof.labLevels[a.launch.labId] || new Set()).size > 0);
+    const inProgress = Object.entries(prof.steps).filter(([id, set]) => set.size > 0 && !prof.completedIds.has(id)).map(([id]) => SE.activityById[id]).filter(Boolean)[0];
+    let main = null, why = "";
+    if (open.length) { main = open[0].a; why = open[0].x.dueDate ? `From your teacher · ${SE.dueText(open[0].x.dueDate)}` : "From your teacher"; }
+    else if (inProgress) { main = inProgress; why = "Pick up where you left off"; }
+    else { const r = SE.game.recommendations(user, prof, 1)[0]; if (r) { main = r.activity; why = r.reason === "Ready for you" ? "A good next step" : r.reason; } }
+    const notes = prof.completions.map((c) => ({ c, r: prof.reviewed[c.event.id] })).filter((x) => x.r && x.r.data.note && Date.now() - x.r.at < 14 * SE.DAY).slice(-1)[0];
+    const first = user.displayName.split(" ")[0];
+    const lab = main && labOf(main);
+    const started = main && startedOn(main);
+    const href = main ? (lab ? `#/lab/${lab.id}` : `#/activity/${main.id}`) : "#/library";
+
+    app().innerHTML = `
+      <section class="today-top ridge" aria-labelledby="today-title">
+        <div class="wrap today-top__inner">
+          <a class="today-top__avatar" href="#/base" title="My harbor">${SE.ownAvatar(user.id, 56, "Your explorer")}</a>
+          <div><span class="eyebrow">${esc(user.cls ? user.cls.name : "Explorer")}</span>
+            <h1 id="today-title" tabindex="-1">Hi, ${esc(first)}. Here's today.</h1></div>
+        </div>
+      </section>
+      <div class="wrap today">
+        ${notes ? `<div class="teacher-note-banner">${icon("message")}<p><strong>Note from your teacher</strong> on <a href="#/activity/${notes.c.activity.id}">${esc(notes.c.activity.title)}</a>: “${esc(notes.r.data.note)}”</p></div>` : ""}
+        ${main ? `
+        <article class="today-card" aria-labelledby="today-mission">
+          <span class="today-card__why">${icon(SE.areaById[main.area].icon)}${esc(why)}</span>
+          <h2 id="today-mission">${esc(main.title)}</h2>
+          <p class="today-card__what">${esc(main.summary)}</p>
+          <p class="today-card__meta">${icon("clock")}${SE.timeText(main)}${lab ? ` · ${(prof.labLevels[lab.id] || new Set()).size} of ${lab.levels.length} levels done` : ""}</p>
+          ${main.stopAt ? `<p class="today-card__stop">${icon("flag")}<span><strong>You're done when:</strong> ${esc(main.stopAt)}</span></p>` : ""}
+          <div class="today-card__actions">
+            <a class="btn btn--launch btn--big" href="${href}">${icon(started ? "arrowRight" : "rocket")}${started ? "Continue" : "Start"}</a>
+            <button type="button" class="btn btn--ghost btn--big" id="help-btn" aria-expanded="false" aria-controls="help-panel">${icon("question")}I need help</button>
+          </div>
+          <div class="help-panel" id="help-panel" hidden>
+            <h3>Stuck? Try these, in order</h3>
+            <ol><li>Read the step you're on again, out loud.</li>
+              ${main.stuck ? `<li>Open the mission and look at <strong>Stuck? Try these</strong>.</li>` : lab ? `<li>In the lab, press <strong>Need a hint?</strong></li>` : ""}
+              <li>Ask a partner.</li>
+              <li>Still stuck? <button type="button" class="btn btn--small btn--primary" id="help-ask">${icon("message")}Let my teacher know</button></li></ol>
+            <p class="help-panel__status" id="help-status" role="status" aria-live="polite"></p>
+          </div>
+        </article>` : `
+        <article class="today-card today-card--empty">
+          <h2 id="today-mission">You're all caught up!</h2>
+          <p>Nothing is waiting for you right now. Pick any mission you like.</p>
+          <a class="btn btn--launch btn--big" href="#/library">${icon("search")}Find a mission</a>
+        </article>`}
+        ${open.length > 1 || doneN ? `
+        <section class="today-more" aria-labelledby="also-title">
+          <h2 id="also-title">Also from your teacher <span class="muted">${doneN} of ${assigned.length} done</span></h2>
+          <ul class="today-list">${open.slice(1).map(({ x, a }) => `<li><a href="${labOf(a) ? `#/lab/${a.launch.labId}` : `#/activity/${a.id}`}">${icon(SE.areaById[a.area].icon)}<span><strong>${esc(a.title)}</strong><small>${x.dueDate ? esc(SE.dueText(x.dueDate)) : "No due date"} · ${SE.timeText(a)}</small></span></a></li>`).join("")}
+            ${assigned.filter((r) => SE.game.missionDone(prof, r.a)).map(({ a }) => `<li class="is-done"><a href="#/activity/${a.id}">${icon("check")}<span><strong>${esc(a.title)}</strong><small>Done</small></span></a></li>`).join("")}</ul>
+        </section>` : ""}
+        <nav class="today-explore" aria-label="More to explore">
+          <h2>More to explore</h2>
+          <div class="today-explore__grid">
+            <a href="#/library">${icon("search")}<span><strong>All missions</strong><small>Search and pick any mission</small></span></a>
+            <a href="#/explore">${icon("map")}<span><strong>My expedition</strong><small>Star map, patches, and class goal</small></span></a>
+            <a href="#/base">${icon("lighthouse")}<span><strong>My harbor</strong><small>Your explorer and boat</small></span></a>
+            <a href="#/pathway">${icon("list")}<span><strong>Coding pathway</strong><small>Seven stages, step by step</small></span></a>
+          </div>
+        </nav>
+      </div>`;
+
+    const btn = document.getElementById("help-btn");
+    if (btn) btn.addEventListener("click", () => {
+      const panel = document.getElementById("help-panel");
+      panel.hidden = !panel.hidden;
+      btn.setAttribute("aria-expanded", String(!panel.hidden));
+    });
+    const ask = document.getElementById("help-ask");
+    if (ask) ask.addEventListener("click", () => {
+      SE.store.log("help_requested", { activityId: main.id });
+      ask.disabled = true;
+      document.getElementById("help-status").textContent = "Your teacher can see that you asked for help. Keep trying the steps while you wait.";
+    });
+  };
 
   /* ───────── Mission debrief (bottom of an activity page) ───────── */
   SE.views.debrief = function (user, a, prof) {
@@ -281,7 +370,7 @@
           </div>` : ""}
         <div class="celebrate__actions">
           ${next ? `<a class="btn btn--launch" href="#/activity/${next.activity.id}" data-close>${icon("rocket")}Next: ${esc(next.activity.title)}</a>` : ""}
-          <a class="btn btn--ghost" href="#/" data-close>${icon("map")}Back to my expedition</a>
+          <a class="btn btn--ghost" href="#/" data-close>${icon("map")}Back to Today</a>
         </div>
       </div>`;
     document.body.appendChild(wrap);

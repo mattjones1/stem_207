@@ -19,6 +19,12 @@ window.STEM.activities = [
   /* ───────────────────────────── Coding & Computer Science ───────────────────────────── */
   {
     id: "robot-maze-mission",
+    pilot: true,
+    time: { prep: 5, core: [15, 20], verified: false },
+    stopAt: "You solve Maze level 3 online. The floor maze (Part 1) is an optional warm-up, and levels after 3 are bonus.",
+    check: "Point to where the character will stop before you press Run. If it goes the wrong way, show the first block that caused it and explain your fix.",
+    stuck: ["Watch the character move. Stop at the first wrong move.", "Left and right mean the character's left and right, not yours.", "Fix only one block, then run it again."],
+    next: "event-party",
     title: "Robot Maze Mission",
     area: "coding",
     summary: "Guide a robot through a maze, first with your feet, then with code blocks.",
@@ -70,6 +76,7 @@ window.STEM.activities = [
     reflect: "When your robot went the wrong way, how did you find the exact card that caused it?",
     extend: "Write the shortest program you can for one level. Then try to beat your own record by using a repeat block.",
     teacherNotes: [
+      "Pilot core: Maze levels 1–3. Play levels 1–3 once on a student device before class to confirm they match these steps.",
       "Model one round of the floor maze with a volunteer before pairs begin.",
       "Ask \"Which step went wrong first?\" rather than \"What's wrong?\" to build debugging habits.",
       "Younger students can stop after levels 1–3 of the online maze. Levels 4+ introduce loops and conditionals and connect to later pathway stages.",
@@ -78,6 +85,12 @@ window.STEM.activities = [
   },
   {
     id: "event-party",
+    pilot: true,
+    time: { prep: 5, core: [15, 20], verified: false },
+    stopAt: "Your sprite reacts to a click and to the space key (step 5). Step 6 is bonus.",
+    check: "Before you test, say what will happen when you click the sprite and when you press space. Then show both working.",
+    stuck: ["To test a click, click the sprite on the stage, not the blocks.", "Check that the key in your block is the key you press.", "Event blocks wait on their own. You don't need the green flag."],
+    next: "animate-your-name",
     title: "Click, Tap, Go! Event Party",
     area: "coding",
     summary: "Make a character jump, spin, and talk when you click or press a key.",
@@ -643,6 +656,12 @@ window.STEM.activities = [
   /* ───────────────────────────── Artificial Intelligence ───────────────────────────── */
   {
     id: "how-ai-sorts",
+    pilot: true,
+    time: { prep: 15, core: [15, 20], verified: false },
+    stopAt: "Your team has sorted the test pile and talked about one card your rule got wrong. Retraining (step 6) is bonus.",
+    check: "Your team explains one card your rule got wrong, or one card that was hard to label, using the class's definition of fruit.",
+    stuck: ["Use only your rule, not what you already know about food.", "A card that doesn't fit your rule is a clue your rule needs work.", "Ask: what do the fruit cards in the training pile have in common?"],
+    next: "blueberry-sorter",
     title: "How Does an AI Sort?",
     area: "ai",
     summary: "Be the computer: learn a sorting rule from examples, then test it on new ones.",
@@ -684,6 +703,7 @@ window.STEM.activities = [
     reflect: "How did adding more examples change your rule? What does that tell you about how AI learns?",
     extend: "Design a test card that you think would trick every team's model. Explain why.",
     teacherNotes: [
+      "Before class, decide which definition of fruit you'll use. In plant science, tomatoes and cucumbers are fruit; in cooking they're vegetables. Tell students the definition, or make the disagreement part of the lesson.",
       "Connect explicitly: the training pile is \"training data,\" the rule is the \"model,\" and the test cards are new inputs.",
       "There's no single correct rule. The goal is noticing that a model is only as good as its examples.",
       "Use foods or objects, never photos of classmates."
@@ -916,6 +936,12 @@ window.STEM.activities = [
 
   {
     id: "pattern-predictors",
+    pilot: true,
+    time: { prep: 5, core: [10, 20], verified: false },
+    stopAt: "The class has finished “I like to eat ___.” The fool-the-class extension is bonus.",
+    check: "Explain one prediction that was likely but not certain, and why it could still be wrong.",
+    stuck: ["Say the pattern out loud.", "Ask: what happened every time before?", "More than one answer can make sense."],
+    next: "how-ai-sorts",
     title: "Pattern Predictors",
     area: "ai",
     summary: "Guess what comes next, then find out how computers make the same kind of guess.",
@@ -1853,6 +1879,12 @@ window.STEM.activities = [
   },
   {
     id: "lab-dance-party",
+    pilot: true,
+    time: { prep: 5, core: [10, 15], verified: false },
+    stopAt: "You finish level 2 (Swap two steps). Levels 3 and 4 are bonus.",
+    check: "Swap two steps in a program. Before you press Run, say what the robot will do differently. Then run it and explain what changed.",
+    stuck: ["Read your program from the top. Step 1 happens first.", "Press Reset robot to start over. Your program stays.", "Use the ▲ and ▼ buttons to move a step. No dragging needed."],
+    next: "robot-maze-mission",
     title: "Robot Dance Party",
     area: "coding",
     summary: "Build a dance from five moves, run it, and watch a robot follow your program one step at a time. Swap two steps and the whole dance changes.",
@@ -1895,6 +1927,12 @@ window.STEM.activities = [
   },
   {
     id: "lab-space-blob",
+    pilot: true,
+    time: { prep: 5, core: [15, 20], verified: false },
+    stopAt: "You finish level 3 (Lost the reset?). The challenge, level 4, is bonus.",
+    check: "Predict what snacks will be after 3 feeds if it starts at 2 and adds 3. Then show what Restart does with the set block on and off.",
+    stuck: ["The orange snacks box shows the number stored right now.", "Changed a number? Press Restart to use it.", "Count each Feed: start, then add the amount, again and again."],
+    next: "score-keeper",
     title: "Feed the Space Blob",
     area: "coding",
     summary: "A hungry alien blob and a variable called snacks. Set its starting value, choose how much each Feed click adds, and find out what happens when a program forgets to reset.",

@@ -18,7 +18,7 @@
         `<a href="#/signin" class="nav-signin" data-signout>${icon("user")}Sign in</a>`;
     } else if (user.role === "student") {
       const prof = SE.game.profile(user.id);
-      html = link("#/", "dashboard", "My expedition") + link("#/library", "library", "Missions") + link("#/pathway", "pathway", "Coding pathway") + link("#/base", "base", "My harbor") +
+      html = link("#/", "dashboard", "Today") + link("#/library", "library", "Missions") + link("#/explore", "explore", "My expedition") + link("#/pathway", "pathway", "Coding pathway") + link("#/base", "base", "My harbor") +
         `<a href="#/me" class="user-chip" ${navKey === "me" ? 'aria-current="page"' : ""}>${SE.ownAvatar(user.id, 28)}<span><b>${esc(user.displayName)}</b><small>${SE.num(prof.xp)} XP · ${esc(prof.rank.name)}</small></span></a>` +
         `<button type="button" class="nav-out" data-signout>${icon("logout")}<span>Sign out</span></button>`;
     } else {
@@ -97,9 +97,14 @@
       else SE.views.notFound();
       title = "Educator dashboard · STEM 207";
     }
+    else if (!a && user.role === "student") { SE.views.today(user); navKey = "dashboard"; title = "Today · STEM 207"; }
+    else if (a === "explore") {
+      if (user.role !== "student") { location.replace("#/"); return; }
+      SE.views.dashboard(user, "explore"); navKey = "explore"; title = "My expedition · STEM 207";
+    }
     else if (!a || a === "library") {
       if (!a && user.role === "educator") { location.replace("#/teach"); return; }
-      SE.views.dashboard(user);
+      SE.views.dashboard(user, a === "library" ? "library" : "");
       navKey = a === "library" ? "library" : "dashboard";
     }
     else if (a === "me") {

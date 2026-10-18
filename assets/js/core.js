@@ -84,6 +84,9 @@
     String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   SE.plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
   SE.num = (n) => Math.round(n).toLocaleString("en-US");
+  /* Student time for an activity: the pilot core range when set (time.core), else its duration. */
+  SE.timeText = (a) => a.time && a.time.core ? `${a.time.core[0]}–${a.time.core[1]} min` : `${a.duration} min`;
+  SE.timeMax = (a) => a.time && a.time.core ? a.time.core[1] : a.duration;
 
   SE.gradesText = (ids) => {
     const nums = ids.map((id) => id.split("-").map(Number)).flat();

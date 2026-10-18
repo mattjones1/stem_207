@@ -33,7 +33,9 @@
   }
 
   SE.isMaine = (a) => (a.keywords || []).includes("maine");
-  const maineTag = (a) => SE.isMaine(a) ? `<span class="maine-tag">${SE.pine(14)}Made in Maine</span>` : "";
+  const maineTag = (a) => (SE.isMaine(a) ? `<span class="maine-tag">${SE.pine(14)}Made in Maine</span>` : "") + pilotTag(a);
+  /* Pilot missions are only flagged for educators; students just see a normal mission. */
+  const pilotTag = (a) => a.pilot && ((SE.store.currentUser && SE.store.currentUser()) || {}).role === "educator" ? `<span class="pilot-tag">${icon("flag")}Pilot</span>` : "";
   function activityCard(a, prof) {
     const area = SE.areaById[a.area];
     const done = prof && prof.completedIds.has(a.id);
@@ -45,7 +47,7 @@
         <div class="meta">
           <span class="meta__item"><span class="visually-hidden">Experience level: </span>${SE.levelMarkup(a.level)}</span>
           <span class="meta__item">${icon("grade")}${SE.gradesText(a.grades)}</span>
-          <span class="meta__item">${icon("clock")}${a.duration} min</span>
+          <span class="meta__item">${icon("clock")}${SE.timeText(a)}</span>
           <span class="meta__item">${icon("users")}${esc(formats[a.format].name)}</span>
           <span class="meta__item meta__item--wide">${icon("tools")}<span><span class="visually-hidden">Equipment: </span>${esc(SE.equipmentText(a.equipment))}</span></span>
         </div>
@@ -60,7 +62,8 @@
         <div><dt>Topic</dt><dd>${esc(SE.areaById[a.area].name)}</dd></div>
         <div><dt>Level</dt><dd>${SE.levelMarkup(a.level)}</dd></div>
         <div><dt>Grades</dt><dd>${SE.gradesText(a.grades)}</dd></div>
-        <div><dt>Time</dt><dd>About ${a.duration} minutes</dd></div>
+        ${a.time ? `<div><dt>Student time</dt><dd>${SE.timeText(a)}${a.time.verified ? "" : ' <span class="muted small">(pilot estimate)</span>'}</dd></div>
+        <div><dt>Teacher prep</dt><dd>${a.time.prep ? `About ${a.time.prep} min` : "None"}</dd></div>` : `<div><dt>Time</dt><dd>About ${a.duration} minutes</dd></div>`}
         <div><dt>Format</dt><dd>${esc(formats[a.format].name)}</dd></div>
         <div><dt>Equipment</dt><dd>${esc(SE.equipmentText(a.equipment))}</dd></div>
       </dl>`;
@@ -78,7 +81,7 @@
   SE.backLink = backLink;
 
   /* ───────── Library state ───────── */
-  const defaultFilters = () => ({ q: "", area: "", level: "", grade: "", time: "", equip: "", status: "" });
+  const defaultFilters = () => ({ q: "", area: "", level: "", grade: "", time: "", equip: "", status: "", pilot: "" });
   let filters = defaultFilters();
   let filtersFor = null; // the user the filters were set up for
 
@@ -89,7 +92,8 @@
     if (f.area && a.area !== f.area) return false;
     if (f.level && a.level !== f.level) return false;
     if (f.grade && !a.grades.includes(f.grade)) return false;
-    if (f.time && a.duration > durations.find((d) => d.id === f.time).max) return false;
+    if (f.time && SE.timeMax(a) > durations.find((d) => d.id === f.time).max) return false;
+    if (f.pilot && !a.pilot) return false;
     if (f.equip && !a.equipment.includes(f.equip)) return false;
     if (f.status && prof) {
       const done = prof.completedIds.has(a.id);
@@ -138,6 +142,7 @@
             ${selectField("f-equip", "Equipment", "equip", "Any equipment",
               Object.entries(equipment).filter(([, v]) => v.filter).map(([k, v]) => [k, v.name]))}
             ${prof ? selectField("f-status", "My progress", "status", "All missions", [["todo", "Not done yet"], ["done", "Completed"]]) : ""}
+            ${user && user.role === "educator" ? selectField("f-pilot", "Collection", "pilot", "All missions", [["yes", "Pilot missions"]]) : ""}
           </div>
           <div class="results-bar">
             <p class="results-bar__count" id="results-count" aria-live="polite"></p>
@@ -150,6 +155,11 @@
 
   function bindLibrary(prof) {
     const q = document.getElementById("f-q");
+    if (!q) {
+      // No library on this page (the student expedition page): time buttons open Missions with that filter.
+      app().querySelectorAll(".time-picker button").forEach((btn) => btn.addEventListener("click", () => { filters.time = btn.dataset.time; location.hash = "#/library"; }));
+      return;
+    }
     q.addEventListener("input", () => { filters.q = q.value.trim(); renderResults(prof); });
     app().querySelectorAll(".filters select").forEach((sel) => {
       sel.addEventListener("change", () => {
@@ -377,7 +387,7 @@
       </section>`;
   }
 
-  SE.views.dashboard = function (user) {
+  SE.views.dashboard = function (user, mode) {
     const isStudent = user && user.role === "student";
     if (filtersFor !== (user && user.id)) {
       filters = defaultFilters();
@@ -387,7 +397,10 @@
 
     if (isStudent) {
       const prof = SE.game.profile(user.id);
-      app().innerHTML = SE.views.expeditionHome(user, prof) + labsStrip(user, null, "Your labs") + maineSection(prof) + areasSection(prof) + pathwayStrip(prof) + librarySection(user, prof);
+      // Students: "explore" is the expedition page (map, patches, class goal); "library" is the mission finder.
+      app().innerHTML = mode === "library"
+        ? `<section class="page-top"><div class="wrap page-top__inner"><div class="backbar">${backLink("#/", "Today")}</div><h1 tabindex="-1">Missions</h1><p class="page-top__lede">Search for a mission, or narrow by topic, grade, and time.</p></div></section>` + librarySection(user, prof)
+        : SE.views.expeditionHome(user, prof) + labsStrip(user, null, "Your labs") + maineSection(prof) + areasSection(prof) + pathwayStrip(prof);
       SE.views.bindExpeditionHome && SE.views.bindExpeditionHome(user, prof);
       bindLibrary(prof);
       return;
@@ -630,7 +643,21 @@
             <h2 id="s-steps">${icon("list")}Your steps</h2>
             ${isStudent ? `<p class="block__hint">Check off each step as you finish it.</p>` : ""}
             ${stepsHtml}
+            ${a.stopAt ? `<p class="stop-at">${icon("flag")}<span><strong>You're done when:</strong> ${esc(a.stopAt)}</span></p>` : ""}
           </section>
+          ${a.stuck ? `
+          <section class="block block--stuck" aria-labelledby="s-stuck">
+            <h2 id="s-stuck">${icon("question")}Stuck? Try these</h2>
+            <ol class="stuck-list">${a.stuck.map((x) => `<li>${esc(x)}</li>`).join("")}</ol>
+            <p class="muted">Still stuck? Ask a partner, then ask your teacher.</p>
+          </section>` : ""}
+          ${a.check ? `
+          <section class="block block--check" aria-labelledby="s-check">
+            <h2 id="s-check">${icon("target")}Show what you know</h2>
+            <p>${esc(a.check)}</p>
+            ${isStudent ? `<p class="muted">You can say it out loud to your teacher or a partner, or write it in your debrief below.</p>` : `<p class="muted">Students can show this out loud, by demonstrating it, or in writing. A quick listen while you walk the room is enough.</p>`}
+          </section>` : ""}
+          ${a.next && SE.activityById[a.next] ? `<p class="next-up">${icon("arrowRight")}<span><strong>Next up:</strong> <a href="#/activity/${a.next}">${esc(SE.activityById[a.next].title)}</a></span></p>` : ""}
           ${launchPanel(a, "s-launch", user)}
           ${isStudent ? SE.views.debrief(user, a, prof) : `
           <section class="block block--reflect" aria-labelledby="s-reflect">
@@ -747,7 +774,7 @@
               <div class="stage__links">
                 ${roverLevelsFor(s.stage).length ? `<div class="stage__lab"><span>${icon("flask")}Harbor Code Lab levels</span>${roverLevelsFor(s.stage).map((lv) => { const d = prof && SE.labs.progressFor(prof, "rover").has(lv - 1); return `<a class="lvl-chip ${d ? "is-done" : ""}" href="#/lab/rover/${lv}" aria-label="Harbor Code Lab level ${lv}${d ? ", finished" : ""}">${d ? icon("check") : ""}${lv}</a>`; }).join("")}</div>` : ""}
                 ${s.activities.map((id) => SE.activityById[id]).filter(Boolean).map((a) => `
-                  <a class="btn btn--ghost btn--small ${prof && prof.completedIds.has(a.id) ? "is-done" : ""}" href="#/activity/${a.id}">${icon(prof && prof.completedIds.has(a.id) ? "check" : SE.areaById[a.area].icon)}${esc(a.title)} · ${a.duration} min</a>`).join("")}
+                  <a class="btn btn--ghost btn--small ${prof && prof.completedIds.has(a.id) ? "is-done" : ""}" href="#/activity/${a.id}">${icon(prof && prof.completedIds.has(a.id) ? "check" : SE.areaById[a.area].icon)}${esc(a.title)} · ${SE.timeText(a)}</a>`).join("")}
               </div>
             </article>
           </li>`;
