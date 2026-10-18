@@ -1828,6 +1828,49 @@ window.STEM.activities = [
     ]
   },
   {
+    id: "lab-space-blob",
+    title: "Feed the Space Blob",
+    area: "coding",
+    summary: "A hungry alien blob and a variable called snacks. Set its starting value, choose how much each Feed click adds, and find out what happens when a program forgets to reset.",
+    level: "beginner",
+    grades: ["2-3", "4-5", "6-8"],
+    duration: 20,
+    format: "independent",
+    equipment: ["computer", "tablet"],
+    source: "original",
+    keywords: ["lab", "variables", "initialization", "events", "counter", "predict", "debugging", "alien", "space", "interactive"],
+    access: { account: "none", cost: "free", supervision: false, hardware: [] },
+    launch: { status: "lab", labId: "space-blob", label: "Open Feed the Space Blob", note: "Runs inside STEM 207. About 15 minutes. No outside account or website needed." },
+    mission: "The Space Blob is hungry, and your code keeps count. Feed it, change the code, predict, and test. Then find out why every program needs a known starting value.",
+    learn: [
+      "Explain that a variable stores a value that the program can read and change.",
+      "Show that an event (a Feed click) can change a variable's value.",
+      "Explain that initialization (setting a starting value) makes every run start the same way."
+    ],
+    before: {
+      materials: ["Laptop, Chromebook, or tablet"],
+      setup: ["Best after students know sequences and click events (Robot Dance Party and coding pathway stage 2).", "Plan about 15 minutes. Students can sign in to save progress or explore as guests."],
+      prerequisites: "Understands sequences and that a click can start code (events)."
+    },
+    steps: [
+      "Level 1: Press Start, feed the blob 3 times, then say what is stored in snacks.",
+      "Level 2: Change “change snacks by” to 2. Predict the value after 3 feeds, then test it.",
+      "Level 3: Turn off “set snacks to” and Restart. Watch snacks keep its old value. Turn it back on.",
+      "Level 4: Challenge. Start with 2 snacks, add 3 per feed, and reach 14 after 4 feeds."
+    ],
+    reflect: "Why does a game set your score to 0 when you start a new game? What would happen if it didn't?",
+    extend: "Make the blob lose snacks: try a negative number in “change snacks by.” What starting value keeps snacks from going below 0 after 5 feeds?",
+    teacherNotes: [
+      "Variables: snacks is a named box that holds one number. The orange monitor shows what's in the box right now. “change snacks by” reads the old value and adds to it; “set snacks to” replaces it.",
+      "Initialization: “when run starts, set snacks to 0” gives the variable a known starting value. In Level 3, students switch that block off and restart: snacks keeps the number from the last run. That's the bug behind a game that starts with last game's score.",
+      "Code is read when the run starts. If students edit a number mid-run, a banner tells them to press Restart. Ask: “Why didn't the blob change when you typed a new number?”",
+      "Common mistake: mixing up set and change. “set snacks to 2” makes it 2; “change snacks by 2” adds 2.",
+      "Common mistake: counting the start as a feed (off-by-one). 0 with +2 three times is 6, not 8. The run history lists every step, so students can check their own counting.",
+      "Common mistake: reaching 14 by luck (for example, start at 14 and add 0). The challenge checks the starting value, the amount, and the number of feeds, and explains which one is off using the student's own numbers.",
+      "Ask afterward: “If you pressed Restart and snacks didn't go back to 0, what would you check first?”"
+    ]
+  },
+  {
     id: "lab-field-station",
     title: "Field Station 360",
     area: "vr",

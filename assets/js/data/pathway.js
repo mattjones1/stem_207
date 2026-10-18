@@ -66,7 +66,7 @@ window.STEM.pathway = [
     project: "Build a catching game that keeps score.",
     debugging: "Watch the variable's value while the program runs. Check where it's set, changed, and reset.",
     iCan: "I can create a variable, change it while my program runs, and explain what it stores.",
-    activities: ["score-keeper"]
+    activities: ["score-keeper", "lab-space-blob"]
   },
   {
     stage: 6,
