@@ -30,6 +30,8 @@ Six missions are marked as the pilot set (teachers can filter for them): Robot D
 
 **Completion statuses.** Each mission shows one status per student: *Started*, *Submitted* (the student sent written evidence or chose "Show or tell my teacher"), *Checked in lab* (the lab's own check passed, for what it tests), *Teacher confirmed* (spoken check, watched demo, or reviewed work), or *Try again* (with the teacher's note; the student can revise and send it again). Older one-click records show as *legacy*. XP no longer depends on mission length, and repeats earn none.
 
+**Learning routes.** Scratch missions that build on a lab say so ("You've seen this idea before") and link back to it. Debug the Broken Animation and Pattern Studio with My Blocks have downloadable starter projects (`assets/starters/`, rebuilt with `tools/build_starters.py`), and Score Keeper shows a picture of where its blocks go. The coding pathway opens with "New to coding? Start here" tracks for grades 2–3, 4–5, and older beginners, and the Mission Capstone is open to any student whose Stage 6 is confirmed. The [AI learning route](https://mattjones1.github.io/stem_207/#/ai-route) puts the AI missions in six steps, from patterns to responsible use.
+
 ## Interactive labs
 
 Each exploration area has its own leveled, interactive lab that runs inside STEM 207, with no outside account or website. Every level teaches one idea, gives a hint on request, checks the student's work, and ends with "What you just learned." Signed-in students earn XP for each level (+30), and lab work counts toward patches and the weekly streak.

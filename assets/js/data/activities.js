@@ -19,6 +19,7 @@ window.STEM.activities = [
   /* ───────────────────────────── Coding & Computer Science ───────────────────────────── */
   {
     id: "robot-maze-mission",
+    bridge: { from: "lab-dance-party", text: "In Robot Dance Party you put moves in order and swapped them. Here you do the same thing with code blocks in a maze." },
     pilot: true,
     time: { prep: 5, core: [15, 20], verified: false },
     stopAt: "You solve Maze level 3 online. The floor maze (Part 1) is an optional warm-up, and levels after 3 are bonus.",
@@ -192,6 +193,8 @@ window.STEM.activities = [
   },
   {
     id: "debug-animation",
+    bridge: { from: "lab-rover", text: "Harbor Code Lab levels 4–6 used repeat blocks. Here a repeat stops too soon, and you'll find out why." },
+    starter: { file: "assets/starters/debug-the-fish.sb3", label: "Download the broken fish project", how: "In Scratch, choose File, then Load from your computer, and pick debug-the-fish.sb3." },
     title: "Debug the Broken Animation",
     area: "coding",
     summary: "A fish animation has four bugs hiding in it. Find them and fix them.",
@@ -227,15 +230,15 @@ window.STEM.activities = [
     before: {
       materials: ["Laptop or Chromebook", "A paper bug log (Bug / What I saw / What I changed)"],
       setup: [
-        "Add the Fish sprite in Scratch and a water backdrop.",
-        "Build this broken script for the fish (or have students build it from the board):",
+        "Download the starter project below (debug-the-fish.sb3) onto each device, or a shared drive. It has the fish, a water backdrop, and the broken script already built.",
+        "The broken script in the starter is:",
         "when green flag clicked → go to x: 0 y: 0 → repeat 10 → move 100 steps → if on edge, bounce → end repeat",
         "Leave the rotation style at its default (all around)."
       ],
       prerequisites: "Stage 3: can use a repeat block."
     },
     steps: [
-      "Click the green flag and watch closely. Write down everything that looks wrong.",
+      "Open the starter project: in Scratch, choose File, then Load from your computer, and pick debug-the-fish.sb3.", "Click the green flag and watch closely. Write down everything that looks wrong.",
       "Bug 1: The fish stops. Which block makes it stop after a while? Try swapping it for \"forever.\"",
       "Bug 2: The fish jumps instead of swimming. Change \"move 100 steps\" to a smaller number and test again.",
       "Bug 3: The fish flips upside down. Find \"set rotation style\" and choose left-right.",
@@ -253,6 +256,7 @@ window.STEM.activities = [
   },
   {
     id: "interactive-story",
+    bridge: { from: "lab-moon-gate", text: "In Moon Base Gatekeeper, IF/ELSE chose who got through the gate, and you tested every badge. Here IF/ELSE chooses the story's ending. Test every answer." },
     title: "Build an Interactive Story",
     area: "coding",
     summary: "Write a story where the reader chooses what happens next.",
@@ -309,6 +313,8 @@ window.STEM.activities = [
   },
   {
     id: "score-keeper",
+    bridge: { from: "lab-space-blob", text: "In Feed the Space Blob, snacks was a variable: set it at the start, change it when something happens. Score works the same way." },
+    figure: "score-keeper-star",
     title: "Score Keeper: Catch the Stars",
     area: "coding",
     summary: "Build a catching game that counts your points and remembers your score.",
@@ -351,8 +357,8 @@ window.STEM.activities = [
       "Add a star sprite. Make it start at the top in a random spot: go to x: (pick random -200 to 200) y: 170.",
       "Make the star fall: forever → change y by -5.",
       "In Variables, click Make a Variable and name it \"score.\"",
-      "Add: if touching catcher then change score by 1 and send the star back to the top.",
-      "Add: if the star reaches the bottom (y < -170), send it back to the top.",
+      "Inside your forever loop, add: if touching catcher then change score by 1 and send the star back to the top.",
+      "Also inside the forever loop, add: if y position < -170 then send the star back to the top. (Look at the picture below.)",
       "Play three games in a row. Does the score start at 0 each time? If not, add \"set score to 0\" when the green flag is clicked."
     ],
     reflect: "What would happen to your game if the variable didn't exist?",
@@ -365,6 +371,8 @@ window.STEM.activities = [
   },
   {
     id: "my-blocks-patterns",
+    bridge: { from: "lab-rover", text: "Harbor Code Lab level 11 had you make your own block. Here you'll make one that draws a shape, then reuse it." },
+    starter: { file: "assets/starters/pattern-studio.sb3", label: "Download the Pattern Studio starter", how: "In Scratch, choose File, then Load from your computer, and pick pattern-studio.sb3. The Pen extension and a square script are already there." },
     title: "Pattern Studio with My Blocks",
     area: "coding",
     summary: "Make your own drawing block, then reuse it to create a big pattern.",
@@ -399,11 +407,11 @@ window.STEM.activities = [
     ],
     before: {
       materials: ["Laptop or Chromebook"],
-      setup: ["In Scratch, show students where to add the Pen extension (blue button, bottom left)."],
+      setup: ["Download the starter project below (pattern-studio.sb3) onto each device. It already has the Pen extension and a square script. Without it, students add Pen with the blue button at the bottom left."],
       prerequisites: "Stage 5: has used a variable."
     },
     steps: [
-      "Add the Pen extension. Write a short script that draws a square using repeat 4: move 50, turn 90.",
+      "Open the starter (File, then Load from your computer). The Pen extension is added and a script draws a square with repeat 4: move 50, turn 90. Click the green flag to test it.",
       "Go to My Blocks → Make a Block. Name it \"square\" and add a number input called \"size.\"",
       "Move your square code under the new \"define square\" block. Replace 50 with the size input.",
       "Test it: erase all, pen down, square (100).",
@@ -425,7 +433,7 @@ window.STEM.activities = [
     area: "coding",
     summary: "Plan, build, test, and present a game or app of your own idea.",
     level: "advanced",
-    grades: ["6-8"],
+    grades: ["4-5", "6-8"],
     duration: 45,
     format: "independent",
     equipment: ["computer"],
@@ -470,6 +478,7 @@ window.STEM.activities = [
     reflect: "What changed between your plan and your finished project? Why?",
     extend: "Add a title screen, instructions, and a way to play again without clicking the green flag.",
     teacherNotes: [
+      "Open to any student whose Stage 6 “I can” is confirmed, including ready grade 4–5 students. Readiness, not grade, decides who starts it.",
       "Check plans before building starts. Most stalled projects began too big.",
       "Use the \"I can\" statement for Stage 7 as the assessment: plan, build, test, debug, and explain.",
       "Presentations can be quick (60–90 seconds) or recorded as a short screen walkthrough."
@@ -1434,6 +1443,7 @@ window.STEM.activities = [
      with full directions on the page. */
   {
     id: "lobster-trap-logic",
+    bridge: { from: "lab-moon-gate", text: "Moon Base Gatekeeper checked one rule. Here you'll put several rules in order and check that every lobster is sorted the same way." },
     title: "Lobster Trap Logic",
     area: "coding",
     summary: "Write the if–else rules a Maine lobsterman uses to decide which lobsters to keep and which go back.",

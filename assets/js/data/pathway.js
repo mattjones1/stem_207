@@ -93,3 +93,29 @@ window.STEM.pathway = [
     activities: ["capstone-game"]
   }
 ];
+
+/* "New to coding? Start here": short entry tracks by grade band. Same ideas, framed for the age. */
+window.STEM.startHere = [
+  { band: "2-3", title: "Grades 2–3", frame: "Learn to give a computer exact instructions, one step at a time.",
+    activities: ["fix-the-recipe", "lab-dance-party", "robot-maze-mission"] },
+  { band: "4-5", title: "Grades 4–5", frame: "Order, events, and debugging: the three habits every coder uses.",
+    activities: ["lab-dance-party", "robot-maze-mission", "event-party"] },
+  { band: "6-8", title: "Grades 6–8 (new to coding)", frame: "These missions look playful, but the thinking is what working programmers do: write an exact sequence, predict the result, and debug the first thing that goes wrong. Move fast through them, then head to Stage 3.",
+    activities: ["lab-dance-party", "robot-maze-mission", "animate-your-name"] }
+];
+
+/* The AI learning route: one idea builds on the next. Every step uses missions that already exist. */
+window.STEM.aiRoute = [
+  { step: 1, title: "Patterns and predictions", idea: "Computers that “guess” are finding patterns in examples. A likely answer can still be wrong.",
+    activities: ["pattern-predictors"] },
+  { step: 2, title: "Labels and examples", idea: "A model learns from labeled examples. Missing or unusual examples lead to mistakes.",
+    activities: ["how-ai-sorts", "blueberry-sorter"] },
+  { step: 3, title: "Training a real model", idea: "Train a model, then check it on examples it has never seen.",
+    activities: ["lab-pattern-machine", "ai-for-oceans"] },
+  { step: 4, title: "Testing with new examples", idea: "Training examples and test examples are different. Variety in the data matters more than amount.",
+    activities: ["teachable-machine-classroom", "ai-secret-signals"] },
+  { step: 5, title: "Uncertainty and limits", idea: "A confidence score is the model's own number, and it can be high when the model is wrong. Some answers should go to a person.",
+    activities: ["lab-pattern-machine"], note: "Pattern Machine Lab levels 5 and 6." },
+  { step: 6, title: "Checking and responsibility", idea: "People decide when to use AI, check its work, and fix the data when it's unfair.",
+    activities: ["ai-limits-detectives"] }
+];

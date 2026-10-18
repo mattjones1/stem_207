@@ -1930,3 +1930,26 @@ h1, h2, h3, h4 { letter-spacing: -.015em; }
 .astatus li { grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: .6rem; row-gap: .2rem; }
 .astatus li > .check-act { grid-column: 2 / -1; }
 .astatus__main { min-width: 0; }
+
+/* ───────── Batch 5: bridges, starters, block pictures, start here, AI route ───────── */
+.bridge { display: flex; gap: .6rem; align-items: flex-start; padding: .8rem 1rem; border-radius: var(--radius-sm); background: var(--teal-soft); font-size: 1.02rem; }
+.bridge svg, .starter > svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; flex: none; margin-top: .15rem; }
+.starter { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; padding: .8rem 1rem; margin-bottom: 1rem; border-radius: var(--radius-sm); background: var(--orange-soft); }
+.starter > span { flex: 1 1 18rem; }
+.block-fig { margin: 1.2rem 0 0; display: grid; gap: .6rem; }
+.block-fig figcaption { font-size: .98rem; }
+.block-fig__art { overflow-x: auto; padding: .6rem; border-radius: var(--radius-sm); background: #f9f9f9; border: 1.5px solid var(--line); }
+.block-fig__art svg { display: block; max-width: none; }
+.block-fig__text summary { cursor: pointer; font-weight: 700; color: var(--teal); }
+.block-fig__text ol { margin: .4rem 0 0; padding-left: 1.4rem; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9rem; }
+.start-here { margin-block: 1.5rem; display: grid; gap: .8rem; }
+.start-here h2 { font-size: 1.35rem; display: flex; align-items: center; gap: .4rem; }
+.start-here__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: .8rem; }
+.start-here__track { display: grid; gap: .5rem; align-content: start; }
+.start-here__track.is-mine { border-color: var(--teal); box-shadow: 0 0 0 2px var(--teal); }
+.start-here__track ol { margin: 0; padding-left: 1.3rem; display: grid; gap: .3rem; }
+.ai-route { list-style: none; padding: 0; display: grid; gap: .8rem; margin-block: 1.5rem 2rem; }
+.ai-route__step { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1rem; align-items: start; }
+.ai-route__n { width: 2.6rem; height: 2.6rem; border-radius: 50%; display: grid; place-items: center; background: var(--navy); color: #fff; font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; }
+.ai-route__step h2 { font-size: 1.2rem; margin-bottom: .3rem; }
+.ai-route__acts { margin: .5rem 0 0; padding-left: 1.2rem; display: grid; gap: .25rem; }

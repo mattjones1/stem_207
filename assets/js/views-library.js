@@ -458,6 +458,13 @@
         </div>
       </section>
       ${labsStrip(user, id)}
+      ${id === "ai" ? `
+        <section class="wrap section">
+          <div class="notice notice--row">
+            <p><strong>Not sure where to start?</strong> The AI learning route puts these missions in order, from patterns to responsible use.</p>
+            <a class="btn btn--primary btn--small" href="#/ai-route">See the AI learning route ${icon("arrowRight")}</a>
+          </div>
+        </section>` : ""}
       ${id === "coding" ? `
         <section class="wrap section">
           <div class="notice notice--row">
@@ -569,6 +576,52 @@
     return `<ul class="reqs">${rows.join("")}</ul>`;
   }
 
+  /* ───────── Block pictures: where blocks go, drawn Scratch-style, with a text version ───────── */
+  const FIGURES = {
+    "score-keeper-star": {
+      title: "The star's script",
+      caption: "Both if blocks go inside the forever loop, so the star checks them again and again. (The score still doesn't reset at the start. You'll find that bug in step 7.)",
+      lines: [
+        [0, "event", "when green flag clicked"],
+        [0, "motion", "go to x: (pick random -200 to 200) y: 170"],
+        [0, "control", "forever"],
+        [1, "motion", "change y by -5"],
+        [1, "control", "if < touching catcher? > then"],
+        [2, "variables", "change score by 1"],
+        [2, "motion", "go to x: (pick random -200 to 200) y: 170"],
+        [1, "end", ""],
+        [1, "control", "if < (y position) < -170 > then"],
+        [2, "motion", "go to x: (pick random -200 to 200) y: 170"],
+        [1, "end", ""],
+        [0, "end", ""]
+      ]
+    }
+  };
+  const BLOCK_FILL = { event: "#ffbf00", motion: "#4c97ff", control: "#ffab19", variables: "#ff8c1a", end: "#ffab19" };
+  function figureMarkup(key) {
+    const f = FIGURES[key];
+    if (!f) return "";
+    const rowH = 34, indent = 26, x0 = 12;
+    const rows = f.lines.map(([d, kind, text], i) => {
+      const x = x0 + d * indent, y = 12 + i * rowH, w = kind === "end" ? 70 : Math.max(150, text.length * 7.4 + 28);
+      return `<g><rect x="${x}" y="${y}" width="${w}" height="${kind === "end" ? 16 : 28}" rx="${kind === "event" ? 12 : 4}" fill="${BLOCK_FILL[kind]}" stroke="rgba(0,0,0,.25)"/>${text ? `<text x="${x + 10}" y="${y + 19}" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="${kind === "event" || kind === "control" || kind === "variables" ? "#1d1647" : "#ffffff"}">${esc(text)}</text>` : ""}</g>`;
+    }).join("");
+    // The left arm of each C block (forever, if): from its row down to its matching end.
+    const arms = f.lines.map(([d, kind], i) => {
+      if (kind !== "control") return "";
+      const j = f.lines.findIndex((l, k) => k > i && l[0] === d && l[1] === "end");
+      if (j < 0) return "";
+      return `<rect x="${x0 + d * indent}" y="${12 + i * rowH + 20}" width="${indent - 4}" height="${(j - i) * rowH - 12}" fill="${BLOCK_FILL.control}" stroke="rgba(0,0,0,.25)"/>`;
+    }).join("");
+    const h = 24 + f.lines.length * rowH, w = 520;
+    return `
+      <figure class="block-fig">
+        <figcaption><strong>${esc(f.title)}</strong> ${esc(f.caption)}</figcaption>
+        <div class="block-fig__art"><svg viewBox="0 0 ${w} ${h}" width="${w}" role="img" aria-label="${esc(f.title)}: ${esc(f.lines.filter((l) => l[2]).map((l) => l[2]).join("; "))}">${arms}${rows}</svg></div>
+        <details class="block-fig__text"><summary>Read the script as text</summary><ol>${f.lines.filter((l) => l[2]).map(([d, , t]) => `<li style="margin-left:${d * 1.5}rem">${esc(t)}</li>`).join("")}</ol></details>
+      </figure>`;
+  }
+
   SE.views.activity = function (user, id) {
     const a = SE.activityById[id];
     if (!a) return SE.views.notFound();
@@ -621,6 +674,7 @@
             <h2 id="s-mission">${icon("target")}Your mission</h2>
             <p>${esc(a.mission)}</p>
           </section>
+          ${a.bridge && SE.activityById[a.bridge.from] ? `<p class="bridge">${icon("arrowRight")}<span><strong>You've seen this idea before.</strong> ${esc(a.bridge.text)} <a href="#/activity/${a.bridge.from}">${esc(SE.activityById[a.bridge.from].title)}</a></span></p>` : ""}
           <section class="block" aria-labelledby="s-learn">
             <h2 id="s-learn">${icon("bulb")}What you’ll learn</h2>
             <ul class="bullets objectives">${a.learn.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul>
@@ -642,7 +696,9 @@
           <section class="block" aria-labelledby="s-steps">
             <h2 id="s-steps">${icon("list")}Your steps</h2>
             ${isStudent ? `<p class="block__hint">Check off each step as you finish it.</p>` : ""}
+            ${a.starter ? `<div class="starter">${icon("box")}<span><strong>Starter project:</strong> ${esc(a.starter.how)}</span><a class="btn btn--primary btn--small" href="${esc(a.starter.file)}" download>${icon("arrowRight")}${esc(a.starter.label)}</a></div>` : ""}
             ${stepsHtml}
+            ${a.figure ? figureMarkup(a.figure) : ""}
             ${a.stopAt ? `<p class="stop-at">${icon("flag")}<span><strong>You're done when:</strong> ${esc(a.stopAt)}</span></p>` : ""}
           </section>
           ${a.stuck ? `
@@ -744,6 +800,15 @@
         <div class="block"><h2>${smallIcon("bug")}Debug at every stage</h2><p>Every stage has its own debugging habit. Finding and fixing mistakes is part of the learning, not a detour.</p></div>
         <div class="block"><h2>${smallIcon("check")}Check with “I can”</h2><p>${isStudent ? "When you can do the “I can” statement, tell your teacher with the button. They'll check it with you." : "Each “I can” statement is something you can watch a student do. When they can, they're ready for the next stage."}</p></div>
       </div>
+      <section class="wrap start-here" aria-labelledby="start-here-title">
+        <h2 id="start-here-title">${smallIcon("rocket")}New to coding? Start here</h2>
+        <div class="start-here__grid">${(STEM.startHere || []).map((t) => `
+          <article class="block start-here__track ${prof && user.gradeBand === t.band ? "is-mine" : ""}">
+            <h3>${esc(t.title)}</h3><p>${esc(t.frame)}</p>
+            <ol>${t.activities.map((id) => SE.activityById[id]).filter(Boolean).map((a) => `<li><a href="#/activity/${a.id}">${esc(a.title)}</a> <span class="muted">${SE.timeText(a)}</span></li>`).join("")}</ol>
+          </article>`).join("")}</div>
+        <p class="muted">Already coding? Skip ahead: pick the first stage below whose prerequisites you can already do. Your grade doesn't limit how far you go.</p>
+      </section>
       <ol class="wrap stages">
         ${pathway.map((s) => {
           const st = prof && prof.stages[s.stage];
@@ -789,6 +854,29 @@
       const el = document.getElementById(`stage-${stageN}`);
       if (el) { el.scrollIntoView({ block: "center" }); }
     }));
+  };
+
+  /* ───────── The AI learning route ───────── */
+  SE.views.aiRoute = function (user) {
+    const prof = user && user.role === "student" ? SE.game.profile(user.id) : null;
+    app().innerHTML = `
+      <section class="page-top">
+        <div class="wrap page-top__inner">
+          <div class="backbar">${backLink("#/area/ai", "Artificial Intelligence")}</div>
+          <div class="page-top__head"><span class="icon-badge">${icon("ai")}</span>
+            <div><span class="eyebrow">Artificial Intelligence</span><h1 tabindex="-1">The AI learning route</h1></div></div>
+          <p class="page-top__lede">Six steps, from spotting patterns to deciding when AI should be trusted. Each step uses missions you can do now. Go in order the first time.</p>
+        </div>
+      </section>
+      <ol class="wrap ai-route">${(STEM.aiRoute || []).map((s) => `
+        <li class="block ai-route__step">
+          <span class="ai-route__n" aria-hidden="true">${s.step}</span>
+          <div><h2><span class="visually-hidden">Step ${s.step}: </span>${esc(s.title)}</h2><p>${esc(s.idea)}</p>
+            <ul class="ai-route__acts">${s.activities.map((id) => SE.activityById[id]).filter((a) => a && !SE.hiddenForUser(a)).map((a) => {
+              const st = prof ? SE.game.statusFor(prof, a) : null;
+              return `<li><a href="#/activity/${a.id}">${esc(a.title)}</a> <span class="muted">${SE.timeText(a)} · ${esc(formats[a.format].name)}</span>${st && st.state !== "none" ? ` <span class="muted">· ${esc(st.label)}</span>` : ""}</li>`; }).join("")}</ul>
+            ${s.note ? `<p class="muted small">${esc(s.note)}</p>` : ""}</div>
+        </li>`).join("")}</ol>`;
   };
 
   SE.views.notFound = function () {

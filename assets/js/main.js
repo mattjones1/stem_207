@@ -122,6 +122,7 @@
       const lab = SE.labs.byId(b);
       title = `${lab ? lab.title : "Lab"} · STEM 207`;
     }
+    else if (a === "ai-route") { SE.views.aiRoute(user); navKey = "library"; title = "AI learning route · STEM 207"; }
     else if (a === "pathway") { SE.views.pathway(user); navKey = "pathway"; title = "Coding pathway · STEM 207"; }
     else SE.views.notFound();
 
