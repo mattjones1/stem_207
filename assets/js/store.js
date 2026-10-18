@@ -257,8 +257,23 @@
       });
     });
 
+    // Sample explorers (all but the first, who designs their own), using free gear only.
+    const hairs = ["short", "curly", "long", "bun", "braids", "buzz", "puffs"], hats = ["none", "beanie", "cap"], jackets = ["indigo", "red", "spruce", "harbor"];
+    students.slice(1).forEach((s, i) => ev(s, "profile_custom", now - (15 - i) * SE.DAY, {
+      look: { skin: (i * 2 + 1) % 6, hair: hairs[(i * 3) % 7], hairColor: (i * 5) % 8, hat: hats[i % 3], jacket: jackets[(i + 1) % 4], gear: i % 4 === 2 ? "glasses" : "none", back: ["sky", "fog", "sunset", "pine"][i % 4] },
+      boat: { hull: i % 6, stripe: (i + 2) % 8, a: i % 12, b: (i * 5) % 12, buoy: [i % 8, (i + 3) % 8, (i + 5) % 8] }
+    }));
+
     events.sort((a, b) => a.at - b.at);
-    return { educator, cls, students, events };
+
+    // Missions the sample teacher has assigned to the class, a couple with due dates.
+    const ASSIGNED = [["robot-maze-mission", -4], ["how-ai-sorts", -1], ["lobster-trap-logic", 2], ["lab-rover", 6], ["tide-watchers", 9], ["lab-field-station", null]];
+    const assignments = ASSIGNED.filter(([id]) => SE.activityById[id]).map(([activityId, dueIn], i) => ({
+      id: `asg_demo_${i}${sfx}`, classId: cls.id, activityId, isDemo: true,
+      assignedAt: now - (12 - i * 2) * SE.DAY,
+      dueDate: dueIn == null ? null : new Date(SE.startOfDay(now + dueIn * SE.DAY)).toISOString().slice(0, 10)
+    }));
+    return { educator, cls, students, events, assignments };
   }
 
   async function ensureDemoHash() {
@@ -275,13 +290,20 @@
     db.classes = db.classes.filter((c) => !c.isDemo).concat(d.cls);
     db.students = db.students.filter((s) => !s.isDemo).concat(d.students);
     db.events = db.events.filter((e) => !e.isDemo).concat(d.events).sort((a, b) => a.at - b.at);
+    db.assignments = (db.assignments || []).filter((x) => !x.isDemo).concat(d.assignments);
   }
 
   function init() {
     db = readDb();
     if (!db || db.version !== 7) {
-      db = { version: 7, educators: [], classes: [], students: [], events: [] };
+      db = { version: 7, educators: [], classes: [], students: [], events: [], assignments: [] };
       installDemo();
+      save();
+    }
+    if (!db.assignments) { // added after version 7: give existing browsers the sample assignments
+      db.assignments = [];
+      const d = seedDemo();
+      if (db.classes.some((c) => c.id === d.cls.id)) db.assignments = d.assignments;
       save();
     }
     return ensureDemoHash();
@@ -295,22 +317,26 @@
     educator: (r) => ({ id: r.id, name: r.name, email: r.email, createdAt: ms(r.created_at) }),
     cls: (r) => ({ id: r.id, name: r.name, code: r.code, educatorId: r.educator_id, isDemo: r.is_demo, createdAt: ms(r.created_at) }),
     student: (r) => ({ id: r.id, classId: r.class_id, displayName: r.display_name, gradeBand: r.grade_band, picCode: r.pic_code, isDemo: r.is_demo, createdAt: ms(r.created_at) }),
-    event: (r) => ({ id: r.id, studentId: r.student_id, classId: r.class_id, type: r.type, at: Number(r.at), data: r.data || {}, by: r.by || undefined, isDemo: r.is_demo })
+    event: (r) => ({ id: r.id, studentId: r.student_id, classId: r.class_id, type: r.type, at: Number(r.at), data: r.data || {}, by: r.by || undefined, isDemo: r.is_demo }),
+    assignment: (r) => ({ id: r.id, classId: r.class_id, activityId: r.activity_id, assignedAt: ms(r.assigned_at), dueDate: r.due_date || null, isDemo: r.is_demo })
   };
   const toRow = {
     cls: (c) => ({ id: c.id, educator_id: c.educatorId, name: c.name, code: c.code, is_demo: !!c.isDemo, created_at: iso(c.createdAt) }),
     student: (s) => ({ id: s.id, class_id: s.classId, display_name: s.displayName, grade_band: s.gradeBand, pic_code: s.picCode, is_demo: !!s.isDemo, created_at: iso(s.createdAt) }),
-    event: (e) => ({ id: e.id, student_id: e.studentId, class_id: e.classId, type: e.type, at: e.at, data: e.data || {}, by: e.by || null, is_demo: !!e.isDemo })
+    event: (e) => ({ id: e.id, student_id: e.studentId, class_id: e.classId, type: e.type, at: e.at, data: e.data || {}, by: e.by || null, is_demo: !!e.isDemo }),
+    assignment: (a) => ({ id: a.id, class_id: a.classId, activity_id: a.activityId, assigned_at: iso(a.assignedAt), due_date: a.dueDate || null, is_demo: !!a.isDemo })
   };
-  const emptyDb = () => ({ version: 7, educators: [], classes: [], students: [], events: [] });
+  const emptyDb = () => ({ version: 7, educators: [], classes: [], students: [], events: [], assignments: [] });
   const cloudCode = () => `${CODE_WORDS[Math.floor(Math.random() * CODE_WORDS.length)]}${Math.floor(Math.random() * 900 + 100)}`;
 
   async function loadEducator(user) {
-    const [eds, classes, students, events] = await Promise.all([
+    const [eds, classes, students, events, assignments] = await Promise.all([
       SE.cloud.selectAll("educators", `id=eq.${user.id}`),
       SE.cloud.selectAll("classes", "order=created_at.asc"),
       SE.cloud.selectAll("students", "order=created_at.asc"),
-      SE.cloud.selectAll("events", "order=at.asc")
+      SE.cloud.selectAll("events", "order=at.asc"),
+      // Older databases may not have the assignments table yet (run supabase/schema.sql again to add it).
+      SE.cloud.selectAll("assignments", "order=assigned_at.asc").catch((e) => { if (e.offline) throw e; console.warn("STEM 207: assignments table missing", e); return []; })
     ]);
     if (!eds.length) {
       // The sign-up trigger normally creates this row; make it here if it's missing.
@@ -318,13 +344,14 @@
       await SE.cloud.rest("POST", "/educators", row, "resolution=ignore-duplicates");
       eds.push(row);
     }
-    db = { version: 7, educators: eds.map(fromRow.educator), classes: classes.map(fromRow.cls), students: students.map(fromRow.student), events: events.map(fromRow.event) };
+    db = { version: 7, educators: eds.map(fromRow.educator), classes: classes.map(fromRow.cls), students: students.map(fromRow.student), events: events.map(fromRow.event), assignments: assignments.map(fromRow.assignment) };
   }
   function loadStudentState(state) {
     db = emptyDb();
     db.classes.push({ ...state.class, educatorId: null });
     db.students.push({ ...state.student, picCode: [] });
     db.events = (state.events || []).map((e) => ({ ...e, at: Number(e.at), data: e.data || {} }));
+    db.assignments = (state.assignments || []).map((a) => ({ ...a, classId: state.class.id, assignedAt: Number(a.assignedAt) || Date.now() }));
   }
 
   /* Outbox: writes go to the server one at a time, in order, retrying when offline. */
@@ -403,6 +430,7 @@
     }
     await SE.cloud.rest("POST", "/students", d.students.map(toRow.student), "return=minimal");
     for (let i = 0; i < d.events.length; i += 500) await SE.cloud.rest("POST", "/events", d.events.slice(i, i + 500).map(toRow.event), "return=minimal");
+    if (d.assignments.length) await SE.cloud.rest("POST", "/assignments", d.assignments.map(toRow.assignment), "return=minimal").catch((e) => console.warn("STEM 207: couldn't add sample assignments", e));
     const a = SE.cloud.auth();
     await loadEducator(a.user);
     return d.cls;
@@ -521,6 +549,35 @@
       db.classes.push(cls);
       if (CLOUD) send(insertClassOp(cls)); else save();
       return cls;
+    },
+
+    /* Assigned missions: what a teacher has picked for a class, in the order assigned. */
+    assignmentsFor: (classId) => (db.assignments || []).filter((x) => x.classId === classId).sort((a, b) => a.assignedAt - b.assignedAt),
+    assignmentFor: (classId, activityId) => (db.assignments || []).find((x) => x.classId === classId && x.activityId === activityId) || null,
+    assign(classId, activityIds, opts = {}) {
+      const added = [];
+      [].concat(activityIds).forEach((activityId, i) => {
+        if (SE.store.assignmentFor(classId, activityId) || !SE.activityById[activityId]) return;
+        const a = { id: SE.uid("asg"), classId, activityId, assignedAt: Date.now() + i, dueDate: opts.dueDate || null };
+        db.assignments.push(a);
+        added.push(a);
+      });
+      if (!added.length) return added;
+      if (CLOUD) send(restOp("POST", "/assignments", added.map(toRow.assignment), "return=minimal")); else save();
+      return added;
+    },
+    unassign(classId, activityIds) {
+      const ids = [].concat(activityIds);
+      const gone = db.assignments.filter((x) => x.classId === classId && ids.includes(x.activityId));
+      if (!gone.length) return;
+      db.assignments = db.assignments.filter((x) => !gone.includes(x));
+      if (CLOUD) gone.forEach((g) => send(restOp("DELETE", `/assignments?id=eq.${encodeURIComponent(g.id)}`, undefined, "return=minimal"))); else save();
+    },
+    setDueDate(classId, activityId, dueDate) {
+      const a = SE.store.assignmentFor(classId, activityId);
+      if (!a) return;
+      a.dueDate = dueDate || null;
+      if (CLOUD) send(restOp("PATCH", `/assignments?id=eq.${encodeURIComponent(a.id)}`, { due_date: a.dueDate }, "return=minimal")); else save();
     },
 
     /* Students */

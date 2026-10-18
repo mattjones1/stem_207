@@ -18,6 +18,12 @@
 - **Projector mode** to enlarge everything for a shared screen. This setting is remembered only on that device.
 
 
+## Ready-to-teach missions (outside tools)
+
+Some missions run on outside platforms. Their full teaching packs are Markdown files in `missions/`:
+
+- **Teach the Computer Your Secret Signals** (AI, grades 2–8, Google Teachable Machine): [`missions/ai/secret-signals/`](missions/ai/secret-signals/). Includes a student mission, a low-reading version, a teacher guide, a before-and-after test table, and hints with an extension.
+
 ## Interactive labs
 
 Each exploration area has its own leveled, interactive lab that runs inside STEM 207, with no outside account or website. Every level teaches one idea, gives a hint on request, checks the student's work, and ends with "What you just learned." Signed-in students earn XP for each level (+30), and lab work counts toward patches and the weekly streak.
@@ -25,6 +31,9 @@ Each exploration area has its own leveled, interactive lab that runs inside STEM
 | Area | Lab | Levels | What students learn |
 | --- | --- | --- | --- |
 | Coding & Computer Science | **Harbor Code Lab** | 36 | Three voyages of 12 levels (Casco Bay, Penobscot Bay, Down East). Steer a lobster boat: haul and set traps, dodge granite ledges, find the mooring in fog. Sequences, debugging with step-through, loops, actions, conditionals (if / if–else), a variable, functions (custom blocks), free build. Levels map to coding pathway stages. |
+| Coding & Computer Science | **Robot Dance Party** | 4 | A 10-minute first coding lesson for grades 2–8. Build a dance from five moves (Move left, Move right, Jump, Spin, Strike a pose), reorder or remove steps with buttons, and run it with each step highlighted. Predict first and last, swap two steps, make a 5+ step dance, then the challenge: jump, spin, and finish with a pose, checked from the steps the robot actually ran. Two hints per level. |
+| Coding & Computer Science | **Feed the Space Blob** | 4 | A 15-minute variables lesson for students who know sequences and click events. Two editable code stacks (`when run starts: set snacks to [0]`, `when Feed is clicked: change snacks by [1]`) drive a live “snacks” monitor. Feed and count, change the amount and predict, switch off the reset block to see why programs need a starting value, then the challenge: start at 2, add 3, reach 14 after 4 feeds. The challenge checks the start value, amount, and feed count, not just the total. |
+| Coding & Computer Science | **Moon Base Gatekeeper** | 5 | Conditionals for students who know events and stored values. Edit `IF visitor badge equals [Moon/Star/Planet] THEN [Open gate/Keep gate closed] ELSE [...]`, predict, and test robot visitors. Every test shows a step-by-step trace (the comparison, the branch taken, the branch skipped) and goes in a test log. Find the bug in a rule where both branches open the gate, then the Star-team challenge, which only passes when all three badges are tested on the current rule (edits invalidate earlier results). |
 | Virtual Reality | **Field Station 360** | 7 | Look-around Gulf of Maine tide pools and a North Woods pond below Katahdin, then a rainforest, desert, and coral reef, with compass headings. Observation vs. inference, adaptations, comparing five habitats. Works in a VR headset's browser too. |
 | Artificial Intelligence | **Pattern Machine Lab** | 6 | Find a pattern, train a real k-nearest-neighbors classifier, see accuracy grow with more examples, uncover biased data, set a confidence threshold, judge responsible uses (including counting puffins and sorting wild blueberries). Made-up creatures only. |
 | Engineering & Robotics | **Pumpkin Launcher Lab** | 6 | Design–test–iterate a catapult for a fall-fair pumpkin toss: prediction, one-change-at-a-time fair tests, a hay-bale constraint, a budget, an engineering notebook. |
@@ -34,7 +43,7 @@ Each exploration area has its own leveled, interactive lab that runs inside STEM
 
 Each lab also has a library entry with a full teacher guide (mission, objectives, setup, steps, reflection, extension, and facilitation notes). Educators see lab progress per class and per student, including tests run, hints used, and saved animations.
 
-Lab ids (`rover`, `launcher`, `line-follower`, `ramp-racers`) are kept from earlier versions so saved progress carries over. Lab code lives in `assets/js/labs/`. `lab-shell.js` provides the shared layout, hints, completion panel, and progress logging. Each lab registers itself with `SE.labs.register({ id, area, title, tagline, levels, chapters?, mount })` (optional `chapters` group levels into voyages, as in the Harbor Code Lab), so adding a lab means adding one file and one `<script>` tag.
+Lab ids (`rover`, `launcher`, `line-follower`, `ramp-racers`) are kept from earlier versions so saved progress carries over. Lab code lives in `assets/js/labs/`. `lab-shell.js` provides the shared layout, hints, completion panel, and progress logging. Each lab registers itself with `SE.labs.register({ id, area, title, tagline, levels, chapters?, mount })` (optional `chapters` group levels into voyages, as in the Harbor Code Lab; a level can give `hints: [...]` instead of `hint` to reveal hints one at a time), so adding a lab means adding one file and one `<script>` tag.
 
 ## Accounts and progress (prototype)
 
@@ -61,9 +70,12 @@ The sample class has eight made-up students with two and a half weeks of made-up
 - **18 mission patches** for things like first mission, reflections, team missions, debugging, each area, pathway stages, and interactive labs.
 - **Class expedition**: everyone's XP moves the class across Maine, from Kittery to Portland Head, Penobscot Bay, Acadia, Moosehead, and the summit of Katahdin. It's cooperative, so there's no leaderboard.
 - **Coding pathway**: an "I can do this" button sends a stage to the teacher to check.
+- **My harbor** (`#/base`): each student designs an illustrated explorer (skin tone, hair, hats, jackets, gear, background) and a home harbor that grows as they learn. A pine grows for every mission and a buoy for every 2 lab levels, in the student's own buoy colors. Ranks and patches unlock 31 items: a lobster boat they name and paint at Tidepooler, a camp cabin, a lighthouse, a sailboat, puffins, a loon, a moose, the northern lights, and Katahdin. New unlocks show up on the Mission complete and lab level screens. Avatars appear in the header, on the home screen, and in the teacher's roster.
+- **No personal info in avatars**: avatars are drawings built from preset parts, and boat names are picked from two word lists, so students never type free text or upload photos. Choices are saved as `profile_custom` events in the activity log, so they work in local and cloud mode with no database change.
 
 ### What educators get (`#/teach`)
 
+- **Missions**: the whole library organized by discipline (Coding pathway, Coding, Virtual Reality, AI, Engineering, Science, Creative). Filter by grade band, time, or Made in Maine; see how many students have finished each mission; and **Assign** missions to the class, one at a time or a whole pathway stage at once. Add due dates in the Assigned list. Assigned missions show first on every student's home screen and are tagged on the mission page. You can also assign from any mission page.
 - **Overview**: active students this week, missions this week compared with last week, reflections and "I can" checks waiting, a 14-day chart, which areas the class is exploring, a "needs a check-in" list (inactive for a week, or "still figuring it out" on recent missions), the class goal, a sortable roster, and a live activity log.
 - **Student detail**: rank, XP, patches, pathway with Confirm / Not yet, every completed mission with answers and confidence, and a full activity timeline.
 - **Pathway checks**: pending "I can" claims and a class-by-stage readiness map.
@@ -90,7 +102,7 @@ STEM 207 runs in one of two modes, chosen by `assets/js/config.js`:
 ### Set up the free back end (about 10 minutes)
 
 1. Create a free account at [supabase.com](https://supabase.com) and click **New project**. Pick a region near Maine (for example US East) and save the database password somewhere safe.
-2. In the project, open **SQL Editor → New query**, paste all of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**. It creates the tables, the security rules, and the student sign-in functions. Running it again is safe.
+2. In the project, open **SQL Editor → New query**, paste all of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**. (Already set up before assigned missions were added? Run [`supabase/update-2-assignments.sql`](supabase/update-2-assignments.sql) once.) It creates the tables, the security rules, and the student sign-in functions. Running it again is safe.
 3. Open **Authentication → Sign In / Providers → Email** and turn off **Confirm email** while you're prototyping, so new educator accounts work right away. (If you leave it on, teachers must click the link in a confirmation email first. In that case, set **Authentication → URL Configuration → Site URL** to wherever your site lives.)
 4. Open **Project Settings → API Keys**. Copy the **Project URL** and the **publishable** key (older projects call it the **anon public** key) into `assets/js/config.js`. Never use a secret or `service_role` key here.
 5. Commit and push. GitHub Pages serves the site with the back end on. To make the one-file version use it too, run `python tools/build_single_file.py` again.
@@ -153,6 +165,7 @@ supabase/schema.sql           Database tables, security rules, and student sign-
 tests/backend/                Supabase stand-in for testing cloud mode on plain Postgres
 assets/js/game.js             Turns the activity log into XP, rank, patches, and pathway status
 assets/js/art.js              Insignia, patches, expedition map, class goal track
+assets/js/base.js             Student avatars, the "My harbor" scene, and gear/harbor unlocks
 assets/js/views-*.js          Library, student, sign-in, and educator views
 assets/js/main.js             Router and header
 ```

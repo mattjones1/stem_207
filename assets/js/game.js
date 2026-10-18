@@ -189,7 +189,9 @@
   /* Suggested next missions: pathway first, then new areas, then anything in grade band. */
   function recommendations(student, prof, limit = 3) {
     const inBand = (a) => !student.gradeBand || a.grades.includes(student.gradeBand);
-    const notDone = (a) => !prof.completedIds.has(a.id);
+    // Assigned missions get their own section on the student home, so suggestions skip them.
+    const assignedIds = new Set(student.classId ? SE.store.assignmentsFor(student.classId).map((x) => x.activityId) : []);
+    const notDone = (a) => !prof.completedIds.has(a.id) && !assignedIds.has(a.id);
     const picks = [];
     const add = (a, reason) => { if (a && !picks.some((p) => p.activity.id === a.id)) picks.push({ activity: a, reason }); };
 
@@ -236,5 +238,13 @@
     return { reached, next, index: idx, progress: Math.max(0, Math.min(1, progress)), totalXp };
   }
 
-  SE.game = { profile, recommendations, classSummary, classGoal, rankFor, baseXp };
+  /* Has this student finished a mission? For lab missions, finishing every level counts too. */
+  function missionDone(prof, a) {
+    if (prof.completedIds.has(a.id)) return true;
+    const labId = a.launch && a.launch.labId;
+    const lab = labId && SE.labs && SE.labs.byId(labId);
+    return !!(lab && (prof.labLevels[labId] || new Set()).size >= lab.levels.length);
+  }
+
+  SE.game = { profile, recommendations, classSummary, classGoal, rankFor, baseXp, missionDone };
 })();

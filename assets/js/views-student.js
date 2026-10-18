@@ -52,7 +52,7 @@
       <section class="xhero ridge" aria-labelledby="xhero-title">
         <div class="wrap xhero__inner">
           <div class="xhero__id">
-            ${SE.insignia(prof.rank, 64)}
+            <a class="xhero__avatar" href="#/base" title="Customize your explorer">${SE.ownAvatar(user.id, 76, "Your explorer")}<span class="xhero__badge">${SE.insignia(prof.rank, 30)}</span></a>
             <div class="xhero__who">
               <span class="eyebrow">${esc(user.cls ? user.cls.name : "Explorer")}</span>
               <h1 id="xhero-title" tabindex="-1">Welcome back, ${esc(firstName)}.</h1>
@@ -69,11 +69,52 @@
         </div>
       </section>
 
+      ${(() => {
+        const ul = SE.base.unlocks(prof);
+        const nextUp = ul.filter((x) => !x.open && x.prog).sort((x, y) => (y.prog.have / y.prog.want) - (x.prog.have / x.prog.want))[0];
+        return `<div class="wrap"><a class="harbor-teaser" href="#/base">
+          <div class="harbor-teaser__art">${SE.base.harbor(prof, SE.base.customFor(user.id), { seed: user.id })}</div>
+          <div class="harbor-teaser__text"><span class="eyebrow">My harbor</span>
+            <strong>${ul.filter((x) => x.open).length} of ${ul.length} unlocks earned</strong>
+            ${nextUp ? `<span>Next up: <b>${esc(nextUp.name)}</b> · ${esc(nextUp.how)}</span>` : "<span>Everything unlocked. Wicked good!</span>"}
+            <span class="harbor-teaser__go">Design your explorer and boat ${icon("arrowRight")}</span></div>
+        </a></div>`;
+      })()}
+
       ${notes ? `
       <div class="wrap"><div class="teacher-note-banner">
         ${icon("message")}
         <p><strong>Note from your teacher</strong> on <a href="#/activity/${notes.c.activity.id}">${esc(notes.c.activity.title)}</a>: “${esc(notes.r.data.note)}”</p>
       </div></div>` : ""}
+
+      ${(() => {
+        const list = SE.store.assignmentsFor(user.classId).map((x) => ({ x, a: SE.activityById[x.activityId] })).filter((r) => r.a);
+        if (!list.length) return "";
+        const done = list.filter(({ a }) => SE.game.missionDone(prof, a)).length;
+        const order = list.slice().sort((p, q) => SE.game.missionDone(prof, p.a) - SE.game.missionDone(prof, q.a) || (p.x.dueDate || "9999").localeCompare(q.x.dueDate || "9999"));
+        return `
+      <section class="section wrap" aria-labelledby="assigned-title">
+        <div class="section__head">
+          <div><span class="eyebrow">From your teacher</span><h2 id="assigned-title">Your assigned missions</h2></div>
+          <p class="assigned-count"><b>${done}</b> of ${list.length} done</p>
+        </div>
+        <div class="mini-meter assigned-meter" aria-hidden="true"><span style="width:${(done / list.length) * 100}%"></span></div>
+        <div class="next-grid next-grid--assigned">
+          ${order.map(({ x, a }) => {
+            const d = SE.game.missionDone(prof, a);
+            const late = !d && x.dueDate && new Date(`${x.dueDate}T23:59:59`).getTime() < Date.now();
+            const lab = a.launch.status === "lab" && SE.labs.byId(a.launch.labId);
+            const lv = lab ? (prof.labLevels[lab.id] || new Set()).size : 0;
+            return `<a class="next-card next-card--assigned ${d ? "is-done" : ""} ${late ? "is-late" : ""}" href="${lab && !d ? `#/lab/${lab.id}` : `#/activity/${a.id}`}">
+              <span class="next-card__tag">${icon(d ? "check" : SE.areaById[a.area].icon)}${d ? "Done" : x.dueDate ? esc(SE.dueText(x.dueDate)) : "Assigned"}</span>
+              <strong>${esc(a.title)}</strong>
+              <span>${esc(a.summary)}</span>
+              <span class="next-card__meta">${lab ? `${lv} of ${lab.levels.length} lab levels` : `${a.duration} min · +${SE.game.baseXp(a)} XP`}</span>
+            </a>`;
+          }).join("")}
+        </div>
+      </section>`;
+      })()}
 
       <section class="section wrap" aria-labelledby="next-title">
         <div class="section__head">
@@ -225,6 +266,7 @@
         <ul class="celebrate__parts">${gained.parts.map(([label, n]) => `<li><span>${esc(label)}</span><b>+${n}</b></li>`).join("")}</ul>
         ${rankUp ? `<div class="celebrate__rank">${SE.insignia(after.rank, 56)}<p><strong>${esc(after.rank.name)}</strong><br>${esc(after.rank.motto)}</p></div>` : ""}
         <div class="celebrate__bar">${rankBar(after, true)}</div>
+        ${SE.base.unlockStrip(SE.base.newUnlocks(before, after))}
         ${newPatches.length ? `
           <div class="celebrate__patches">
             <p class="eyebrow">New ${newPatches.length === 1 ? "patch" : "patches"} earned</p>
@@ -307,8 +349,8 @@
         <div class="wrap page-top__inner">
           <div class="backbar">${SE.backLink()}</div>
           <div class="page-top__head">
-            ${SE.insignia(prof.rank, 64)}
-            <div><span class="eyebrow">Explorer profile</span><h1 tabindex="-1">${esc(user.displayName)}</h1></div>
+            <a class="xhero__avatar" href="#/base" title="Customize your explorer">${SE.ownAvatar(user.id, 72, "Your explorer")}<span class="xhero__badge">${SE.insignia(prof.rank, 28)}</span></a>
+            <div><span class="eyebrow">Explorer profile</span><h1 tabindex="-1">${esc(user.displayName)}</h1><a class="btn btn--ghost btn--small" href="#/base">${icon("lighthouse")}Visit my harbor</a></div>
           </div>
           <p class="page-top__lede">${esc(prof.rank.name)} · ${SE.num(prof.xp)} XP · ${plural(prof.counts.missions, "mission", "missions")} · ${prof.earnedCount} of ${P.patches.length} patches</p>
           <div class="page-top__rank">${rankBar(prof)}</div>

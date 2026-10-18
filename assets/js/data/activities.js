@@ -744,7 +744,71 @@ window.STEM.activities = [
       "Keep the camera on objects, not people. Avoid training on students' faces or bodies.",
       "No student logins or personal information are needed. If a save prompt appears, skip it.",
       "Students will want to trick the model. Channel it: each trick is a test case that reveals a limitation.",
-      "Google's 2017 announcement states training happens in the browser without sending images to a server. Re-check current terms with your district before use."
+      "Teachable Machine's FAQ says samples aren't sent to any servers unless you save to Google Drive, and training runs in the browser tab. Re-check current terms with your district before use."
+    ]
+  },
+  {
+    id: "ai-secret-signals",
+    title: "Teach the Computer Your Secret Signals",
+    area: "ai",
+    summary: "Train Teachable Machine to recognize two hand signals for a space station's contact-free controls. Test it with new examples, find where it fails, add better data, and compare.",
+    level: "beginner",
+    grades: ["2-3", "4-5", "6-8"],
+    duration: 45,
+    format: "collaborative",
+    equipment: ["computer", "webcam"],
+    source: "original",
+    keywords: ["teachable machine", "training data", "test data", "image classification", "machine learning", "hand signals", "space", "variety", "retrain"],
+    access: {
+      account: "none",
+      accountNote: "Teachable Machine's FAQ says no account or login is needed. Students should not save to Drive, upload, or export.",
+      cost: "free",
+      supervision: true,
+      hardware: ["Laptop or Chromebook with a webcam (one per pair)", "A sheet of plain paper as a background"]
+    },
+    launch: {
+      status: "ready",
+      label: "Open Teachable Machine",
+      url: "https://teachablemachine.withgoogle.com/",
+      provider: "Google Teachable Machine",
+      note: "Free. Get Started → Image Project → Standard image model. Full student mission, low-reading version, test table, and teacher guide are in the STEM 207 repo under missions/ai/secret-signals."
+    },
+    mission: "You're designing a contact-free control system for a space station. Can you train a computer to recognize two secret hand signals, and recognize when neither signal is present?",
+    learn: [
+      "Explain the difference between training examples and new test examples.",
+      "Show how changing the training data changes the model's predictions.",
+      "Describe a prediction score as a model output, not a guarantee or proof of understanding."
+    ],
+    before: {
+      materials: ["Device with a webcam per pair", "Plain paper or a plain wall for a background", "Printed test table (one per pair)"],
+      setup: [
+        "Teacher setup, about 20 minutes: test Teachable Machine on a student device (the FAQ doesn't list supported devices), check camera permissions, and confirm your district allows webcam use.",
+        "Frame only hands and a plain background. Keep faces and names out of the camera.",
+        "Camera not suitable? Use the classroom-objects version: two objects plus an empty background, or teacher-taken object photos with Upload.",
+        "Plan one session. Closing the tab erases the project, and saving would store students' hand images."
+      ],
+      prerequisites: "None. \"How Does an AI Sort?\" or Train a Classroom Model makes a good lead-in."
+    },
+    steps: [
+      "Get Started → Image Project → Standard image model. Name classes Open hand and Closed fist, then Add a class: No signal.",
+      "Click Webcam. Use Hold to Record in short 1-second bursts, in one spot. Keep the classes about the same size.",
+      "Click Train Model. Predict what it will say for a new hand position.",
+      "In Preview (Input ON), test each class live with new examples. Record results in the test table.",
+      "Change one thing: hand angle, distance, or background. Test again and note any mistake.",
+      "Add varied examples to every class, keep them balanced, and click Train Model again.",
+      "Repeat the same tests and compare Round 1 with Round 2.",
+      "Challenge: fix a position it struggled with. Record what failed, what you added, what happened, and one limitation. Close the tab."
+    ],
+    reflect: "Your detector showed a high score but was wrong. What does a score really tell you, and why do new test examples matter more than the pictures you trained on?",
+    extend: "With permission, test with a partner's hand before adding it to training. Who might a model like this work worse for, and how would a team check?",
+    teacherNotes: [
+      "Learning goal: training examples are what the model learns from; test examples are new ones it has never seen, like the live webcam image in Preview.",
+      "Hold to Record captures 24 frames per second by default, so a long hold adds many nearly identical pictures. Short bursts from different positions give more variety.",
+      "Scores are model outputs, not guarantees. The model always picks one of its classes, even for something new like a thumbs-up.",
+      "Privacy (official FAQ): no account needed; samples aren't sent to servers unless saved to Drive; closing the tab without saving keeps nothing. Uploading a model publishes it to Google servers, so students should never upload or export.",
+      "Not confirmed in official docs: supported browsers and devices, and age or district terms. Test on your devices and check policy first.",
+      "A perfect detector isn't required. A clear before-and-after record and one limitation complete the mission.",
+      "Full materials: missions/ai/secret-signals in the STEM 207 repo (student mission, low-reading version, teacher guide, test table, hints and extension)."
     ]
   },
   {
@@ -1783,6 +1847,134 @@ window.STEM.activities = [
       "Block limits on later levels are intentional. They push students to find the pattern instead of brute-forcing with many Forward blocks.",
       "Step-through is the key debugging habit. Ask “Which block went wrong first?” before helping.",
       "Your dashboard shows each student's level progress, test runs, and hints used."
+    ]
+  },
+  {
+    id: "lab-dance-party",
+    title: "Robot Dance Party",
+    area: "coding",
+    summary: "Build a dance from five moves, run it, and watch a robot follow your program one step at a time. Swap two steps and the whole dance changes.",
+    level: "beginner",
+    grades: ["2-3", "4-5", "6-8"],
+    duration: 20,
+    format: "independent",
+    equipment: ["computer", "tablet"],
+    source: "original",
+    keywords: ["lab", "sequence", "order", "algorithm", "robot", "dance", "predict", "debugging", "interactive", "first coding"],
+    access: { account: "none", cost: "free", supervision: false, hardware: [] },
+    launch: { status: "lab", labId: "dance-party", label: "Open Robot Dance Party", note: "Runs inside STEM 207. About 10 minutes. No outside account or website needed." },
+    mission: "The robot is ready to dance, but it only does exactly what your program says, in exactly that order. Predict, run, swap, and create, then take on the challenge: jump, spin, and finish with a pose.",
+    learn: [
+      "Explain that a sequence is a set of instructions a computer follows in order.",
+      "Predict what a program will do first and last before running it.",
+      "Show that changing the order of the same instructions changes the result."
+    ],
+    before: {
+      materials: ["Laptop, Chromebook, or tablet (keyboard works too)"],
+      setup: ["Works as a 10-minute warm-up. Students can sign in to save progress or explore as guests.", "Optional unplugged opener: have one student \"run\" a three-card dance program for the class."],
+      prerequisites: "None. This is a first coding activity."
+    },
+    steps: [
+      "Level 1: Read the three-step example. Predict what the robot does first and last, then press Run.",
+      "Level 2: Swap two instructions with the ▲ and ▼ buttons and run it again. What changed?",
+      "Level 3: Make a dance with at least five instructions.",
+      "Level 4: Challenge. Make the robot jump, spin, and then pose. It must finish with the pose.",
+      "Remember: computers follow your instructions in the order you give them."
+    ],
+    reflect: "You used the same three moves in Level 1 and Level 2. Why did the robot dance differently?",
+    extend: "Write a dance on paper first, then have a partner predict it before you run it. Did they get the first and last moves right?",
+    teacherNotes: [
+      "Learning objective: students understand that a sequence is a set of instructions run in order, and that changing the order changes the result.",
+      "Common misconception: the computer \"knows\" what you meant, or does the important moves first. It doesn't. It runs step 1, then step 2, and so on, exactly as written. Students who put Strike a pose first are often surprised that the robot poses before dancing.",
+      "Ask afterward: \"If two programs use exactly the same instructions, will the robot always do the same dance? Why or why not?\"",
+      "The challenge is checked from the steps the robot actually ran, so students can't skip it by clicking. Feedback names what went wrong (a missing move, the wrong order, or not ending with the pose) without giving the answer. Each level has two hints that appear one at a time.",
+      "The robot never leaves the dance floor: moving past an edge makes it wiggle in place. That's a good chance to ask students to predict where it will end up."
+    ]
+  },
+  {
+    id: "lab-space-blob",
+    title: "Feed the Space Blob",
+    area: "coding",
+    summary: "A hungry alien blob and a variable called snacks. Set its starting value, choose how much each Feed click adds, and find out what happens when a program forgets to reset.",
+    level: "beginner",
+    grades: ["2-3", "4-5", "6-8"],
+    duration: 20,
+    format: "independent",
+    equipment: ["computer", "tablet"],
+    source: "original",
+    keywords: ["lab", "variables", "initialization", "events", "counter", "predict", "debugging", "alien", "space", "interactive"],
+    access: { account: "none", cost: "free", supervision: false, hardware: [] },
+    launch: { status: "lab", labId: "space-blob", label: "Open Feed the Space Blob", note: "Runs inside STEM 207. About 15 minutes. No outside account or website needed." },
+    mission: "The Space Blob is hungry, and your code keeps count. Feed it, change the code, predict, and test. Then find out why every program needs a known starting value.",
+    learn: [
+      "Explain that a variable stores a value that the program can read and change.",
+      "Show that an event (a Feed click) can change a variable's value.",
+      "Explain that initialization (setting a starting value) makes every run start the same way."
+    ],
+    before: {
+      materials: ["Laptop, Chromebook, or tablet"],
+      setup: ["Best after students know sequences and click events (Robot Dance Party and coding pathway stage 2).", "Plan about 15 minutes. Students can sign in to save progress or explore as guests."],
+      prerequisites: "Understands sequences and that a click can start code (events)."
+    },
+    steps: [
+      "Level 1: Press Start, feed the blob 3 times, then say what is stored in snacks.",
+      "Level 2: Change “change snacks by” to 2. Predict the value after 3 feeds, then test it.",
+      "Level 3: Turn off “set snacks to” and Restart. Watch snacks keep its old value. Turn it back on.",
+      "Level 4: Challenge. Start with 2 snacks, add 3 per feed, and reach 14 after 4 feeds."
+    ],
+    reflect: "Why does a game set your score to 0 when you start a new game? What would happen if it didn't?",
+    extend: "Make the blob lose snacks: try a negative number in “change snacks by.” What starting value keeps snacks from going below 0 after 5 feeds?",
+    teacherNotes: [
+      "Variables: snacks is a named box that holds one number. The orange monitor shows what's in the box right now. “change snacks by” reads the old value and adds to it; “set snacks to” replaces it.",
+      "Initialization: “when run starts, set snacks to 0” gives the variable a known starting value. In Level 3, students switch that block off and restart: snacks keeps the number from the last run. That's the bug behind a game that starts with last game's score.",
+      "Code is read when the run starts. If students edit a number mid-run, a banner tells them to press Restart. Ask: “Why didn't the blob change when you typed a new number?”",
+      "Common mistake: mixing up set and change. “set snacks to 2” makes it 2; “change snacks by 2” adds 2.",
+      "Common mistake: counting the start as a feed (off-by-one). 0 with +2 three times is 6, not 8. The run history lists every step, so students can check their own counting.",
+      "Common mistake: reaching 14 by luck (for example, start at 14 and add 0). The challenge checks the starting value, the amount, and the number of feeds, and explains which one is off using the student's own numbers.",
+      "Ask afterward: “If you pressed Restart and snacks didn't go back to 0, what would you check first?”"
+    ]
+  },
+  {
+    id: "lab-moon-gate",
+    title: "Moon Base Gatekeeper",
+    area: "coding",
+    summary: "Write an IF / ELSE rule for a moon base gate, predict what each robot visitor will do, and test every badge. Then find the bug in a rule that lets everyone in.",
+    level: "beginner",
+    grades: ["2-3", "4-5", "6-8"],
+    duration: 20,
+    format: "independent",
+    equipment: ["computer", "tablet"],
+    source: "original",
+    keywords: ["lab", "conditionals", "if else", "equals", "testing", "debugging", "branches", "space", "moon", "interactive"],
+    access: { account: "none", cost: "free", supervision: false, hardware: [] },
+    launch: { status: "lab", labId: "moon-gate", label: "Open Moon Base Gatekeeper", note: "Runs inside STEM 207. About 15–20 minutes. No outside account or website needed." },
+    mission: "You run the gate at a moon base. Robot visitors arrive wearing Moon, Star, or Planet badges, and your IF / ELSE rule decides who gets in. Predict, test, fix a broken rule, and get the Star team into their meeting.",
+    learn: [
+      "Explain that a conditional checks a rule and chooses one of two actions.",
+      "Trace which branch (THEN or ELSE) runs for a given input.",
+      "Explain why a rule must be tested with inputs that match and inputs that don't."
+    ],
+    before: {
+      materials: ["Laptop, Chromebook, or tablet"],
+      setup: ["Best after students know events and stored values (Robot Dance Party and Feed the Space Blob).", "Optional opener: you are the gate. Students hold up badge cards and the class says “open” or “closed” using a rule on the board."],
+      prerequisites: "Understands simple events and that a program can store a value."
+    },
+    steps: [
+      "Level 1: Predict what happens to a Moon visitor, then test.",
+      "Level 2: Predict and test a Star visitor.",
+      "Level 3: Change which badge gets in, then test a visitor that matches and one that doesn't.",
+      "Level 4: A rule is broken. Find a visitor that shows the bug, fix the rule, and test again.",
+      "Level 5: Challenge. Only Star visitors get in. Test all three badges."
+    ],
+    reflect: "Your first test passed in Level 4, but the rule was still broken. How many tests do you need to trust a rule?",
+    extend: "Write a rule on paper for a different base (for example, only Planet visitors stay out). List the tests you'd run before you trust it.",
+    teacherNotes: [
+      "Conditionals: IF checks one thing, here whether the visitor's badge equals the badge in the rule. The answer is true or false, and that decides what happens next.",
+      "Branch selection: true runs THEN; false runs ELSE. Exactly one branch runs every time. The trace and the highlighted code show which branch ran and which was skipped.",
+      "Why one test isn't enough: in Level 4, the broken rule says THEN Open gate and ELSE Open gate. A Moon visitor gets in, so the rule looks fine. Only a visitor who doesn't match shows the bug. Good testers try a case that should pass and a case that should fail.",
+      "The challenge only counts tests of the current rule. If a student edits the rule, earlier results are crossed out and they must test all three badges again. Ask: “Why don't your old tests count anymore?”",
+      "Common mistake: thinking ELSE is the “wrong answer.” ELSE is just what happens when the check is false. It can open or close the gate.",
+      "Ask afterward: “If a rule worked for one visitor, how could it still be broken?”"
     ]
   },
   {

@@ -18,7 +18,7 @@ window.STEM.pathway = [
     project: "Guide a robot through a floor maze with arrow cards, then solve the same kind of maze with code blocks.",
     debugging: "Run the program one step at a time and point to the first step that goes wrong.",
     iCan: "I can write step-by-step instructions in the right order, and fix the step that goes wrong.",
-    activities: ["fix-the-recipe", "robot-maze-mission", "pixel-art-code"]
+    activities: ["fix-the-recipe", "lab-dance-party", "robot-maze-mission", "pixel-art-code"]
   },
   {
     stage: 2,
@@ -54,7 +54,7 @@ window.STEM.pathway = [
     project: "Build an interactive story where the reader's choice changes the ending.",
     debugging: "Test every branch, including answers you didn't plan for.",
     iCan: "I can use if–then–else to make a program choose what to do, and test every path.",
-    activities: ["interactive-story", "sense-think-act"]
+    activities: ["interactive-story", "sense-think-act", "lab-moon-gate"]
   },
   {
     stage: 5,
@@ -66,7 +66,7 @@ window.STEM.pathway = [
     project: "Build a catching game that keeps score.",
     debugging: "Watch the variable's value while the program runs. Check where it's set, changed, and reset.",
     iCan: "I can create a variable, change it while my program runs, and explain what it stores.",
-    activities: ["score-keeper"]
+    activities: ["score-keeper", "lab-space-blob"]
   },
   {
     stage: 6,

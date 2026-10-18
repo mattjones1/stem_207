@@ -591,7 +591,7 @@
           </div>
           <p class="page-top__lede">${esc(a.summary)}</p>
           <div class="page-top__tags">
-            ${a.source === "original" ? `<span class="label-original">${icon("flag")}Original STEM 207 lesson</span>` : ""}${maineTag(a)}
+            ${a.source === "original" ? `<span class="label-original">${icon("flag")}Original STEM 207 lesson</span>` : ""}${maineTag(a)}${isStudent && SE.store.assignmentFor(user.classId, a.id) ? `<span class="assigned-tag">${icon("clipboard")}Assigned by your teacher${SE.store.assignmentFor(user.classId, a.id).dueDate ? ` · ${esc(SE.dueText(SE.store.assignmentFor(user.classId, a.id).dueDate))}` : ""}</span>` : ""}
             ${isStudent ? (lastCompletion
               ? `<span class="chip chip--done-dark">${icon("check")}Completed ${SE.dateShort(lastCompletion.event.at)}</span>`
               : `<span class="chip chip--xp-dark">Worth ${SE.game.baseXp(a)} XP</span>`) : ""}
