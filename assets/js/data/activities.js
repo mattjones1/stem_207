@@ -744,7 +744,71 @@ window.STEM.activities = [
       "Keep the camera on objects, not people. Avoid training on students' faces or bodies.",
       "No student logins or personal information are needed. If a save prompt appears, skip it.",
       "Students will want to trick the model. Channel it: each trick is a test case that reveals a limitation.",
-      "Google's 2017 announcement states training happens in the browser without sending images to a server. Re-check current terms with your district before use."
+      "Teachable Machine's FAQ says samples aren't sent to any servers unless you save to Google Drive, and training runs in the browser tab. Re-check current terms with your district before use."
+    ]
+  },
+  {
+    id: "ai-secret-signals",
+    title: "Teach the Computer Your Secret Signals",
+    area: "ai",
+    summary: "Train Teachable Machine to recognize two hand signals for a space station's contact-free controls. Test it with new examples, find where it fails, add better data, and compare.",
+    level: "beginner",
+    grades: ["2-3", "4-5", "6-8"],
+    duration: 45,
+    format: "collaborative",
+    equipment: ["computer", "webcam"],
+    source: "original",
+    keywords: ["teachable machine", "training data", "test data", "image classification", "machine learning", "hand signals", "space", "variety", "retrain"],
+    access: {
+      account: "none",
+      accountNote: "Teachable Machine's FAQ says no account or login is needed. Students should not save to Drive, upload, or export.",
+      cost: "free",
+      supervision: true,
+      hardware: ["Laptop or Chromebook with a webcam (one per pair)", "A sheet of plain paper as a background"]
+    },
+    launch: {
+      status: "ready",
+      label: "Open Teachable Machine",
+      url: "https://teachablemachine.withgoogle.com/",
+      provider: "Google Teachable Machine",
+      note: "Free. Get Started → Image Project → Standard image model. Full student mission, low-reading version, test table, and teacher guide are in the STEM 207 repo under missions/ai/secret-signals."
+    },
+    mission: "You're designing a contact-free control system for a space station. Can you train a computer to recognize two secret hand signals, and recognize when neither signal is present?",
+    learn: [
+      "Explain the difference between training examples and new test examples.",
+      "Show how changing the training data changes the model's predictions.",
+      "Describe a prediction score as a model output, not a guarantee or proof of understanding."
+    ],
+    before: {
+      materials: ["Device with a webcam per pair", "Plain paper or a plain wall for a background", "Printed test table (one per pair)"],
+      setup: [
+        "Teacher setup, about 20 minutes: test Teachable Machine on a student device (the FAQ doesn't list supported devices), check camera permissions, and confirm your district allows webcam use.",
+        "Frame only hands and a plain background. Keep faces and names out of the camera.",
+        "Camera not suitable? Use the classroom-objects version: two objects plus an empty background, or teacher-taken object photos with Upload.",
+        "Plan one session. Closing the tab erases the project, and saving would store students' hand images."
+      ],
+      prerequisites: "None. \"How Does an AI Sort?\" or Train a Classroom Model makes a good lead-in."
+    },
+    steps: [
+      "Get Started → Image Project → Standard image model. Name classes Open hand and Closed fist, then Add a class: No signal.",
+      "Click Webcam. Use Hold to Record in short 1-second bursts, in one spot. Keep the classes about the same size.",
+      "Click Train Model. Predict what it will say for a new hand position.",
+      "In Preview (Input ON), test each class live with new examples. Record results in the test table.",
+      "Change one thing: hand angle, distance, or background. Test again and note any mistake.",
+      "Add varied examples to every class, keep them balanced, and click Train Model again.",
+      "Repeat the same tests and compare Round 1 with Round 2.",
+      "Challenge: fix a position it struggled with. Record what failed, what you added, what happened, and one limitation. Close the tab."
+    ],
+    reflect: "Your detector showed a high score but was wrong. What does a score really tell you, and why do new test examples matter more than the pictures you trained on?",
+    extend: "With permission, test with a partner's hand before adding it to training. Who might a model like this work worse for, and how would a team check?",
+    teacherNotes: [
+      "Learning goal: training examples are what the model learns from; test examples are new ones it has never seen, like the live webcam image in Preview.",
+      "Hold to Record captures 24 frames per second by default, so a long hold adds many nearly identical pictures. Short bursts from different positions give more variety.",
+      "Scores are model outputs, not guarantees. The model always picks one of its classes, even for something new like a thumbs-up.",
+      "Privacy (official FAQ): no account needed; samples aren't sent to servers unless saved to Drive; closing the tab without saving keeps nothing. Uploading a model publishes it to Google servers, so students should never upload or export.",
+      "Not confirmed in official docs: supported browsers and devices, and age or district terms. Test on your devices and check policy first.",
+      "A perfect detector isn't required. A clear before-and-after record and one limitation complete the mission.",
+      "Full materials: missions/ai/secret-signals in the STEM 207 repo (student mission, low-reading version, teacher guide, test table, hints and extension)."
     ]
   },
   {

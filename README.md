@@ -18,6 +18,12 @@
 - **Projector mode** to enlarge everything for a shared screen. This setting is remembered only on that device.
 
 
+## Ready-to-teach missions (outside tools)
+
+Some missions run on outside platforms. Their full teaching packs are Markdown files in `missions/`:
+
+- **Teach the Computer Your Secret Signals** (AI, grades 2–8, Google Teachable Machine): [`missions/ai/secret-signals/`](missions/ai/secret-signals/). Includes a student mission, a low-reading version, a teacher guide, a before-and-after test table, and hints with an extension.
+
 ## Interactive labs
 
 Each exploration area has its own leveled, interactive lab that runs inside STEM 207, with no outside account or website. Every level teaches one idea, gives a hint on request, checks the student's work, and ends with "What you just learned." Signed-in students earn XP for each level (+30), and lab work counts toward patches and the weekly streak.
