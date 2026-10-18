@@ -103,7 +103,7 @@
             <button type="button" class="btn btn--ghost btn--small" id="lab-hint-btn" aria-expanded="false" aria-controls="lab-hint">${icon("question")}Need a hint?</button>
             ${done.has(idx) ? `<span class="chip chip--done">${icon("check")}You finished this level</span>` : `<span class="chip chip--xp">+${STEM.progression.xp.labLevel} XP</span>`}
           </div>
-          <p class="lab-hint" id="lab-hint" hidden>${esc(level.hint)}</p>
+          ${level.hints ? `<div class="lab-hint" id="lab-hint" hidden>${level.hints.map((h, i) => `<p data-hint="${i}" ${i ? "hidden" : ""}><strong>Hint ${i + 1} of ${level.hints.length}:</strong> ${esc(h)}</p>`).join("")}</div>` : `<p class="lab-hint" id="lab-hint" hidden>${esc(level.hint)}</p>`}
         </section>
 
         <section class="lab-stage" aria-label="Lab workspace">
@@ -117,8 +117,20 @@
     const hintBtn = document.getElementById("lab-hint-btn");
     hintBtn.addEventListener("click", () => {
       const h = document.getElementById("lab-hint");
+      // Levels with a list of hints reveal them one at a time.
+      if (level.hints && !h.hidden) {
+        const next = h.querySelector("[data-hint][hidden]");
+        if (next) {
+          next.hidden = false;
+          if (!h.querySelector("[data-hint][hidden]")) hintBtn.innerHTML = `${icon("question")}Hide hints`;
+          if (isStudent) SE.store.log("lab_hint", { labId: lab.id, level: idx, hint: Number(next.dataset.hint) + 1 });
+          return;
+        }
+      }
       h.hidden = !h.hidden;
       hintBtn.setAttribute("aria-expanded", String(!h.hidden));
+      if (level.hints) hintBtn.innerHTML = `${icon("question")}${h.hidden ? "Need a hint?" : level.hints.length > 1 ? "Show another hint" : "Hide hint"}`;
+      if (level.hints && h.hidden) h.querySelectorAll("[data-hint]").forEach((p, i) => { p.hidden = i > 0; });
       if (!h.hidden && isStudent) SE.store.log("lab_hint", { labId: lab.id, level: idx });
     });
 

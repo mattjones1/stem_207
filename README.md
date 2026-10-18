@@ -25,6 +25,7 @@ Each exploration area has its own leveled, interactive lab that runs inside STEM
 | Area | Lab | Levels | What students learn |
 | --- | --- | --- | --- |
 | Coding & Computer Science | **Harbor Code Lab** | 36 | Three voyages of 12 levels (Casco Bay, Penobscot Bay, Down East). Steer a lobster boat: haul and set traps, dodge granite ledges, find the mooring in fog. Sequences, debugging with step-through, loops, actions, conditionals (if / if–else), a variable, functions (custom blocks), free build. Levels map to coding pathway stages. |
+| Coding & Computer Science | **Robot Dance Party** | 4 | A 10-minute first coding lesson for grades 2–8. Build a dance from five moves (Move left, Move right, Jump, Spin, Strike a pose), reorder or remove steps with buttons, and run it with each step highlighted. Predict first and last, swap two steps, make a 5+ step dance, then the challenge: jump, spin, and finish with a pose, checked from the steps the robot actually ran. Two hints per level. |
 | Virtual Reality | **Field Station 360** | 7 | Look-around Gulf of Maine tide pools and a North Woods pond below Katahdin, then a rainforest, desert, and coral reef, with compass headings. Observation vs. inference, adaptations, comparing five habitats. Works in a VR headset's browser too. |
 | Artificial Intelligence | **Pattern Machine Lab** | 6 | Find a pattern, train a real k-nearest-neighbors classifier, see accuracy grow with more examples, uncover biased data, set a confidence threshold, judge responsible uses (including counting puffins and sorting wild blueberries). Made-up creatures only. |
 | Engineering & Robotics | **Pumpkin Launcher Lab** | 6 | Design–test–iterate a catapult for a fall-fair pumpkin toss: prediction, one-change-at-a-time fair tests, a hay-bale constraint, a budget, an engineering notebook. |
@@ -34,7 +35,7 @@ Each exploration area has its own leveled, interactive lab that runs inside STEM
 
 Each lab also has a library entry with a full teacher guide (mission, objectives, setup, steps, reflection, extension, and facilitation notes). Educators see lab progress per class and per student, including tests run, hints used, and saved animations.
 
-Lab ids (`rover`, `launcher`, `line-follower`, `ramp-racers`) are kept from earlier versions so saved progress carries over. Lab code lives in `assets/js/labs/`. `lab-shell.js` provides the shared layout, hints, completion panel, and progress logging. Each lab registers itself with `SE.labs.register({ id, area, title, tagline, levels, chapters?, mount })` (optional `chapters` group levels into voyages, as in the Harbor Code Lab), so adding a lab means adding one file and one `<script>` tag.
+Lab ids (`rover`, `launcher`, `line-follower`, `ramp-racers`) are kept from earlier versions so saved progress carries over. Lab code lives in `assets/js/labs/`. `lab-shell.js` provides the shared layout, hints, completion panel, and progress logging. Each lab registers itself with `SE.labs.register({ id, area, title, tagline, levels, chapters?, mount })` (optional `chapters` group levels into voyages, as in the Harbor Code Lab; a level can give `hints: [...]` instead of `hint` to reveal hints one at a time), so adding a lab means adding one file and one `<script>` tag.
 
 ## Accounts and progress (prototype)
 

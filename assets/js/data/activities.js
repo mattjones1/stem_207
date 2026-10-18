@@ -1786,6 +1786,48 @@ window.STEM.activities = [
     ]
   },
   {
+    id: "lab-dance-party",
+    title: "Robot Dance Party",
+    area: "coding",
+    summary: "Build a dance from five moves, run it, and watch a robot follow your program one step at a time. Swap two steps and the whole dance changes.",
+    level: "beginner",
+    grades: ["2-3", "4-5", "6-8"],
+    duration: 20,
+    format: "independent",
+    equipment: ["computer", "tablet"],
+    source: "original",
+    keywords: ["lab", "sequence", "order", "algorithm", "robot", "dance", "predict", "debugging", "interactive", "first coding"],
+    access: { account: "none", cost: "free", supervision: false, hardware: [] },
+    launch: { status: "lab", labId: "dance-party", label: "Open Robot Dance Party", note: "Runs inside STEM 207. About 10 minutes. No outside account or website needed." },
+    mission: "The robot is ready to dance, but it only does exactly what your program says, in exactly that order. Predict, run, swap, and create, then take on the challenge: jump, spin, and finish with a pose.",
+    learn: [
+      "Explain that a sequence is a set of instructions a computer follows in order.",
+      "Predict what a program will do first and last before running it.",
+      "Show that changing the order of the same instructions changes the result."
+    ],
+    before: {
+      materials: ["Laptop, Chromebook, or tablet (keyboard works too)"],
+      setup: ["Works as a 10-minute warm-up. Students can sign in to save progress or explore as guests.", "Optional unplugged opener: have one student \"run\" a three-card dance program for the class."],
+      prerequisites: "None. This is a first coding activity."
+    },
+    steps: [
+      "Level 1: Read the three-step example. Predict what the robot does first and last, then press Run.",
+      "Level 2: Swap two instructions with the ▲ and ▼ buttons and run it again. What changed?",
+      "Level 3: Make a dance with at least five instructions.",
+      "Level 4: Challenge. Make the robot jump, spin, and then pose. It must finish with the pose.",
+      "Remember: computers follow your instructions in the order you give them."
+    ],
+    reflect: "You used the same three moves in Level 1 and Level 2. Why did the robot dance differently?",
+    extend: "Write a dance on paper first, then have a partner predict it before you run it. Did they get the first and last moves right?",
+    teacherNotes: [
+      "Learning objective: students understand that a sequence is a set of instructions run in order, and that changing the order changes the result.",
+      "Common misconception: the computer \"knows\" what you meant, or does the important moves first. It doesn't. It runs step 1, then step 2, and so on, exactly as written. Students who put Strike a pose first are often surprised that the robot poses before dancing.",
+      "Ask afterward: \"If two programs use exactly the same instructions, will the robot always do the same dance? Why or why not?\"",
+      "The challenge is checked from the steps the robot actually ran, so students can't skip it by clicking. Feedback names what went wrong (a missing move, the wrong order, or not ending with the pose) without giving the answer. Each level has two hints that appear one at a time.",
+      "The robot never leaves the dance floor: moving past an edge makes it wiggle in place. That's a good chance to ask students to predict where it will end up."
+    ]
+  },
+  {
     id: "lab-field-station",
     title: "Field Station 360",
     area: "vr",

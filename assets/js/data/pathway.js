@@ -18,7 +18,7 @@ window.STEM.pathway = [
     project: "Guide a robot through a floor maze with arrow cards, then solve the same kind of maze with code blocks.",
     debugging: "Run the program one step at a time and point to the first step that goes wrong.",
     iCan: "I can write step-by-step instructions in the right order, and fix the step that goes wrong.",
-    activities: ["fix-the-recipe", "robot-maze-mission", "pixel-art-code"]
+    activities: ["fix-the-recipe", "lab-dance-party", "robot-maze-mission", "pixel-art-code"]
   },
   {
     stage: 2,
