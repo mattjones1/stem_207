@@ -271,9 +271,14 @@
     const assignments = ASSIGNED.filter(([id]) => SE.activityById[id]).map(([activityId, dueIn], i) => ({
       id: `asg_demo_${i}${sfx}`, classId: cls.id, activityId, isDemo: true,
       assignedAt: now - (12 - i * 2) * SE.DAY,
-      dueDate: dueIn == null ? null : new Date(SE.startOfDay(now + dueIn * SE.DAY)).toISOString().slice(0, 10)
+      dueDate: dueIn == null ? null : new Date(SE.startOfDay(now + dueIn * SE.DAY)).toISOString().slice(0, 10),
+      note: activityId === "lobster-trap-logic" ? "Work with your table group. Bring your flowchart to Thursday's class." : null
     }));
-    return { educator, cls, students, events, assignments };
+    const messages = [
+      { id: `msg_demo_1${sfx}`, classId: cls.id, isDemo: true, createdAt: now - 3 * SE.DAY, body: "Welcome to STEM 207! Start with your assigned missions. When you finish, explore anything you like." },
+      { id: `msg_demo_2${sfx}`, classId: cls.id, isDemo: true, createdAt: now - 6 * 3600000, body: "This week we're working on loops and if–else. Tomorrow we'll share our lobster trap flowcharts." }
+    ];
+    return { educator, cls, students, events, assignments, messages };
   }
 
   async function ensureDemoHash() {
@@ -291,12 +296,13 @@
     db.students = db.students.filter((s) => !s.isDemo).concat(d.students);
     db.events = db.events.filter((e) => !e.isDemo).concat(d.events).sort((a, b) => a.at - b.at);
     db.assignments = (db.assignments || []).filter((x) => !x.isDemo).concat(d.assignments);
+    db.messages = (db.messages || []).filter((x) => !x.isDemo).concat(d.messages);
   }
 
   function init() {
     db = readDb();
     if (!db || db.version !== 7) {
-      db = { version: 7, educators: [], classes: [], students: [], events: [], assignments: [] };
+      db = { version: 7, educators: [], classes: [], students: [], events: [], assignments: [], messages: [] };
       installDemo();
       save();
     }
@@ -304,6 +310,12 @@
       db.assignments = [];
       const d = seedDemo();
       if (db.classes.some((c) => c.id === d.cls.id)) db.assignments = d.assignments;
+      save();
+    }
+    if (!db.messages) { // added in Batch 9: give existing browsers the sample class messages and instructions
+      const d = seedDemo();
+      db.messages = db.classes.some((c) => c.id === d.cls.id) ? d.messages : [];
+      d.assignments.forEach((x) => { const a = db.assignments.find((y) => y.id === x.id); if (a && x.note && a.note === undefined) a.note = x.note; });
       save();
     }
     return ensureDemoHash();
@@ -318,25 +330,31 @@
     cls: (r) => ({ id: r.id, name: r.name, code: r.code, educatorId: r.educator_id, isDemo: r.is_demo, createdAt: ms(r.created_at) }),
     student: (r) => ({ id: r.id, classId: r.class_id, displayName: r.display_name, gradeBand: r.grade_band, picCode: r.pic_code, isDemo: r.is_demo, createdAt: ms(r.created_at) }),
     event: (r) => ({ id: r.id, studentId: r.student_id, classId: r.class_id, type: r.type, at: Number(r.at), data: r.data || {}, by: r.by || undefined, isDemo: r.is_demo }),
-    assignment: (r) => ({ id: r.id, classId: r.class_id, activityId: r.activity_id, assignedAt: ms(r.assigned_at), dueDate: r.due_date || null, isDemo: r.is_demo })
+    assignment: (r) => ({ id: r.id, classId: r.class_id, activityId: r.activity_id, assignedAt: ms(r.assigned_at), dueDate: r.due_date || null, note: r.note || null, isDemo: r.is_demo }),
+    message: (r) => ({ id: r.id, classId: r.class_id, body: r.body, createdAt: ms(r.created_at), isDemo: r.is_demo })
   };
   const toRow = {
     cls: (c) => ({ id: c.id, educator_id: c.educatorId, name: c.name, code: c.code, is_demo: !!c.isDemo, created_at: iso(c.createdAt) }),
     student: (s) => ({ id: s.id, class_id: s.classId, display_name: s.displayName, grade_band: s.gradeBand, pic_code: s.picCode, is_demo: !!s.isDemo, created_at: iso(s.createdAt) }),
     event: (e) => ({ id: e.id, student_id: e.studentId, class_id: e.classId, type: e.type, at: e.at, data: e.data || {}, by: e.by || null, is_demo: !!e.isDemo }),
-    assignment: (a) => ({ id: a.id, class_id: a.classId, activity_id: a.activityId, assigned_at: iso(a.assignedAt), due_date: a.dueDate || null, is_demo: !!a.isDemo })
+    // note is sent only when set, so assigning still works before supabase/update-3 is run.
+    assignment: (a) => ({ id: a.id, class_id: a.classId, activity_id: a.activityId, assigned_at: iso(a.assignedAt), due_date: a.dueDate || null, is_demo: !!a.isDemo, ...(a.note ? { note: a.note } : {}) }),
+    message: (m) => ({ id: m.id, class_id: m.classId, body: m.body, created_at: iso(m.createdAt), is_demo: !!m.isDemo })
   };
-  const emptyDb = () => ({ version: 7, educators: [], classes: [], students: [], events: [], assignments: [] });
+  const emptyDb = () => ({ version: 7, educators: [], classes: [], students: [], events: [], assignments: [], messages: [] });
   const cloudCode = () => `${CODE_WORDS[Math.floor(Math.random() * CODE_WORDS.length)]}${Math.floor(Math.random() * 900 + 100)}`;
 
   async function loadEducator(user) {
-    const [eds, classes, students, events, assignments] = await Promise.all([
+    journey = null;
+    const [eds, classes, students, events, assignments, messages] = await Promise.all([
       SE.cloud.selectAll("educators", `id=eq.${user.id}`),
       SE.cloud.selectAll("classes", "order=created_at.asc"),
       SE.cloud.selectAll("students", "order=created_at.asc"),
       SE.cloud.selectAll("events", "order=at.asc"),
       // Older databases may not have the assignments table yet (run supabase/schema.sql again to add it).
-      SE.cloud.selectAll("assignments", "order=assigned_at.asc").catch((e) => { if (e.offline) throw e; console.warn("STEM 207: assignments table missing", e); return []; })
+      SE.cloud.selectAll("assignments", "order=assigned_at.asc").catch((e) => { if (e.offline) throw e; console.warn("STEM 207: assignments table missing", e); return []; }),
+      // Class messages arrive with supabase/update-3-class-messages.sql; until then there are none.
+      SE.cloud.selectAll("class_messages", "order=created_at.asc").catch((e) => { if (e.offline) throw e; console.warn("STEM 207: class_messages table missing (run supabase/update-3-class-messages.sql)", e); return []; })
     ]);
     if (!eds.length) {
       // The sign-up trigger normally creates this row; make it here if it's missing.
@@ -344,14 +362,23 @@
       await SE.cloud.rest("POST", "/educators", row, "resolution=ignore-duplicates");
       eds.push(row);
     }
-    db = { version: 7, educators: eds.map(fromRow.educator), classes: classes.map(fromRow.cls), students: students.map(fromRow.student), events: events.map(fromRow.event), assignments: assignments.map(fromRow.assignment) };
+    db = { version: 7, educators: eds.map(fromRow.educator), classes: classes.map(fromRow.cls), students: students.map(fromRow.student), events: events.map(fromRow.event), assignments: assignments.map(fromRow.assignment), messages: messages.map(fromRow.message) };
   }
+  /* Class journey totals for a student's device in cloud mode (supabase/update-4-class-journey.sql).
+     Counts only; null until loaded, or if the function isn't there yet (then the app counts what it has). */
+  let journey = null;
+  async function loadJourney(token, classId) {
+    try { const r = await SE.cloud.rpc("class_journey", { p_token: token }); if (r && r.ok) { const { ok, ...counts } = r; journey = { classId, counts }; } else journey = null; }
+    catch (e) { journey = null; if (!e.offline) console.warn("STEM 207: class journey totals unavailable (run supabase/update-4-class-journey.sql)", e); }
+  }
+
   function loadStudentState(state) {
     db = emptyDb();
     db.classes.push({ ...state.class, educatorId: null });
     db.students.push({ ...state.student, picCode: [] });
     db.events = (state.events || []).map((e) => ({ ...e, at: Number(e.at), data: e.data || {} }));
-    db.assignments = (state.assignments || []).map((a) => ({ ...a, classId: state.class.id, assignedAt: Number(a.assignedAt) || Date.now() }));
+    db.assignments = (state.assignments || []).map((a) => ({ ...a, classId: state.class.id, assignedAt: Number(a.assignedAt) || Date.now(), note: a.note || null }));
+    db.messages = (state.messages || []).map((m) => ({ ...m, classId: state.class.id, createdAt: Number(m.createdAt) || Date.now() }));
   }
 
   /* Outbox: writes go to the server one at a time, in order, retrying when offline. */
@@ -413,6 +440,7 @@
         const st = await SE.cloud.rpc("student_state", { p_token: s.token });
         if (!st || !st.ok) { writeSession(null); return; }
         loadStudentState(st);
+        await loadJourney(s.token, st.class.id);
       }
     } catch (e) {
       if (e.status === 401 || e.status === 400) { writeSession(null); SE.cloud.forgetAuth(); }
@@ -430,7 +458,10 @@
     }
     await SE.cloud.rest("POST", "/students", d.students.map(toRow.student), "return=minimal");
     for (let i = 0; i < d.events.length; i += 500) await SE.cloud.rest("POST", "/events", d.events.slice(i, i + 500).map(toRow.event), "return=minimal");
-    if (d.assignments.length) await SE.cloud.rest("POST", "/assignments", d.assignments.map(toRow.assignment), "return=minimal").catch((e) => console.warn("STEM 207: couldn't add sample assignments", e));
+    if (d.assignments.length) await SE.cloud.rest("POST", "/assignments", d.assignments.map(toRow.assignment), "return=minimal")
+      .catch(() => SE.cloud.rest("POST", "/assignments", d.assignments.map((a) => toRow.assignment({ ...a, note: null })), "return=minimal")) // before update-3
+      .catch((e) => console.warn("STEM 207: couldn't add sample assignments", e));
+    if (d.messages.length) await SE.cloud.rest("POST", "/class_messages", d.messages.map(toRow.message), "return=minimal").catch((e) => console.warn("STEM 207: couldn't add sample messages (run supabase/update-3-class-messages.sql)", e));
     const a = SE.cloud.auth();
     await loadEducator(a.user);
     return d.cls;
@@ -453,6 +484,7 @@
     ready: null,
     loadError: null,
     pendingWrites: () => outbox.length,
+    journeyCounts: (classId) => (journey && journey.classId === classId ? journey.counts : null),
     flush: () => flush(),
 
     /* Session */
@@ -464,6 +496,7 @@
         if (s && s.role === "student" && s.token) SE.cloud.rpc("student_sign_out", { p_token: s.token }).catch(() => {});
         if (s && s.role === "educator") await SE.cloud.signOut();
         db = emptyDb();
+        journey = null;
       }
       writeSession(null);
     },
@@ -580,6 +613,35 @@
       if (CLOUD) send(restOp("PATCH", `/assignments?id=eq.${encodeURIComponent(a.id)}`, { due_date: a.dueDate }, "return=minimal")); else save();
     },
 
+    /* Instructions a teacher adds to one assigned mission (shown on the student's Today). */
+    setAssignmentNote(classId, activityId, note) {
+      const a = SE.store.assignmentFor(classId, activityId);
+      if (!a) return;
+      a.note = String(note || "").trim().slice(0, 500) || null;
+      if (CLOUD) send(restOp("PATCH", `/assignments?id=eq.${encodeURIComponent(a.id)}`, { note: a.note }, "return=minimal")); else save();
+    },
+
+    /* Class messages: short notes from the teacher to the whole class, newest first. */
+    messagesFor: (classId) => (db.messages || []).filter((m) => m.classId === classId).sort((a, b) => b.createdAt - a.createdAt),
+    postMessage(classId, body) {
+      body = String(body || "").trim().slice(0, 500);
+      if (!body) return null;
+      const m = { id: SE.uid("msg"), classId, body, createdAt: Date.now() };
+      db.messages = db.messages || [];
+      db.messages.push(m);
+      if (CLOUD) send(restOp("POST", "/class_messages", toRow.message(m), "return=minimal", async () => {
+        db.messages = db.messages.filter((x) => x.id !== m.id);
+        SE.toast && SE.toast("Couldn't send that message. Ask your admin to run supabase/update-3-class-messages.sql.");
+        return true;
+      }));
+      else save();
+      return m;
+    },
+    deleteMessage(id) {
+      db.messages = (db.messages || []).filter((m) => m.id !== id);
+      if (CLOUD) send(restOp("DELETE", `/class_messages?id=eq.${encodeURIComponent(id)}`, undefined, "return=minimal")); else save();
+    },
+
     /* Students */
     studentsIn: (classId) => db.students.filter((s) => s.classId === classId).sort((a, b) => a.displayName.localeCompare(b.displayName)),
     studentById: (id) => db.students.find((s) => s.id === id),
@@ -627,6 +689,7 @@
           return { ok: false, error: msg || "Those pictures don't match. Try again, or ask your teacher for your login card." };
         }
         loadStudentState(r);
+        await loadJourney(r.token, r.class.id);
         writeSession({ role: "student", id: r.student.id, token: r.token, cloud: true });
         SE.store.log("signed_in");
         return { ok: true, student: db.students[0] };
@@ -654,6 +717,8 @@
             if (r && r.ok === false) { const err = new Error("Your sign-in expired. Please sign in again."); err.status = 401; throw err; }
           }
         });
+        // A sent mission can move the class journey: refresh the class totals once it's saved.
+        if (type === "mission_completed") flush().then(() => loadJourney(s.token, st.classId)).catch(() => {});
       } else save();
       return e;
     },

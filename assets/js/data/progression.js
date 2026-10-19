@@ -10,15 +10,21 @@ window.STEM = window.STEM || {};
 window.STEM.progression = {
   /* Experience points (XP) for each kind of accomplishment. */
   xp: {
-    missionByDuration: { 20: 100, 30: 150, 45: 200 },
+    mission: 150,            // first submission with evidence (no extra XP for longer missions)
+    missionByDuration: { 20: 150, 30: 150, 45: 150 },   // kept for older code; all equal now
+    teacherConfirmed: 50,    // a teacher confirmed the target skill (once per mission)
     levelBonus: { beginner: 0, intermediate: 50, advanced: 100 },
     reflection: 25,          // answered "Think about it"
     extension: 50,           // tried "Take it further"
     newSector: 50,           // first mission in an exploration area
     stageCleared: 100,       // teacher confirmed a pathway "I can"
     labLevel: 30,            // finished a level in an interactive lab (first time)
-    replay: 0.25             // repeating a mission earns a quarter of its base XP
+    replay: 0                // repeating a mission is practice: no new XP
   },
+
+  /* Completions recorded before this date (ms) came from the old one-click flow, so teacher
+     views label them "legacy" instead of treating them as current evidence. Sample data is exempt. */
+  legacyBefore: Date.UTC(2026, 9, 18, 14, 0),
 
   /* Explorer ranks, Maine-style: from the dock to the top of Katahdin.
      Insignia are drawn from `chevrons` and `stars`. */
@@ -75,15 +81,29 @@ window.STEM.progression = {
       how: "Finish 3 missions feeling ready to teach someone else." }
   ],
 
-  /* Shared class goal: the class travels Maine together, from the state line to the summit.
-     Everyone's XP adds up toward the next stop. */
+  /* Class rewards (Batch 10) are separate from personal XP. Only class work moves the class:
+     a mission the teacher assigned and the student sent, a mission the teacher confirmed, and a
+     pathway stage the teacher confirmed. Personal XP, ranks, patches, and the harbor still count
+     everything a student does. */
+  classPoints: { assignedDone: 100, confirmed: 50, stageCleared: 100 },
+
+  /* The class journey: the class travels Maine together, from the state line to the summit. */
   classGoal: [
-    { name: "Kittery", xp: 0 },
-    { name: "Portland Head", xp: 3000 },
-    { name: "Penobscot Bay", xp: 8000 },
-    { name: "Acadia", xp: 16000 },
-    { name: "Moosehead", xp: 30000 },
-    { name: "Katahdin", xp: 50000 }
+    { name: "Kittery", pts: 0 },
+    { name: "Portland Head", pts: 1500 },
+    { name: "Penobscot Bay", pts: 4500 },
+    { name: "Acadia", pts: 9000 },
+    { name: "Moosehead", pts: 16000 },
+    { name: "Katahdin", pts: 26000 }
+  ],
+
+  /* Badges the whole class earns together. */
+  classBadges: [
+    { id: "first-haul", name: "First Haul", icon: "boat", how: "Your teacher confirms the class's first mission." },
+    { id: "all-hands", name: "All Hands on Deck", icon: "users", how: "Every student sends at least one class mission." },
+    { id: "pathfinders", name: "Pathfinders", icon: "compass", how: "Every student clears Stage 1 of the coding pathway." },
+    { id: "right-on-tide", name: "Right on Tide", icon: "wave", how: "Everyone sends an assigned mission by its due date." },
+    { id: "steady-crew", name: "Steady Crew", icon: "lighthouse", how: "Your teacher confirms 10 missions across the class." }
   ],
 
   /* How a student felt at the end of a mission. Shown to teachers. */

@@ -375,6 +375,7 @@
     return () => { st.runToken++; };
   }
 
+  SE.labs.goals(LEVELS, [["How a program runs one step at a time, in order.", "Guessing what code will do before you run it is how programmers catch mistakes early."], ["How changing the order of steps changes what happens.", "In code, order matters. The same steps in a different order can make a totally different result."], ["How to write your own program from steps you choose.", "Programmers turn ideas into steps. Your dance is a program made from your own idea."], ["How to build a program that matches a goal exactly.", "Real programs have to do exactly what someone needs. Checking your work against the goal is a big part of coding."]]);
   SE.labs.register({
     id: "dance-party",
     area: "coding",

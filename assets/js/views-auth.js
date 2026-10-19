@@ -16,7 +16,7 @@
 
   const shell = (inner, wide) => `
     <section class="auth">
-      <div class="auth__sky" aria-hidden="true">${SE.starMap(null)}</div>
+      <div class="auth__sky" aria-hidden="true">${SE.starMap(null, [], { decorative: true })}</div>
       <div class="wrap auth__inner">
         <div class="auth__card ${wide ? "auth__card--wide" : ""}">${inner}</div>
       </div>

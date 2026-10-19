@@ -11,7 +11,8 @@
 
   function baseXp(act) {
     const d = act.duration <= 20 ? 20 : act.duration <= 30 ? 30 : 45;
-    return P.xp.missionByDuration[d] + (P.xp.levelBonus[act.level] || 0);
+    // Flat base: longer missions don't earn more. (d is kept so older settings still load.)
+    return (P.xp.mission || P.xp.missionByDuration[d]) + (P.xp.levelBonus[act.level] || 0);
   }
 
   function rankFor(xp) {
@@ -67,6 +68,7 @@
     const earned = {}; // patchId -> at
     const opened = new Set();
     const steps = {}; // activityId -> Set of checked step indexes
+    const missions = {}; // activityId -> { submitted, confirmed, tryAgain } (latest events)
     let lastActive = 0;
 
     const checkPatches = (at) => {
@@ -93,11 +95,13 @@
         const parts = [];
         if (first) {
           const b = baseXp(act);
-          gained += b; parts.push(["Mission complete", b]);
+          gained += b; parts.push(["Mission sent", b]);
           if (!c.sectors.has(act.area)) { gained += P.xp.newSector; parts.push([`New area: ${SE.areaById[act.area].short}`, P.xp.newSector]); }
           const answered = (e.data.reflection || "").trim().length >= 3;
           if (answered) { gained += P.xp.reflection; parts.push(["Answered Think about it", P.xp.reflection]); c.reflections++; }
-          if (e.data.extension) { gained += P.xp.extension; parts.push(["Tried Take it further", P.xp.extension]); c.extensions++; }
+          // New debriefs ask what happened (extensionNote); older ones used a checkbox.
+          const tried = e.data.evidence ? !!(e.data.extensionNote || "").trim() : !!e.data.extension;
+          if (tried) { gained += P.xp.extension; parts.push(["Tried Take it further", P.xp.extension]); c.extensions++; }
           c.missions++;
           c.sectors.add(act.area);
           c.areas[act.area] = (c.areas[act.area] || 0) + 1;
@@ -105,13 +109,26 @@
           (act.keywords || []).forEach((k) => { c.keywords[k] = (c.keywords[k] || 0) + 1; });
           if (e.data.confidence === "teach") c.confident++;
         } else {
-          const r = Math.round(baseXp(act) * P.xp.replay);
-          gained += r; parts.push(["Mission replayed", r]);
+          // Repeats are practice. They're recorded (so a teacher can read the new answer) but earn no XP.
+          const r = Math.round(baseXp(act) * (P.xp.replay || 0));
+          if (r) { gained += r; parts.push(["Mission replayed", r]); }
         }
         xp += gained;
         completedIds.add(act.id);
         completions.push({ event: e, activity: act, xp: gained, parts, first });
+        const ms = (missions[act.id] = missions[act.id] || {});
+        ms.submitted = e; if (ms.tryAgain && ms.tryAgain.at < e.at) ms.tryAgain = null;
         checkPatches(e.at);
+      }
+      // Teacher checks. Confirmation sticks; "try again" holds until the student submits again.
+      if (e.type === "teacher_confirmed" && act) {
+        const ms = (missions[act.id] = missions[act.id] || {});
+        if (!ms.confirmed) { xp += P.xp.teacherConfirmed || 0; }
+        ms.confirmed = e; ms.tryAgain = null;
+      }
+      if (e.type === "teacher_try_again" && act) {
+        const ms = (missions[act.id] = missions[act.id] || {});
+        if (!ms.confirmed) ms.tryAgain = e;
       }
 
       if (e.type === "ican_claimed") {
@@ -182,7 +199,8 @@
       streak,
       labLevels,
       labResults,
-      labStats
+      labStats,
+      missions
     };
   }
 
@@ -191,7 +209,19 @@
     const inBand = (a) => !student.gradeBand || a.grades.includes(student.gradeBand);
     // Assigned missions get their own section on the student home, so suggestions skip them.
     const assignedIds = new Set(student.classId ? SE.store.assignmentsFor(student.classId).map((x) => x.activityId) : []);
-    const notDone = (a) => !prof.completedIds.has(a.id) && !assignedIds.has(a.id);
+    // Only suggest what a student can start alone: no teacher-led activities, hands-on activities
+    // that need materials, or placeholders. Teachers can still assign any of these.
+    const canStartAlone = (a) => a.format !== "teacher-led" && (a.launch.status === "lab" || a.launch.status === "ready")
+      && !(a.access && (a.access.supervision || (a.access.hardware || []).length));
+    // Respect prerequisites: no coding activity beyond the student's next pathway stage, and no
+    // advanced activity until they've finished an intermediate one in the same area.
+    const stageOf = (a) => a.pathwayStage || (STEM.pathway.find((s) => s.activities.includes(a.id)) || {}).stage || 0;
+    let reach = 1;
+    while (prof.stages[reach] && prof.stages[reach].status === "cleared") reach++;
+    prof.completions.forEach((c) => { reach = Math.max(reach, stageOf(c.activity) + 1); });
+    const doneLevel = (area, level) => prof.completions.some((c) => c.activity.area === area && c.activity.level === level);
+    const ready = (a) => (stageOf(a) <= reach) && (a.level !== "advanced" || doneLevel(a.area, "intermediate"));
+    const notDone = (a) => !prof.completedIds.has(a.id) && !assignedIds.has(a.id) && canStartAlone(a) && ready(a);
     const picks = [];
     const add = (a, reason) => { if (a && !picks.some((p) => p.activity.id === a.id)) picks.push({ activity: a, reason }); };
 
@@ -200,7 +230,9 @@
     while (prof.stages[nextStage] && prof.stages[nextStage].status === "cleared") nextStage++;
     const stage = STEM.pathway.find((s) => s.stage === nextStage);
     if (stage) {
-      const act = stage.activities.map((id) => SE.activityById[id]).find((a) => a && notDone(a));
+      // Prefer the student's own grade-band track (e.g. the grades 6–8 missions), then anything in band.
+      const acts = stage.activities.map((id) => SE.activityById[id]).filter((a) => a && notDone(a));
+      const act = acts.find((a) => a.track && a.track === student.gradeBand) || acts.find(inBand);
       if (act) add(act, `Coding pathway, stage ${stage.stage}`);
     }
     // An area they haven't visited yet
@@ -225,26 +257,113 @@
     events.forEach((e) => { (byStudent[e.studentId] = byStudent[e.studentId] || []).push(e); });
     const profiles = students.map((s) => ({ student: s, prof: profile(s.id, byStudent[s.id] || []) }));
     const totalXp = profiles.reduce((sum, p) => sum + p.prof.xp, 0);
-    return { students, events, profiles, totalXp, goal: classGoal(totalXp) };
+    return { students, events, profiles, totalXp, journey: classJourney(classId) };
   }
 
-  function classGoal(totalXp) {
+  /* ───────── Class rewards ─────────
+   * Counts of class work. The same rules run in supabase/update-4-class-journey.sql
+   * (class_journey), which is how a student's device gets the whole class's totals.
+   *   assignedDone  distinct (student, mission) sent, for missions assigned to the class
+   *   confirmed     distinct (student, mission) a teacher confirmed
+   *   stages        distinct (student, stage) a teacher confirmed
+   *   withAssigned  students who sent at least one assigned mission
+   *   withStage1    students whose Stage 1 is confirmed
+   *   onTime        assigned missions with a due date that every student sent by the end of that day (UTC) */
+  const dueEnd = (d) => { const [y, m, dd] = d.split("-").map(Number); return Date.UTC(y, m - 1, dd + 1); };
+  function classCounts(classId) {
+    const students = SE.store.studentsIn(classId);
+    const ids = new Set(students.map((s) => s.id));
+    const assigned = new Map(SE.store.assignmentsFor(classId).map((a) => [a.activityId, a]));
+    const events = SE.store.eventsForClass(classId).filter((e) => ids.has(e.studentId));
+    const sent = new Map(), confirmed = new Set(), stages = new Set(), stage1 = new Set();
+    events.forEach((e) => {
+      const a = e.data && e.data.activityId;
+      if (e.type === "mission_completed" && assigned.has(a)) { const k = `${e.studentId}|${a}`; if (!sent.has(k) || sent.get(k) > e.at) sent.set(k, e.at); }
+      if (e.type === "teacher_confirmed" && a) confirmed.add(`${e.studentId}|${a}`);
+      if (e.type === "ican_verified") { stages.add(`${e.studentId}|${e.data.stage}`); if (Number(e.data.stage) === 1) stage1.add(e.studentId); }
+    });
+    const withAssigned = new Set([...sent.keys()].map((k) => k.split("|")[0]));
+    let onTime = 0;
+    if (students.length) assigned.forEach((x, act) => {
+      if (x.dueDate && students.every((s) => { const at = sent.get(`${s.id}|${act}`); return at != null && at < dueEnd(x.dueDate); })) onTime++;
+    });
+    return { students: students.length, assignedDone: sent.size, confirmed: confirmed.size, stages: stages.size,
+      withAssigned: withAssigned.size, withStage1: stage1.size, onTime };
+  }
+  function journeyFrom(c) {
+    const cp = P.classPoints;
+    const points = c.assignedDone * cp.assignedDone + c.confirmed * cp.confirmed + c.stages * cp.stageCleared;
+    const all = (n) => c.students > 0 && n >= c.students;
+    const earned = { "first-haul": c.confirmed >= 1, "all-hands": all(c.withAssigned), pathfinders: all(c.withStage1), "right-on-tide": c.onTime >= 1, "steady-crew": c.confirmed >= 10 };
+    return { counts: c, points, goal: classGoal(points), badges: P.classBadges.map((b) => ({ badge: b, earned: !!earned[b.id] })) };
+  }
+  /* On a student's device in cloud mode, the class totals come from the server (the device only
+     holds that student's own work). Everywhere else they're counted from the data in hand. */
+  function classJourney(classId) {
+    const server = SE.store.journeyCounts && SE.store.journeyCounts(classId);
+    return journeyFrom(server || classCounts(classId));
+  }
+  /* What one student has added to the class journey. */
+  function classPointsFor(studentId, classId) {
+    const assigned = new Set(SE.store.assignmentsFor(classId).map((a) => a.activityId));
+    const ev = SE.store.eventsFor(studentId);
+    const cp = P.classPoints;
+    const sent = new Set(ev.filter((e) => e.type === "mission_completed" && assigned.has(e.data.activityId)).map((e) => e.data.activityId));
+    const conf = new Set(ev.filter((e) => e.type === "teacher_confirmed").map((e) => e.data.activityId));
+    const st = new Set(ev.filter((e) => e.type === "ican_verified").map((e) => e.data.stage));
+    return sent.size * cp.assignedDone + conf.size * cp.confirmed + st.size * cp.stageCleared;
+  }
+
+  function classGoal(points) {
     const g = P.classGoal;
     let idx = 0;
-    g.forEach((m, i) => { if (totalXp >= m.xp) idx = i; });
+    g.forEach((m, i) => { if (points >= m.pts) idx = i; });
     const reached = g[idx];
     const next = g[idx + 1] || null;
-    const progress = next ? (totalXp - reached.xp) / (next.xp - reached.xp) : 1;
-    return { reached, next, index: idx, progress: Math.max(0, Math.min(1, progress)), totalXp };
+    const progress = next ? (points - reached.pts) / (next.pts - reached.pts) : 1;
+    return { reached, next, index: idx, progress: Math.max(0, Math.min(1, progress)), points };
   }
 
   /* Has this student finished a mission? For lab missions, finishing every level counts too. */
   function missionDone(prof, a) {
+    const ms = prof.missions[a.id] || {};
+    if (ms.confirmed) return true;
+    if (ms.tryAgain) return false;   // the teacher reopened it
     if (prof.completedIds.has(a.id)) return true;
     const labId = a.launch && a.launch.labId;
     const lab = labId && SE.labs && SE.labs.byId(labId);
-    return !!(lab && (prof.labLevels[labId] || new Set()).size >= lab.levels.length);
+    if (!lab) return false;
+    // A lab mission is done when its core levels pass (all levels unless coreLevels is set).
+    const lv = prof.labLevels[labId] || new Set();
+    const core = Math.min(lab.levels.length, a.coreLevels || lab.levels.length);
+    return [...Array(core).keys()].every((i) => lv.has(i));
   }
 
-  SE.game = { profile, recommendations, classSummary, classGoal, rankFor, baseXp, missionDone };
+  /* One status per mission for a student, strongest first:
+   *   confirmed  Teacher confirmed the target skill (spoken check, watched a demo, or reviewed work)
+   *   tryagain   Teacher asked for more work; holds until the student submits again
+   *   checked    The lab's own check passed for its core levels (only what the lab tests)
+   *   submitted  The student submitted evidence (written, or "I'll show my teacher"); not yet confirmed
+   *   started    Opened it, checked a step, or finished a lab level
+   *   none       Not started
+   * legacy: the latest submission came from the old one-click flow. */
+  function statusFor(prof, a) {
+    const ms = prof.missions[a.id] || {};
+    const labId = a.launch && a.launch.labId;
+    const lab = labId && SE.labs && SE.labs.byId(labId);
+    const lv = lab ? (prof.labLevels[labId] || new Set()) : null;
+    const core = lab ? Math.min(lab.levels.length, a.coreLevels || lab.levels.length) : 0;
+    const coreDone = lab && [...Array(core).keys()].every((i) => lv.has(i));
+    const sub = ms.submitted;
+    const legacy = !!sub && !sub.data.evidence && !sub.isDemo && sub.at < (P.legacyBefore || 0);
+    const base = { sub, legacy, confirmed: ms.confirmed, tryAgain: ms.tryAgain };
+    if (ms.confirmed) return { ...base, state: "confirmed", label: "Teacher confirmed" };
+    if (ms.tryAgain) return { ...base, state: "tryagain", label: "Try again" };
+    if (coreDone) return { ...base, state: "checked", label: "Checked in lab" };
+    if (sub) return { ...base, state: "submitted", label: legacy ? "Legacy" : sub.data.evidence === "show" ? "Submitted (will show teacher)" : "Submitted" };
+    const started = prof.opened.has(a.id) || (prof.steps[a.id] && prof.steps[a.id].size > 0) || (lv && lv.size > 0);
+    return { ...base, state: started ? "started" : "none", label: started ? "Started" : "Not started" };
+  }
+
+  SE.game = { profile, recommendations, classSummary, classGoal, classCounts, journeyFrom, classJourney, classPointsFor, rankFor, baseXp, missionDone, statusFor };
 })();

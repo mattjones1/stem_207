@@ -69,10 +69,24 @@ create table if not exists public.assignments (
   activity_id text not null check (char_length(activity_id) between 1 and 80),
   assigned_at timestamptz not null default now(),
   due_date date,
+  note text,                               -- teacher's instructions for this mission, shown to students
   is_demo boolean not null default false,
   unique (class_id, activity_id)
 );
 create index if not exists assignments_class_idx on public.assignments (class_id);
+alter table public.assignments add column if not exists note text;
+alter table public.assignments drop constraint if exists assignments_note_len;
+alter table public.assignments add constraint assignments_note_len check (note is null or char_length(note) <= 500);
+
+-- Short messages from a teacher to the whole class (students read them through student_state).
+create table if not exists public.class_messages (
+  id text primary key check (char_length(id) <= 64),
+  class_id text not null references public.classes (id) on delete cascade,
+  body text not null check (char_length(body) between 1 and 500),
+  created_at timestamptz not null default now(),
+  is_demo boolean not null default false
+);
+create index if not exists class_messages_class_idx on public.class_messages (class_id, created_at);
 
 -- Student sessions and sign-in attempts are private: only the functions below touch them.
 create table if not exists public.student_sessions (
@@ -114,6 +128,7 @@ alter table public.events enable row level security;
 alter table public.student_sessions enable row level security;
 alter table public.sign_in_attempts enable row level security;
 alter table public.assignments enable row level security;
+alter table public.class_messages enable row level security;
 
 -- Does the signed-in educator own this class?
 create or replace function public.owns_class(cid text)
@@ -147,13 +162,16 @@ create policy events_owner_insert on public.events for insert to authenticated
   );
 drop policy if exists events_owner_delete on public.events;
 create policy events_owner_delete on public.events for delete to authenticated using (public.owns_class(class_id));
+drop policy if exists class_messages_owner on public.class_messages;
+create policy class_messages_owner on public.class_messages for all to authenticated
+  using (public.owns_class(class_id)) with check (public.owns_class(class_id));
 drop policy if exists assignments_owner on public.assignments;
 create policy assignments_owner on public.assignments for all to authenticated
   using (public.owns_class(class_id)) with check (public.owns_class(class_id));
 -- student_sessions and sign_in_attempts have no policies, so no one can read them directly.
 
-grant select, insert, update, delete on public.educators, public.classes, public.students, public.events, public.assignments to authenticated;
-revoke all on public.educators, public.classes, public.students, public.events, public.assignments from anon;
+grant select, insert, update, delete on public.educators, public.classes, public.students, public.events, public.assignments, public.class_messages to authenticated;
+revoke all on public.educators, public.classes, public.students, public.events, public.assignments, public.class_messages from anon;
 revoke all on public.student_sessions, public.sign_in_attempts from anon, authenticated;
 
 -- ───────── Student sign-in and progress (callable by anyone with the public key) ─────────
@@ -171,7 +189,7 @@ returns json language sql stable security definer set search_path = public as $$
   where c.code = upper(regexp_replace(coalesce(p_code, ''), '\s', '', 'g'));
 $$;
 
--- A student's own state: profile, class, full activity log, and the class's assigned missions.
+-- A student's own state: profile, class, full activity log, assigned missions (with instructions), and class messages.
 create or replace function public.student_state(p_token uuid)
 returns json language plpgsql stable security definer set search_path = public as $$
 declare v_student public.students;
@@ -188,9 +206,12 @@ begin
     'events', coalesce((select json_agg(json_build_object('id', e.id, 'studentId', e.student_id, 'classId', e.class_id, 'type', e.type,
                                                           'at', e.at, 'data', e.data, 'by', e.by, 'isDemo', e.is_demo) order by e.at)
                         from public.events e where e.student_id = v_student.id), '[]'::json),
-    'assignments', coalesce((select json_agg(json_build_object('id', a.id, 'activityId', a.activity_id, 'dueDate', a.due_date,
+    'assignments', coalesce((select json_agg(json_build_object('id', a.id, 'activityId', a.activity_id, 'dueDate', a.due_date, 'note', a.note,
                                                                'assignedAt', (extract(epoch from a.assigned_at) * 1000)::bigint) order by a.assigned_at)
-                             from public.assignments a where a.class_id = v_student.class_id), '[]'::json));
+                             from public.assignments a where a.class_id = v_student.class_id), '[]'::json),
+    'messages', coalesce((select json_agg(json_build_object('id', m.id, 'body', m.body,
+                                                            'createdAt', (extract(epoch from m.created_at) * 1000)::bigint) order by m.created_at desc)
+                          from (select * from public.class_messages where class_id = v_student.class_id order by created_at desc limit 20) m), '[]'::json));
 end $$;
 
 -- Step 3 of student sign-in: check the three pictures. Too many wrong tries in 10 minutes
@@ -247,3 +268,41 @@ revoke all on function public.class_roster(text), public.student_state(uuid), pu
 grant execute on function public.class_roster(text), public.student_state(uuid), public.student_sign_in(text, text[]),
   public.student_log(uuid, json), public.student_sign_out(uuid) to anon, authenticated;
 grant execute on function public.owns_class(text) to authenticated;
+
+-- Class journey totals for students (counts only). Same as supabase/update-4-class-journey.sql.
+create or replace function public.class_journey(p_token uuid)
+returns json language plpgsql stable security definer set search_path = public as $$
+declare v_class text; v_students int;
+begin
+  select s.class_id into v_class from public.student_sessions t join public.students s on s.id = t.student_id
+   where t.token = p_token and t.expires_at > now();
+  if not found then return json_build_object('ok', false, 'error', 'session'); end if;
+  select count(*) into v_students from public.students where class_id = v_class;
+  return (
+    with st as (select id from public.students where class_id = v_class),
+    ev as (select e.student_id, e.type, e.at, e.data from public.events e join st on st.id = e.student_id),
+    asg as (select activity_id, due_date from public.assignments where class_id = v_class),
+    -- first time each student sent each assigned mission
+    sent as (select student_id, data->>'activityId' as act, min(at) as at from ev
+             where type = 'mission_completed' and (data->>'activityId') in (select activity_id from asg)
+             group by 1, 2),
+    conf as (select distinct student_id, data->>'activityId' as act from ev where type = 'teacher_confirmed' and data ? 'activityId'),
+    stg as (select distinct student_id, data->>'stage' as stage from ev where type = 'ican_verified'),
+    -- assigned missions with a due date that every student sent before the end of that day (UTC)
+    ontime as (select a.activity_id from asg a
+               where a.due_date is not null and v_students > 0
+                 and (select count(*) from sent s where s.act = a.activity_id
+                        and s.at < extract(epoch from (a.due_date + 1)::timestamp) * 1000) = v_students)
+    select json_build_object(
+      'ok', true,
+      'students', v_students,
+      'assignedDone', (select count(*) from sent),
+      'confirmed', (select count(*) from conf),
+      'stages', (select count(*) from stg),
+      'withAssigned', (select count(distinct student_id) from sent),
+      'withStage1', (select count(distinct student_id) from stg where stage = '1'),
+      'onTime', (select count(*) from ontime)));
+end $$;
+
+revoke all on function public.class_journey(uuid) from public;
+grant execute on function public.class_journey(uuid) to anon, authenticated;

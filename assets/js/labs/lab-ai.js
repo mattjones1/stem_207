@@ -191,7 +191,8 @@
     el.innerHTML = `
       <div class="lab-panel">
         <h3>The machine needs to learn: what makes a Glim?</h3>
-        <p class="muted">Add labeled examples one at a time. After each one, the machine is tested on 12 creatures it has never seen. Get it to 90% or better.</p>
+        <p><strong>Glims</strong> and <strong>Norps</strong> are made-up creatures. Each card below already has its correct label. You know the labels, but the machine starts knowing nothing.</p>
+        <p class="muted">You're the teacher. Press <strong>Add</strong> to give the machine one labeled example. After each one, it takes a 12-question quiz on creatures it has never seen, and the chart shows its score. Get it to 90% or better, using as few examples as you can.</p>
         <div class="cr-row" id="hm-pool"></div>
       </div>
       <div class="hm-split">
@@ -315,6 +316,19 @@
     el.innerHTML = `
       <div class="lab-panel">
         <h3>A machine should know when it doesn't know</h3>
+        <div class="cf-lesson">
+          <p><strong>Confidence score.</strong> Every time the machine gives an answer, it also gives a score from 0% to 100%. The score says how closely the creature matches the examples it was trained on. It's the model's estimate, not a promise: a confident answer can still be wrong.</p>
+          <p><strong>Confidence threshold.</strong> A cut-off line that people choose. Above the line, the machine answers. Below it, the machine says “Not sure, ask a person.”</p>
+          <svg viewBox="0 0 360 76" class="cf-diagram" role="img" aria-label="A bar from 0 to 100 percent. Scores below the threshold line go to a person. Scores above it get an answer from the machine.">
+            <rect x="10" y="24" width="340" height="20" rx="10" class="cf-diagram__bar"/>
+            <rect x="10" y="24" width="170" height="20" rx="10" class="cf-diagram__ask"/>
+            <line x1="180" x2="180" y1="16" y2="52" class="cf-diagram__line"/>
+            <text x="95" y="68" text-anchor="middle">Ask a person</text>
+            <text x="265" y="68" text-anchor="middle">Machine answers</text>
+            <text x="180" y="12" text-anchor="middle" class="cf-diagram__k">threshold</text>
+          </svg>
+          <p><strong>The balance.</strong> Too low, and the machine answers everything, even when it's wrong. Too high, and it asks about almost everything, so it isn't much help. Your job is to find a setting in between.</p>
+        </div>
         <p class="muted">This machine was trained only on blue and orange creatures: spiky ones sink, round ones float. Now some <strong>purple</strong> creatures show up. They're a new species, and nobody told the machine they behave differently. Set a confidence threshold: below it, the machine says <strong>“Not sure, ask a person.”</strong></p>
         <div class="range"><label for="cf-th">Confidence threshold <b id="cf-val">20%</b></label><input type="range" id="cf-th" min="20" max="90" step="5" value="20"></div>
         <p class="lab-score" id="cf-sum"></p>
@@ -344,74 +358,185 @@
   }
 
   /* ───────── Level 6: responsible use ───────── */
+  /* Responsible use. Each case has a decision and a reason.
+   *   floor: decisions ruled out by a fact or a safety, privacy, or honesty rule (null = a judgment call)
+   *   fits:  reasons that actually apply to the case
+   *   view:  what many people think, shown as one perspective, not the answer
+   * A case passes when the decision is allowed and the reason fits. Judgment calls accept any
+   * allowed decision with a fitting reason, and are flagged for class discussion. */
+  const REASONS = {
+    small: "A mistake would be small and easy to catch",
+    help: "It saves people time on a slow or boring job",
+    choice: "People still make the final choice",
+    harm: "A mistake could hurt someone",
+    unfair: "It could treat some people unfairly",
+    private: "It uses private information",
+    honest: "It wouldn't be honest",
+    cantknow: "The AI can't really know this from the data"
+  };
+  const BIN = { good: "Good use", human: "OK if a person checks", not: "Not OK" };
   const USES = [
-    ["Counting puffins in photos from a Maine seabird island", "good", "Low risk, and it saves scientists hours. If it miscounts, a person can spot-check the photos, and no one is harmed."],
-    ["Sorting Maine wild blueberries from leaves and stems on a conveyor belt", "good", "Low risk. A mistake means one leaf slips through, and machines like this help farms work faster."],
-    ["Suggesting a library book you might like", "good", "Helpful and low risk. You still choose what to read."],
-        ["Spotting something worrying on an X-ray", "human", "It can help doctors find things faster, but a doctor must check, because a mistake could hurt someone."],
-    ["Grading a student's science report", "human", "A teacher should review it. AI can miss creative thinking or be unfair to some kinds of writing."],
-    ["Choosing which people get a job interview", "human", "AI trained on past choices can copy past unfairness. People need to check the results."],
-    ["Writing a whole essay and turning it in as your own", "not", "That's not your work. Using AI to brainstorm can be OK if your teacher allows it, but passing off its writing as yours isn't honest."],
-    ["Asking kids to type their home address into a chatbot", "not", "Never share personal information like your address with an AI tool."],
-    ["Guessing someone's mood from a photo to put them in a group", "not", "Faces don't reliably show feelings, and it's not fair or private to sort people this way."]
+    { text: "Counting puffins in photos from a Maine seabird island", floor: null, fits: ["small", "help"],
+      view: "Many people call this a good use: it saves scientists hours, and a person can spot-check the photos." },
+    { text: "Sorting Maine wild blueberries from leaves and stems on a conveyor belt", floor: null, fits: ["small", "help"],
+      view: "Many people call this a good use: a mistake means one leaf slips through." },
+    { text: "Suggesting a library book you might like", floor: null, fits: ["small", "choice", "private"],
+      view: "Many people call this a good use because you still choose what to read. Some worry about apps keeping a record of what you read." },
+    { text: "Spotting something worrying on an X-ray", floor: ["good"], fits: ["harm", "help"],
+      rule: "A missed or wrong finding could hurt a patient, so this can't be left to AI alone. A doctor has to check.",
+      view: "Many people say it's OK if a doctor checks: AI can help doctors find things faster." },
+    { text: "Grading a student's science report", floor: ["good"], fits: ["unfair", "harm", "cantknow"],
+      rule: "Grades affect students, and AI can miss creative thinking or be unfair to some kinds of writing, so it can't grade alone.",
+      view: "Many people say a teacher should review any AI suggestions." },
+    { text: "Choosing which people get a job interview", floor: ["good"], fits: ["unfair", "harm"],
+      rule: "AI trained on past choices can copy past unfairness, and the decision affects people's lives, so it can't decide alone.",
+      view: "Many people say people must check the results, and some say AI shouldn't be used for this at all." },
+    { text: "Writing a whole essay and turning it in as your own", floor: ["good", "human"], fits: ["honest"],
+      rule: "Turning in AI writing as your own work isn't honest, even if someone checks it. (Brainstorming with AI can be OK if your teacher allows it.)",
+      view: "" },
+    { text: "Asking kids to type their home address into a chatbot", floor: ["good", "human"], fits: ["private", "harm"],
+      rule: "Never share personal information like your address with an AI tool. That's a safety rule.",
+      view: "" },
+    { text: "Translating a school newsletter for families who speak another language", floor: null, fits: ["help", "harm"],
+      view: "Many people call this helpful, especially if a fluent speaker checks important messages like dates and safety notes." },
+    { text: "Guessing someone's mood from a photo to put them in a group", floor: ["good"], fits: ["cantknow", "unfair", "private"],
+      rule: "Faces don't reliably show feelings, so the AI can't really know someone's mood. Sorting people this way isn't fair or private.",
+      view: "Many people say this is not OK at all." }
   ];
+  /* Pure check for one case: { ok, kind: "rule" | "reason" | "ok", discuss } */
+  function judgeUse(i, decision, reason) {
+    const u = USES[i];
+    if (u.floor && u.floor.includes(decision)) return { ok: false, kind: "rule" };
+    if (!u.fits.includes(reason)) return { ok: false, kind: "reason" };
+    return { ok: true, kind: "ok", discuss: !u.floor || u.floor.length < 2 };
+  }
+  /* Passing grade for Level 6: 7 of 10 sound decisions. picks: { caseIndex: { d, r } } */
+  const PASS = 7;
+  function scoreUses(picks) {
+    const results = USES.map((_, i) => (picks[i] && picks[i].d && picks[i].r ? judgeUse(i, picks[i].d, picks[i].r) : { ok: false, kind: "missing" }));
+    const score = results.filter((r) => r.ok).length;
+    return { score, total: USES.length, pass: score >= PASS, results };
+  }
+  SE.patternMachine = { judgeUse, scoreUses, PASS, USES, REASONS };
+
   function mountResponsible(el, api) {
     const order = SE.shuffle(USES.map((_, i) => i), "resp");
-    const answered = {};
-    const BIN = { good: "Good use", human: "OK if a person checks", not: "Not OK" };
+    const pick = {};   // case index -> { d, r }
+    const reasonOrder = Object.keys(REASONS);
+    const u = api.user && api.user.role === "student" ? api.user : null;
+    const certInfo = (score) => ({
+      award: "Responsible AI Explorer",
+      course: "Pattern Machine Lab: Use AI Responsibly",
+      detail: `Passed with ${score} of ${USES.length} sound decisions`,
+      name: u ? u.displayName : "",
+      className: u && u.cls ? u.cls.name : "",
+      at: Date.now()
+    });
+    const prior = api.saved();
     el.innerHTML = `
+      ${prior && prior.score >= PASS ? `<div class="lab-panel resp-prior">${icon("star")}<p>You passed this level with ${prior.score} of ${USES.length}.</p>${SE.certificate.button({ ...certInfo(prior.score) }, "Print my certificate", "btn btn--primary btn--small")}</div>` : ""}
       <div class="lab-panel">
         <h3>Should we use AI for this?</h3>
-        <p class="muted">For each idea, choose: a good use, OK only if a person checks the AI's work, or not OK.</p>
+        <p class="muted">For each idea, choose what you think, then choose your best reason. Some cases have a firm rule. Others are judgment calls where people disagree, and a good reason matters most.</p>
+        <p class="resp-pass">${icon("flag")}<span>When all ${USES.length} have a choice and a reason, score your decisions. <strong>${PASS} of ${USES.length} passes</strong> and earns a STEM 207 certificate.</span></p>
         <ol class="oi-list">${order.map((i) => `
-          <li data-row="${i}"><p>${esc(USES[i][0])}</p>
-            <div class="seg" role="group" aria-label="Your choice">${Object.entries(BIN).map(([k, v]) => `<button type="button" data-u="${k}" data-i="${i}">${v}</button>`).join("")}</div>
+          <li data-row="${i}"><p>${esc(USES[i].text)}</p>
+            <div class="seg" role="group" aria-label="Your choice for: ${esc(USES[i].text)}">${Object.entries(BIN).map(([k, v]) => `<button type="button" data-u="${k}" data-i="${i}" aria-pressed="false">${v}</button>`).join("")}</div>
+            <label class="oi-reason">Why? <select class="input input--small" data-r="${i}"><option value="">Choose a reason…</option>${reasonOrder.map((k) => `<option value="${k}">${esc(REASONS[k])}</option>`).join("")}</select></label>
             <p class="oi-why" hidden></p></li>`).join("")}</ol>
+        <div class="resp-score"><button type="button" class="btn btn--primary" id="resp-score" disabled>${icon("check")}Score my decisions</button><span id="resp-count" class="muted"></span></div>
       </div>`;
+    const answered = () => USES.filter((_, i) => pick[i] && pick[i].d && pick[i].r).length;
+    const refresh = () => {
+      const n = answered();
+      el.querySelector("#resp-count").textContent = `${n} of ${USES.length} ready`;
+      el.querySelector("#resp-score").disabled = n < USES.length;
+    };
+    const clearNote = (i) => { const w = el.querySelector(`[data-row="${i}"] .oi-why`); w.hidden = true; w.textContent = ""; };
+    const score = () => {
+      const res = scoreUses(pick);
+      res.results.forEach((r, i) => {
+        const why = el.querySelector(`[data-row="${i}"] .oi-why`), c = USES[i], p = pick[i];
+        why.hidden = false;
+        why.className = `oi-why ${r.ok ? "is-right" : "is-wrong"}`;
+        if (r.kind === "rule") why.textContent = `Look again: ${c.rule}`;
+        else if (r.kind === "reason") why.textContent = `Look again: “${REASONS[p.r]}” doesn't really fit this case. Think about who could be affected, and how.`;
+        else why.textContent = `Your choice and reason hold up.${r.discuss ? " People disagree on this one, so talk it over with your teacher." : ""}${c.view ? ` One view: ${c.view}` : ""}`;
+      });
+      api.log("lab_test_run", { score: res.score });
+      if (res.pass) {
+        api.say(`You scored ${res.score} of ${res.total}. That's a pass!${res.score < res.total ? " Read the “Look again” notes to see what you'd change." : ""}`, "good");
+        const info = certInfo(res.score);
+        api.win({ score: res.score, choices: USES.map((_, k) => `${k}:${pick[k].d}:${pick[k].r}`) }, {
+          title: `You passed: ${res.score} of ${res.total}!`,
+          extra: `<div class="cert-cele"><span class="cert-cele__badge" aria-hidden="true">${icon("star")}</span><div><p class="cert-cele__k">Responsible AI Explorer</p><p>You weighed harm, fairness, privacy, and honesty like a real AI team. Print your certificate and take it home.</p>${SE.certificate.button(info, "See my certificate")}</div></div>`
+        });
+      } else {
+        api.say(`You scored ${res.score} of ${res.total}. You need ${PASS} to pass. Read each “Look again” note, change those answers, and score again.`, "warn");
+      }
+    };
     el.addEventListener("click", (e) => {
+      if (e.target.closest("#resp-score")) return score();
       const b = e.target.closest("[data-u]");
       if (!b) return;
       const i = Number(b.dataset.i);
-      const row = el.querySelector(`[data-row="${i}"]`);
-      const right = USES[i][1] === b.dataset.u;
-      row.querySelectorAll("[data-u]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-      const why = row.querySelector(".oi-why");
-      why.hidden = false;
-      why.className = `oi-why ${right ? "is-right" : "is-wrong"}`;
-      why.textContent = `${right ? "Agreed." : `Many people would say “${BIN[USES[i][1]]}.”`} ${USES[i][2]}`;
-      answered[i] = right;
-      const n = Object.values(answered).filter(Boolean).length;
-      if (n === USES.length) { api.say("You thought through every case. The bigger the possible harm, the more a human needs to be in charge.", "good"); api.win({ correct: n }); }
-      else api.say(`${n} of ${USES.length} match. Think about: how bad is a mistake, and who could be harmed?`, "info");
+      pick[i] = { ...(pick[i] || {}), d: b.dataset.u };
+      b.parentElement.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      clearNote(i);
+      refresh();
     });
+    el.addEventListener("change", (e) => {
+      const sel = e.target.closest("[data-r]");
+      if (!sel) return;
+      const i = Number(sel.dataset.r);
+      pick[i] = { ...(pick[i] || {}), r: sel.value };
+      clearNote(i);
+      refresh();
+    });
+    refresh();
   }
 
   const LEVELS = [
     { title: "Be the pattern finder", concept: "Patterns",
+      learn: "How to find a pattern in labeled examples, then use it to label something new.",
+      why: "This is the first thing every sorting AI does. Once you've done it yourself, AI is less like magic: it's pattern finding, done fast.",
       goal: "Study the labeled examples, predict 4 new creatures, then name the rule.",
+      steps: ["Look at the creatures labeled Zog and the ones labeled Blip.", "For each new creature, choose Zog or Blip.", "Then choose the rule you used."],
       hint: "Compare the Zogs to each other. Ignore color for a second. What shape are they?",
       learned: "Finding a pattern in labeled examples and using it to label new things is exactly what machine learning does, just much faster and with many more examples." },
     { title: "Train the machine", concept: "Training examples",
+      learn: "How a machine learns from examples a person labels, not from rules someone types in.",
+      why: "Real AI tools are trained on examples labeled by people. Whoever does the labeling shapes what the AI learns.",
       goal: "Invent a secret rule, label at least 8 creatures, train the machine, and check 6 of its predictions.",
       steps: ["Pick a rule, like “striped ones are friendly.”", "Label creatures using your rule.", "Train, then mark each prediction right or wrong."],
       hint: "Keep your rule simple and stick to it. Label some creatures of each kind so the machine sees both.",
       learned: "The machine never knew your rule. It only had your examples. It labels new creatures by finding the most similar examples it was trained on." },
     { title: "How many examples?", concept: "More data",
+      learn: "How the number and variety of training examples change how accurate a machine is.",
+      why: "Companies collect huge amounts of data to train AI. Watching accuracy climb one example at a time shows why, and shows that the kind of examples matters as much as how many.",
       goal: "Add labeled examples until the machine is at least 90% accurate.",
+      steps: ["Read about Glims and Norps below.", "Press Add to teach the machine one example.", "Watch the chart after each one. Stop when it reaches 90%."],
       hint: "Watch the chart. Examples that are different from the ones the machine already has usually help the most.",
       learned: "With only a few examples, AI mostly guesses. More, and more varied, examples usually make it more accurate, which is why real AI uses huge amounts of data." },
     { title: "Spot the bias", concept: "Bias in data",
+      learn: "What bias in training data is, and how to fix it by fixing the data.",
+      why: "AI trained on lopsided data can be unfair to the people or things it rarely saw. Checking the data is how real teams find and fix this.",
       goal: "Find the machine's wrong predictions, then fix the training data so every prediction is right.",
       hint: "In the training data, color and shape always go together. The machine can't tell which one matters. Add examples where they don't go together.",
       learned: "If training data is lopsided, AI learns the wrong lesson. This is called bias. Fixing it means checking the data, not just the machine." },
     { title: "Know when you don't know", concept: "Confidence and limits",
+      learn: "What a confidence score is, and how a confidence threshold lets a machine say “not sure.”",
+      why: "AI is used where mistakes matter, like medicine and safety. A machine that hands hard questions to a person is safer than one that always guesses.",
       goal: "Set a confidence threshold so the machine is never confidently wrong, but still answers at least half.",
+      steps: ["Read “Confidence score” and “Confidence threshold” below.", "Slide the threshold and watch which answers change to “Not sure.”", "Find a setting with no confident mistakes that still answers at least half."],
       hint: "Slide slowly and watch the counts. Which creatures does the machine get wrong? Are they like anything it saw in training? Look at their confidence.",
-      learned: "AI always produces an answer, even when it shouldn't. Good AI tools show how confident they are and hand hard cases to a person." },
+      learned: "An AI system can produce an answer when it should express uncertainty. Some systems can also refuse or say they are unsure. A high confidence score can still accompany a mistake, so a threshold helps, and a person still decides which mistakes are too costly." },
     { title: "Use AI responsibly", concept: "Responsible use",
-      goal: "Decide whether AI should be used in 9 situations.",
-      hint: "Ask two questions: How bad would a mistake be? Does it involve someone's private information?",
-      learned: "Whether to use AI depends on the stakes. Low-risk uses are fine; high-stakes decisions need a human in charge; some uses aren't fair, honest, or private." }
+      learn: "How to decide whether AI should be used, used only with a person checking, or not used at all.",
+      why: "AI is showing up in schools, hospitals, and jobs. The people who decide how to use it, maybe you someday, have to weigh harm, fairness, privacy, and honesty.",
+      goal: "For 10 ideas, choose whether AI should be used and give your best reason. Then score your decisions: 7 of 10 passes.",
+      hints: ["For each case, ask: how bad would a mistake be, and who could be harmed?", "Some cases have a firm rule about safety, privacy, or honesty. The others are judgment calls: any choice can work if your reason really fits the case."],
+      learned: "Deciding whether to use AI means weighing harm, fairness, privacy, and honesty. Some lines are firm rules. For the rest, people can disagree, so explain your reason and listen to other people's." }
   ];
 
   SE.labs.register({

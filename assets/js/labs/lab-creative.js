@@ -285,6 +285,7 @@
     return () => stop();
   }
 
+  SE.labs.goals(LEVELS, [["That every digital picture is made of tiny squares called pixels.", "Every photo, game, and screen you see is pixels. Knowing that helps you understand how computers show pictures."], ["How resolution, the number of pixels, changes how sharp a picture looks.", "Resolution is why some pictures look crisp and others look blocky, on phones, TVs, and printers."], ["How a picture can be stored as code, with a number or letter for each pixel.", "Computers store everything as numbers. Turning pictures into code is how images are saved and sent."], ["How showing frames one after another makes something look like it moves.", "Every cartoon, movie, and video game uses frames to make motion."], ["How frames per second changes how smooth motion looks.", "Games and videos choose a frame rate to balance smooth motion against how much work the computer has to do."], ["How to plan and make your own short animation.", "Animators and game makers combine pixels and frames to tell stories. Now you can too."]]);
   SE.labs.register({
     id: "pixel-studio",
     area: "creative",

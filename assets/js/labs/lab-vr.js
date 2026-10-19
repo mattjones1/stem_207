@@ -4,7 +4,8 @@
  * tide pool and a North Woods pond under Katahdin), then travel to a rainforest,
  * a desert, and a coral reef. They turn to compass headings, find clues,
  * separate observations from inferences, and compare adaptations.
- * Works with a mouse, touch, keyboard, or a VR headset's web browser.
+ * Works with a mouse, touch, or keyboard. It is a 360° look-around page, not an immersive
+ * VR view: in a headset's web browser it appears as a flat page.
  */
 (function () {
   "use strict";
@@ -741,11 +742,12 @@
       learned: "Good field scientists record observations first and label their inferences as ideas to test. That keeps evidence and guesses separate." }
   ];
 
+  SE.labs.goals(LEVELS, [["The difference between what you observe and what you infer from it.", "Field scientists separate what they see from what they think it means, so their conclusions hold up."], ["How living things have adaptations that help them survive where they live.", "Adaptations explain why plants and animals live where they do, from Maine's woods to the whole world."], ["How to use clues in a habitat to make good inferences.", "Scientists often can't see everything. Clues and careful thinking fill in the rest."], ["How plants and animals adapt to heat and very little water.", "Comparing extreme places shows how powerful adaptations are, and how climate shapes life."], ["How the living things in an ecosystem depend on each other.", "When one part of an ecosystem changes, others feel it. That's why scientists protect whole habitats."], ["How to compare habitats using evidence you collected.", "Comparing with evidence, not guesses, is how scientists find patterns across the world."], ["How to sort statements into observations and inferences.", "Telling what you know from what you think is a skill for science, and for checking what you read online."]]);
   SE.labs.register({
     id: "field-station",
     area: "vr",
     title: "Field Station 360",
-    tagline: "Start in Maine's tide pools and North Woods, then travel the world. Look all around five habitats, find clues, and think like a field scientist. Works with a mouse, touch screen, or a VR headset's browser.",
+    tagline: "Start in Maine's tide pools and North Woods, then travel the world. Look all around five habitats, find clues, and think like a field scientist. Drag, tap, or use arrow keys to look around.",
     levels: LEVELS,
     mount(el, idx, api) {
       const L = LEVELS[idx];

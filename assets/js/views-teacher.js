@@ -2,7 +2,7 @@
  * STEM 207 — educator dashboard.
  *   #/teach                   class overview
  *   #/teach/student/<id>      one student's progress and log
- *   #/teach/pathway           coding pathway readiness checks
+ *   #/teach/pathway           educator coding pathway: the student stages, class status, checks, assigning
  *   #/teach/reflections       student answers to review
  *   #/teach/class             roster, class code, and login cards
  */
@@ -15,6 +15,60 @@
   const app = () => document.getElementById("app");
 
   let currentClassId = null;
+  /* How a student-marked completion is labeled for teachers: "legacy" for records from the old
+     one-click flow, "self-reported" for everything since. Lab checks are reported separately. */
+  const completionTag = (e) => {
+    const legacy = !e.data.evidence && !e.isDemo && e.at < (STEM.progression.legacyBefore || 0);
+    if (legacy) return '<span class="self-rep self-rep--legacy" title="Recorded before completions were labeled. Treat as unverified.">legacy</span>';
+    if (e.data.evidence === "show") return '<span class="self-rep" title="The student chose to show or tell you. Record a check when you have.">will show you</span>';
+    return '<span class="self-rep" title="The student submitted this. It isn\'t confirmed until you check it.">submitted</span>';
+  };
+  /* A student's status on one mission, as a small chip (word + shape, not color alone). */
+  const STATUS_ICON = { confirmed: "shield", tryagain: "refresh", checked: "flask", submitted: "check", started: "clock", none: "clock" };
+  const statusChip = (st) => `<span class="st-chip st-chip--${st.state}">${icon(STATUS_ICON[st.state])}${esc(st.label)}</span>`;
+  /* Record a teacher check: confirm the target skill (spoken, demo, or work) or ask for another try. */
+  const checkActions = (student, a, st) => st.state === "confirmed" ? "" : `
+    <details class="check-act">
+      <summary>${icon("shield")}Record a check</summary>
+      <form class="check-act__form" data-check-student="${student.id}" data-check-activity="${a.id}">
+        ${a.check ? `<p class="muted small"><strong>Check:</strong> ${esc(a.check)}</p>` : ""}
+        <label>How did you check? <select class="input input--small" name="how">
+          <option value="oral">Spoken check (they told me)</option><option value="demo">Watched them show it</option><option value="work">Reviewed their work</option></select></label>
+        <label>Note for ${esc(student.displayName.split(" ")[0])} <span class="muted">(needed for Try again)</span>
+          <input class="input input--small" name="note" maxlength="200" placeholder="What to try next, or what they did well"></label>
+        <div class="check-act__btns">
+          <button type="submit" class="btn btn--primary btn--small" name="act" value="confirm">${icon("check")}Confirm</button>
+          <button type="submit" class="btn btn--ghost btn--small" name="act" value="again">${icon("refresh")}Try again</button>
+        </div>
+        <p class="form__error" role="alert"></p>
+      </form>
+    </details>`;
+  let checkBound = false;
+  function bindCheckActions() {
+    if (checkBound) return;
+    checkBound = true;
+    document.addEventListener("submit", (e) => {
+      const f = e.target.closest("[data-check-student]");
+      if (!f) return;
+      e.preventDefault();
+      const act = (e.submitter && e.submitter.value) || "confirm";
+      const note = f.note.value.trim();
+      if (act === "again" && !note) { f.querySelector(".form__error").textContent = "Add a short note so they know what to try next."; f.note.focus(); return; }
+      f.querySelectorAll("button").forEach((b) => { b.disabled = true; });
+      const data = { activityId: f.dataset.checkActivity, note };
+      if (act === "confirm") data.how = f.how.value;
+      SE.store.teacherLog(f.dataset.checkStudent, act === "confirm" ? "teacher_confirmed" : "teacher_try_again", data);
+      SE.toast(act === "confirm" ? "Confirmed" : "Sent back with your note");
+      SE.route(true);
+    });
+  }
+  /* What a teacher needs before class, from the activity's own materials and setup. */
+  const prepLine = (a) => {
+    if (a.launch.status === "lab") return `<span class="prep-line">${icon("check")}${a.time && a.time.prep ? `Teacher prep: about ${a.time.prep} min to check devices. Runs inside STEM 207.` : "No prep: runs inside STEM 207"}</span>`;
+    const mats = (a.before && a.before.materials) || [], setup = (a.before && a.before.setup) || [];
+    return `<details class="prep-line"><summary>${icon("clipboard")}Teacher prep: ${a.time && a.time.prep ? `about ${a.time.prep} min, ` : ""}${mats.length} material${mats.length === 1 ? "" : "s"}${setup.length ? `, ${setup.length} setup step${setup.length === 1 ? "" : "s"}` : ""}</summary>
+      ${mats.length ? `<p><strong>Materials:</strong> ${mats.map(esc).join("; ")}</p>` : ""}${setup.length ? `<p><strong>Setup:</strong> ${setup.map(esc).join(" ")}</p>` : ""}</details>`;
+  };
   const FEED_NOISE = ["step_checked", "signed_in", "lab_test_run", "lab_opened", "lab_hint", "lab_clue", "lab_compass", "lab_fps", "lab_play", "lab_prediction", "lab_trained", "lab_bug", "lab_miss", "profile_custom"];
   const TIMELINE_NOISE = ["lab_test_run", "lab_clue", "lab_compass", "lab_fps", "lab_play", "lab_prediction", "lab_trained", "lab_bug", "lab_miss", "profile_custom"];
   let rosterSort = { key: "name", dir: 1 };
@@ -35,10 +89,13 @@
     const who = withName ? `<strong>${esc((SE.store.studentById(e.studentId) || {}).displayName || "A student")}</strong> ` : "";
     switch (e.type) {
       case "signed_in": return { icon: "user", text: `${who}signed in` };
+      case "teacher_confirmed": return { icon: "shield", text: `Teacher confirmed ${withName ? esc((SE.store.studentById(e.studentId) || {}).displayName) + "’s " : ""}${title}${e.data.how ? ` (${esc({ oral: "spoken check", demo: "watched a demo", work: "reviewed work" }[e.data.how] || "")})` : ""}`, strong: true };
+      case "teacher_try_again": return { icon: "refresh", text: `Teacher asked ${withName ? esc((SE.store.studentById(e.studentId) || {}).displayName) : "them"} to try again on ${title}` };
+      case "help_requested": return { icon: "question", text: `${who}asked for help on ${title}`, strong: true };
       case "mission_opened": return { icon: "eye", text: `${who}opened ${title}` };
       case "launched": return { icon: "external", text: `${who}launched ${a ? esc(a.launch.provider) : "a resource"} for ${title}` };
       case "step_checked": return { icon: "list", text: `${who}${e.data.checked ? "checked off" : "unchecked"} step ${e.data.step + 1} of ${title}` };
-      case "mission_completed": return { icon: "check", text: `${who}completed ${title}`, strong: true };
+      case "mission_completed": return { icon: "check", text: `${who}${e.data.evidence ? "sent" : "marked"} ${title}${e.data.evidence ? "" : " complete"} ${completionTag(e)}`, strong: true };
       case "ican_claimed": return { icon: "flag", text: `${who}said “I can” for pathway stage ${e.data.stage}` };
       case "ican_verified": return { icon: "shield", text: `${withName ? who : ""}Stage ${e.data.stage} confirmed by teacher` };
       case "ican_returned": return { icon: "refresh", text: `${withName ? who : ""}Stage ${e.data.stage}: teacher said “not yet”` };
@@ -61,7 +118,7 @@
     const tabs = [
       ["overview", "#/teach", "Overview", "chart", 0],
       ["missions", "#/teach/missions", "Missions", "rocket", 0],
-      ["pathway", "#/teach/pathway", "Pathway checks", "flag", pendingClaims],
+      ["pathway", "#/teach/pathway", "Coding pathway", "flag", pendingClaims],
       ["reflections", "#/teach/reflections", "Reflections", "message", pendingRefl],
       ["class", "#/teach/class", "Class & logins", "users", 0]
     ];
@@ -108,7 +165,14 @@
     const out = [];
     summary.profiles.forEach(({ student, prof }) => {
       prof.completions.forEach((c) => {
+        // Waiting for you: unread written answers, and "I'll show you" submissions not yet checked.
+        // A teacher check (confirm or try again) after the submission also counts as reviewed.
+        const st = SE.game.statusFor(prof, c.activity);
+        const checkedSince = (st.confirmed && st.confirmed.at > c.event.at) || (st.tryAgain && st.tryAgain.at > c.event.at);
+        const latest = st.sub && st.sub.id === c.event.id;
+        if (checkedSince) return;
         if ((c.event.data.reflection || "").trim() && !prof.reviewed[c.event.id]) out.push({ student, prof, c });
+        else if (latest && c.event.data.evidence === "show" && st.state === "submitted") out.push({ student, prof, c });
       });
     });
     return out.sort((a, b) => b.c.event.at - a.c.event.at);
@@ -161,6 +225,8 @@
       const recent = prof.completions.slice(-3);
       const stuck = recent.filter((c) => c.event.data.confidence === "figuring").length;
       if (stuck >= 2) attention.push({ student, why: `Said “still figuring it out” on ${stuck} of their last ${recent.length} missions`, icon: "question" });
+      const help = SE.store.eventsFor(student.id).filter((e) => e.type === "help_requested" && now - e.at < SE.DAY).pop();
+      if (help) { const ha = SE.activityById[help.data.activityId]; attention.unshift({ student, why: `Asked for help ${SE.timeAgo(help.at)}${ha ? ` on ${ha.title}` : ""}`, icon: "message" }); }
     });
 
     // 14-day chart
@@ -186,6 +252,7 @@
           <a class="kpi ${claims.length ? "kpi--action" : ""}" href="#/teach/pathway"><span class="kpi__label">“I can” checks</span><span class="kpi__value">${claims.length}</span><span class="kpi__foot">${claims.length ? "Waiting for you" : "None waiting"}</span></a>
         </div>
       </section>
+      <section class="wrap section">${messageBlock(cls)}</section>
 
       <section class="wrap section teach-grid">
         <div class="block chart-block">
@@ -212,7 +279,7 @@
           const list = SE.store.assignmentsFor(cls.id).map((x) => ({ x, a: SE.activityById[x.activityId] })).filter((r) => r.a);
           return `<div class="block">
             <div class="block__head"><h2>Assigned missions</h2><a class="muted" href="#/teach/missions">${list.length ? "Manage" : "Assign missions"}</a></div>
-            ${list.length ? `<ul class="alist alist--compact">${list.map(({ x, a }) => `<li class="alist__item"><div class="alist__main"><a href="#/activity/${a.id}">${esc(a.title)}</a><small>${x.dueDate ? esc(dueText(x.dueDate)) : "No due date"}</small></div>${progressMarkup(classProgress(sum, a))}</li>`).join("")}</ul>`
+            ${list.length ? `<ul class="alist alist--compact">${list.map(({ x, a }) => `<li class="alist__item"><div class="alist__main"><a href="#/activity/${a.id}">${esc(a.title)}</a><small>${x.dueDate ? esc(dueText(x.dueDate)) : "No due date"}</small>${prepLine(a)}</div>${progressMarkup(classProgress(sum, a))}</li>`).join("")}</ul>`
               : `<p class="muted">Pick missions by discipline on the <a href="#/teach/missions">Missions</a> tab. They'll show up first on every student's home screen.</p>`}
           </div>`;
         })()}
@@ -234,9 +301,9 @@
             : `<p class="muted">Everyone has been active this week and nobody is flagging trouble.</p>`}
         </div>
         <div class="block">
-          <div class="block__head"><h2>Class expedition</h2><span class="muted">${SE.num(sum.totalXp)} XP together</span></div>
-          ${SE.goalTrack(sum.goal)}
-          <p class="muted">${sum.goal.next ? `${SE.num(sum.goal.next.xp - sum.totalXp)} XP until the class reaches ${esc(sum.goal.next.name)}. Students see this on their home screen.` : "Your class reached the final destination."}</p>
+          <div class="block__head"><h2>Class journey</h2><span class="muted">${sum.journey.goal.next ? `Next stop: ${esc(sum.journey.goal.next.name)}` : "Katahdin reached"}</span></div>
+          ${SE.classJourneyBlock(sum.journey)}
+          <p class="muted">Only class work moves the journey: missions you assign, and missions and stages you confirm. Students see this on Today and My expedition. Their own XP, ranks, patches, and harbor still count everything they do.</p>
         </div>
       </section>
 
@@ -259,7 +326,42 @@
     app().innerHTML = frame(user, cls, classes, "overview", body);
     bindFrame(user);
     bindRoster(sum);
+    bindMessages(cls);
   };
+
+  /* Class messages: a short note to the whole class, shown under "From your teacher" on Today. */
+  function messageBlock(cls) {
+    const list = SE.store.messagesFor(cls.id);
+    return `
+      <div class="block msg-block" id="class-messages">
+        <div class="block__head"><h2>${icon("message")}Message your class</h2><span class="muted">Students see the newest 3 on their Today page</span></div>
+        <form class="msg-form" id="msg-form">
+          <label for="msg-body" class="visually-hidden">Message to ${esc(cls.name)}</label>
+          <textarea id="msg-body" class="input" rows="2" maxlength="500" placeholder="Example: Finish Lobster Trap Logic by Thursday. Bring your flowchart." aria-describedby="msg-help"></textarea>
+          <p class="field-help" id="msg-help">Keep it short and about class work. No student names or personal details.</p>
+          <button type="submit" class="btn btn--primary">${icon("message")}Post to ${esc(cls.name)}</button>
+        </form>
+        ${list.length ? `<ul class="msg-list">${list.map((m) => `<li><p>${esc(m.body)}</p><small>${SE.timeAgo(m.createdAt)}</small><button type="button" class="btn btn--ghost btn--small" data-msg-del="${m.id}" aria-label="Delete message: ${esc(m.body.slice(0, 40))}">${icon("trash")}Delete</button></li>`).join("")}</ul>` : `<p class="muted">No messages yet.</p>`}
+      </div>`;
+  }
+  function bindMessages(cls) {
+    const f = document.getElementById("msg-form");
+    if (!f) return;
+    f.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const t = document.getElementById("msg-body");
+      if (!t.value.trim()) { t.focus(); return; }
+      SE.store.postMessage(cls.id, t.value);
+      SE.toast(`Posted to ${cls.name}`);
+      SE.route(true);
+      document.getElementById("msg-body").focus();
+    });
+    app().querySelectorAll("[data-msg-del]").forEach((b) => b.addEventListener("click", () => {
+      SE.store.deleteMessage(b.dataset.msgDel);
+      SE.toast("Message deleted");
+      SE.route(true);
+    }));
+  }
 
   function rosterTable(sum) {
     const rows = sum.profiles.map(({ student, prof }) => {
@@ -357,7 +459,8 @@
           return `<div class="block">
             <div class="block__head"><h2>Assigned missions</h2><span class="muted">${doneN} of ${list.length} done</span></div>
             <ul class="astatus">${list.map(({ x, a }) => { const d = SE.game.missionDone(prof, a); const late = !d && x.dueDate && new Date(`${x.dueDate}T23:59:59`).getTime() < Date.now();
-              return `<li class="${d ? "is-done" : late ? "is-late" : ""}">${icon(d ? "check" : late ? "alert" : "clock")}<a href="#/activity/${a.id}">${esc(a.title)}</a><small>${d ? "Done" : prof.opened.has(a.id) ? "Started" : "Not started"}${x.dueDate ? ` · ${esc(dueText(x.dueDate))}` : ""}</small></li>`; }).join("")}</ul>
+              const st = SE.game.statusFor(prof, a);
+              return `<li class="${d ? "is-done" : late ? "is-late" : ""}">${icon(d ? "check" : late ? "alert" : "clock")}<span class="astatus__main"><a href="#/activity/${a.id}">${esc(a.title)}</a><small>${x.dueDate ? esc(dueText(x.dueDate)) : "No due date"}</small></span>${statusChip(st)}${checkActions(student, a, st)}</li>`; }).join("")}</ul>
           </div>`;
         })()}
         <div class="block">
@@ -389,7 +492,9 @@
           <ul class="lab-prog-list">${SE.labs.all().map((lab) => {
             const n = (prof.labLevels[lab.id] || new Set()).size;
             const st = prof.labStats[lab.id] || { runs: 0, hints: 0 };
-            return `<li><span><a href="#/lab/${lab.id}">${esc(lab.title)}</a><small>${n} of ${lab.levels.length} levels · ${st.runs} tests · ${st.hints} hints</small></span><span class="meter"><span style="width:${(n / lab.levels.length) * 100}%"></span></span></li>`;
+            const la = STEM.activities.find((x) => x.launch && x.launch.labId === lab.id);
+            const ls = la ? SE.game.statusFor(prof, la) : null;
+            return `<li><span><a href="#/lab/${lab.id}">${esc(lab.title)}</a><small>${n} of ${lab.levels.length} levels · ${st.runs} tests · ${st.hints} hints</small>${ls && ["checked", "confirmed", "tryagain"].includes(ls.state) ? statusChip(ls) : ""}</span><span class="meter"><span style="width:${(n / lab.levels.length) * 100}%"></span></span></li>`;
           }).join("")}</ul>
         </div>
         <div class="block">
@@ -412,6 +517,7 @@
     bindFrame(user);
     bindStageButtons();
     bindReflectionActions();
+    bindCheckActions();
   };
 
   function bindStageButtons() {
@@ -438,11 +544,13 @@
           <span class="icon-badge">${icon(SE.areaById[c.activity.area].icon)}</span>
           <div>
             ${withName ? `<a href="#/teach/student/${student.id}"><strong>${esc(student.displayName)}</strong></a> · ` : ""}<a href="#/activity/${c.activity.id}">${withName ? esc(c.activity.title) : `<strong>${esc(c.activity.title)}</strong>`}</a>
-            <span>${SE.dateShort(c.event.at)} · ${c.event.data.stepsDone || 0}/${c.event.data.stepsTotal || c.activity.steps.length} steps · ${c.event.data.extension ? "tried the challenge" : "no challenge"}</span>
+            <span>${SE.dateShort(c.event.at)} · ${completionTag(c.event)} · ${c.event.data.stepsDone || 0}/${c.event.data.stepsTotal || c.activity.steps.length} steps · ${c.event.data.extension ? "tried the challenge" : "no challenge"}</span>
           </div>
           ${conf ? `<span class="conf conf--${conf.id}">${esc(conf.name)}</span>` : ""}
         </div>
-        ${answer ? `<p class="mission-log__q">${esc(c.activity.reflect)}</p><p class="mission-log__answer">“${esc(answer)}”</p>` : `<p class="muted">No answer to the reflection question.</p>`}
+        ${(() => { const st = SE.game.statusFor(prof, c.activity); return st.sub && st.sub.id === c.event.id ? `<div class="check-row-wrap">${statusChip(st)}${checkActions(student, c.activity, st)}</div>` : ""; })()}
+        ${c.event.data.extensionNote ? `<p class="muted small"><strong>Take it further:</strong> “${esc(c.event.data.extensionNote)}”</p>` : ""}
+        ${answer ? `<p class="mission-log__q">${esc(c.event.data.evidence && c.activity.check ? c.activity.check : c.activity.reflect)}</p><p class="mission-log__answer">“${esc(answer)}”</p>` : (c.event.data.evidence === "show" ? `<p class="muted">${icon("users", 'class="inline-icon"')}Chose to show or tell you instead of writing.</p>` : `<p class="muted">No answer to the reflection question.</p>`)}
         ${r ? (r.data.note ? `<p class="teacher-reply">${icon("message")}<span><strong>You replied:</strong> ${esc(r.data.note)}</span></p>` : `<p class="muted">${icon("eye", 'class="inline-icon"')}Marked as read</p>`)
           : answer ? `
           <form class="reply-form" data-completion="${c.event.id}" data-student="${student.id}">
@@ -488,30 +596,86 @@
     app().innerHTML = frame(user, cls, classes, "reflections", body);
     bindFrame(user);
     bindReflectionActions();
+    bindCheckActions();
     document.getElementById("show-reviewed").addEventListener("change", (e) => { showReviewed = e.target.checked; SE.route(true); });
   };
 
-  /* ───────── Pathway checks ───────── */
+  /* ───────── Coding pathway (educator) ─────────
+     The same seven stages students see, from the same data (STEM.pathway), plus the class's
+     status on each stage, checks waiting, what a confirm looks like, and assigning. */
   SE.views.teachPathway = function (user) {
     const { classes, cls } = getClass(user);
     if (!cls) return noClass(user);
     const sum = SE.game.classSummary(cls.id);
     const claims = pendingStageClaims(sum);
+    const claimRow = (x, withStage) => {
+      const s = STEM.pathway.find((p) => p.stage === x.stage);
+      return `<li>
+        <div><a href="#/teach/student/${x.student.id}"><strong>${esc(x.student.displayName)}</strong></a><span>${withStage ? `Stage ${x.stage}: ${esc(s.title)} · ` : ""}asked ${SE.timeAgo(x.at)}</span>${withStage ? `<em>“${esc(s.iCan)}”</em>` : ""}</div>
+        <span class="stage-actions"><button class="btn btn--primary btn--small" data-verify="${x.stage}" data-student="${x.student.id}">${icon("check")}Confirm</button><button class="btn btn--ghost btn--small" data-return="${x.stage}" data-student="${x.student.id}">Not yet</button></span>
+      </li>`;
+    };
+    const stageCard = (st) => {
+      const acts = st.activities.map((id) => SE.activityById[id]).filter(Boolean);
+      const cleared = sum.profiles.filter((p) => p.prof.stages[st.stage] && p.prof.stages[st.stage].status === "cleared");
+      const waiting = claims.filter((c) => c.stage === st.stage);
+      const notYet = sum.students.length - cleared.length - waiting.length;
+      const unassigned = acts.filter((a) => !SE.store.assignmentFor(cls.id, a.id));
+      const labLevels = (SE.roverLevels || []).map((l, i) => (l.stage === st.stage ? i + 1 : 0)).filter(Boolean);
+      const t = st.teach || {};
+      return `
+        <li class="stage tstage" id="tstage-${st.stage}">
+          <div class="stage__node" aria-hidden="true"><div><small>Stage</small><b>${st.stage}</b></div></div>
+          <article class="block stage__card" aria-labelledby="tstage-title-${st.stage}">
+            <div class="stage__head">
+              <div>
+                <h2 id="tstage-title-${st.stage}"><span class="visually-hidden">Stage ${st.stage}: </span>${esc(st.title)}</h2>
+                <p class="stage__concepts">${esc(st.concepts)}</p>
+              </div>
+              <p class="tstage__status" aria-label="Class status for stage ${st.stage}">
+                <span class="tchip is-cleared">${icon("check")}${cleared.length} cleared</span>
+                <span class="tchip is-claimed">${icon("clock")}${waiting.length} waiting</span>
+                <span class="tchip">${notYet} not yet</span>
+              </p>
+            </div>
+            ${waiting.length ? `<div class="tstage__waiting"><h3>${icon("flag")}Waiting for your check</h3><ul class="claims claims--compact">${waiting.map((x) => claimRow(x, false)).join("")}</ul></div>` : ""}
+            <div class="ican">${icon("check")}<span><span class="visually-hidden">Readiness check: </span>${esc(st.iCan)}</span></div>
+            <div class="tstage__teach">
+              <div><h3>What a confirm looks like</h3><p>${esc(t.lookFor || "")}</p></div>
+              <div><h3>Common misconception</h3><p>${esc(t.misconception || "")}</p></div>
+            </div>
+            <details class="tstage__more"><summary>Learning goal, project, and prerequisites</summary>
+              <div class="stage__grid">
+                <div><h3>Learning goal</h3><p>${esc(st.goal)}</p></div>
+                <div><h3>Project</h3><p>${esc(st.project)}</p></div>
+                <div><h3>Prerequisite</h3><p>${esc(st.prerequisite)}</p></div>
+                <div><h3>Debugging habit</h3><p>${esc(st.debugging)}</p></div>
+                <div class="prep__full"><h3>Suggested starting point</h3><p>${esc(st.suggestedStart)}</p></div>
+              </div>
+            </details>
+            <div class="tstage__missions-head">
+              <h3>Missions in this stage <span class="muted">${acts.length}</span></h3>
+              ${unassigned.length ? `<button type="button" class="btn btn--ghost btn--small" data-assign-many="${unassigned.map((a) => a.id).join(",")}">${icon("plus")}Assign stage ${st.stage} (${unassigned.length})</button>` : `<span class="chip chip--done">${icon("check")}All assigned</span>`}
+            </div>
+            <ul class="mlist">${acts.map((a) => missionRow(a, cls, sum)).join("")}</ul>
+            ${labLevels.length ? `<div class="stage__lab"><span>${icon("flask")}Harbor Code Lab levels for this stage</span>${labLevels.map((lv) => `<a class="lvl-chip" href="#/lab/rover/${lv}">${lv}</a>`).join("")}</div>` : ""}
+          </article>
+        </li>`;
+    };
     const body = `
       <section class="wrap section">
         <div class="section__head">
-          <div><span class="eyebrow">Coding pathway</span><h2>${claims.length ? `${plural(claims.length, "student is", "students are")} waiting for a check` : "No checks waiting"}</h2></div>
-          <a class="btn btn--ghost btn--small" href="#/pathway">See the stages ${icon("arrowRight")}</a>
+          <div><span class="eyebrow">Coding pathway</span><h2>The stages your students see, with your class on each one</h2></div>
+          <span class="tpath-tools"><a class="btn btn--ghost btn--small" href="#/pathway/student">${icon("eye")}Preview the student view</a><a class="btn btn--ghost btn--small" href="#checks-guide" data-jump="checks-guide">${icon("question")}How checks work</a></span>
         </div>
-        <p class="muted section-note">When a student taps “I can do this,” ask them to show you the “I can” statement. Confirm it to clear the stage (+${P.xp.stageCleared} XP for them), or choose Not yet so they can keep practicing.</p>
-        ${claims.length ? `<ul class="claims">${claims.map((x) => {
-          const s = STEM.pathway.find((p) => p.stage === x.stage);
-          return `<li>
-            <div><a href="#/teach/student/${x.student.id}"><strong>${esc(x.student.displayName)}</strong></a><span>Stage ${x.stage}: ${esc(s.title)} · asked ${SE.timeAgo(x.at)}</span><em>“${esc(s.iCan)}”</em></div>
-            <span class="stage-actions"><button class="btn btn--primary btn--small" data-verify="${x.stage}" data-student="${x.student.id}">${icon("check")}Confirm</button><button class="btn btn--ghost btn--small" data-return="${x.stage}" data-student="${x.student.id}">Not yet</button></span>
-          </li>`;
-        }).join("")}</ul>` : ""}
+        <div class="block tpath-queue">
+          <div class="block__head"><h2>${claims.length ? `${plural(claims.length, "check", "checks")} waiting` : "No checks waiting"}</h2></div>
+          ${claims.length ? `<p class="muted section-note">Ask each student to show you the “I can” statement. Confirm clears the stage (+${P.xp.stageCleared} XP for them). Not yet lets them keep practicing and ask again.</p><ul class="claims">${claims.map((x) => claimRow(x, true)).join("")}</ul>`
+            : `<p class="muted">When a student taps “I can do this” on a stage, it shows up here and on that stage below.</p>`}
+        </div>
       </section>
+      <section class="wrap section">${SE.checksGuide("teacher")}</section>
+      <ol class="wrap stages tstages">${STEM.pathway.map(stageCard).join("")}</ol>
       <section class="wrap section">
         <div class="section__head"><div><span class="eyebrow">Readiness</span><h2>Class pathway map</h2></div></div>
         <div class="table-wrap">
@@ -641,19 +805,28 @@
     { id: "pathway", name: "Coding pathway", short: "Pathway", icon: "list", blurb: "Seven readiness-based stages, from first instructions to independent projects. Assign a whole stage or pick missions inside it." },
     ...STEM.areas.map((a) => ({ id: a.id, name: a.name, short: a.short, icon: a.icon, blurb: a.description }))
   ];
-  const missionFilters = { grade: "", time: "", q: "", maine: false };
+  const missionFilters = { grade: "", time: "", q: "", maine: false, pilot: false };
   const LEVEL_ORDER = { beginner: 0, intermediate: 1, advanced: 2 };
 
   function classProgress(sum, a) {
+    const by = { confirmed: 0, checked: 0, submitted: 0, tryagain: 0, started: 0 };
+    sum.profiles.forEach((p) => { const s = SE.game.statusFor(p.prof, a).state; if (by[s] != null) by[s]++; });
     const done = sum.profiles.filter((p) => SE.game.missionDone(p.prof, a)).length;
     const started = sum.profiles.filter((p) => !SE.game.missionDone(p.prof, a) && (p.prof.opened.has(a.id) || (a.launch.labId && (p.prof.labLevels[a.launch.labId] || new Set()).size))).length;
-    return { done, started, total: sum.students.length };
+    // Lab missions are checked by the lab itself; anything else is marked complete by the student.
+    return { done, started, total: sum.students.length, self: !a.launch.labId, by };
   }
-  const progressMarkup = (pr) => `
-    <span class="mprog" aria-label="${pr.done} of ${pr.total} students finished${pr.started ? `, ${pr.started} started` : ""}">
-      <span class="mprog__bar"><span style="width:${pr.total ? (pr.done / pr.total) * 100 : 0}%"></span><span class="mprog__started" style="width:${pr.total ? (pr.started / pr.total) * 100 : 0}%"></span></span>
-      <span class="mprog__text"><b>${pr.done}</b>/${pr.total} done${pr.started ? ` · ${pr.started} started` : ""}</span>
+  const progressMarkup = (pr) => {
+    const b = pr.by || {};
+    const parts = [b.confirmed && `${b.confirmed} confirmed`, b.checked && `${b.checked} checked in lab`, b.submitted && `${b.submitted} submitted`, b.tryagain && `${b.tryagain} try again`, b.started && `${b.started} started`].filter(Boolean);
+    const solid = (b.confirmed || 0) + (b.checked || 0), sent = b.submitted || 0, began = (b.started || 0) + (b.tryagain || 0);
+    const w = (n) => (pr.total ? (n / pr.total) * 100 : 0);
+    return `
+    <span class="mprog" aria-label="${pr.total} students: ${parts.join(", ") || "none started"}">
+      <span class="mprog__bar"><span style="width:${w(solid)}%"></span><span class="mprog__sent" style="width:${w(sent)}%"></span><span class="mprog__started" style="width:${w(began)}%"></span></span>
+      <span class="mprog__text">${parts.length ? `${parts.join(" · ")}<span class="muted"> of ${pr.total}</span>` : "No one has started yet"}</span>
     </span>`;
+  };
   const assignBtn = (a, assigned) => `<button type="button" class="btn btn--small ${assigned ? "btn--assigned" : "btn--ghost"}" data-assign="${a.id}" aria-pressed="${!!assigned}">${icon(assigned ? "check" : "plus")}${assigned ? "Assigned" : "Assign"}</button>`;
   const dueText = (d) => {
     if (!d) return "";
@@ -675,16 +848,18 @@
             ${lab ? `<span class="mtag mtag--lab">${icon("flask")}Interactive lab · ${SE.labs.byId(a.launch.labId) ? SE.labs.byId(a.launch.labId).levels.length : ""} levels</span>` : ""}
             ${SE.isMaine && SE.isMaine(a) ? `<span class="maine-tag">${SE.pine(13)}Made in Maine</span>` : ""}
             ${a.pathwayStage ? `<span class="mtag">${icon("list")}Pathway stage ${a.pathwayStage}</span>` : ""}
+            ${a.track ? `<span class="track-tag">Grades ${esc(a.track.replace("-", "–"))} track</span>` : ""}
           </div>
           <h4><a href="#/activity/${a.id}">${esc(a.title)}</a></h4>
           <p>${esc(a.summary)}</p>
           <div class="mrow__meta">
             <span>${SE.levelMarkup(a.level)}</span>
             <span>${icon("grade")}${SE.gradesText(a.grades)}</span>
-            <span>${icon("clock")}${a.duration} min</span>
+            <span>${icon("clock")}${SE.timeText(a)}</span>${a.pilot ? `<span class="mtag mtag--pilot">${icon("flag")}Pilot</span>` : ""}
             <span>${icon("users")}${esc(STEM.formats[a.format].name)}</span>
             <span>${icon("tools")}${esc(SE.equipmentText(a.equipment))}</span>
           </div>
+          ${prepLine(a)}
         </div>
         <div class="mrow__side">
           ${progressMarkup(classProgress(sum, a))}
@@ -698,7 +873,8 @@
     const q = missionFilters.q.trim().toLowerCase();
     return list.filter((a) =>
       (!missionFilters.grade || a.grades.includes(missionFilters.grade)) &&
-      (!missionFilters.time || a.duration <= Number(missionFilters.time)) &&
+      (!missionFilters.time || SE.timeMax(a) <= Number(missionFilters.time)) &&
+      (!missionFilters.pilot || a.pilot) &&
       (!missionFilters.maine || (SE.isMaine && SE.isMaine(a))) &&
       (!q || `${a.title} ${a.summary} ${(a.keywords || []).join(" ")}`.toLowerCase().includes(q)));
   }
@@ -760,7 +936,12 @@
             const late = x.dueDate && new Date(`${x.dueDate}T23:59:59`).getTime() < Date.now();
             return `<li class="alist__item">
               <span class="icon-badge">${icon(SE.areaById[a.area].icon)}</span>
-              <div class="alist__main"><a href="#/activity/${a.id}">${esc(a.title)}</a><small>${esc(SE.areaById[a.area].short)} · ${a.duration} min · ${SE.gradesText(a.grades)}</small></div>
+              <div class="alist__main"><a href="#/activity/${a.id}">${esc(a.title)}</a><small>${esc(SE.areaById[a.area].short)} · ${SE.timeText(a)} · ${SE.gradesText(a.grades)}</small>${prepLine(a)}
+                <details class="alist__note" ${x.note ? "open" : ""}><summary>${icon("clipboard")}${x.note ? "Instructions for students" : "Add instructions for students"}</summary>
+                  <form class="note-form" data-note-form="${a.id}"><label class="visually-hidden" for="note-${a.id}">Instructions for ${esc(a.title)}</label>
+                    <textarea id="note-${a.id}" class="input input--small" rows="2" maxlength="500" placeholder="Example: Work with your table group.">${esc(x.note || "")}</textarea>
+                    <button type="submit" class="btn btn--ghost btn--small">${icon("check")}Save</button></form>
+                </details></div>
               ${progressMarkup(pr)}
               <label class="alist__due ${late && pr.done < pr.total ? "is-late" : ""}"><span>Due</span><input type="date" class="input input--small" value="${x.dueDate || ""}" data-due="${a.id}" aria-label="Due date for ${esc(a.title)}"></label>
               <button type="button" class="icon-btn" data-assign="${a.id}" aria-pressed="true" aria-label="Unassign ${esc(a.title)}" title="Unassign">✕</button>
@@ -790,13 +971,14 @@
         <div class="disc-panel">
           <div class="disc-panel__head">
             <div><h3>${icon(disc.icon)}${esc(disc.name)}</h3><p class="muted">${esc(disc.blurb)}</p></div>
-            ${disc.id === "pathway" ? "" : SE.labs.forArea(disc.id).length ? `<a class="btn btn--ghost btn--small" href="#/lab/${SE.labs.forArea(disc.id)[0].id}">${icon("flask")}Preview the lab</a>` : ""}
+            ${disc.id === "pathway" ? `<a class="btn btn--ghost btn--small" href="#/teach/pathway">${icon("flag")}Open the coding pathway and checks</a>` : SE.labs.forArea(disc.id).length ? `<a class="btn btn--ghost btn--small" href="#/lab/${SE.labs.forArea(disc.id)[0].id}">${icon("flask")}Preview the lab</a>` : ""}
           </div>
           <form class="mfilters" id="mfilters" role="search" aria-label="Filter missions">
             <label><span>Grade band</span><select class="input input--small" name="grade"><option value="">All grades</option>${STEM.gradeBands.map((g) => `<option value="${g.id}" ${missionFilters.grade === g.id ? "selected" : ""}>${esc(g.name)}</option>`).join("")}</select></label>
             <label><span>Time</span><select class="input input--small" name="time"><option value="">Any length</option>${STEM.durations.map((d) => `<option value="${d.max}" ${missionFilters.time === String(d.max) ? "selected" : ""}>${esc(d.name)}</option>`).join("")}</select></label>
             <label class="mfilters__q"><span>Search</span><input class="input input--small" name="q" type="search" value="${esc(missionFilters.q)}" placeholder="loops, tides, robots…"></label>
             <label class="check-row"><input type="checkbox" name="maine" ${missionFilters.maine ? "checked" : ""}> Made in Maine only</label>
+            <label class="check-row"><input type="checkbox" name="pilot" ${missionFilters.pilot ? "checked" : ""}> Pilot missions only</label>
           </form>
           <div id="disc-body">${disciplineBody(disc, cls, sum)}</div>
         </div>
@@ -807,10 +989,17 @@
     const form = document.getElementById("mfilters");
     const refresh = () => { document.getElementById("disc-body").innerHTML = disciplineBody(disc, cls, SE.game.classSummary(cls.id)); };
     form.addEventListener("input", () => {
-      missionFilters.grade = form.grade.value; missionFilters.time = form.time.value; missionFilters.q = form.q.value; missionFilters.maine = form.maine.checked;
+      missionFilters.grade = form.grade.value; missionFilters.time = form.time.value; missionFilters.q = form.q.value; missionFilters.maine = form.maine.checked; missionFilters.pilot = form.pilot.checked;
       refresh();
     });
     form.addEventListener("submit", (e) => e.preventDefault());
+    app().querySelectorAll("[data-note-form]").forEach((f) => f.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = f.dataset.noteForm, v = f.querySelector("textarea").value;
+      SE.store.setAssignmentNote(cls.id, id, v);
+      SE.toast(v.trim() ? "Instructions saved. Students see them on Today." : "Instructions removed");
+      SE.route(true);
+    }));
     app().querySelectorAll("[data-due]").forEach((inp) => inp.addEventListener("change", () => {
       SE.store.setDueDate(cls.id, inp.dataset.due, inp.value);
       SE.toast(inp.value ? `Due date set: ${dueText(inp.value).replace(/^Due /, "")}` : "Due date removed");
@@ -820,7 +1009,7 @@
 
   /* Assign / unassign buttons work anywhere on the page (Missions tab, activity pages). */
   document.addEventListener("click", (e) => {
-    if (e.target.closest("[data-clear-filters]")) { Object.assign(missionFilters, { grade: "", time: "", q: "", maine: false }); SE.route(true); return; }
+    if (e.target.closest("[data-clear-filters]")) { Object.assign(missionFilters, { grade: "", time: "", q: "", maine: false, pilot: false }); SE.route(true); return; }
     const one = e.target.closest("[data-assign]");
     const many = e.target.closest("[data-assign-many]");
     if (!one && !many) return;
