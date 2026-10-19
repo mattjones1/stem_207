@@ -784,6 +784,49 @@
   /* ───────── Pathway ───────── */
   /* Harbor Code Lab levels that practice each pathway stage (from each level's `stage`). */
   const roverLevelsFor = (stage) => (SE.roverLevels || []).map((l, i) => (l.stage === stage ? i + 1 : 0)).filter(Boolean);
+  /* "How checks work": one picture of who does what, where, and what it changes.
+     kind "teacher" shows both kinds of check; "student" shows the short stage-check version. */
+  SE.checksGuide = function (kind) {
+    const step = (who, what, where) => `<li class="cg-step cg-step--${who === "You" || who === "Teacher" ? "teach" : "student"}"><span class="cg-who">${esc(who)}</span><span class="cg-what">${what}</span>${where ? `<span class="cg-where">${icon("map")}${where}</span>` : ""}</li>`;
+    if (kind === "student") return `
+      <details class="block cg cg--student" id="checks-guide">
+        <summary><span>${icon("question")}How stage checks work</span></summary>
+        <ol class="cg-flow">
+          ${step("You", "Practice the missions and lab levels in a stage.", "")}
+          ${step("You", "When you can do the “I can” statement, tap <strong>I can do this</strong>.", "On this page")}
+          ${step("Teacher", "Your teacher asks you to show it, then chooses <strong>Confirm</strong> or <strong>Not yet</strong>.", "In class")}
+          ${step("You", "Confirmed: the stage is cleared and you earn " + STEM.progression.xp.stageCleared + " XP. Not yet: keep practicing and tap it again.", "On this page")}
+        </ol>
+      </details>`;
+    return `
+      <details class="block cg" id="checks-guide" open>
+        <summary><span>${icon("question")}How checks work</span><span class="muted cg-sub">Two kinds of check. Students ask, you decide.</span></summary>
+        <div class="cg-grid">
+          <section aria-labelledby="cg-m">
+            <h3 id="cg-m">${icon("rocket")}Mission checks</h3>
+            <p class="muted">Did the student do this mission? One per mission.</p>
+            <ol class="cg-flow">
+              ${step("Student", "Finishes the steps, then sends the <strong>Mission debrief</strong>: a written answer, or “Show or tell my teacher.”", "Mission page")}
+              ${step("You", "See it in the <strong>Reflections</strong> tab (a badge shows how many are waiting) or on the student's page.", "Reflections tab · student page")}
+              ${step("You", "Choose <strong>Confirm</strong> (how they showed you: said it, showed it, or their work) or <strong>Try again</strong> with a short note.", "Student page")}
+              ${step("Student", "Confirm: the mission shows as confirmed (+" + STEM.progression.xp.teacherConfirmed + " XP). Try again: it comes back on their Today page with your note until they send it again.", "Today · mission page")}
+            </ol>
+          </section>
+          <section aria-labelledby="cg-s">
+            <h3 id="cg-s">${icon("flag")}Stage checks</h3>
+            <p class="muted">Is the student ready for the next pathway stage? One per stage.</p>
+            <ol class="cg-flow">
+              ${step("Student", "Practices the stage, then taps <strong>I can do this</strong> on that stage.", "Coding pathway page")}
+              ${step("You", "See it under <strong>Checks waiting</strong> on this page, with a badge on the tab.", "Coding pathway tab")}
+              ${step("You", "Ask them to show the “I can” statement. Choose <strong>Confirm</strong> or <strong>Not yet</strong>.", "This page · student page")}
+              ${step("Student", "Confirm: the stage is cleared (+" + STEM.progression.xp.stageCleared + " XP) and suggestions move to the next stage. Not yet: the request goes away and they can ask again.", "Coding pathway · Today")}
+            </ol>
+          </section>
+        </div>
+        <p class="cg-key">${icon("check")}<span><strong>Only your Confirm clears a stage.</strong> Missions and lab levels are practice and evidence. Finishing them never clears a stage on its own, and a student can ask for a stage check at any time.</span></p>
+      </details>`;
+  };
+
   SE.views.pathway = function (user) {
     const isStudent = user && user.role === "student";
     const prof = isStudent ? SE.game.profile(user.id) : null;
@@ -800,6 +843,7 @@
             <div><span class="eyebrow">Coding & Computer Science</span><h1 tabindex="-1">The coding pathway</h1></div>
           </div>
           <p class="page-top__lede">Seven stages organized by readiness, not by grade. Suggested grades help you choose a starting point. Move on when you can show the “I can” statement, at your own pace.</p>
+          ${user && user.role === "educator" ? `<p class="preview-note">${icon("eye")}<span><strong>Student view preview.</strong> This is what students see. Their “I can do this” buttons appear once they sign in.</span> <a class="btn btn--ghost btn--small" href="#/teach/pathway">${icon("arrowLeft")}Back to your pathway</a></p>` : ""}
           ${prof ? `<p class="page-top__progress"><strong>${prof.counts.stagesCleared} of 7</strong> stages cleared · each cleared stage is worth ${STEM.progression.xp.stageCleared} XP</p>` : ""}
         </div>
       </section>
@@ -816,6 +860,7 @@
             <ol>${t.activities.map((id) => SE.activityById[id]).filter(Boolean).map((a) => `<li><a href="#/activity/${a.id}">${esc(a.title)}</a> <span class="muted">${SE.timeText(a)}</span></li>`).join("")}</ol>
           </article>`).join("")}</div>
         <p class="muted">Already coding? Skip ahead: pick the first stage below whose prerequisites you can already do. Your grade doesn't limit how far you go.</p>
+        ${prof ? SE.checksGuide("student") : ""}
         <p class="track-note ${prof && user.gradeBand === "6-8" ? "is-mine" : ""}">${icon("star")}<span><strong>Grades 6–8 track.</strong> Every stage has a mission tagged <span class="track-tag">Grades 6–8</span>. It practices the same idea, a step further: broadcasts, clones, and/or/not, lists, custom blocks with inputs, and a first taste of Python.</span></p>
       </section>
       <ol class="wrap stages">

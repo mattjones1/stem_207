@@ -22,7 +22,7 @@
         `<a href="#/me" class="user-chip" ${navKey === "me" ? 'aria-current="page"' : ""}>${SE.ownAvatar(user.id, 28)}<span><b>${esc(user.displayName)}</b><small>${SE.num(prof.xp)} XP · ${esc(prof.rank.name)}</small></span></a>` +
         `<button type="button" class="nav-out" data-signout>${icon("logout")}<span>Sign out</span></button>`;
     } else {
-      html = link("#/teach", "teach", "Educator dashboard") + link("#/library", "library", "Activity library") + link("#/pathway", "pathway", "Coding pathway") +
+      html = link("#/teach", "teach", "Educator dashboard") + link("#/library", "library", "Activity library") + link("#/teach/pathway", "pathway", "Coding pathway") +
         `<span class="user-chip user-chip--edu">${icon("clipboard")}<span><b>${esc(user.name)}</b><small>Educator</small></span></span>` +
         `<button type="button" class="nav-out" data-signout>${icon("logout")}<span>Sign out</span></button>`;
     }
@@ -87,7 +87,7 @@
     else if (a === "signup") { SE.views.signup(); title = "Create account · STEM 207"; }
     else if (a === "teach") {
       if (user.role !== "educator") { location.replace("#/signin/educator"); return; }
-      navKey = "teach";
+      navKey = b === "pathway" ? "pathway" : "teach";
       if (!b) SE.views.teach(user);
       else if (b === "student") SE.views.teachStudent(user, c);
       else if (b === "pathway") SE.views.teachPathway(user);
@@ -123,7 +123,11 @@
       title = `${lab ? lab.title : "Lab"} · STEM 207`;
     }
     else if (a === "ai-route") { SE.views.aiRoute(user); navKey = "library"; title = "AI learning route · STEM 207"; }
-    else if (a === "pathway") { SE.views.pathway(user); navKey = "pathway"; title = "Coding pathway · STEM 207"; }
+    else if (a === "pathway") {
+      // Educators get their own pathway (in sync with the student one); #/pathway/student previews the student view.
+      if (user.role === "educator" && b !== "student") { location.replace("#/teach/pathway"); return; }
+      SE.views.pathway(user); navKey = "pathway"; title = "Coding pathway · STEM 207";
+    }
     else SE.views.notFound();
 
     document.title = title;

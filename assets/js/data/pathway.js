@@ -10,6 +10,7 @@ window.STEM = window.STEM || {};
 window.STEM.pathway = [
   {
     stage: 1,
+    teach: { lookFor: "They write or arrange steps in order and, when a step fails, point to the exact step and fix it.", misconception: "Thinking the computer will “know what I mean.” Precise steps matter more than the right idea." },
     title: "Giving clear instructions",
     concepts: "Sequencing and algorithms",
     suggestedStart: "A common starting point for grades 2–3, and a quick warm-up for any new coder.",
@@ -22,6 +23,7 @@ window.STEM.pathway = [
   },
   {
     stage: 2,
+    teach: { lookFor: "They show a sprite that reacts to at least two different events and say which event starts which action.", misconception: "Believing every program needs the green flag. Event blocks wait on their own." },
     title: "Making things happen",
     concepts: "Events and input",
     suggestedStart: "Often a good next step for grades 2–4.",
@@ -34,6 +36,7 @@ window.STEM.pathway = [
   },
   {
     stage: 3,
+    teach: { lookFor: "They use a repeat loop and say how many times it will run before they run it.", misconception: "Putting steps that should run once inside the loop, or miscounting the repeats." },
     title: "Finding patterns",
     concepts: "Repetition and loops",
     suggestedStart: "Many grade 3–5 classes start here after a quick Stage 1–2 review.",
@@ -46,6 +49,7 @@ window.STEM.pathway = [
   },
   {
     stage: 4,
+    teach: { lookFor: "They test both paths of an if–else, one input that matches and one that doesn't, and explain which branch ran.", misconception: "Testing only the case they expect, or thinking “else” means the wrong answer." },
     title: "Making choices",
     concepts: "Conditions and logical reasoning",
     suggestedStart: "A frequent entry point for grades 4–6 with some block-coding experience.",
@@ -58,6 +62,7 @@ window.STEM.pathway = [
   },
   {
     stage: 5,
+    teach: { lookFor: "They point to a variable, say what it stores, and show where it changes and where it resets.", misconception: "Forgetting to reset a variable, so the next run starts with the old value." },
     title: "Remembering information",
     concepts: "Variables and basic data",
     suggestedStart: "Often a fit for grades 5–7.",
@@ -70,6 +75,7 @@ window.STEM.pathway = [
   },
   {
     stage: 6,
+    teach: { lookFor: "They show a custom block they made, explain what its input changes, and use it more than once.", misconception: "Copying the same code instead of reusing a block, or making a block that only works for one size." },
     title: "Organizing solutions",
     concepts: "Decomposition and reusable functions",
     suggestedStart: "Often a fit for grades 6–8.",
@@ -82,6 +88,7 @@ window.STEM.pathway = [
   },
   {
     stage: 7,
+    teach: { lookFor: "They show a project of their own and explain one bug they found and how they fixed it.", misconception: "Choosing a project too big to finish. A small version 1 that works comes first." },
     title: "Creating independently",
     concepts: "Plan, build, test, debug, and explain",
     suggestedStart: "For any student who is confident with Stages 1–6, usually grades 6–8.",

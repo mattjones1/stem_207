@@ -20,6 +20,7 @@ Mark each item ✅ works, ⚠️ works with a workaround (write it down), or ❌
 | Keyboard only: Tab reaches "I'm a student" within a few presses and the focus outline is visible | | |
 | Screen reader (ChromeVox or your school's): sign-in, Today, and one mission page are readable | | |
 | Close the tab mid-mission, sign in again: progress is still there | | |
+| Stage check: a student taps **I can do this** on Stage 1 → it shows under **Coding pathway → Checks waiting** for the teacher → **Confirm** → the student's pathway shows Cleared | | |
 
 ---
 
@@ -37,6 +38,14 @@ For each one: launch it as a student, do the **core** to its "You're done when" 
 | Pattern Predictors (unplugged) | | Four patterns on the board | | min | min | — |
 
 **External platforms:** note any login prompt, pop-up, blocked video, or filter page. Check that students can get back to STEM 207 in another tab.
+
+## If you'll use them
+
+| Check | Result | Notes |
+| --- | --- | --- |
+| Loop Dance: download the Dance Crew starter, then in the Scratch editor choose File → Load from your computer. The dancer and its long script appear and the dance plays | | |
+| From Blocks to Python: the Code Editor link opens a blank Python project without signing in, and the mission's turtle pattern draws when you press Run | | |
+| Grades 6–8 Scratch missions: build each one you plan to use once, following its steps, before students do | | |
 
 ---
 

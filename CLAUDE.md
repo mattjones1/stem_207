@@ -61,6 +61,11 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - Starters: `tools/build_starters.py` also builds `dance-crew.sb3`. It rebuilds every starter; revert the unchanged ones (zip timestamps change).
 - Tests: `python3 tests/labs/test_robot_chef.py`, `python3 tests/site/test_batch7.py`.
 
+## Educator pathway and checks guide (Batch 8)
+- `#/teach/pathway` (tab "Coding pathway") renders `STEM.pathway` for teachers: class status per stage, inline Confirm / Not yet (`ican_verified` / `ican_returned`), `teach: { lookFor, misconception }` per stage, mission rows with assign + prep, and the readiness map. Educators opening `#/pathway` are sent there; `#/pathway/student` previews the student page.
+- `SE.checksGuide("teacher" | "student")` in `views-library.js` is the "How checks work" guide. Keep it in step with the real flow if checks change.
+- Test: `python3 tests/site/test_batch8.py`.
+
 ## Classroom and design rules
 - Grades 2–8: short sentences, large controls, buttons instead of dragging, keyboard access, and a visible focus outline. Never rely on color or sound alone.
 - Collect no student personal information. Students have a display name and picture codes only. Camera activities frame hands or objects, never faces.

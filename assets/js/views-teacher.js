@@ -2,7 +2,7 @@
  * STEM 207 — educator dashboard.
  *   #/teach                   class overview
  *   #/teach/student/<id>      one student's progress and log
- *   #/teach/pathway           coding pathway readiness checks
+ *   #/teach/pathway           educator coding pathway: the student stages, class status, checks, assigning
  *   #/teach/reflections       student answers to review
  *   #/teach/class             roster, class code, and login cards
  */
@@ -118,7 +118,7 @@
     const tabs = [
       ["overview", "#/teach", "Overview", "chart", 0],
       ["missions", "#/teach/missions", "Missions", "rocket", 0],
-      ["pathway", "#/teach/pathway", "Pathway checks", "flag", pendingClaims],
+      ["pathway", "#/teach/pathway", "Coding pathway", "flag", pendingClaims],
       ["reflections", "#/teach/reflections", "Reflections", "message", pendingRefl],
       ["class", "#/teach/class", "Class & logins", "users", 0]
     ];
@@ -564,27 +564,82 @@
     document.getElementById("show-reviewed").addEventListener("change", (e) => { showReviewed = e.target.checked; SE.route(true); });
   };
 
-  /* ───────── Pathway checks ───────── */
+  /* ───────── Coding pathway (educator) ─────────
+     The same seven stages students see, from the same data (STEM.pathway), plus the class's
+     status on each stage, checks waiting, what a confirm looks like, and assigning. */
   SE.views.teachPathway = function (user) {
     const { classes, cls } = getClass(user);
     if (!cls) return noClass(user);
     const sum = SE.game.classSummary(cls.id);
     const claims = pendingStageClaims(sum);
+    const claimRow = (x, withStage) => {
+      const s = STEM.pathway.find((p) => p.stage === x.stage);
+      return `<li>
+        <div><a href="#/teach/student/${x.student.id}"><strong>${esc(x.student.displayName)}</strong></a><span>${withStage ? `Stage ${x.stage}: ${esc(s.title)} · ` : ""}asked ${SE.timeAgo(x.at)}</span>${withStage ? `<em>“${esc(s.iCan)}”</em>` : ""}</div>
+        <span class="stage-actions"><button class="btn btn--primary btn--small" data-verify="${x.stage}" data-student="${x.student.id}">${icon("check")}Confirm</button><button class="btn btn--ghost btn--small" data-return="${x.stage}" data-student="${x.student.id}">Not yet</button></span>
+      </li>`;
+    };
+    const stageCard = (st) => {
+      const acts = st.activities.map((id) => SE.activityById[id]).filter(Boolean);
+      const cleared = sum.profiles.filter((p) => p.prof.stages[st.stage] && p.prof.stages[st.stage].status === "cleared");
+      const waiting = claims.filter((c) => c.stage === st.stage);
+      const notYet = sum.students.length - cleared.length - waiting.length;
+      const unassigned = acts.filter((a) => !SE.store.assignmentFor(cls.id, a.id));
+      const labLevels = (SE.roverLevels || []).map((l, i) => (l.stage === st.stage ? i + 1 : 0)).filter(Boolean);
+      const t = st.teach || {};
+      return `
+        <li class="stage tstage" id="tstage-${st.stage}">
+          <div class="stage__node" aria-hidden="true"><div><small>Stage</small><b>${st.stage}</b></div></div>
+          <article class="block stage__card" aria-labelledby="tstage-title-${st.stage}">
+            <div class="stage__head">
+              <div>
+                <h2 id="tstage-title-${st.stage}"><span class="visually-hidden">Stage ${st.stage}: </span>${esc(st.title)}</h2>
+                <p class="stage__concepts">${esc(st.concepts)}</p>
+              </div>
+              <p class="tstage__status" aria-label="Class status for stage ${st.stage}">
+                <span class="tchip is-cleared">${icon("check")}${cleared.length} cleared</span>
+                <span class="tchip is-claimed">${icon("clock")}${waiting.length} waiting</span>
+                <span class="tchip">${notYet} not yet</span>
+              </p>
+            </div>
+            ${waiting.length ? `<div class="tstage__waiting"><h3>${icon("flag")}Waiting for your check</h3><ul class="claims claims--compact">${waiting.map((x) => claimRow(x, false)).join("")}</ul></div>` : ""}
+            <div class="ican">${icon("check")}<span><span class="visually-hidden">Readiness check: </span>${esc(st.iCan)}</span></div>
+            <div class="tstage__teach">
+              <div><h3>What a confirm looks like</h3><p>${esc(t.lookFor || "")}</p></div>
+              <div><h3>Common misconception</h3><p>${esc(t.misconception || "")}</p></div>
+            </div>
+            <details class="tstage__more"><summary>Learning goal, project, and prerequisites</summary>
+              <div class="stage__grid">
+                <div><h3>Learning goal</h3><p>${esc(st.goal)}</p></div>
+                <div><h3>Project</h3><p>${esc(st.project)}</p></div>
+                <div><h3>Prerequisite</h3><p>${esc(st.prerequisite)}</p></div>
+                <div><h3>Debugging habit</h3><p>${esc(st.debugging)}</p></div>
+                <div class="prep__full"><h3>Suggested starting point</h3><p>${esc(st.suggestedStart)}</p></div>
+              </div>
+            </details>
+            <div class="tstage__missions-head">
+              <h3>Missions in this stage <span class="muted">${acts.length}</span></h3>
+              ${unassigned.length ? `<button type="button" class="btn btn--ghost btn--small" data-assign-many="${unassigned.map((a) => a.id).join(",")}">${icon("plus")}Assign stage ${st.stage} (${unassigned.length})</button>` : `<span class="chip chip--done">${icon("check")}All assigned</span>`}
+            </div>
+            <ul class="mlist">${acts.map((a) => missionRow(a, cls, sum)).join("")}</ul>
+            ${labLevels.length ? `<div class="stage__lab"><span>${icon("flask")}Harbor Code Lab levels for this stage</span>${labLevels.map((lv) => `<a class="lvl-chip" href="#/lab/rover/${lv}">${lv}</a>`).join("")}</div>` : ""}
+          </article>
+        </li>`;
+    };
     const body = `
       <section class="wrap section">
         <div class="section__head">
-          <div><span class="eyebrow">Coding pathway</span><h2>${claims.length ? `${plural(claims.length, "student is", "students are")} waiting for a check` : "No checks waiting"}</h2></div>
-          <a class="btn btn--ghost btn--small" href="#/pathway">See the stages ${icon("arrowRight")}</a>
+          <div><span class="eyebrow">Coding pathway</span><h2>The stages your students see, with your class on each one</h2></div>
+          <span class="tpath-tools"><a class="btn btn--ghost btn--small" href="#/pathway/student">${icon("eye")}Preview the student view</a><a class="btn btn--ghost btn--small" href="#checks-guide" data-jump="checks-guide">${icon("question")}How checks work</a></span>
         </div>
-        <p class="muted section-note">When a student taps “I can do this,” ask them to show you the “I can” statement. Confirm it to clear the stage (+${P.xp.stageCleared} XP for them), or choose Not yet so they can keep practicing.</p>
-        ${claims.length ? `<ul class="claims">${claims.map((x) => {
-          const s = STEM.pathway.find((p) => p.stage === x.stage);
-          return `<li>
-            <div><a href="#/teach/student/${x.student.id}"><strong>${esc(x.student.displayName)}</strong></a><span>Stage ${x.stage}: ${esc(s.title)} · asked ${SE.timeAgo(x.at)}</span><em>“${esc(s.iCan)}”</em></div>
-            <span class="stage-actions"><button class="btn btn--primary btn--small" data-verify="${x.stage}" data-student="${x.student.id}">${icon("check")}Confirm</button><button class="btn btn--ghost btn--small" data-return="${x.stage}" data-student="${x.student.id}">Not yet</button></span>
-          </li>`;
-        }).join("")}</ul>` : ""}
+        <div class="block tpath-queue">
+          <div class="block__head"><h2>${claims.length ? `${plural(claims.length, "check", "checks")} waiting` : "No checks waiting"}</h2></div>
+          ${claims.length ? `<p class="muted section-note">Ask each student to show you the “I can” statement. Confirm clears the stage (+${P.xp.stageCleared} XP for them). Not yet lets them keep practicing and ask again.</p><ul class="claims">${claims.map((x) => claimRow(x, true)).join("")}</ul>`
+            : `<p class="muted">When a student taps “I can do this” on a stage, it shows up here and on that stage below.</p>`}
+        </div>
       </section>
+      <section class="wrap section">${SE.checksGuide("teacher")}</section>
+      <ol class="wrap stages tstages">${STEM.pathway.map(stageCard).join("")}</ol>
       <section class="wrap section">
         <div class="section__head"><div><span class="eyebrow">Readiness</span><h2>Class pathway map</h2></div></div>
         <div class="table-wrap">
@@ -757,6 +812,7 @@
             ${lab ? `<span class="mtag mtag--lab">${icon("flask")}Interactive lab · ${SE.labs.byId(a.launch.labId) ? SE.labs.byId(a.launch.labId).levels.length : ""} levels</span>` : ""}
             ${SE.isMaine && SE.isMaine(a) ? `<span class="maine-tag">${SE.pine(13)}Made in Maine</span>` : ""}
             ${a.pathwayStage ? `<span class="mtag">${icon("list")}Pathway stage ${a.pathwayStage}</span>` : ""}
+            ${a.track ? `<span class="track-tag">Grades ${esc(a.track.replace("-", "–"))} track</span>` : ""}
           </div>
           <h4><a href="#/activity/${a.id}">${esc(a.title)}</a></h4>
           <p>${esc(a.summary)}</p>
@@ -767,6 +823,7 @@
             <span>${icon("users")}${esc(STEM.formats[a.format].name)}</span>
             <span>${icon("tools")}${esc(SE.equipmentText(a.equipment))}</span>
           </div>
+          ${prepLine(a)}
         </div>
         <div class="mrow__side">
           ${progressMarkup(classProgress(sum, a))}
@@ -873,7 +930,7 @@
         <div class="disc-panel">
           <div class="disc-panel__head">
             <div><h3>${icon(disc.icon)}${esc(disc.name)}</h3><p class="muted">${esc(disc.blurb)}</p></div>
-            ${disc.id === "pathway" ? "" : SE.labs.forArea(disc.id).length ? `<a class="btn btn--ghost btn--small" href="#/lab/${SE.labs.forArea(disc.id)[0].id}">${icon("flask")}Preview the lab</a>` : ""}
+            ${disc.id === "pathway" ? `<a class="btn btn--ghost btn--small" href="#/teach/pathway">${icon("flag")}Open the coding pathway and checks</a>` : SE.labs.forArea(disc.id).length ? `<a class="btn btn--ghost btn--small" href="#/lab/${SE.labs.forArea(disc.id)[0].id}">${icon("flask")}Preview the lab</a>` : ""}
           </div>
           <form class="mfilters" id="mfilters" role="search" aria-label="Filter missions">
             <label><span>Grade band</span><select class="input input--small" name="grade"><option value="">All grades</option>${STEM.gradeBands.map((g) => `<option value="${g.id}" ${missionFilters.grade === g.id ? "selected" : ""}>${esc(g.name)}</option>`).join("")}</select></label>
