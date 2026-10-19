@@ -301,9 +301,9 @@
             : `<p class="muted">Everyone has been active this week and nobody is flagging trouble.</p>`}
         </div>
         <div class="block">
-          <div class="block__head"><h2>Class expedition</h2><span class="muted">${SE.num(sum.totalXp)} XP together</span></div>
-          ${SE.goalTrack(sum.goal)}
-          <p class="muted">${sum.goal.next ? `${SE.num(sum.goal.next.xp - sum.totalXp)} XP until the class reaches ${esc(sum.goal.next.name)}. Students see this on their home screen.` : "Your class reached the final destination."}</p>
+          <div class="block__head"><h2>Class journey</h2><span class="muted">${sum.journey.goal.next ? `Next stop: ${esc(sum.journey.goal.next.name)}` : "Katahdin reached"}</span></div>
+          ${SE.classJourneyBlock(sum.journey)}
+          <p class="muted">Only class work moves the journey: missions you assign, and missions and stages you confirm. Students see this on Today and My expedition. Their own XP, ranks, patches, and harbor still count everything they do.</p>
         </div>
       </section>
 

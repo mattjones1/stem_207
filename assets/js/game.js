@@ -257,17 +257,71 @@
     events.forEach((e) => { (byStudent[e.studentId] = byStudent[e.studentId] || []).push(e); });
     const profiles = students.map((s) => ({ student: s, prof: profile(s.id, byStudent[s.id] || []) }));
     const totalXp = profiles.reduce((sum, p) => sum + p.prof.xp, 0);
-    return { students, events, profiles, totalXp, goal: classGoal(totalXp) };
+    return { students, events, profiles, totalXp, journey: classJourney(classId) };
   }
 
-  function classGoal(totalXp) {
+  /* ───────── Class rewards ─────────
+   * Counts of class work. The same rules run in supabase/update-4-class-journey.sql
+   * (class_journey), which is how a student's device gets the whole class's totals.
+   *   assignedDone  distinct (student, mission) sent, for missions assigned to the class
+   *   confirmed     distinct (student, mission) a teacher confirmed
+   *   stages        distinct (student, stage) a teacher confirmed
+   *   withAssigned  students who sent at least one assigned mission
+   *   withStage1    students whose Stage 1 is confirmed
+   *   onTime        assigned missions with a due date that every student sent by the end of that day (UTC) */
+  const dueEnd = (d) => { const [y, m, dd] = d.split("-").map(Number); return Date.UTC(y, m - 1, dd + 1); };
+  function classCounts(classId) {
+    const students = SE.store.studentsIn(classId);
+    const ids = new Set(students.map((s) => s.id));
+    const assigned = new Map(SE.store.assignmentsFor(classId).map((a) => [a.activityId, a]));
+    const events = SE.store.eventsForClass(classId).filter((e) => ids.has(e.studentId));
+    const sent = new Map(), confirmed = new Set(), stages = new Set(), stage1 = new Set();
+    events.forEach((e) => {
+      const a = e.data && e.data.activityId;
+      if (e.type === "mission_completed" && assigned.has(a)) { const k = `${e.studentId}|${a}`; if (!sent.has(k) || sent.get(k) > e.at) sent.set(k, e.at); }
+      if (e.type === "teacher_confirmed" && a) confirmed.add(`${e.studentId}|${a}`);
+      if (e.type === "ican_verified") { stages.add(`${e.studentId}|${e.data.stage}`); if (Number(e.data.stage) === 1) stage1.add(e.studentId); }
+    });
+    const withAssigned = new Set([...sent.keys()].map((k) => k.split("|")[0]));
+    let onTime = 0;
+    if (students.length) assigned.forEach((x, act) => {
+      if (x.dueDate && students.every((s) => { const at = sent.get(`${s.id}|${act}`); return at != null && at < dueEnd(x.dueDate); })) onTime++;
+    });
+    return { students: students.length, assignedDone: sent.size, confirmed: confirmed.size, stages: stages.size,
+      withAssigned: withAssigned.size, withStage1: stage1.size, onTime };
+  }
+  function journeyFrom(c) {
+    const cp = P.classPoints;
+    const points = c.assignedDone * cp.assignedDone + c.confirmed * cp.confirmed + c.stages * cp.stageCleared;
+    const all = (n) => c.students > 0 && n >= c.students;
+    const earned = { "first-haul": c.confirmed >= 1, "all-hands": all(c.withAssigned), pathfinders: all(c.withStage1), "right-on-tide": c.onTime >= 1, "steady-crew": c.confirmed >= 10 };
+    return { counts: c, points, goal: classGoal(points), badges: P.classBadges.map((b) => ({ badge: b, earned: !!earned[b.id] })) };
+  }
+  /* On a student's device in cloud mode, the class totals come from the server (the device only
+     holds that student's own work). Everywhere else they're counted from the data in hand. */
+  function classJourney(classId) {
+    const server = SE.store.journeyCounts && SE.store.journeyCounts(classId);
+    return journeyFrom(server || classCounts(classId));
+  }
+  /* What one student has added to the class journey. */
+  function classPointsFor(studentId, classId) {
+    const assigned = new Set(SE.store.assignmentsFor(classId).map((a) => a.activityId));
+    const ev = SE.store.eventsFor(studentId);
+    const cp = P.classPoints;
+    const sent = new Set(ev.filter((e) => e.type === "mission_completed" && assigned.has(e.data.activityId)).map((e) => e.data.activityId));
+    const conf = new Set(ev.filter((e) => e.type === "teacher_confirmed").map((e) => e.data.activityId));
+    const st = new Set(ev.filter((e) => e.type === "ican_verified").map((e) => e.data.stage));
+    return sent.size * cp.assignedDone + conf.size * cp.confirmed + st.size * cp.stageCleared;
+  }
+
+  function classGoal(points) {
     const g = P.classGoal;
     let idx = 0;
-    g.forEach((m, i) => { if (totalXp >= m.xp) idx = i; });
+    g.forEach((m, i) => { if (points >= m.pts) idx = i; });
     const reached = g[idx];
     const next = g[idx + 1] || null;
-    const progress = next ? (totalXp - reached.xp) / (next.xp - reached.xp) : 1;
-    return { reached, next, index: idx, progress: Math.max(0, Math.min(1, progress)), totalXp };
+    const progress = next ? (points - reached.pts) / (next.pts - reached.pts) : 1;
+    return { reached, next, index: idx, progress: Math.max(0, Math.min(1, progress)), points };
   }
 
   /* Has this student finished a mission? For lab missions, finishing every level counts too. */
@@ -311,5 +365,5 @@
     return { ...base, state: started ? "started" : "none", label: started ? "Started" : "Not started" };
   }
 
-  SE.game = { profile, recommendations, classSummary, classGoal, rankFor, baseXp, missionDone, statusFor };
+  SE.game = { profile, recommendations, classSummary, classGoal, classCounts, journeyFrom, classJourney, classPointsFor, rankFor, baseXp, missionDone, statusFor };
 })();

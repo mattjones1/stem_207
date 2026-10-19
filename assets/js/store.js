@@ -345,6 +345,7 @@
   const cloudCode = () => `${CODE_WORDS[Math.floor(Math.random() * CODE_WORDS.length)]}${Math.floor(Math.random() * 900 + 100)}`;
 
   async function loadEducator(user) {
+    journey = null;
     const [eds, classes, students, events, assignments, messages] = await Promise.all([
       SE.cloud.selectAll("educators", `id=eq.${user.id}`),
       SE.cloud.selectAll("classes", "order=created_at.asc"),
@@ -363,6 +364,14 @@
     }
     db = { version: 7, educators: eds.map(fromRow.educator), classes: classes.map(fromRow.cls), students: students.map(fromRow.student), events: events.map(fromRow.event), assignments: assignments.map(fromRow.assignment), messages: messages.map(fromRow.message) };
   }
+  /* Class journey totals for a student's device in cloud mode (supabase/update-4-class-journey.sql).
+     Counts only; null until loaded, or if the function isn't there yet (then the app counts what it has). */
+  let journey = null;
+  async function loadJourney(token, classId) {
+    try { const r = await SE.cloud.rpc("class_journey", { p_token: token }); if (r && r.ok) { const { ok, ...counts } = r; journey = { classId, counts }; } else journey = null; }
+    catch (e) { journey = null; if (!e.offline) console.warn("STEM 207: class journey totals unavailable (run supabase/update-4-class-journey.sql)", e); }
+  }
+
   function loadStudentState(state) {
     db = emptyDb();
     db.classes.push({ ...state.class, educatorId: null });
@@ -431,6 +440,7 @@
         const st = await SE.cloud.rpc("student_state", { p_token: s.token });
         if (!st || !st.ok) { writeSession(null); return; }
         loadStudentState(st);
+        await loadJourney(s.token, st.class.id);
       }
     } catch (e) {
       if (e.status === 401 || e.status === 400) { writeSession(null); SE.cloud.forgetAuth(); }
@@ -474,6 +484,7 @@
     ready: null,
     loadError: null,
     pendingWrites: () => outbox.length,
+    journeyCounts: (classId) => (journey && journey.classId === classId ? journey.counts : null),
     flush: () => flush(),
 
     /* Session */
@@ -485,6 +496,7 @@
         if (s && s.role === "student" && s.token) SE.cloud.rpc("student_sign_out", { p_token: s.token }).catch(() => {});
         if (s && s.role === "educator") await SE.cloud.signOut();
         db = emptyDb();
+        journey = null;
       }
       writeSession(null);
     },
@@ -677,6 +689,7 @@
           return { ok: false, error: msg || "Those pictures don't match. Try again, or ask your teacher for your login card." };
         }
         loadStudentState(r);
+        await loadJourney(r.token, r.class.id);
         writeSession({ role: "student", id: r.student.id, token: r.token, cloud: true });
         SE.store.log("signed_in");
         return { ok: true, student: db.students[0] };
@@ -704,6 +717,8 @@
             if (r && r.ok === false) { const err = new Error("Your sign-in expired. Please sign in again."); err.status = 401; throw err; }
           }
         });
+        // A sent mission can move the class journey: refresh the class totals once it's saved.
+        if (type === "mission_completed") flush().then(() => loadJourney(s.token, st.classId)).catch(() => {});
       } else save();
       return e;
     },

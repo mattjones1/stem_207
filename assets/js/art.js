@@ -127,13 +127,13 @@
     const pos = (goal.index + goal.progress) / (g.length - 1);
     return `
       <div class="goal">
-        <div class="goal__track" role="img" aria-label="Class expedition: ${SE.num(goal.totalXp)} XP. Reached ${SE.esc(goal.reached.name)}${goal.next ? `, ${Math.round(goal.progress * 100)}% of the way to ${SE.esc(goal.next.name)}` : ""}.">
+        <div class="goal__track" role="img" aria-label="Class journey: ${SE.num(goal.points)} class points. Reached ${SE.esc(goal.reached.name)}${goal.next ? `, ${Math.round(goal.progress * 100)}% of the way to ${SE.esc(goal.next.name)}` : ""}.">
           <div class="goal__fill" style="width:${(pos * 100).toFixed(1)}%"></div>
           ${g.map((m, i) => `<span class="goal__stop ${i <= goal.index ? "is-reached" : ""}" style="left:${((i / (g.length - 1)) * 100).toFixed(1)}%"></span>`).join("")}
           <span class="goal__ship" style="left:${(pos * 100).toFixed(1)}%">${SE.icon("boat")}</span>
         </div>
         <ol class="goal__labels" aria-hidden="true">
-          ${g.map((m, i) => `<li class="${i <= goal.index ? "is-reached" : ""} ${i === goal.index ? "is-current" : ""} ${i === goal.index + 1 ? "is-next" : ""}" style="left:${((i / (g.length - 1)) * 100).toFixed(1)}%"><b>${SE.esc(m.name)}</b><span>${SE.num(m.xp)} XP</span></li>`).join("")}
+          ${g.map((m, i) => `<li class="${i <= goal.index ? "is-reached" : ""} ${i === goal.index ? "is-current" : ""} ${i === goal.index + 1 ? "is-next" : ""}" style="left:${((i / (g.length - 1)) * 100).toFixed(1)}%"><b>${SE.esc(m.name)}</b><span>${SE.num(m.pts)} pts</span></li>`).join("")}
         </ol>
       </div>`;
   };

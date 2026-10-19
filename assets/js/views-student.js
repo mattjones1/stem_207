@@ -33,6 +33,28 @@
   };
 
   /* ───────── Expedition home (top of the student dashboard) ───────── */
+  /* Class journey: points and badges the class earns together (separate from personal XP). */
+  SE.classJourneyBlock = function (journey, opts = {}) {
+    const g = journey.goal, cp = P.classPoints;
+    const earned = journey.badges.filter((b) => b.earned);
+    const badge = (b) => `<li class="cbadge ${b.earned ? "is-earned" : ""}">${icon(b.badge.icon)}<span><strong>${esc(b.badge.name)}</strong><small>${b.earned ? "Earned" : esc(b.badge.how)}</small></span></li>`;
+    if (opts.compact) return `
+      <div class="cjourney cjourney--compact">
+        <h3>${icon("boat")}Class journey</h3>
+        <p class="cjourney__pts"><strong>${SE.num(journey.points)} class points</strong>${g.next ? ` · next stop ${esc(g.next.name)} (${SE.num(g.next.pts - journey.points)} to go)` : " · Katahdin reached!"}</p>
+        ${SE.goalTrack(g)}
+        <p class="cjourney__badges">${icon("star")}${earned.length} of ${journey.badges.length} class badges${earned.length ? `: ${earned.map((b) => esc(b.badge.name)).join(", ")}` : ""}</p>
+      </div>`;
+    return `
+      <div class="cjourney">
+        <p class="cjourney__pts"><strong>${SE.num(journey.points)} class points</strong>${g.next ? ` · ${SE.num(g.next.pts - journey.points)} to ${esc(g.next.name)}` : ""}</p>
+        ${SE.goalTrack(g)}
+        <p class="cjourney__how">${icon("users")}<span><strong>How the class earns points:</strong> an assigned mission sent +${cp.assignedDone} · a mission your teacher confirms +${cp.confirmed} · a coding stage your teacher confirms +${cp.stageCleared}. Missions you do on your own still earn your own XP.</span></p>
+        <h3 class="cjourney__bh">Class badges <span class="muted">${earned.length} of ${journey.badges.length}</span></h3>
+        <ul class="cbadges">${journey.badges.map(badge).join("")}</ul>
+      </div>`;
+  };
+
   SE.views.expeditionHome = function (user, prof) {
     const recs = SE.game.recommendations(user, prof, 3);
     const summary = SE.game.classSummary(user.classId);
@@ -169,11 +191,10 @@
           </ul>` : ""}
         </div>
         <aside class="split__side block" aria-labelledby="goal-title">
-          <span class="eyebrow">Class expedition</span>
-          <h2 id="goal-title">${summary.goal.next ? `Next stop: ${esc(summary.goal.next.name)}` : "Destination reached!"}</h2>
-          <p class="muted">Every mission anyone in ${esc(user.cls ? user.cls.name : "your class")} finishes moves the whole class forward.</p>
-          ${SE.goalTrack(summary.goal)}
-          <p class="goal__total"><strong>${SE.num(summary.totalXp)} XP</strong> together${summary.goal.next ? ` · ${SE.num(summary.goal.next.xp - summary.totalXp)} to go` : ""}</p>
+          <span class="eyebrow">Class journey · ${esc(user.cls ? user.cls.name : "your class")}</span>
+          <h2 id="goal-title">${summary.journey.goal.next ? `Next stop: ${esc(summary.journey.goal.next.name)}` : "Destination reached!"}</h2>
+          <p class="muted">Class work moves everyone forward together: the missions your teacher assigns, and the work your teacher confirms.</p>
+          ${SE.classJourneyBlock(summary.journey)}
         </aside>
       </section>`;
   };
@@ -282,7 +303,8 @@
             <ul>${waiting.filter((w) => w.what === "Stage check").concat(waiting.filter((w) => w.what !== "Stage check")).slice(0, 3).map((w) => `<li><a href="${w.href}"><strong>${esc(w.label)}</strong></a><small>${esc(w.what)}</small></li>`).join("")}</ul>
             ${waiting.length > 3 ? `<a class="today-waiting__more" href="#/me">${waiting.length - 3} more in your mission log ${icon("arrowRight")}</a>` : ""}
           </section>` : ""}
-          <a class="today-col__link" href="#/explore">${icon("map")}See the class journey on My expedition ${icon("arrowRight")}</a>
+          ${user.classId ? SE.classJourneyBlock(SE.game.classJourney(user.classId), { compact: true }) : ""}
+          <a class="today-col__link" href="#/explore">${icon("map")}Class badges and the full journey ${icon("arrowRight")}</a>
         </section>
 
         <section class="today-col today-col--own" aria-labelledby="own-title">
@@ -293,10 +315,20 @@
           <p class="today-col__lede">Your own picks, any time. They don't change your class list.</p>
           ${ownMain ? bigCard(ownMain, ownWhy, "own") : `<div class="today-empty"><h3>Pick anything you like</h3><p>Search all the missions and labs.</p></div>`}
           ${ownMore.length ? `<ul class="today-list today-list--own">${ownMore.map((r) => `<li><a href="${hrefOf(r.activity)}">${icon(SE.areaById[r.activity.area].icon)}<span><strong>${esc(r.activity.title)}</strong><small>${esc(r.reason)} · ${SE.timeText(r.activity)}</small></span></a></li>`).join("")}</ul>` : ""}
+          <div class="myrewards" aria-labelledby="myrewards-title">
+            <h3 id="myrewards-title">${icon("star")}My rewards</h3>
+            <p class="muted">Everything you do earns your own XP, class missions included.</p>
+            <dl class="myrewards__stats">
+              <div><dt>My XP</dt><dd>${SE.num(prof.xp)}</dd></div>
+              <div><dt>Rank</dt><dd>${esc(prof.rank.name)}</dd></div>
+              <div><dt>Patches</dt><dd>${prof.earnedCount}<small> of ${P.patches.length}</small></dd></div>
+              <div><dt>Harbor</dt><dd>${SE.base.unlocks(prof).filter((x) => x.open).length}<small> unlocks</small></dd></div>
+            </dl>
+          </div>
           <nav class="today-explore" aria-label="More to explore">
             <div class="today-explore__grid">
               <a href="#/library">${icon("search")}<span><strong>All missions</strong><small>Search and pick any mission</small></span></a>
-              <a href="#/explore">${icon("map")}<span><strong>My expedition</strong><small>Star map, patches, and class goal</small></span></a>
+              <a href="#/explore">${icon("map")}<span><strong>My expedition</strong><small>Star map, patches, and class journey</small></span></a>
               <a href="#/base">${icon("lighthouse")}<span><strong>My harbor</strong><small>Your explorer and boat</small></span></a>
               <a href="#/pathway">${icon("list")}<span><strong>Coding pathway</strong><small>Seven stages, step by step</small></span></a>
             </div>
@@ -450,6 +482,7 @@
         ${gained.event.data.evidence === "show" ? `<p class="celebrate__note celebrate__note--show">${icon("users")}Now show or tell your teacher what you did.</p>` : ""}
         ${gained.xp ? `<p class="celebrate__xp">+<span id="cel-xp">${reduce ? gained.xp : 0}</span> XP</p>
         <ul class="celebrate__parts">${gained.parts.map(([label, n]) => `<li><span>${esc(label)}</span><b>+${n}</b></li>`).join("")}</ul>` : `<p class="celebrate__note">Repeats are practice, so they don't add XP. Your teacher can read your new answer.</p>`}
+        ${gained.first && user.classId && SE.store.assignmentFor(user.classId, a.id) && !after.completions.slice(0, -1).some((c) => c.activity.id === a.id) ? `<p class="celebrate__class">${icon("boat")}<span><strong>+${P.classPoints.assignedDone} class points</strong> for ${esc(user.cls ? user.cls.name : "your class")}. This was a class mission, so the whole class moves forward.</span></p>` : ""}
         ${rankUp ? `<div class="celebrate__rank">${SE.insignia(after.rank, 56)}<p><strong>${esc(after.rank.name)}</strong><br>${esc(after.rank.motto)}</p></div>` : ""}
         <div class="celebrate__bar">${rankBar(after, true)}</div>
         ${SE.base.unlockStrip(SE.base.newUnlocks(before, after))}

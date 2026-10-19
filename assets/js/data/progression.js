@@ -81,15 +81,29 @@ window.STEM.progression = {
       how: "Finish 3 missions feeling ready to teach someone else." }
   ],
 
-  /* Shared class goal: the class travels Maine together, from the state line to the summit.
-     Everyone's XP adds up toward the next stop. */
+  /* Class rewards (Batch 10) are separate from personal XP. Only class work moves the class:
+     a mission the teacher assigned and the student sent, a mission the teacher confirmed, and a
+     pathway stage the teacher confirmed. Personal XP, ranks, patches, and the harbor still count
+     everything a student does. */
+  classPoints: { assignedDone: 100, confirmed: 50, stageCleared: 100 },
+
+  /* The class journey: the class travels Maine together, from the state line to the summit. */
   classGoal: [
-    { name: "Kittery", xp: 0 },
-    { name: "Portland Head", xp: 3000 },
-    { name: "Penobscot Bay", xp: 8000 },
-    { name: "Acadia", xp: 16000 },
-    { name: "Moosehead", xp: 30000 },
-    { name: "Katahdin", xp: 50000 }
+    { name: "Kittery", pts: 0 },
+    { name: "Portland Head", pts: 1500 },
+    { name: "Penobscot Bay", pts: 4500 },
+    { name: "Acadia", pts: 9000 },
+    { name: "Moosehead", pts: 16000 },
+    { name: "Katahdin", pts: 26000 }
+  ],
+
+  /* Badges the whole class earns together. */
+  classBadges: [
+    { id: "first-haul", name: "First Haul", icon: "boat", how: "Your teacher confirms the class's first mission." },
+    { id: "all-hands", name: "All Hands on Deck", icon: "users", how: "Every student sends at least one class mission." },
+    { id: "pathfinders", name: "Pathfinders", icon: "compass", how: "Every student clears Stage 1 of the coding pathway." },
+    { id: "right-on-tide", name: "Right on Tide", icon: "wave", how: "Everyone sends an assigned mission by its due date." },
+    { id: "steady-crew", name: "Steady Crew", icon: "lighthouse", how: "Your teacher confirms 10 missions across the class." }
   ],
 
   /* How a student felt at the end of a mission. Shown to teachers. */

@@ -69,8 +69,14 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 ## My class / On my own, messages, instructions (Batch 9)
 - Today (`SE.views.today`) has two sides: `.today-col--class` (messages, try-again, assigned missions with `note`, waiting checks) and `.today-col--own` (unassigned in-progress work, suggestions, links). Assigned missions never appear on the own side.
 - `SE.store.messagesFor / postMessage / deleteMessage` (table `class_messages`) and `SE.store.setAssignmentNote` (`assignments.note`). Students get both through `student_state`. Needs `supabase/update-3-class-messages.sql`; before it runs, the app still works and posting a message shows a toast.
-- In cloud mode, students only load their own events, so class-wide totals on a student's device are their own. Batch 10's class rewards need a server function for class totals.
+- In cloud mode, students only load their own events; class totals come from `class_journey` (Batch 10).
 - Test: `python3 tests/site/test_batch9.py [local] [cloud|skip]` (cloud needs Postgres with update-3 + the mock on 8787).
+
+## Separate rewards (Batch 10)
+- Personal: XP, ranks, patches, harbor (unchanged; everything counts). Class: `P.classPoints` (assigned mission sent 100, mission confirmed 50, stage confirmed 100), `P.classGoal` stops in `pts`, and `P.classBadges`.
+- `SE.game.classCounts(classId)` → counts; `journeyFrom(counts)` → `{ points, goal, badges }`; `classJourney(classId)` uses `SE.store.journeyCounts(classId)` (from the `class_journey(p_token)` RPC on a cloud student device) or counts locally. Keep the JS and `supabase/update-4-class-journey.sql` rules identical.
+- UI: `SE.classJourneyBlock(journey, { compact })` on Today (class side), My expedition, and the teacher Overview; "My rewards" on Today's own side; the celebration shows "+100 class points" for a first send of an assigned mission.
+- Test: `python3 tests/site/test_batch10.py [local] [cloud|skip]` (cloud needs Postgres with update-4 + the mock on 8787).
 
 ## Classroom and design rules
 - Grades 2–8: short sentences, large controls, buttons instead of dragging, keyboard access, and a visible focus outline. Never rely on color or sound alone.
