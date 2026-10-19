@@ -230,7 +230,9 @@
     while (prof.stages[nextStage] && prof.stages[nextStage].status === "cleared") nextStage++;
     const stage = STEM.pathway.find((s) => s.stage === nextStage);
     if (stage) {
-      const act = stage.activities.map((id) => SE.activityById[id]).find((a) => a && notDone(a));
+      // Prefer the student's own grade-band track (e.g. the grades 6–8 missions), then anything in band.
+      const acts = stage.activities.map((id) => SE.activityById[id]).filter((a) => a && notDone(a));
+      const act = acts.find((a) => a.track && a.track === student.gradeBand) || acts.find(inBand);
       if (act) add(act, `Coding pathway, stage ${stage.stage}`);
     }
     // An area they haven't visited yet

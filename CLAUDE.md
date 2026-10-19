@@ -54,6 +54,13 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - `SE.certificate.open(info)` / `SE.certificate.button(info, label)` in `assets/js/certificate.js`: a printable certificate on warm paper. `info = { award, course, detail, name, className, at }`. Use the display name and class name only. Pattern Machine Level 6 awards "Responsible AI Explorer" at 7 of 10 (`SE.patternMachine.scoreUses`, `PASS`).
 - Test: `python3 tests/site/test_batch6.py`.
 
+## Grades 6–8 track and Robot Chef (Batch 7)
+- `track: "6-8"` marks a mission written for grades 6–8. Each pathway stage lists one (stage 6 also has `python-turtle-bridge`). `SE.game.recommendations` picks the student's own track first, then anything in their band. The pathway page tags them.
+- `board.code: true` renders board lines as code (the Scratch → Python card).
+- Robot Chef lab (`lab-chef.js`, `.rc-`): `SE.robotChef.run(stepIds)` → `{ ok, trace, bug: { index, kind: unclear|order|missing|end, need } }`.
+- Starters: `tools/build_starters.py` also builds `dance-crew.sb3`. It rebuilds every starter; revert the unchanged ones (zip timestamps change).
+- Tests: `python3 tests/labs/test_robot_chef.py`, `python3 tests/site/test_batch7.py`.
+
 ## Classroom and design rules
 - Grades 2–8: short sentences, large controls, buttons instead of dragging, keyboard access, and a visible focus outline. Never rely on color or sound alone.
 - Collect no student personal information. Students have a display name and picture codes only. Camera activities frame hands or objects, never faces.

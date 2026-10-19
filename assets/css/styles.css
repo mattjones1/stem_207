@@ -1996,3 +1996,11 @@ h1, h2, h3, h4 { letter-spacing: -.015em; }
 }
 .block--mission .board .board__title, .block--mission .board li { color: var(--fg); }
 .block--mission .board .board__note { color: var(--muted); }
+
+/* Batch 7: grades 6–8 track tag and code boards */
+.track-tag { display: inline-block; margin-left: .3rem; padding: .05rem .45rem; border-radius: 999px; background: var(--navy); color: var(--on-dark); font-size: .72rem; font-weight: 700; letter-spacing: .02em; vertical-align: middle; white-space: nowrap; }
+.track-note { display: flex; gap: .55rem; align-items: flex-start; margin-top: .6rem; padding: .7rem .9rem; border-radius: var(--radius-sm); background: var(--teal-soft); }
+.track-note.is-mine { outline: 3px solid var(--orange); }
+.track-note > svg { width: 1.3rem; height: 1.3rem; flex: none; fill: none; stroke: var(--teal); stroke-width: 2; margin-top: .1rem; }
+.board--code li { list-style: none; margin-left: -1.4rem; }
+.board--code code { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: .95rem; white-space: pre-wrap; word-break: break-word; color: var(--fg); }

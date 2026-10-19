@@ -85,3 +85,49 @@ blocks = {
 comments = {"note": {"blockId": None, "x": 300, "y": 40, "width": 260, "height": 140, "minimized": False,
     "text": "This script draws one square. Next: My Blocks > Make a Block. Name it square, add a number input called size, and move the square code under it."}}
 write("pattern-studio.sb3", [stage([wk]), sprite("Turtle", [pk], blocks, comments)], ["pen"], [wkf, pkf])
+
+# 3. Loop Dance Choreographers: a dancer with five move costumes and the long 16-move dance from
+#    the lesson, written out one move at a time, so students can shorten it with repeat blocks.
+FLOOR = '''<svg xmlns="http://www.w3.org/2000/svg" width="480" height="360" viewBox="0 0 480 360">
+<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#302568"/><stop offset="1" stop-color="#4a3ba6"/></linearGradient></defs>
+<rect width="480" height="360" fill="url(#s)"/>
+<g fill="#ffffff" opacity=".5"><circle cx="60" cy="50" r="2"/><circle cx="150" cy="30" r="1.5"/><circle cx="300" cy="60" r="2"/><circle cx="420" cy="35" r="1.5"/></g>
+<path d="M0 270 H480 V360 H0 Z" fill="#1d1647"/>
+<g stroke="#8cc832" stroke-width="2" opacity=".6"><path d="M0 270 H480"/><path d="M40 360 L160 270 M240 360 V270 M440 360 L320 270"/></g></svg>'''
+def dancer(arms, legs, lift=0, extra=""):
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" width="120" height="150" viewBox="0 0 120 150">
+<g transform="translate(0 {-lift})" stroke="#1d1647" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+{extra}<path d="{legs}" fill="none"/>
+<rect x="40" y="52" width="40" height="46" rx="10" fill="#8cc832"/><path d="{arms}" fill="none"/>
+<rect x="38" y="14" width="44" height="34" rx="10" fill="#e9e6f6"/>
+<circle cx="52" cy="31" r="4" fill="#1d1647" stroke="none"/><circle cx="68" cy="31" r="4" fill="#1d1647" stroke="none"/>
+<path d="M60 14 V4" /><circle cx="60" cy="4" r="3" fill="#f2c14e"/></g></svg>'''
+LEGS = "M50 98 V140 M70 98 V140"
+COST = {
+    "ready": dancer("M44 62 L28 92 M76 62 L92 92", LEGS),
+    "clap": dancer("M44 62 L24 40 L50 10 M76 62 L96 40 L70 10", LEGS, extra='<path d="M60 2 l-10 -0 M60 2 l10 0" stroke="#f2c14e"/>'),
+    "stomp": dancer("M44 62 L24 80 M76 62 L96 80", "M50 98 V140 M70 98 L88 118 L76 128", extra='<path d="M30 142 h20 M74 142 h22" stroke="#f2c14e"/>'),
+    "spin": dancer("M44 64 L12 62 M76 64 L108 62", LEGS, extra='<path d="M14 40 A50 22 0 0 0 106 40" fill="none" stroke="#f2c14e"/>'),
+    "jump": dancer("M44 62 L22 36 M76 62 L98 36", "M50 98 L42 124 M70 98 L78 124", lift=12, extra='<path d="M44 150 h32" stroke="#f2c14e" transform="translate(0 6)"/>'),
+}
+fl, flf = costume("dance floor", FLOOR, 240, 180)
+dcs, dfiles = [], []
+for n, svg in COST.items():
+    c, f = costume(n, svg, 60, 90); dcs.append(c); dfiles.append(f)
+DANCE = ["clap", "stomp", "clap", "stomp", "clap", "stomp", "spin", "jump"] * 2
+blocks = {"flag": block("event_whenflagclicked", None, None, top=True, x=40, y=40)}
+seq = [("ready", False)] + [(m, True) for m in DANCE] + [("ready", False)]
+prev = "flag"
+for i, (m, wait) in enumerate(seq):
+    sid, mid, wid = f"sw{i}", f"menu{i}", f"wt{i}"
+    blocks[prev]["next"] = sid
+    blocks[sid] = block("looks_switchcostumeto", None, prev, {"COSTUME": [1, mid]})
+    blocks[mid] = {"opcode": "looks_costume", "next": None, "parent": sid, "inputs": {}, "fields": {"COSTUME": [m, None]}, "shadow": True, "topLevel": False}
+    prev = sid
+    if wait:
+        blocks[sid]["next"] = wid
+        blocks[wid] = block("control_wait", None, sid, {"DURATION": [1, [5, "0.4"]]})
+        prev = wid
+comments = {"note": {"blockId": None, "x": 320, "y": 40, "width": 270, "height": 170, "minimized": False,
+    "text": "Dance crew: this dance is written out one move at a time, 16 moves long. Click the green flag to watch it. Your job: make the program shorter with repeat blocks, without changing the dance. Count your blocks before and after."}}
+write("dance-crew.sb3", [stage([fl]), sprite("Dancer", dcs, blocks, comments, rotation="don't rotate")], [], [flf] + dfiles)

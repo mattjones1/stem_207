@@ -673,7 +673,7 @@
           <section class="block block--mission" aria-labelledby="s-mission">
             <h2 id="s-mission">${icon("target")}Your mission</h2>
             <p>${esc(a.mission)}</p>
-            ${a.board ? `<div class="board"><p class="board__title">${esc(a.board.title)}</p><ol>${a.board.lines.map((x) => `<li>${esc(x)}</li>`).join("")}</ol>${a.board.note ? `<p class="board__note">${esc(a.board.note)}</p>` : ""}</div>` : ""}
+            ${a.board ? `<div class="board"><p class="board__title">${esc(a.board.title)}</p><ol class="${a.board.code ? "board--code" : ""}">${a.board.lines.map((x) => `<li>${a.board.code ? `<code>${esc(x)}</code>` : esc(x)}</li>`).join("")}</ol>${a.board.note ? `<p class="board__note">${esc(a.board.note)}</p>` : ""}</div>` : ""}
           </section>
           ${a.bridge && SE.activityById[a.bridge.from] ? `<p class="bridge">${icon("arrowRight")}<span><strong>You've seen this idea before.</strong> ${esc(a.bridge.text)} <a href="#/activity/${a.bridge.from}">${esc(SE.activityById[a.bridge.from].title)}</a></span></p>` : ""}
           <section class="block" aria-labelledby="s-learn">
@@ -816,6 +816,7 @@
             <ol>${t.activities.map((id) => SE.activityById[id]).filter(Boolean).map((a) => `<li><a href="#/activity/${a.id}">${esc(a.title)}</a> <span class="muted">${SE.timeText(a)}</span></li>`).join("")}</ol>
           </article>`).join("")}</div>
         <p class="muted">Already coding? Skip ahead: pick the first stage below whose prerequisites you can already do. Your grade doesn't limit how far you go.</p>
+        <p class="track-note ${prof && user.gradeBand === "6-8" ? "is-mine" : ""}">${icon("star")}<span><strong>Grades 6–8 track.</strong> Every stage has a mission tagged <span class="track-tag">Grades 6–8</span>. It practices the same idea, a step further: broadcasts, clones, and/or/not, lists, custom blocks with inputs, and a first taste of Python.</span></p>
       </section>
       <ol class="wrap stages">
         ${pathway.map((s) => {
@@ -847,7 +848,7 @@
               <div class="stage__links">
                 ${roverLevelsFor(s.stage).length ? `<div class="stage__lab"><span>${icon("flask")}Harbor Code Lab levels</span>${roverLevelsFor(s.stage).map((lv) => { const d = prof && SE.labs.progressFor(prof, "rover").has(lv - 1); return `<a class="lvl-chip ${d ? "is-done" : ""}" href="#/lab/rover/${lv}" aria-label="Harbor Code Lab level ${lv}${d ? ", finished" : ""}">${d ? icon("check") : ""}${lv}</a>`; }).join("")}</div>` : ""}
                 ${s.activities.map((id) => SE.activityById[id]).filter(Boolean).map((a) => `
-                  <a class="btn btn--ghost btn--small ${prof && prof.completedIds.has(a.id) ? "is-done" : ""}" href="#/activity/${a.id}">${icon(prof && prof.completedIds.has(a.id) ? "check" : SE.areaById[a.area].icon)}${esc(a.title)} · ${SE.timeText(a)}</a>`).join("")}
+                  <a class="btn btn--ghost btn--small ${prof && prof.completedIds.has(a.id) ? "is-done" : ""}" href="#/activity/${a.id}">${icon(prof && prof.completedIds.has(a.id) ? "check" : SE.areaById[a.area].icon)}${esc(a.title)} · ${SE.timeText(a)}${a.track ? ` <span class="track-tag">Grades ${esc(a.track.replace("-", "–"))}</span>` : ""}</a>`).join("")}
               </div>
             </article>
           </li>`;
