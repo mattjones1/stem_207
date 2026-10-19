@@ -1566,7 +1566,8 @@ window.STEM.activities = [
     "stuck": [
       "IndentationError? Lines inside def and for need the same number of spaces in front.",
       "NameError or AttributeError? Python cares about capitals: turtle.Turtle() has a capital T in Turtle, and nothing else does.",
-      "Nothing drawn? Check that square(100) has no spaces in front and comes after the function."
+      "Nothing drawn? Check that square(100) has no spaces in front and comes after the function.",
+      "Drawing cut off? Scroll inside the Visual output box, or drag the bar above it up to make it bigger."
     ],
     "mission": "You've built custom blocks in Scratch. Now write the same idea in Python, a language programmers type every day. Your turtle will draw a pattern using a function you write.",
     "learn": [
@@ -1617,7 +1618,7 @@ window.STEM.activities = [
     "extend": "Use t.color(\"blue\") to change colors inside your pattern loop, or draw your Snowflake Studio snowflake in Python.",
     "teacherNotes": [
       "Objective: transfer. Students rewrite a familiar Scratch idea (a custom block with an input, used inside a loop) in Python.",
-      "Platform: the Raspberry Pi Foundation's free Code Editor runs Python in the browser, and its help pages list turtle as supported. Running code doesn't need an account; saving does. Check on school devices before class that the editor loads and runs code without signing in.",
+      "Platform: the Raspberry Pi Foundation's free Code Editor runs Python in the browser, and its help pages list turtle as supported. Checked in October 2026: the blank Python project opens and runs this mission's turtle pattern without signing in. Saving online needs an account, and there is a download button. The editor doesn't add indents for you, so students type the spaces. Check once on your school devices before class.",
       "Common mistakes: a missing colon, uneven indentation, and turtle.turtle() instead of turtle.Turtle(). Have students read the error's line number aloud before asking for help.",
       "Ask afterward: “What's easier in Python than in Scratch, and what's harder?”"
     ]
