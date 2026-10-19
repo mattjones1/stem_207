@@ -16,7 +16,8 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 
 ## Adding an in-site lab
 1. Create `assets/js/labs/lab-<name>.js`. Register it with `SE.labs.register({ id, area, title, tagline, levels, mount })`.
-   - Levels: `{ title, concept, goal, steps?, hints: [h1, h2] (progressive), learned }`.
+   - Levels: `{ title, concept, learn, why, goal, steps?, hints: [h1, h2] (progressive), learned }`. Every level needs `learn` ("What you'll learn") and `why` ("Why it matters", repeated on the win panel); `SE.labs.goals(levels, [[learn, why], ...])` adds them by index.
+   - `api.win(data, { title, extra })` can replace the win heading and add HTML at the top of the win panel.
    - `mount(el, idx, api)` uses `api.win(data)`, `api.say(text, "info"|"good"|"warn")`, `api.log(type, data)`, and `api.saved()`, and returns a cleanup function.
    - Check the student's **actual** work, never a "Done" click. Feedback names the mistake using the student's own values and doesn't reveal the answer.
    - Expose pure rules for tests, e.g. `SE.<name>.check(level, …)`.
@@ -47,6 +48,11 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - Read `brand/BRAND.md` before any branding, marketing, or visual-identity work. The marketing kit (social posts, banner, flyer and partner templates, concept artwork) is in `brand/marketing-kit/`.
 - The logo master is `assets/img/brand/stem207-logo.svg`, the same file as the kit's approved logo. Indigo `#302568` = `--navy`, lime `#8CC832` = `--orange`.
 - Marketing images show no people. The kit artwork is AI-generated concept art, so never present it as real equipment or programs.
+
+## Mission context and certificates (Batch 6)
+- Activity fields: `why`, `realWorld`, `vocab: [{ term, def }]` render as "Why it matters" with key words (all 10 coding missions have them). `board: { title, lines, note }` shows a card students read in the mission block (Bug Hunt's buggy algorithm).
+- `SE.certificate.open(info)` / `SE.certificate.button(info, label)` in `assets/js/certificate.js`: a printable certificate on warm paper. `info = { award, course, detail, name, className, at }`. Use the display name and class name only. Pattern Machine Level 6 awards "Responsible AI Explorer" at 7 of 10 (`SE.patternMachine.scoreUses`, `PASS`).
+- Test: `python3 tests/site/test_batch6.py`.
 
 ## Classroom and design rules
 - Grades 2–8: short sentences, large controls, buttons instead of dragging, keyboard access, and a visible focus outline. Never rely on color or sound alone.

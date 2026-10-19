@@ -307,6 +307,7 @@
     return () => { ro.disconnect(); cancelAnimationFrame(anim); };
   }
 
+  SE.labs.goals(LEVELS, [["How to make a prediction and test it.", "Scientists test their ideas instead of just believing them."], ["Why the same test can give slightly different results, and why we repeat tests.", "Real data always varies a little. Repeating tests helps scientists trust what they find."], ["How to change only one variable so a test is fair.", "A fair test is the only way to know what really caused a result."], ["How to test a hunch, even when the answer surprises you.", "Scientists change their minds when the evidence says so. That's how science gets things right."], ["How to explain a result with a claim, evidence, and reasoning.", "A good explanation shows why you believe something, using data, so other people can check it."]]);
   SE.labs.register({
     id: "ramp-racers",
     simulation: "This hill is a computer simulation built from a simple model of sliding. Real hills, sleds, and snow can behave differently. What would you need to test this on a real hill?",

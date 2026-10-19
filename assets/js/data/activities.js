@@ -19,6 +19,9 @@ window.STEM.activities = [
   /* ───────────────────────────── Coding & Computer Science ───────────────────────────── */
   {
     id: "robot-maze-mission",
+    why: "An algorithm is a set of exact steps. Computers can't guess what you mean, so every app, game, and robot starts with someone writing clear steps in the right order.",
+    realWorld: "Warehouse robots, delivery robots, and Mars rovers all follow algorithms to get where they're going without bumping into things.",
+    vocab: [{"term": "Algorithm", "def": "A set of steps, in order, that solves a problem."}, {"term": "Sequence", "def": "The order the steps happen in."}, {"term": "Bug", "def": "A mistake that makes a program do the wrong thing."}],
     bridge: { from: "lab-dance-party", text: "In Robot Dance Party you put moves in order and swapped them. Here you do the same thing with code blocks in a maze." },
     pilot: true,
     time: { prep: 5, core: [15, 20], verified: false },
@@ -86,6 +89,9 @@ window.STEM.activities = [
   },
   {
     id: "event-party",
+    why: "Most programs sit and wait for you. Events are how a program knows you clicked, tapped, or pressed a key, so it can do something.",
+    realWorld: "Every button you tap on a phone and every key you press in a video game starts an event.",
+    vocab: [{"term": "Event", "def": "Something that happens, like a click or a key press, that starts code."}, {"term": "Input", "def": "Information you give a program."}, {"term": "Sprite", "def": "A character or object in Scratch."}],
     pilot: true,
     time: { prep: 5, core: [15, 20], verified: false },
     stopAt: "Your sprite reacts to a click and to the space key (step 5). Step 6 is bonus.",
@@ -148,6 +154,9 @@ window.STEM.activities = [
   },
   {
     id: "loop-dance",
+    why: "Programmers don't like repeating themselves. A loop says “do this again” in one line, so programs are shorter and easier to fix.",
+    realWorld: "A music app repeating a song, a game's countdown timer, and a factory robot doing the same job all day all use loops.",
+    vocab: [{"term": "Loop", "def": "Instructions that repeat."}, {"term": "Pattern", "def": "Something that happens again and again in the same way."}, {"term": "Nested loop", "def": "A loop inside another loop."}],
     title: "Loop Dance Choreographers",
     area: "coding",
     summary: "Turn a long dance into a short program by spotting the moves that repeat.",
@@ -193,6 +202,9 @@ window.STEM.activities = [
   },
   {
     id: "debug-animation",
+    why: "Programmers spend a lot of their time finding and fixing bugs. Changing one thing at a time, then testing again, is how professionals do it.",
+    realWorld: "Before an app update comes out, testers run it again and again looking for bugs, just like you.",
+    vocab: [{"term": "Bug", "def": "A mistake that makes a program do the wrong thing."}, {"term": "Debugging", "def": "Finding and fixing bugs."}, {"term": "Forever loop", "def": "A loop that never stops on its own."}],
     bridge: { from: "lab-rover", text: "Harbor Code Lab levels 4–6 used repeat blocks. Here a repeat stops too soon, and you'll find out why." },
     starter: { file: "assets/starters/debug-the-fish.sb3", label: "Download the broken fish project", how: "In Scratch, choose File, then Load from your computer, and pick debug-the-fish.sb3." },
     title: "Debug the Broken Animation",
@@ -256,6 +268,9 @@ window.STEM.activities = [
   },
   {
     id: "interactive-story",
+    why: "Programs make choices. An if–then–else block lets your program pick a path based on what the reader decides.",
+    realWorld: "Choose-your-path games, quizzes that show your score, and apps that ask “Are you sure?” all branch with if–else.",
+    vocab: [{"term": "Conditional", "def": "A check that decides what happens next."}, {"term": "Condition", "def": "The question being checked, like “Did they answer yes?”"}, {"term": "Branch", "def": "One of the paths a program can take."}],
     bridge: { from: "lab-moon-gate", text: "In Moon Base Gatekeeper, IF/ELSE chose who got through the gate, and you tested every badge. Here IF/ELSE chooses the story's ending. Test every answer." },
     title: "Build an Interactive Story",
     area: "coding",
@@ -313,6 +328,9 @@ window.STEM.activities = [
   },
   {
     id: "score-keeper",
+    why: "Programs need memory. A variable remembers a value, like a score, and can change while the game is played.",
+    realWorld: "Step counters, game high scores, and the battery percent on a phone are all variables.",
+    vocab: [{"term": "Variable", "def": "A named place that stores a value that can change."}, {"term": "Value", "def": "What's stored in the variable right now."}, {"term": "Reset", "def": "Setting a variable back to its starting value."}],
     bridge: { from: "lab-space-blob", text: "In Feed the Space Blob, snacks was a variable: set it at the start, change it when something happens. Score works the same way." },
     figure: "score-keeper-star",
     title: "Score Keeper: Catch the Stars",
@@ -371,6 +389,9 @@ window.STEM.activities = [
   },
   {
     id: "my-blocks-patterns",
+    why: "Big programs are built from small pieces you can reuse. When you make your own block, you write it once and use it anywhere.",
+    realWorld: "Apps reuse the same code to draw every button. When programmers fix that code once, every button gets fixed.",
+    vocab: [{"term": "Custom block (function)", "def": "A named set of steps you can reuse."}, {"term": "Input", "def": "A value you give a block, like size."}, {"term": "Decomposition", "def": "Breaking a big problem into smaller parts."}],
     bridge: { from: "lab-rover", text: "Harbor Code Lab level 11 had you make your own block. Here you'll make one that draws a shape, then reuse it." },
     starter: { file: "assets/starters/pattern-studio.sb3", label: "Download the Pattern Studio starter", how: "In Scratch, choose File, then Load from your computer, and pick pattern-studio.sb3. The Pen extension and a square script are already there." },
     title: "Pattern Studio with My Blocks",
@@ -429,6 +450,9 @@ window.STEM.activities = [
   },
   {
     id: "capstone-game",
+    why: "Real programmers plan, build, test with real users, and improve. This mission is the whole process, with your own idea.",
+    realWorld: "Game studios and app teams work this way: plan, build a first version, playtest, fix, and repeat.",
+    vocab: [{"term": "Plan", "def": "A sketch of what you'll build and how it works."}, {"term": "Playtest", "def": "Letting someone try your project while you watch what happens."}, {"term": "Iterate", "def": "Improving something by repeating build, test, fix."}],
     title: "Mission Capstone: Design Your Own Game",
     area: "coding",
     summary: "Plan, build, test, and present a game or app of your own idea.",
@@ -487,6 +511,11 @@ window.STEM.activities = [
 
   {
     id: "fix-the-recipe",
+    board: { title: "The robot chef's sandwich algorithm. It has bugs!", lines: ["Put the spread on the bread.", "Put the bread together.", "Open the bread bag.", "Eat the sandwich."], note: "Your teacher is the robot chef. The robot does exactly what each step says, and nothing more." },
+    stopAt: "The robot chef makes the sandwich by following your class's fixed algorithm from step 1 to the end.",
+    why: "Computers do exactly what you say, not what you mean. Writing precise steps is one of the most important skills in coding.",
+    realWorld: "When a robot arm or a self-checkout machine does something strange, it's usually because a step in its instructions was missing or unclear.",
+    vocab: [{"term": "Algorithm", "def": "A set of steps, in order, that solves a problem."}, {"term": "Bug", "def": "A mistake that makes a program do the wrong thing."}, {"term": "Precise", "def": "Exact, with nothing left to guess."}],
     title: "Bug Hunt: Fix the Sandwich Algorithm",
     area: "coding",
     summary: "A set of sandwich instructions has bugs. Follow them exactly and find what's wrong.",
@@ -519,17 +548,20 @@ window.STEM.activities = [
       prerequisites: "None."
     },
     steps: [
-      "Read the algorithm aloud. The teacher-robot follows step 1 exactly (for example, sets the whole jar on the bag of bread).",
-      "Students say \"Bug!\" when something goes wrong. Ask: which step caused it?",
-      "Classify the bug: missing step, wrong order, or unclear step.",
-      "Students rewrite the step to be more precise.",
-      "Run the algorithm again from the start with the fix.",
-      "Keep going until the robot makes the sandwich."
+      "Read the robot chef's algorithm above. Can you spot a problem before the robot starts?",
+      "Watch the robot chef follow step 1 exactly as it's written.",
+      "When something goes wrong, call out \"Bug!\" Which step caused it?",
+      "Name the kind of bug: a missing step, a step in the wrong order, or a step that's unclear.",
+      "Help rewrite that step so it's precise. Example: \"Pick up the knife and spread the topping on one slice of bread.\"",
+      "Run the whole algorithm again from step 1 with your fix.",
+      "Keep fixing until the robot makes the sandwich."
     ],
     reflect: "Why does the robot need more detail than a person would?",
     extend: "Write a bug-free algorithm for another everyday task, like brushing teeth, and test it on a partner.",
     teacherNotes: [
       "Ham it up. The more literally you follow the steps, the clearer the idea becomes.",
+      "Robot chef script: Step 1, set the closed jar on top of the closed bread bag. Step 2, press the bag and jar together. Step 3, open the bag (now it works). Step 4, pretend to bite the bag.",
+      "Fixes to look for: open the bag first (wrong order), take out two slices and open the jar (missing steps), and say which tool spreads what, and where (unclear step).",
       "Use paper props in classrooms with food restrictions; it works just as well.",
       "This is a strong 20-minute opener before any coding stage."
     ]
@@ -1443,6 +1475,9 @@ window.STEM.activities = [
      with full directions on the page. */
   {
     id: "lobster-trap-logic",
+    why: "Rules written as if–else let anyone, or any computer, make the same decision every time. That makes the decision fair and consistent.",
+    realWorld: "Mail-sorting machines and ticket scanners use if–else rules too. On a lobster boat, clear rules help the whole crew sort the catch the same way.",
+    vocab: [{"term": "Conditional", "def": "A check that decides what happens next."}, {"term": "Flowchart", "def": "A drawing of a decision, with boxes and arrows."}, {"term": "Rule order", "def": "Which check happens first. Changing the order can change the result."}],
     bridge: { from: "lab-moon-gate", text: "Moon Base Gatekeeper checked one rule. Here you'll put several rules in order and check that every lobster is sorted the same way." },
     title: "Lobster Trap Logic",
     area: "coding",

@@ -42,6 +42,7 @@
     box: '<path d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5l9 4.5 9-4.5M12 12v9"/>',
     question: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"/>',
     mountain: '<path d="M3 20l6-10 4 6 2.5-3.5L21 20z"/><circle cx="17" cy="6" r="2"/>',
+    print: '<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
     clipboard: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/>',
     headset: '<path d="M3 8h18a1 1 0 0 1 1 1v6a2 2 0 0 1-2 2h-4.2l-2.3-3h-3l-2.3 3H4a2 2 0 0 1-2-2V9a1 1 0 0 1 1-1z"/>',
     key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/>',

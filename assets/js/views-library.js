@@ -673,12 +673,20 @@
           <section class="block block--mission" aria-labelledby="s-mission">
             <h2 id="s-mission">${icon("target")}Your mission</h2>
             <p>${esc(a.mission)}</p>
+            ${a.board ? `<div class="board"><p class="board__title">${esc(a.board.title)}</p><ol>${a.board.lines.map((x) => `<li>${esc(x)}</li>`).join("")}</ol>${a.board.note ? `<p class="board__note">${esc(a.board.note)}</p>` : ""}</div>` : ""}
           </section>
           ${a.bridge && SE.activityById[a.bridge.from] ? `<p class="bridge">${icon("arrowRight")}<span><strong>You've seen this idea before.</strong> ${esc(a.bridge.text)} <a href="#/activity/${a.bridge.from}">${esc(SE.activityById[a.bridge.from].title)}</a></span></p>` : ""}
           <section class="block" aria-labelledby="s-learn">
             <h2 id="s-learn">${icon("bulb")}What you’ll learn</h2>
             <ul class="bullets objectives">${a.learn.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul>
           </section>
+          ${a.why ? `
+          <section class="block block--why" aria-labelledby="s-why">
+            <h2 id="s-why">${icon("star")}Why it matters</h2>
+            <p>${esc(a.why)}</p>
+            ${a.realWorld ? `<p class="why-real"><strong>In the real world:</strong> ${esc(a.realWorld)}</p>` : ""}
+            ${a.vocab ? `<h3>Key words</h3><dl class="vocab">${a.vocab.map((v) => `<div><dt>${esc(v.term)}</dt><dd>${esc(v.def)}</dd></div>`).join("")}</dl>` : ""}
+          </section>` : ""}
           <section class="block" aria-labelledby="s-before">
             <h2 id="s-before">${icon("box")}Before you begin</h2>
             <div class="prep">

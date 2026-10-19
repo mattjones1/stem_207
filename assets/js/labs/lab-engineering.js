@@ -249,6 +249,7 @@
     return () => { ro.disconnect(); cancelAnimationFrame(anim); };
   }
 
+  SE.labs.goals(LAUNCH_LEVELS, [["How to test a design and watch carefully what happens.", "Engineers learn more from careful watching than from guessing."], ["How making a prediction before a test helps you learn from it.", "When a result surprises you, you've learned something. You only notice surprises if you predicted first."], ["How changing only one thing at a time makes a test fair.", "If you change two things and it works, you won't know which one helped. Engineers test fairly."], ["How to design for a limit, like a wall you have to clear.", "Real designs always have limits: size, weight, safety. Working within them is what engineers do."], ["How to get the best result while using the least material.", "Saving material saves money and resources. Engineers call this optimizing."], ["How to adjust a design until it works every time, for different targets.", "A design that works once isn't done. Engineers keep improving it until it's reliable."]]);
   SE.labs.register({
     id: "launcher",
     simulation: "This catapult is a computer simulation built from a simple physics model. A real catapult has friction, wobble, and wind that the model leaves out. What would change if you built one for real?",
@@ -457,6 +458,7 @@
     return () => cancelAnimationFrame(raf);
   }
 
+  SE.labs.goals(LINE_LEVELS, [["How a robot senses, decides, and acts, over and over.", "Self-driving cars, robot vacuums, and robot plows all use sense, think, act."], ["How to find the rule that makes a robot behave wrong.", "When a robot goes the wrong way, the bug is in its rules. Fixing the rule fixes the behavior."], ["How to add rules for situations the robot didn't expect.", "The real world surprises machines. Good engineers plan for the unexpected."], ["How going faster can make a robot less accurate.", "Engineers always balance trade-offs, like speed against safety."]]);
   SE.labs.register({
     id: "line-follower",
     simulation: "This plow is a simulated robot. Real sensors can be fooled by snow, glare, and dirt that the simulation leaves out. What could go wrong with a real one?",

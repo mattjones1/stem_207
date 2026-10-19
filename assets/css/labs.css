@@ -695,3 +695,42 @@
 .lab-sim svg { width: 1.1rem; height: 1.1rem; flex: none; margin-top: .15rem; fill: none; stroke: var(--warn-ink); stroke-width: 2; }
 .oi-reason { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; font-weight: 700; font-size: .92rem; }
 .oi-reason select { max-width: 100%; }
+
+/* Batch 6: level learning goals */
+.lab-objective { display: grid; gap: .5rem; margin: .4rem 0 .8rem; padding: .8rem 1rem; border-left: 4px solid var(--orange); background: var(--orange-soft); border-radius: var(--radius-sm); }
+.lab-objective p { margin: 0; color: var(--fg); }
+.lab-objective__k { display: flex; align-items: center; gap: .35rem; font-family: var(--font-display); font-weight: 700; font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; color: var(--orange-ink); margin-bottom: .1rem; }
+.lab-objective__k svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 2; }
+.lab-win__why { margin-top: .5rem; }
+
+/* Pattern Machine level 5: confidence lesson */
+.cf-lesson { display: grid; gap: .55rem; margin: .4rem 0 .9rem; padding: .9rem 1rem; background: var(--teal-soft); border-radius: var(--radius-sm); }
+.cf-lesson p { margin: 0; }
+.cf-diagram { width: 100%; max-width: 380px; height: auto; }
+.cf-diagram text { font-size: 11px; fill: var(--fg); font-family: var(--font-body); }
+.cf-diagram .cf-diagram__k { font-weight: 700; fill: var(--teal); }
+.cf-diagram__bar { fill: var(--orange); }
+.cf-diagram__ask { fill: var(--granite); }
+.cf-diagram__line { stroke: var(--navy); stroke-width: 3; }
+
+/* Pattern Machine level 6: scoring and certificate */
+.resp-pass { display: flex; gap: .5rem; align-items: flex-start; font-weight: 600; }
+.resp-pass svg { width: 1.2rem; height: 1.2rem; flex: none; fill: none; stroke: var(--orange-ink); stroke-width: 2; margin-top: .1rem; }
+.resp-score { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin-top: 1rem; }
+.resp-prior { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; }
+.resp-prior > svg { width: 1.5rem; height: 1.5rem; fill: var(--orange); stroke: var(--orange-ink); }
+.resp-prior p { margin: 0; font-weight: 700; }
+.cert-cele { display: flex; gap: 1rem; align-items: center; padding: 1rem 1.1rem; margin-bottom: 1rem; border-radius: var(--radius); background: var(--navy); color: var(--on-dark); }
+.cert-cele p { margin: 0 0 .6rem; color: var(--on-dark); }
+.cert-cele__k { font-family: var(--font-display); font-weight: 800; font-size: var(--step-1, 1.2rem); color: var(--orange) !important; }
+.cert-cele__badge { flex: none; display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: var(--orange); }
+.cert-cele__badge svg { width: 38px; height: 38px; fill: #fff8e9; stroke: var(--navy); stroke-width: 1.5; }
+@media (prefers-reduced-motion: no-preference) {
+  .cert-cele__badge { animation: cert-pop .7s cubic-bezier(.2, 1.4, .4, 1) both; }
+  @keyframes cert-pop { from { transform: scale(.3) rotate(-30deg); opacity: 0; } }
+}
+/* Level 6 on phones: let the reason list and choice buttons shrink to fit */
+.oi-list li { min-width: 0; }
+.oi-list .seg { max-width: 100%; }
+.oi-reason { display: grid; gap: .25rem; min-width: 0; }
+.oi-reason select { width: 100%; max-width: 100%; min-width: 0; }

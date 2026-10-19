@@ -334,6 +334,7 @@
   }
 
   SE.blob = { check, readInt, working, LEVELS, CHALLENGE, state: () => null };
+  SE.labs.goals(LEVELS, [["What a variable is: a named box that holds a number.", "Games use variables to remember scores, lives, and coins. Without them, a program forgets everything."], ["How to predict a variable's value after code changes it.", "Predicting values helps you understand code before you run it, and spot bugs when the numbers look wrong."], ["Why a variable needs a starting value every time the program runs.", "Forgetting to reset is one of the most common bugs. It's why a new game sometimes starts with the old score."], ["How to use change and set blocks to reach an exact number.", "Programs often need an exact value, like a timer at 0 or a score of 100. Planning the math gets you there."]]);
   SE.labs.register({
     id: "space-blob",
     area: "coding",

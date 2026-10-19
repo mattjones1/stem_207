@@ -325,6 +325,7 @@
   }
 
   SE.gate = { run, check, keyOf, GOAL, BADGES, state: () => null };
+  SE.labs.goals(LEVELS, [["How an IF / ELSE rule picks one of two paths.", "Apps check things all the time, like a password or a badge. IF / ELSE is how they decide what happens next."], ["What the ELSE branch does when the check is false.", "A good program plans for every answer, not just the one you expect."], ["How editing the check changes who gets through.", "Rules change in real life. Programmers update the check without rewriting everything."], ["How to find a bug by testing a rule with different visitors.", "Testing many cases, not just one, is how programmers find the bugs that hide."], ["How to write a rule that works for every visitor in a group.", "Real systems have to be right for everyone who uses them."]]);
   SE.labs.register({
     id: "moon-gate",
     area: "coding",

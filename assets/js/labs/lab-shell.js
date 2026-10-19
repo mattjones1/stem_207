@@ -8,13 +8,15 @@
  *
  * A lab definition:
  *   id, area, title, tagline, intro
- *   levels: [{ title, concept, goal, steps?: [], hint, learned }]
+ *   levels: [{ title, concept, learn, why, goal, steps?: [], hint | hints: [], learned }]
+ *     learn: "What you'll learn" (shown first); why: "Why it matters" (shown first, repeated on the win panel)
  *   simulation (optional): a sentence telling students the lab is a model, not real-world data
  *   chapters (optional): [{ title, short, from, to, blurb }] groups levels (indexes from..to)
  *   mount(el, levelIndex, api) → optional cleanup function
  *
  * The api passed to mount:
- *   api.win(data)        mark the level complete (data is saved with the event)
+ *   api.win(data, opts)  mark the level complete (data is saved with the event)
+ *                        opts.extra: HTML shown at the top of the win panel; opts.title: its heading
  *   api.say(text, kind)  show feedback ("info" | "good" | "warn")
  *   api.log(type, data)  record a lab action (e.g. "lab_test_run")
  *   api.saved()          data from this student's last completion of this level
@@ -31,6 +33,11 @@
 
   SE.labs = {
     register(def) { registry.push(def); },
+    /* Add "What you'll learn" / "Why it matters" to levels: list is [[learn, why], ...] by index. */
+    goals(levels, list) {
+      list.forEach((g, i) => { if (levels[i] && g) { levels[i].learn = levels[i].learn || g[0]; levels[i].why = levels[i].why || g[1]; } });
+      return levels;
+    },
     all: () => registry.slice(),
     byId: (id) => registry.find((l) => l.id === id),
     forArea: (areaId) => registry.filter((l) => l.area === areaId),
@@ -98,6 +105,10 @@
           ${chapters ? `<p class="lab-voyage">${esc(chapters[ch].title)} · level ${idx - chapters[ch].from + 1} of ${chapters[ch].to - chapters[ch].from + 1}</p>${idx === chapters[ch].from ? `<p class="lab-voyage__blurb">${esc(chapters[ch].blurb)}</p>` : ""}` : ""}
           <span class="lab-concept">${icon("bulb")}${esc(level.concept)}</span>
           <h2 id="lvl-title">Level ${idx + 1}: ${esc(level.title)}</h2>
+          ${level.learn || level.why ? `<div class="lab-objective">
+            ${level.learn ? `<p><span class="lab-objective__k">${icon("target")}What you'll learn</span>${esc(level.learn)}</p>` : ""}
+            ${level.why ? `<p><span class="lab-objective__k">${icon("bulb")}Why it matters</span>${esc(level.why)}</p>` : ""}
+          </div>` : ""}
           ${lab.simulation ? `<p class="lab-sim">${icon("alert")}<span><strong>Simulation.</strong> ${esc(lab.simulation)}</span></p>` : ""}
           <p class="lab-goal"><strong>Your goal:</strong> ${esc(level.goal)}</p>
           ${level.steps ? `<ol class="lab-steps">${level.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>` : ""}
@@ -152,7 +163,7 @@
         const ev = SE.store.eventsFor(user.id).filter((e) => e.type === "lab_level_completed" && e.data.labId === lab.id && e.data.level === idx).pop();
         return ev ? ev.data.result || null : null;
       },
-      win(result = {}) {
+      win(result = {}, opts = {}) {
         if (won) return;
         won = true;
         const before = isStudent ? SE.game.profile(user.id) : null;
@@ -165,14 +176,15 @@
         const allDone = isStudent ? SE.labs.progressFor(after, lab.id).size === lab.levels.length : guestProgress[lab.id].size === lab.levels.length;
         const panel = document.getElementById("lab-win");
         panel.innerHTML = `
+          ${opts.extra || ""}
           <div class="lab-win__head">
             <span class="lab-win__badge">${icon("check")}</span>
             <div>
-              <h2 tabindex="-1" id="lab-win-title">Level ${idx + 1} complete${allDone && next === null ? ". Lab finished!" : "!"}</h2>
+              <h2 tabindex="-1" id="lab-win-title">${opts.title ? esc(opts.title) : `Level ${idx + 1} complete${allDone && next === null ? ". Lab finished!" : "!"}`}</h2>
               ${isStudent && first ? `<p class="lab-win__xp">+${STEM.progression.xp.labLevel} XP${after.index > before.index ? ` · Promoted to ${esc(after.rank.name)}` : ""}</p>` : ""}
             </div>
           </div>
-          <div class="lab-win__learned"><span class="eyebrow">What you just learned</span><p>${esc(level.learned)}</p></div>
+          <div class="lab-win__learned"><span class="eyebrow">What you just learned</span><p>${esc(level.learned)}</p>${level.why ? `<p class="lab-win__why"><strong>Why it matters:</strong> ${esc(level.why)}</p>` : ""}</div>
           ${newPatches.length ? `<div class="patch-row">${newPatches.map((p) => `<figure class="patch-tile patch-tile--new">${SE.patchArt(p.patch, true, 76)}<figcaption><strong>${esc(p.patch.name)}</strong></figcaption></figure>`).join("")}</div>` : ""}
           ${isStudent ? SE.base.unlockStrip(SE.base.newUnlocks(before, after)) : ""}
           <div class="lab-win__actions">
