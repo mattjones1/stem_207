@@ -30,8 +30,8 @@ async def main():
     first = await pg.evaluate("""(()=>{const u=SE.store.currentUser(), prof=SE.game.profile(u.id);
       const open=SE.store.assignmentsFor(u.classId).map(x=>({x,a:SE.activityById[x.activityId]})).filter(r=>r.a&&!SE.game.missionDone(prof,r.a)).sort((p,q)=>(p.x.dueDate||'9999').localeCompare(q.x.dueDate||'9999'));
       return open[0].a.title})()""")
-    ok("Today leads with the earliest-due unfinished assignment", (await pg.inner_text("#today-mission")) == first, first)
-    act = await pg.inner_text(".today-card__actions .btn--launch")
+    ok("Today leads with the earliest-due unfinished assignment", (await pg.inner_text("#today-class-title")) == first, first)
+    act = await pg.inner_text(".today-card--class .today-card__actions .btn--launch")
     ok("big Start/Continue button", act.strip() in ("Start", "Continue"), act)
     ok("map, patches, and full library are not on Today", await pg.locator(".map-frame, .patch-row, #library").count() == 0)
     await pg.screenshot(path=O + "today.png", full_page=True)
@@ -59,8 +59,8 @@ async def main():
     # no assignment -> one eligible next step
     await pg.evaluate("(()=>{const c=SE.store.currentUser().classId; SE.store.assignmentsFor(c).map(x=>x.activityId).forEach(id=>SE.store.unassign(c,[id]))})()")
     await pg.goto(S + "#/library"); await pg.wait_for_timeout(150); await pg.goto(S + "#/"); await pg.wait_for_timeout(500)
-    why = await pg.inner_text(".today-card__why") if await pg.locator(".today-card__why").count() else ""
-    ok("no assignment: Today offers one next step", await pg.locator(".today-card").count() == 1 and "teacher" not in why.lower(), why)
+    why = await pg.inner_text(".today-card--own .today-card__why") if await pg.locator(".today-card--own .today-card__why").count() else ""
+    ok("no assignment: class side says nothing assigned, own side offers one next step", await pg.locator(".today-card--class").count() == 0 and await pg.locator(".today-card--own").count() == 1 and "teacher" not in why.lower(), why)
     # teacher views
     t2 = await ctx.new_page(); watch(t2)
     await educator(t2)

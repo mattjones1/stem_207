@@ -180,37 +180,67 @@
 
   SE.views.bindExpeditionHome = function () {};
 
-  /* ───────── Today: one clear next action ─────────
-   * Leads with the teacher's assignment (or work in progress, or one eligible next step),
-   * a big Start/Continue button, and a visible way to ask for help. Everything else
-   * (map, patches, harbor, the full library) lives behind "More to explore". */
+  /* ───────── Today: my class, and on my own ─────────
+   * Two clearly separate halves. "My class" holds everything the teacher set: class messages,
+   * try-agains, assigned missions (with the teacher's instructions), and what's waiting for a
+   * check. "On my own" holds the student's own exploring: work in progress, suggestions, and
+   * the rest of the site. The help button sits on the first big card. */
   SE.views.today = function (user) {
     const prof = SE.game.profile(user.id);
     const due = (r) => r.x.dueDate || "9999";
     const assigned = SE.store.assignmentsFor(user.classId).map((x) => ({ x, a: SE.activityById[x.activityId] })).filter((r) => r.a && !SE.hiddenForUser(r.a));
+    const assignedIds = new Set(assigned.map((r) => r.a.id));
     const open = assigned.filter((r) => !SE.game.missionDone(prof, r.a)).sort((p, q) => due(p).localeCompare(due(q)));
     const doneN = assigned.length - open.length;
     const labOf = (a) => a.launch.status === "lab" && SE.labs.byId(a.launch.labId);
+    const hrefOf = (a) => (labOf(a) ? `#/lab/${a.launch.labId}` : `#/activity/${a.id}`);
     const startedOn = (a) => prof.opened.has(a.id) || (prof.steps[a.id] && prof.steps[a.id].size > 0) || (labOf(a) && (prof.labLevels[a.launch.labId] || new Set()).size > 0);
-    const inProgress = Object.entries(prof.steps).filter(([id, set]) => set.size > 0 && !prof.completedIds.has(id)).map(([id]) => SE.activityById[id]).filter(Boolean)[0];
-    let main = null, why = "";
-    let retry = null;
-    // A teacher's "try again" comes first, assigned or not: it's direction from the teacher.
-    const retryA = STEM.activities.map((a) => ({ a, st: SE.game.statusFor(prof, a) })).filter((r) => r.st.state === "tryagain").sort((p, q) => q.st.tryAgain.at - p.st.tryAgain.at)[0];
-    if (retryA) { main = retryA.a; retry = retryA.st.tryAgain; why = "Your teacher asked you to try again"; }
-    else if (open.length) {
-      main = open[0].a;
-      const st = SE.game.statusFor(prof, main);
-      if (st.state === "tryagain") { retry = st.tryAgain; why = "Your teacher asked you to try again"; }
-      else why = open[0].x.dueDate ? `From your teacher · ${SE.dueText(open[0].x.dueDate)}` : "From your teacher";
-    }
-    else if (inProgress) { main = inProgress; why = "Pick up where you left off"; }
-    else { const r = SE.game.recommendations(user, prof, 1)[0]; if (r) { main = r.activity; why = r.reason === "Ready for you" ? "A good next step" : r.reason; } }
+    const statuses = STEM.activities.map((a) => ({ a, st: SE.game.statusFor(prof, a) }));
+
+    // My class: a try-again comes first (it's direction from the teacher), then the earliest-due assignment.
+    let classMain = null, classWhy = "", retry = null, classNote = null;
+    const retryA = statuses.filter((r) => r.st.state === "tryagain").sort((p, q) => q.st.tryAgain.at - p.st.tryAgain.at)[0];
+    if (retryA) { classMain = retryA.a; retry = retryA.st.tryAgain; classWhy = "Your teacher asked you to try again"; }
+    else if (open.length) { classMain = open[0].a; classWhy = open[0].x.dueDate ? `Assigned · ${SE.dueText(open[0].x.dueDate)}` : "Assigned by your teacher"; }
+    if (classMain) { const asg = assigned.find((r) => r.a.id === classMain.id); classNote = asg && asg.x.note; }
+    const messages = user.classId ? SE.store.messagesFor(user.classId) : [];
     const notes = prof.completions.map((c) => ({ c, r: prof.reviewed[c.event.id] })).filter((x) => x.r && x.r.data.note && Date.now() - x.r.at < 14 * SE.DAY).slice(-1)[0];
+    const waiting = statuses.filter((r) => r.st.state === "submitted").sort((p, q) => ((q.st.sub && q.st.sub.at) || 0) - ((p.st.sub && p.st.sub.at) || 0)).map((r) => ({ label: r.a.title, href: `#/activity/${r.a.id}`, what: "Mission sent" }))
+      .concat(Object.entries(prof.stages).filter(([, st]) => st.status === "claimed").map(([n]) => ({ label: `Stage ${n}: ${STEM.pathway.find((p) => p.stage === Number(n)).title}`, href: `#/pathway#stage-${n}`, what: "Stage check" })));
+
+    // On my own: unassigned work in progress first, then suggestions (which already skip assigned missions).
+    const ownInProgress = Object.entries(prof.steps).filter(([id, set]) => set.size > 0 && !prof.completedIds.has(id) && !assignedIds.has(id)).map(([id]) => SE.activityById[id]).filter(Boolean)[0];
+    const recs = SE.game.recommendations(user, prof, 4).filter((r) => !ownInProgress || r.activity.id !== ownInProgress.id);
+    const ownMain = ownInProgress || (recs[0] && recs[0].activity);
+    const ownWhy = ownInProgress ? "Pick up where you left off" : recs[0] ? (recs[0].reason === "Ready for you" ? "A good next step" : recs[0].reason) : "";
+    const ownMore = recs.filter((r) => r.activity !== ownMain).slice(0, 2);
     const first = user.displayName.split(" ")[0];
-    const lab = main && labOf(main);
-    const started = main && startedOn(main);
-    const href = main ? (lab ? `#/lab/${lab.id}` : `#/activity/${main.id}`) : "#/library";
+    const helpOn = classMain ? "class" : "own";
+
+    const bigCard = (a, why, kind, extra = "") => {
+      const lab = labOf(a), started = startedOn(a);
+      return `
+        <article class="today-card today-card--${kind}" aria-labelledby="today-${kind}-title">
+          <span class="today-card__why">${icon(SE.areaById[a.area].icon)}${esc(why)}</span>
+          <h3 id="today-${kind}-title" class="today-card__title">${esc(a.title)}</h3>
+          ${extra}
+          <p class="today-card__what">${esc(a.summary)}</p>
+          <p class="today-card__meta">${icon("clock")}${SE.timeText(a)}${lab ? ` · ${(prof.labLevels[lab.id] || new Set()).size} of ${lab.levels.length} levels done` : ""}</p>
+          ${a.stopAt ? `<p class="today-card__stop">${icon("flag")}<span><strong>You're done when:</strong> ${esc(a.stopAt)}</span></p>` : ""}
+          <div class="today-card__actions">
+            <a class="btn btn--launch btn--big" href="${hrefOf(a)}">${icon(started ? "arrowRight" : "rocket")}${started ? "Continue" : "Start"}</a>
+            ${helpOn === kind ? `<button type="button" class="btn btn--ghost btn--big" id="help-btn" aria-expanded="false" aria-controls="help-panel">${icon("question")}I need help</button>` : ""}
+          </div>
+          ${helpOn === kind ? `<div class="help-panel" id="help-panel" hidden>
+            <h3>Stuck? Try these, in order</h3>
+            <ol><li>Read the step you're on again, out loud.</li>
+              ${a.stuck ? `<li>Open the mission and look at <strong>Stuck? Try these</strong>.</li>` : lab ? `<li>In the lab, press <strong>Need a hint?</strong></li>` : ""}
+              <li>Ask a partner.</li>
+              <li>Still stuck? <button type="button" class="btn btn--small btn--primary" id="help-ask" data-activity="${a.id}">${icon("message")}Let my teacher know</button></li></ol>
+            <p class="help-panel__status" id="help-status" role="status" aria-live="polite"></p>
+          </div>` : ""}
+        </article>`;
+    };
 
     app().innerHTML = `
       <section class="today-top ridge" aria-labelledby="today-title">
@@ -220,49 +250,58 @@
             <h1 id="today-title" tabindex="-1">Hi, ${esc(first)}. Here's today.</h1></div>
         </div>
       </section>
-      <div class="wrap today">
-        ${notes ? `<div class="teacher-note-banner">${icon("message")}<p><strong>Note from your teacher</strong> on <a href="#/activity/${notes.c.activity.id}">${esc(notes.c.activity.title)}</a>: “${esc(notes.r.data.note)}”</p></div>` : ""}
-        ${main ? `
-        <article class="today-card" aria-labelledby="today-mission">
-          <span class="today-card__why">${icon(SE.areaById[main.area].icon)}${esc(why)}</span>
-          <h2 id="today-mission">${esc(main.title)}</h2>
-          ${retry && retry.data.note ? `<p class="today-card__retry">${icon("message")}<span><strong>Your teacher says:</strong> “${esc(retry.data.note)}”</span></p>` : ""}
-          <p class="today-card__what">${esc(main.summary)}</p>
-          <p class="today-card__meta">${icon("clock")}${SE.timeText(main)}${lab ? ` · ${(prof.labLevels[lab.id] || new Set()).size} of ${lab.levels.length} levels done` : ""}</p>
-          ${main.stopAt ? `<p class="today-card__stop">${icon("flag")}<span><strong>You're done when:</strong> ${esc(main.stopAt)}</span></p>` : ""}
-          <div class="today-card__actions">
-            <a class="btn btn--launch btn--big" href="${href}">${icon(started ? "arrowRight" : "rocket")}${started ? "Continue" : "Start"}</a>
-            <button type="button" class="btn btn--ghost btn--big" id="help-btn" aria-expanded="false" aria-controls="help-panel">${icon("question")}I need help</button>
-          </div>
-          <div class="help-panel" id="help-panel" hidden>
-            <h3>Stuck? Try these, in order</h3>
-            <ol><li>Read the step you're on again, out loud.</li>
-              ${main.stuck ? `<li>Open the mission and look at <strong>Stuck? Try these</strong>.</li>` : lab ? `<li>In the lab, press <strong>Need a hint?</strong></li>` : ""}
-              <li>Ask a partner.</li>
-              <li>Still stuck? <button type="button" class="btn btn--small btn--primary" id="help-ask">${icon("message")}Let my teacher know</button></li></ol>
-            <p class="help-panel__status" id="help-status" role="status" aria-live="polite"></p>
-          </div>
-        </article>` : `
-        <article class="today-card today-card--empty">
-          <h2 id="today-mission">You're all caught up!</h2>
-          <p>Nothing is waiting for you right now. Pick any mission you like.</p>
-          <a class="btn btn--launch btn--big" href="#/library">${icon("search")}Find a mission</a>
-        </article>`}
-        ${open.length > 1 || doneN ? `
-        <section class="today-more" aria-labelledby="also-title">
-          <h2 id="also-title">Also from your teacher <span class="muted">${doneN} of ${assigned.length} done</span></h2>
-          <ul class="today-list">${open.slice(1).map(({ x, a }) => `<li><a href="${labOf(a) ? `#/lab/${a.launch.labId}` : `#/activity/${a.id}`}">${icon(SE.areaById[a.area].icon)}<span><strong>${esc(a.title)}</strong><small>${x.dueDate ? esc(SE.dueText(x.dueDate)) : "No due date"} · ${SE.timeText(a)}</small></span></a></li>`).join("")}
-            ${assigned.filter((r) => SE.game.missionDone(prof, r.a)).map(({ a }) => `<li class="is-done"><a href="#/activity/${a.id}">${icon("check")}<span><strong>${esc(a.title)}</strong><small>Done</small></span></a></li>`).join("")}</ul>
-        </section>` : ""}
-        <nav class="today-explore" aria-label="More to explore">
-          <h2>More to explore</h2>
-          <div class="today-explore__grid">
-            <a href="#/library">${icon("search")}<span><strong>All missions</strong><small>Search and pick any mission</small></span></a>
-            <a href="#/explore">${icon("map")}<span><strong>My expedition</strong><small>Star map, patches, and class goal</small></span></a>
-            <a href="#/base">${icon("lighthouse")}<span><strong>My harbor</strong><small>Your explorer and boat</small></span></a>
-            <a href="#/pathway">${icon("list")}<span><strong>Coding pathway</strong><small>Seven stages, step by step</small></span></a>
-          </div>
-        </nav>
+      <div class="wrap today today--split">
+        <section class="today-col today-col--class" aria-labelledby="class-title">
+          <header class="today-col__head">
+            <span class="today-col__icon">${icon("users")}</span>
+            <div><span class="eyebrow">My class${user.cls ? ` · ${esc(user.cls.name)}` : ""}</span><h2 id="class-title">With your class</h2></div>
+          </header>
+          ${messages.length ? `
+          <div class="class-board" aria-labelledby="board-title">
+            <h3 id="board-title">${icon("message")}From your teacher</h3>
+            <ul class="class-board__list">${messages.slice(0, 3).map((m) => `<li><p>${esc(m.body)}</p><small>${SE.timeAgo(m.createdAt)}</small></li>`).join("")}</ul>
+            ${messages.length > 3 ? `<details class="class-board__more"><summary>Older messages (${messages.length - 3})</summary><ul class="class-board__list">${messages.slice(3).map((m) => `<li><p>${esc(m.body)}</p><small>${SE.timeAgo(m.createdAt)}</small></li>`).join("")}</ul></details>` : ""}
+          </div>` : ""}
+          ${notes ? `<div class="teacher-note-banner">${icon("message")}<p><strong>Note from your teacher</strong> on <a href="#/activity/${notes.c.activity.id}">${esc(notes.c.activity.title)}</a>: “${esc(notes.r.data.note)}”</p></div>` : ""}
+          ${classMain ? bigCard(classMain, classWhy, "class",
+            (retry && retry.data.note ? `<p class="today-card__retry">${icon("message")}<span><strong>Your teacher says:</strong> “${esc(retry.data.note)}”</span></p>` : "")
+            + (classNote ? `<p class="today-card__note">${icon("clipboard")}<span><strong>Instructions:</strong> ${esc(classNote)}</span></p>` : "")) : `
+          <div class="today-empty">
+            <h3>${assigned.length ? "All your class missions are done!" : "Nothing assigned right now"}</h3>
+            <p>${assigned.length ? "Nice work. Explore on your own until your teacher adds more." : "When your teacher assigns a mission, it shows up here."}</p>
+          </div>`}
+          ${open.length > (retry ? 0 : 1) || doneN ? `
+          <section class="today-more" aria-labelledby="also-title">
+            <h3 id="also-title">Class missions <span class="muted">${doneN} of ${assigned.length} done</span></h3>
+            <ul class="today-list">${open.filter((r) => r.a !== classMain).map(({ x, a }) => `<li><a href="${hrefOf(a)}">${icon(SE.areaById[a.area].icon)}<span><strong>${esc(a.title)}</strong><small>${x.dueDate ? esc(SE.dueText(x.dueDate)) : "No due date"} · ${SE.timeText(a)}</small>${x.note ? `<small class="today-list__note">${icon("clipboard")}${esc(x.note)}</small>` : ""}</span></a></li>`).join("")}
+              ${assigned.filter((r) => SE.game.missionDone(prof, r.a)).map(({ a }) => `<li class="is-done"><a href="#/activity/${a.id}">${icon("check")}<span><strong>${esc(a.title)}</strong><small>Done</small></span></a></li>`).join("")}</ul>
+          </section>` : ""}
+          ${waiting.length ? `
+          <section class="today-waiting" aria-labelledby="waiting-title">
+            <h3 id="waiting-title">${icon("clock")}Waiting for your teacher to check</h3>
+            <ul>${waiting.filter((w) => w.what === "Stage check").concat(waiting.filter((w) => w.what !== "Stage check")).slice(0, 3).map((w) => `<li><a href="${w.href}"><strong>${esc(w.label)}</strong></a><small>${esc(w.what)}</small></li>`).join("")}</ul>
+            ${waiting.length > 3 ? `<a class="today-waiting__more" href="#/me">${waiting.length - 3} more in your mission log ${icon("arrowRight")}</a>` : ""}
+          </section>` : ""}
+          <a class="today-col__link" href="#/explore">${icon("map")}See the class journey on My expedition ${icon("arrowRight")}</a>
+        </section>
+
+        <section class="today-col today-col--own" aria-labelledby="own-title">
+          <header class="today-col__head">
+            <span class="today-col__icon">${icon("compass")}</span>
+            <div><span class="eyebrow">On my own</span><h2 id="own-title">Explore on your own</h2></div>
+          </header>
+          <p class="today-col__lede">Your own picks, any time. They don't change your class list.</p>
+          ${ownMain ? bigCard(ownMain, ownWhy, "own") : `<div class="today-empty"><h3>Pick anything you like</h3><p>Search all the missions and labs.</p></div>`}
+          ${ownMore.length ? `<ul class="today-list today-list--own">${ownMore.map((r) => `<li><a href="${hrefOf(r.activity)}">${icon(SE.areaById[r.activity.area].icon)}<span><strong>${esc(r.activity.title)}</strong><small>${esc(r.reason)} · ${SE.timeText(r.activity)}</small></span></a></li>`).join("")}</ul>` : ""}
+          <nav class="today-explore" aria-label="More to explore">
+            <div class="today-explore__grid">
+              <a href="#/library">${icon("search")}<span><strong>All missions</strong><small>Search and pick any mission</small></span></a>
+              <a href="#/explore">${icon("map")}<span><strong>My expedition</strong><small>Star map, patches, and class goal</small></span></a>
+              <a href="#/base">${icon("lighthouse")}<span><strong>My harbor</strong><small>Your explorer and boat</small></span></a>
+              <a href="#/pathway">${icon("list")}<span><strong>Coding pathway</strong><small>Seven stages, step by step</small></span></a>
+            </div>
+          </nav>
+        </section>
       </div>`;
 
     const btn = document.getElementById("help-btn");
@@ -273,7 +312,7 @@
     });
     const ask = document.getElementById("help-ask");
     if (ask) ask.addEventListener("click", () => {
-      SE.store.log("help_requested", { activityId: main.id });
+      SE.store.log("help_requested", { activityId: ask.dataset.activity });
       ask.disabled = true;
       document.getElementById("help-status").textContent = "Your teacher can see that you asked for help. Keep trying the steps while you wait.";
     });

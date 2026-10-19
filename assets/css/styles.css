@@ -2049,3 +2049,68 @@ h1, h2, h3, h4 { letter-spacing: -.015em; }
 .tstage__missions-head h3 { margin: 0; }
 .preview-note { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .8rem; margin-top: .8rem; padding: .6rem .9rem; border-radius: var(--radius-sm); background: rgba(255, 255, 255, .12); color: var(--on-dark); }
 .preview-note > svg { width: 1.2rem; height: 1.2rem; fill: none; stroke: currentColor; stroke-width: 2; }
+
+/* Batch 9: Today split into My class and On my own */
+.today.today--split { max-width: 1180px; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; gap: 1.4rem; }
+@media (max-width: 900px) { .today.today--split { grid-template-columns: minmax(0, 1fr); } }
+.today-col { display: grid; gap: 1rem; padding: 1.1rem; border-radius: calc(var(--radius) + 4px); }
+.today-col--class { background: var(--teal-soft); border: 2px solid color-mix(in srgb, var(--teal) 35%, transparent); }
+.today-col--own { background: var(--orange-soft); border: 2px solid color-mix(in srgb, var(--orange) 45%, transparent); }
+.today-col__head { display: flex; gap: .75rem; align-items: center; }
+.today-col__head h2 { font-size: clamp(1.3rem, 3vw, 1.6rem); margin: 0; }
+.today-col__icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 14px; flex: none; }
+.today-col__icon svg { width: 26px; height: 26px; fill: none; stroke-width: 2; }
+.today-col--class .today-col__icon { background: var(--teal); }
+.today-col--class .today-col__icon svg { stroke: var(--surface); }
+.today-col--own .today-col__icon { background: var(--orange); }
+.today-col--own .today-col__icon svg { stroke: var(--on-accent); }
+.today-col--class .eyebrow { color: var(--teal); }
+.today-col--own .eyebrow { color: var(--orange-ink); }
+.today-col__lede { margin: -.4rem 0 0; color: var(--muted); }
+.today-col__link { display: inline-flex; align-items: center; gap: .4rem; font-weight: 700; color: var(--teal); }
+.today-col__link svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
+.today-card__title { font-size: clamp(1.35rem, 3vw, 1.8rem); }
+.today-card--own { border-top-color: var(--teal); }
+.today-card--own .today-card__actions .btn { min-height: 54px; font-size: 1.1rem; }
+.today-card__note { display: flex; gap: .5rem; align-items: flex-start; padding: .7rem .9rem; border-radius: var(--radius-sm); background: var(--teal-soft); }
+.today-card__note svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; flex: none; margin-top: .2rem; }
+.today-more h3, .today-waiting h3 { font-size: 1.05rem; margin: 0 0 .5rem; display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+.today-more h3 .muted { font-weight: 400; font-size: .95rem; }
+.today-list__note { display: flex; gap: .3rem; align-items: flex-start; }
+.today-list__note svg { width: 14px !important; height: 14px !important; margin-top: .2rem; }
+.today-empty { padding: 1.1rem 1.2rem; border-radius: var(--radius); background: var(--surface); border: 2px dashed var(--line); }
+.today-empty h3 { margin: 0 0 .3rem; }
+.today-empty p { margin: 0; color: var(--muted); }
+.class-board { padding: 1rem 1.1rem; border-radius: var(--radius); background: var(--surface); border-left: 6px solid var(--teal); box-shadow: var(--shadow); }
+.class-board h3 { display: flex; align-items: center; gap: .45rem; margin: 0 0 .6rem; font-size: 1.1rem; }
+.class-board h3 svg { width: 22px; height: 22px; fill: none; stroke: var(--teal); stroke-width: 2; }
+.class-board__list { list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; }
+.class-board__list li { display: grid; gap: .15rem; padding-bottom: .55rem; border-bottom: 1px dashed var(--line); }
+.class-board__list li:last-child { border-bottom: 0; padding-bottom: 0; }
+.class-board__list p { margin: 0; font-size: 1.08rem; }
+.class-board__list small { color: var(--muted); }
+.class-board__more { margin-top: .6rem; }
+.class-board__more summary { cursor: pointer; color: var(--teal); font-weight: 700; }
+.class-board__more .class-board__list { margin-top: .5rem; }
+.today-waiting { padding: .8rem 1rem; border-radius: var(--radius-sm); background: var(--surface); }
+.today-waiting h3 svg { width: 18px; height: 18px; fill: none; stroke: var(--warn-ink); stroke-width: 2; }
+.today-waiting ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .35rem; }
+.today-waiting li { display: flex; justify-content: space-between; gap: .6rem; flex-wrap: wrap; }
+.today-waiting small { color: var(--muted); }
+/* Teacher: class messages and assignment instructions */
+.msg-block .block__head h2 { display: flex; align-items: center; gap: .45rem; }
+.msg-block .block__head h2 svg { width: 22px; height: 22px; fill: none; stroke: var(--teal); stroke-width: 2; }
+.msg-form { display: grid; gap: .4rem; margin-top: .4rem; }
+.msg-form .btn { justify-self: start; }
+.msg-list { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: .5rem; }
+.msg-list li { display: grid; grid-template-columns: 1fr auto; gap: .1rem .8rem; align-items: center; padding: .6rem .8rem; border-radius: var(--radius-sm); background: var(--bg); }
+.msg-list p { margin: 0; }
+.msg-list small { color: var(--muted); grid-column: 1; }
+.msg-list .btn { grid-column: 2; grid-row: 1 / span 2; }
+.alist__note { margin-top: .4rem; }
+.alist__note summary { display: inline-flex; align-items: center; gap: .35rem; cursor: pointer; font-size: .9rem; font-weight: 700; color: var(--teal); }
+.alist__note summary svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; }
+.note-form { display: flex; flex-wrap: wrap; gap: .4rem; align-items: flex-end; margin-top: .4rem; }
+.note-form textarea { flex: 1 1 220px; }
+.today-waiting__more { display: inline-flex; align-items: center; gap: .3rem; margin-top: .5rem; font-weight: 700; font-size: .92rem; }
+.today-waiting__more svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; }

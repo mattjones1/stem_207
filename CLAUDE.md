@@ -66,6 +66,12 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - `SE.checksGuide("teacher" | "student")` in `views-library.js` is the "How checks work" guide. Keep it in step with the real flow if checks change.
 - Test: `python3 tests/site/test_batch8.py`.
 
+## My class / On my own, messages, instructions (Batch 9)
+- Today (`SE.views.today`) has two sides: `.today-col--class` (messages, try-again, assigned missions with `note`, waiting checks) and `.today-col--own` (unassigned in-progress work, suggestions, links). Assigned missions never appear on the own side.
+- `SE.store.messagesFor / postMessage / deleteMessage` (table `class_messages`) and `SE.store.setAssignmentNote` (`assignments.note`). Students get both through `student_state`. Needs `supabase/update-3-class-messages.sql`; before it runs, the app still works and posting a message shows a toast.
+- In cloud mode, students only load their own events, so class-wide totals on a student's device are their own. Batch 10's class rewards need a server function for class totals.
+- Test: `python3 tests/site/test_batch9.py [local] [cloud|skip]` (cloud needs Postgres with update-3 + the mock on 8787).
+
 ## Classroom and design rules
 - Grades 2–8: short sentences, large controls, buttons instead of dragging, keyboard access, and a visible focus outline. Never rely on color or sound alone.
 - Collect no student personal information. Students have a display name and picture codes only. Camera activities frame hands or objects, never faces.

@@ -252,6 +252,7 @@
           <a class="kpi ${claims.length ? "kpi--action" : ""}" href="#/teach/pathway"><span class="kpi__label">“I can” checks</span><span class="kpi__value">${claims.length}</span><span class="kpi__foot">${claims.length ? "Waiting for you" : "None waiting"}</span></a>
         </div>
       </section>
+      <section class="wrap section">${messageBlock(cls)}</section>
 
       <section class="wrap section teach-grid">
         <div class="block chart-block">
@@ -325,7 +326,42 @@
     app().innerHTML = frame(user, cls, classes, "overview", body);
     bindFrame(user);
     bindRoster(sum);
+    bindMessages(cls);
   };
+
+  /* Class messages: a short note to the whole class, shown under "From your teacher" on Today. */
+  function messageBlock(cls) {
+    const list = SE.store.messagesFor(cls.id);
+    return `
+      <div class="block msg-block" id="class-messages">
+        <div class="block__head"><h2>${icon("message")}Message your class</h2><span class="muted">Students see the newest 3 on their Today page</span></div>
+        <form class="msg-form" id="msg-form">
+          <label for="msg-body" class="visually-hidden">Message to ${esc(cls.name)}</label>
+          <textarea id="msg-body" class="input" rows="2" maxlength="500" placeholder="Example: Finish Lobster Trap Logic by Thursday. Bring your flowchart." aria-describedby="msg-help"></textarea>
+          <p class="field-help" id="msg-help">Keep it short and about class work. No student names or personal details.</p>
+          <button type="submit" class="btn btn--primary">${icon("message")}Post to ${esc(cls.name)}</button>
+        </form>
+        ${list.length ? `<ul class="msg-list">${list.map((m) => `<li><p>${esc(m.body)}</p><small>${SE.timeAgo(m.createdAt)}</small><button type="button" class="btn btn--ghost btn--small" data-msg-del="${m.id}" aria-label="Delete message: ${esc(m.body.slice(0, 40))}">${icon("trash")}Delete</button></li>`).join("")}</ul>` : `<p class="muted">No messages yet.</p>`}
+      </div>`;
+  }
+  function bindMessages(cls) {
+    const f = document.getElementById("msg-form");
+    if (!f) return;
+    f.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const t = document.getElementById("msg-body");
+      if (!t.value.trim()) { t.focus(); return; }
+      SE.store.postMessage(cls.id, t.value);
+      SE.toast(`Posted to ${cls.name}`);
+      SE.route(true);
+      document.getElementById("msg-body").focus();
+    });
+    app().querySelectorAll("[data-msg-del]").forEach((b) => b.addEventListener("click", () => {
+      SE.store.deleteMessage(b.dataset.msgDel);
+      SE.toast("Message deleted");
+      SE.route(true);
+    }));
+  }
 
   function rosterTable(sum) {
     const rows = sum.profiles.map(({ student, prof }) => {
@@ -900,7 +936,12 @@
             const late = x.dueDate && new Date(`${x.dueDate}T23:59:59`).getTime() < Date.now();
             return `<li class="alist__item">
               <span class="icon-badge">${icon(SE.areaById[a.area].icon)}</span>
-              <div class="alist__main"><a href="#/activity/${a.id}">${esc(a.title)}</a><small>${esc(SE.areaById[a.area].short)} · ${SE.timeText(a)} · ${SE.gradesText(a.grades)}</small>${prepLine(a)}</div>
+              <div class="alist__main"><a href="#/activity/${a.id}">${esc(a.title)}</a><small>${esc(SE.areaById[a.area].short)} · ${SE.timeText(a)} · ${SE.gradesText(a.grades)}</small>${prepLine(a)}
+                <details class="alist__note" ${x.note ? "open" : ""}><summary>${icon("clipboard")}${x.note ? "Instructions for students" : "Add instructions for students"}</summary>
+                  <form class="note-form" data-note-form="${a.id}"><label class="visually-hidden" for="note-${a.id}">Instructions for ${esc(a.title)}</label>
+                    <textarea id="note-${a.id}" class="input input--small" rows="2" maxlength="500" placeholder="Example: Work with your table group.">${esc(x.note || "")}</textarea>
+                    <button type="submit" class="btn btn--ghost btn--small">${icon("check")}Save</button></form>
+                </details></div>
               ${progressMarkup(pr)}
               <label class="alist__due ${late && pr.done < pr.total ? "is-late" : ""}"><span>Due</span><input type="date" class="input input--small" value="${x.dueDate || ""}" data-due="${a.id}" aria-label="Due date for ${esc(a.title)}"></label>
               <button type="button" class="icon-btn" data-assign="${a.id}" aria-pressed="true" aria-label="Unassign ${esc(a.title)}" title="Unassign">✕</button>
@@ -952,6 +993,13 @@
       refresh();
     });
     form.addEventListener("submit", (e) => e.preventDefault());
+    app().querySelectorAll("[data-note-form]").forEach((f) => f.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = f.dataset.noteForm, v = f.querySelector("textarea").value;
+      SE.store.setAssignmentNote(cls.id, id, v);
+      SE.toast(v.trim() ? "Instructions saved. Students see them on Today." : "Instructions removed");
+      SE.route(true);
+    }));
     app().querySelectorAll("[data-due]").forEach((inp) => inp.addEventListener("change", () => {
       SE.store.setDueDate(cls.id, inp.dataset.due, inp.value);
       SE.toast(inp.value ? `Due date set: ${dueText(inp.value).replace(/^Due /, "")}` : "Due date removed");
