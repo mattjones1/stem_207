@@ -11,11 +11,11 @@ STEM Coliseum's tagline is **STEM • SPORT • LEARN**.
 ## How the two brands appear together
 | Place | What shows |
 | --- | --- |
-| Top of every page | A white bar: "STEM 207 is a program of" + the full-color STEM Coliseum logo |
-| Header | The STEM 207 logo (it leads) |
-| Footer | The STEM Coliseum and Learning Center logo on a white plate, "STEM 207, LLC is a program offered exclusively through STEM Coliseum and Learning Center", STEM • SPORT • LEARN, and the STEM 207 mission |
-| Sign-in card | "Offered through" + the STEM Coliseum logo |
-| Certificates | The STEM 207 logo, then "A program of" + the STEM Coliseum logo |
+| Top of every page | A white brand row: the STEM 207 logo (links home), "powered by", and a large full-color STEM Coliseum logo that links to the STEM Coliseum and Learning Center website, https://stem-coliseum.odoo.com/ (new tab) |
+| Header | The navigation, under the brand row |
+| Footer | The STEM Coliseum and Learning Center logo on a white plate (links to the STEM Coliseum site), "STEM 207, LLC is a program offered exclusively through STEM Coliseum and Learning Center", STEM • SPORT • LEARN, and the STEM 207 mission |
+| Sign-in card | "Powered by" + the STEM Coliseum logo (links to the STEM Coliseum site) |
+| Certificates | The STEM 207 logo, then "Powered by" + the STEM Coliseum logo |
 
 ## STEM Coliseum logo rules (from the parent guide)
 - Use the original files only (`assets/img/brand/coliseum/` for the site, all versions in `brand/coliseum/`). Never recolor, stretch, redraw, or add shadows or effects.

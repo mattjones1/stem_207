@@ -2166,11 +2166,26 @@ h1, h2, h3, h4 { letter-spacing: -.015em; }
 /* ───────── Co-branding: STEM Coliseum (parent) · STEM 207 (program) ─────────
    The full-color Coliseum logo is approved for white or light backgrounds only, so it always sits on
    white, with clear space around it, in light and dark mode. Never recolor or add effects to it. */
-.cobrand-bar { background: #ffffff; border-bottom: 1px solid #dfe8e7; }
-.cobrand-bar__inner { max-width: 1240px; margin: 0 auto; padding: 6px var(--gutter-r) 6px var(--gutter-l); display: flex; align-items: center; justify-content: flex-end; gap: .7rem; }
-.cobrand-bar__by { font-family: var(--font-display); font-weight: 600; font-size: .78rem; letter-spacing: .02em; color: #555555; }
-.cobrand-bar__logo { display: block; width: 168px; height: auto; padding: 4px 6px; }
-@media (max-width: 520px) { .cobrand-bar__inner { justify-content: center; } .cobrand-bar__by { font-size: .72rem; } .cobrand-bar__logo { width: 140px; } }
+/* The brand row: STEM 207 (home) powered by STEM Coliseum (parent site). Always white, so the full-color
+   Coliseum logo is on an approved background and the STEM 207 logo keeps its light-background colors. */
+.cobrand-bar { background: #ffffff; border-bottom: 1px solid #dfe8e7; --logo-stem: #012d2b; }
+.cobrand-bar__inner { max-width: 1200px; margin: 0 auto; padding: 10px var(--gutter-r) 10px var(--gutter-l); display: flex; align-items: center; gap: .4rem 1.1rem; flex-wrap: wrap; }
+.cobrand-bar__home { display: inline-flex; align-items: center; min-height: 44px; }
+.cobrand-bar__home .logo207 { width: 172px; height: auto; display: block; }
+.cobrand-bar__by { font-family: var(--font-display); font-weight: 700; font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; color: #555555; }
+.cobrand-bar__parent { display: inline-flex; align-items: center; padding: 6px 8px; border-radius: 10px; }
+.cobrand-bar__parent img { display: block; width: 300px; height: auto; }
+.cobrand-bar__parent:hover { background: #f1f7f6; }
+.cobrand-bar__parent:focus-visible, .cobrand-bar__home:focus-visible { outline: 3px solid #037872; outline-offset: 2px; border-radius: 10px; }
+.cobrand-bar__tag { margin-left: auto; font-family: var(--font-display); font-weight: 700; font-size: .66rem; letter-spacing: .2em; text-transform: uppercase; color: #555555; border-left: 2px solid #dfe8e7; padding-left: .7rem; line-height: 1.3; }
+@media (max-width: 1000px) { .cobrand-bar__tag { display: none; } .cobrand-bar__parent img { width: 250px; } }
+@media (max-width: 600px) {
+  .cobrand-bar__inner { justify-content: center; gap: .1rem .7rem; padding-block: 8px; }
+  .cobrand-bar__home .logo207 { width: 128px; }
+  .cobrand-bar__by { font-size: .7rem; }
+  .cobrand-bar__parent { padding: 4px; }
+  .cobrand-bar__parent img { width: 200px; }
+}
 .site-footer__parent { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; margin: .9rem 0 .4rem; }
 .site-footer__plate { display: inline-flex; background: #ffffff; border-radius: 10px; padding: 10px 14px; }
 .site-footer__plate img { display: block; width: 220px; height: auto; }

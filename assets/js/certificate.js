@@ -19,7 +19,7 @@
       <article class="cert" aria-labelledby="cert-title">
         <div class="cert__frame">
           <div class="cert__logo">${SE.brandLogo(54)}</div>
-          <p class="cert__parent"><span>A program of</span><img src="assets/img/brand/coliseum/stem-coliseum.png" alt="STEM Coliseum" width="700" height="105"></p>
+          <p class="cert__parent"><span>Powered by</span><img src="assets/img/brand/coliseum/stem-coliseum.png" alt="STEM Coliseum" width="700" height="105"></p>
           <p class="cert__eyebrow">Certificate of completion</p>
           <h2 class="cert__award" id="cert-title" tabindex="-1">${esc(info.award)}</h2>
           <p class="cert__lead">This certifies that</p>
