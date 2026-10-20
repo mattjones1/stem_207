@@ -79,7 +79,7 @@
   /* ───────── Kitchen picture ───────── */
   function scene(st, mood) {
     const s = st || {};
-    const face = mood === "bug" ? '<path d="M44 52 q8 -6 16 0" fill="none" stroke="#1d1647" stroke-width="3"/>' : mood === "done" ? '<path d="M42 48 q10 10 20 0" fill="none" stroke="#1d1647" stroke-width="3"/>' : '<path d="M44 50 h16" stroke="#1d1647" stroke-width="3"/>';
+    const face = mood === "bug" ? '<path d="M44 52 q8 -6 16 0" fill="none" stroke="#01201e" stroke-width="3"/>' : mood === "done" ? '<path d="M42 48 q10 10 20 0" fill="none" stroke="#01201e" stroke-width="3"/>' : '<path d="M44 50 h16" stroke="#01201e" stroke-width="3"/>';
     const bits = [];
     if (s.bagOpen) bits.push("bag open"); if (s.slices) bits.push("two slices out"); if (s.jarOpen) bits.push("jar open");
     if (s.knife) bits.push("knife in hand"); if (s.spread) bits.push("spread on a slice"); if (s.sandwich) bits.push("sandwich made"); if (s.eaten) bits.push("sandwich eaten");

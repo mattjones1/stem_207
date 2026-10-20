@@ -18,7 +18,9 @@
     <section class="auth">
       <div class="auth__sky" aria-hidden="true">${SE.starMap(null, [], { decorative: true })}</div>
       <div class="wrap auth__inner">
-        <div class="auth__card ${wide ? "auth__card--wide" : ""}">${inner}</div>
+        <div class="auth__card ${wide ? "auth__card--wide" : ""}">${inner}
+          <p class="auth__parent"><span>Offered through</span><img src="assets/img/brand/coliseum/stem-coliseum.png" alt="STEM Coliseum" width="700" height="105"></p>
+        </div>
       </div>
     </section>`;
 

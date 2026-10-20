@@ -145,7 +145,7 @@
       // A white lighthouse on a far point
       wrap(at(160), (p) => {
         x.fillStyle = "#f4f2ea"; x.beginPath(); x.moveTo(p - 7, 196); x.lineTo(p - 5, 150); x.lineTo(p + 5, 150); x.lineTo(p + 7, 196); x.fill();
-        x.fillStyle = "#1d1647"; x.fillRect(p - 7, 144, 14, 7); x.beginPath(); x.moveTo(p - 7, 144); x.lineTo(p, 136); x.lineTo(p + 7, 144); x.fill();
+        x.fillStyle = "#01201e"; x.fillRect(p - 7, 144, 14, 7); x.beginPath(); x.moveTo(p - 7, 144); x.lineTo(p, 136); x.lineTo(p + 7, 144); x.fill();
         x.fillStyle = "#fff3a8"; x.fillRect(p - 4, 145, 8, 5);
       });
       // Pink granite ledges in the foreground

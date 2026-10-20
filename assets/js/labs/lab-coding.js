@@ -462,11 +462,11 @@
   /* Top-down lobster boat, bow pointing east. */
   const ROVER = `<svg viewBox="0 0 40 40" class="rover__svg" aria-hidden="true">
       <path d="M2 30 Q-1 20 2 10" fill="none" stroke="#ffffff" stroke-opacity=".7" stroke-width="2" stroke-linecap="round"/>
-      <path d="M5 11 H25 Q36 13 39 20 Q36 27 25 29 H5 Q3.5 20 5 11 Z" fill="#f7f6f0" stroke="#1d1647" stroke-width="2" stroke-linejoin="round"/>
-      <path d="M6 14.5 H25 Q32 16 35 20 Q32 24 25 25.5 H6" fill="none" stroke="#8cc832" stroke-width="2"/>
-      <rect x="15" y="14" width="10" height="12" rx="2" fill="#302568"/>
+      <path d="M5 11 H25 Q36 13 39 20 Q36 27 25 29 H5 Q3.5 20 5 11 Z" fill="#f7f6f0" stroke="#01201e" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M6 14.5 H25 Q32 16 35 20 Q32 24 25 25.5 H6" fill="none" stroke="#94c93d" stroke-width="2"/>
+      <rect x="15" y="14" width="10" height="12" rx="2" fill="#012d2b"/>
       <rect x="22" y="15.5" width="2.5" height="9" rx="1" fill="#b9e2f5"/>
-      <rect x="7" y="16" width="5" height="8" rx="1" fill="#e9603f" stroke="#1d1647" stroke-width="1"/>
+      <rect x="7" y="16" width="5" height="8" rx="1" fill="#e9603f" stroke="#01201e" stroke-width="1"/>
     </svg>`;
 
   function mount(el, idx, api) {

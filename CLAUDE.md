@@ -44,14 +44,15 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - `starter: { file, label, how }`: a downloadable starter project (built by `python3 tools/build_starters.py` into `assets/starters/`). `figure: "<key>"`: a drawn block picture from `FIGURES` in `views-library.js` (with a text version). `bridge: { from, text }`: "You've seen this idea before" link from a lab to a platform activity.
 - `STEM.startHere` and `STEM.aiRoute` live in `pathway.js`. Pages: the pathway's "New to coding? Start here" and `#/ai-route`. Test: `python3 tests/site/test_batch5.py`.
 
-## Brand
-- Read `brand/BRAND.md` before any branding, marketing, or visual-identity work. The marketing kit (social posts, banner, flyer and partner templates, concept artwork) is in `brand/marketing-kit/`.
-- The logo master is `assets/img/brand/stem207-logo.svg`, the same file as the kit's approved logo. Indigo `#302568` = `--navy`, lime `#8CC832` = `--orange`.
+## Brand (co-branded with STEM Coliseum)
+- STEM Coliseum and Learning Center is the parent; STEM 207, LLC is a program offered exclusively through it. Read `brand/BRAND.md` before any branding work. The parent guide and all its logo files are in `brand/coliseum/`.
+- Every page: white `.cobrand-bar` ("STEM 207 is a program of" + `assets/img/brand/coliseum/stem-coliseum.png`), the STEM 207 logo in the header, and the parent block in the footer. The sign-in card and certificates also show the Coliseum logo. The Coliseum logo always sits on white and is never recolored or redrawn.
+- Palette: Dark Teal `#012d2b` (`--navy`, `--fg`), Teal `#03968f` (`--brand-teal`, large type and graphics), text teal `#037872` (`--teal`, small text and buttons, for 4.5:1 contrast), Green 2 `#94c93d` (`--orange`, CTAs). Fonts: Montserrat and Open Sans. The STEM 207 logo is STEM in Dark Teal and 207 in Green 2.
 - Marketing images show no people. The kit artwork is AI-generated concept art, so never present it as real equipment or programs.
 
 ## Mission context and certificates (Batch 6)
 - Activity fields: `why`, `realWorld`, `vocab: [{ term, def }]` render as "Why it matters" with key words (all 10 coding missions have them). `board: { title, lines, note }` shows a card students read in the mission block (Bug Hunt's buggy algorithm).
-- `SE.certificate.open(info)` / `SE.certificate.button(info, label)` in `assets/js/certificate.js`: a printable certificate on warm paper. `info = { award, course, detail, name, className, at }`. Use the display name and class name only. Pattern Machine Level 6 awards "Responsible AI Explorer" at 7 of 10 (`SE.patternMachine.scoreUses`, `PASS`).
+- `SE.certificate.open(info)` / `SE.certificate.button(info, label)` in `assets/js/certificate.js`: a printable certificate on white paper, co-branded with STEM Coliseum. `info = { award, course, detail, name, className, at }`. Use the display name and class name only. Pattern Machine Level 6 awards "Responsible AI Explorer" at 7 of 10 (`SE.patternMachine.scoreUses`, `PASS`).
 - Test: `python3 tests/site/test_batch6.py`.
 
 ## Grades 6–8 track and Robot Chef (Batch 7)

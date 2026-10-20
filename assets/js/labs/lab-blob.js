@@ -100,19 +100,19 @@
   const blobSvg = () => `
     <svg class="sb-blob__svg" viewBox="0 0 200 170" aria-hidden="true">
       <ellipse cx="100" cy="160" rx="62" ry="8" fill="#000" opacity=".25"/>
-      <path class="sb-body" d="M36 150 C18 150 14 128 24 112 C16 86 34 52 66 44 C76 18 124 18 134 44 C166 52 186 84 176 112 C188 130 180 150 162 150 Z" fill="#8cc832" stroke="#1d1647" stroke-width="4"/>
+      <path class="sb-body" d="M36 150 C18 150 14 128 24 112 C16 86 34 52 66 44 C76 18 124 18 134 44 C166 52 186 84 176 112 C188 130 180 150 162 150 Z" fill="#94c93d" stroke="#01201e" stroke-width="4"/>
       <circle cx="58" cy="118" r="7" fill="#b9e27f"/><circle cx="148" cy="96" r="5" fill="#b9e27f"/><circle cx="138" cy="132" r="4" fill="#b9e27f"/>
-      <g class="sb-stalk"><path d="M100 30 Q96 10 104 2" stroke="#1d1647" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="104" cy="4" r="6" fill="#f2c14e" stroke="#1d1647" stroke-width="3"/></g>
+      <g class="sb-stalk"><path d="M100 30 Q96 10 104 2" stroke="#01201e" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="104" cy="4" r="6" fill="#f2c14e" stroke="#01201e" stroke-width="3"/></g>
       <g class="sb-eyes">
-        <circle cx="76" cy="74" r="16" fill="#fff" stroke="#1d1647" stroke-width="3"/><circle cx="124" cy="70" r="20" fill="#fff" stroke="#1d1647" stroke-width="3"/>
-        <circle class="sb-pupil" cx="80" cy="77" r="7" fill="#1d1647"/><circle class="sb-pupil" cx="129" cy="74" r="9" fill="#1d1647"/>
+        <circle cx="76" cy="74" r="16" fill="#fff" stroke="#01201e" stroke-width="3"/><circle cx="124" cy="70" r="20" fill="#fff" stroke="#01201e" stroke-width="3"/>
+        <circle class="sb-pupil" cx="80" cy="77" r="7" fill="#01201e"/><circle class="sb-pupil" cx="129" cy="74" r="9" fill="#01201e"/>
         <circle cx="82" cy="74" r="2.2" fill="#fff"/><circle cx="132" cy="70" r="3" fill="#fff"/>
       </g>
-      <path class="sb-mouth sb-mouth--idle" d="M78 112 Q100 128 122 110" stroke="#1d1647" stroke-width="5" fill="none" stroke-linecap="round"/>
-      <g class="sb-mouth sb-mouth--open"><ellipse cx="100" cy="116" rx="22" ry="16" fill="#302568" stroke="#1d1647" stroke-width="4"/><ellipse cx="100" cy="124" rx="12" ry="6" fill="#e9603f"/></g>
+      <path class="sb-mouth sb-mouth--idle" d="M78 112 Q100 128 122 110" stroke="#01201e" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <g class="sb-mouth sb-mouth--open"><ellipse cx="100" cy="116" rx="22" ry="16" fill="#012d2b" stroke="#01201e" stroke-width="4"/><ellipse cx="100" cy="124" rx="12" ry="6" fill="#e9603f"/></g>
       <g class="sb-cheeks"><ellipse cx="62" cy="104" rx="9" ry="5" fill="#e9603f" opacity=".35"/><ellipse cx="142" cy="100" rx="9" ry="5" fill="#e9603f" opacity=".35"/></g>
     </svg>`;
-  const snackSvg = () => `<svg class="sb-snack" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 4 L24 15 L36 16 L27 24 L30 36 L20 30 L10 36 L13 24 L4 16 L16 15 Z" fill="#f2c14e" stroke="#1d1647" stroke-width="2.5" stroke-linejoin="round"/></svg>`;
+  const snackSvg = () => `<svg class="sb-snack" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 4 L24 15 L36 16 L27 24 L30 36 L20 30 L10 36 L13 24 L4 16 L16 15 Z" fill="#f2c14e" stroke="#01201e" stroke-width="2.5" stroke-linejoin="round"/></svg>`;
 
   function mount(el, idx, api) {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

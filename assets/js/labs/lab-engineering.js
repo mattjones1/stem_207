@@ -119,7 +119,7 @@
       ctx.fillStyle = "#8aa35a"; ctx.fillRect(0, sy(0) - 34, W, 34);
       ctx.fillStyle = "#6f8f45"; ctx.fillRect(0, sy(0), W, Hh - sy(0));
       // distance markers
-      ctx.fillStyle = "#0d1d36"; ctx.font = "700 20px 'Atkinson Hyperlegible', sans-serif"; ctx.textAlign = "center";
+      ctx.fillStyle = "#0d1d36"; ctx.font = "700 20px 'Open Sans', sans-serif"; ctx.textAlign = "center";
       for (let m = 0; m <= MAXX; m += 2) {
         ctx.fillRect(sx(m) - 1, sy(0), 2, m % 10 === 0 ? 12 : 7);
         if (m % 4 === 0) ctx.fillText(`${m} m`, sx(m), sy(0) + 34);
@@ -130,7 +130,7 @@
         // hay bale target with a flag
         ctx.fillStyle = "#e3c15a"; ctx.fillRect(sx(t - 1), sy(0) - 14, sx(t + 1) - sx(t - 1), 14);
         ctx.strokeStyle = "#b8923a"; ctx.lineWidth = 2; ctx.strokeRect(sx(t - 1), sy(0) - 14, sx(t + 1) - sx(t - 1), 14);
-        ctx.fillStyle = hit ? "#3f6b0c" : "#302568";
+        ctx.fillStyle = hit ? "#3f6b0c" : "#012d2b";
         ctx.fillRect(sx(t) - 1.5, sy(0) - 56, 3, 42);
         ctx.beginPath(); ctx.moveTo(sx(t) + 1.5, sy(0) - 56); ctx.lineTo(sx(t) + 26, sy(0) - 48); ctx.lineTo(sx(t) + 1.5, sy(0) - 40); ctx.fill();
         ctx.fillStyle = "#0d1d36"; ctx.fillText(hit ? "hit!" : `${t} m`, sx(t), sy(0) - 64);
@@ -369,7 +369,7 @@
       ctx.save(); ctx.translate(bot.x, bot.y); ctx.rotate(bot.a);
       ctx.fillStyle = "#e9822b"; ctx.strokeStyle = "#0d1d36"; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.roundRect(-14, -11, 26, 22, 5); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = "#302568"; ctx.fillRect(-4, -7, 9, 14);
+      ctx.fillStyle = "#012d2b"; ctx.fillRect(-4, -7, 9, 14);
       ctx.fillStyle = "#f2c14e"; ctx.beginPath(); ctx.moveTo(13, -16); ctx.lineTo(19, -12); ctx.lineTo(19, 12); ctx.lineTo(13, 16); ctx.closePath(); ctx.fill(); ctx.stroke();
       ctx.fillStyle = "#0d1d36"; ctx.fillRect(-10, -14, 12, 4); ctx.fillRect(-10, 10, 12, 4);
       ctx.restore();

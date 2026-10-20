@@ -29,9 +29,9 @@
 
   /* Badge art: each has its own shape, plus its name wherever it appears. */
   const BADGE_ART = {
-    moon: '<circle cx="20" cy="20" r="17" fill="#e8e3f7" stroke="#1d1647" stroke-width="2.5"/><path d="M25 8 A12 12 0 1 0 25 32 A9.5 9.5 0 1 1 25 8 Z" fill="#c7bff0" stroke="#1d1647" stroke-width="2.5" stroke-linejoin="round"/>',
-    star: '<circle cx="20" cy="20" r="17" fill="#fff4c4" stroke="#1d1647" stroke-width="2.5"/><path d="M20 7 L23.6 16 L33 16.6 L25.8 22.6 L28.2 32 L20 26.8 L11.8 32 L14.2 22.6 L7 16.6 L16.4 16 Z" fill="#f2c14e" stroke="#1d1647" stroke-width="2.2" stroke-linejoin="round"/>',
-    planet: '<circle cx="20" cy="20" r="17" fill="#d4f3ee" stroke="#1d1647" stroke-width="2.5"/><circle cx="20" cy="20" r="8" fill="#3fb6a8" stroke="#1d1647" stroke-width="2.2"/><ellipse cx="20" cy="20" rx="15" ry="5" fill="none" stroke="#1d1647" stroke-width="2.2" transform="rotate(-20 20 20)"/>'
+    moon: '<circle cx="20" cy="20" r="17" fill="#e0f2ef" stroke="#01201e" stroke-width="2.5"/><path d="M25 8 A12 12 0 1 0 25 32 A9.5 9.5 0 1 1 25 8 Z" fill="#a9e0db" stroke="#01201e" stroke-width="2.5" stroke-linejoin="round"/>',
+    star: '<circle cx="20" cy="20" r="17" fill="#fff4c4" stroke="#01201e" stroke-width="2.5"/><path d="M20 7 L23.6 16 L33 16.6 L25.8 22.6 L28.2 32 L20 26.8 L11.8 32 L14.2 22.6 L7 16.6 L16.4 16 Z" fill="#f2c14e" stroke="#01201e" stroke-width="2.2" stroke-linejoin="round"/>',
+    planet: '<circle cx="20" cy="20" r="17" fill="#d4f3ee" stroke="#01201e" stroke-width="2.5"/><circle cx="20" cy="20" r="8" fill="#3fb6a8" stroke="#01201e" stroke-width="2.2"/><ellipse cx="20" cy="20" rx="15" ry="5" fill="none" stroke="#01201e" stroke-width="2.2" transform="rotate(-20 20 20)"/>'
   };
   const badgeSvg = (b, size = 28, cls = "") => `<svg class="mg-badge-art ${cls}" viewBox="0 0 40 40" width="${size}" height="${size}" aria-hidden="true">${BADGE_ART[b]}</svg>`;
   const badgeTag = (b) => `<span class="mg-badge-tag">${badgeSvg(b, 22)}${BADGE[b]}</span>`;
@@ -121,13 +121,13 @@
   /* ───────── Scene ───────── */
   const visitorSvg = () => `
     <svg class="mg-bot" viewBox="0 0 100 130" aria-hidden="true">
-      <rect x="22" y="14" width="56" height="44" rx="22" fill="#f4f2ea" stroke="#1d1647" stroke-width="3.5"/>
-      <rect x="31" y="24" width="38" height="24" rx="12" fill="#302568"/>
+      <rect x="22" y="14" width="56" height="44" rx="22" fill="#f4f2ea" stroke="#01201e" stroke-width="3.5"/>
+      <rect x="31" y="24" width="38" height="24" rx="12" fill="#012d2b"/>
       <circle cx="43" cy="36" r="4" fill="#8fd3e8"/><circle cx="57" cy="36" r="4" fill="#8fd3e8"/>
-      <path d="M50 14 V4" stroke="#1d1647" stroke-width="3"/><circle cx="50" cy="4" r="4" fill="#e9603f" stroke="#1d1647" stroke-width="2"/>
-      <rect x="28" y="60" width="44" height="40" rx="12" fill="#8fd3e8" stroke="#1d1647" stroke-width="3.5"/>
-      <rect x="32" y="100" width="12" height="20" rx="4" fill="#302568"/><rect x="56" y="100" width="12" height="20" rx="4" fill="#302568"/>
-      <path d="M28 70 L16 86" stroke="#1d1647" stroke-width="7" stroke-linecap="round"/><path d="M72 70 L82 80" stroke="#1d1647" stroke-width="7" stroke-linecap="round"/>
+      <path d="M50 14 V4" stroke="#01201e" stroke-width="3"/><circle cx="50" cy="4" r="4" fill="#e9603f" stroke="#01201e" stroke-width="2"/>
+      <rect x="28" y="60" width="44" height="40" rx="12" fill="#8fd3e8" stroke="#01201e" stroke-width="3.5"/>
+      <rect x="32" y="100" width="12" height="20" rx="4" fill="#012d2b"/><rect x="56" y="100" width="12" height="20" rx="4" fill="#012d2b"/>
+      <path d="M28 70 L16 86" stroke="#01201e" stroke-width="7" stroke-linecap="round"/><path d="M72 70 L82 80" stroke="#01201e" stroke-width="7" stroke-linecap="round"/>
     </svg>`;
 
   function mount(el, idx, api) {
