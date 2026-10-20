@@ -190,7 +190,7 @@
         <div class="form__field">
           <label for="edu-pw">Password</label>
           <div class="pw-wrap">
-            <input id="edu-pw" class="input" type="password" autocomplete="current-password" aria-describedby="edu-pw-err">
+            <input id="edu-pw" class="input" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" aria-describedby="edu-pw-err">
             <button type="button" class="pw-toggle" aria-pressed="false" aria-label="Show password">${icon("eye")}</button>
           </div>
           <p class="form__error" id="edu-pw-err" role="alert"></p>
@@ -243,11 +243,19 @@
         <div class="form__field">
           <label for="su-pw">Password</label>
           <div class="pw-wrap">
-            <input id="su-pw" class="input" type="password" autocomplete="new-password" aria-describedby="su-pw-help su-pw-err">
+            <input id="su-pw" class="input" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" aria-describedby="su-pw-help su-pw-err">
             <button type="button" class="pw-toggle" aria-pressed="false" aria-label="Show password">${icon("eye")}</button>
           </div>
           <p class="field-help" id="su-pw-help">At least 8 characters.</p>
           <p class="form__error" id="su-pw-err" role="alert"></p>
+        </div>
+        <div class="form__field">
+          <label for="su-pw2">Type your password again</label>
+          <div class="pw-wrap">
+            <input id="su-pw2" class="input" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" aria-describedby="su-pw2-err">
+            <button type="button" class="pw-toggle" aria-pressed="false" aria-label="Show password">${icon("eye")}</button>
+          </div>
+          <p class="form__error" id="su-pw2-err" role="alert"></p>
         </div>
         <button class="btn btn--primary btn--big" type="submit">Create account</button>
       </form>
@@ -257,6 +265,9 @@
       e.preventDefault();
       clearErrors();
       const btn = document.querySelector("#su-form button[type=submit]");
+      const pw = document.getElementById("su-pw").value, pw2 = document.getElementById("su-pw2").value;
+      // Catch a typo before the account exists, so the same password works at sign-in.
+      if (pw.length >= 8 && pw !== pw2) return showError("su-pw2", pw2 ? "The two passwords don't match. Type them again, or press the eye to check." : "Type your password a second time to confirm it.");
       btn.disabled = true;
       const res = await SE.store.createEducator({
         name: document.getElementById("su-name").value,

@@ -14,7 +14,7 @@
     if (!user) {
       html = `<a href="#/signin" class="nav-signin">${icon("user")}Sign in</a>`;
     } else if (user.role === "guest") {
-      html = link("#/", "dashboard", "Dashboard") + link("#/library", "library", "Activity library") + link("#/pathway", "pathway", "Coding pathway") +
+      html = link("#/", "dashboard", "Home") + link("#/library", "library", "Mission library") + link("#/pathway", "pathway", "Coding pathway") +
         `<a href="#/signin" class="nav-signin" data-signout>${icon("user")}Sign in</a>`;
     } else if (user.role === "student") {
       const prof = SE.game.profile(user.id);
@@ -22,7 +22,7 @@
         `<a href="#/me" class="user-chip" ${navKey === "me" ? 'aria-current="page"' : ""}>${SE.ownAvatar(user.id, 28)}<span><b>${esc(user.displayName)}</b><small>${SE.num(prof.xp)} XP · ${esc(prof.rank.name)}</small></span></a>` +
         `<button type="button" class="nav-out" data-signout>${icon("logout")}<span>Sign out</span></button>`;
     } else {
-      html = link("#/teach", "teach", "Educator dashboard") + link("#/library", "library", "Activity library") + link("#/teach/pathway", "pathway", "Coding pathway") +
+      html = link("#/teach", "teach", "Educator dashboard") + link("#/library", "library", "Mission library") + link("#/teach/pathway", "pathway", "Coding pathway") +
         `<span class="user-chip user-chip--edu">${icon("clipboard")}<span><b>${esc(user.name)}</b><small>Educator</small></span></span>` +
         `<button type="button" class="nav-out" data-signout>${icon("logout")}<span>Sign out</span></button>`;
     }

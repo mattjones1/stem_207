@@ -77,7 +77,9 @@
       x.duration - y.duration);
   SE.sortActivities = sortActivities;
 
-  const backLink = (href = "#/", label = "Dashboard") => `<a class="back-link" href="${href}">${icon("arrowLeft")}${label}</a>`;
+  /* What "home" (#/) is called for whoever is signed in: Today, Educator dashboard, or Home. */
+  SE.homeLabel = () => { const u = SE.store.currentUser(); return !u || u.role === "guest" ? "Home" : u.role === "student" ? "Today" : "Educator dashboard"; };
+  const backLink = (href = "#/", label) => `<a class="back-link" href="${href}">${icon("arrowLeft")}${label || SE.homeLabel()}</a>`;
   SE.backLink = backLink;
 
   /* ───────── Library state ───────── */
@@ -123,7 +125,7 @@
       <section class="section wrap" id="library" aria-labelledby="library-title">
         <div class="section__head">
           <div>
-            <span class="eyebrow">Activity library</span>
+            <span class="eyebrow">Mission library</span>
             <h2 id="library-title" tabindex="-1">Find your next mission</h2>
           </div>
           <p>Search by name or idea, or narrow by topic, level, grade, time, and equipment.</p>
@@ -755,7 +757,7 @@
       <section class="wrap section" aria-labelledby="related-title">
         <div class="section__head">
           <div><span class="eyebrow">More in ${esc(area.short)}</span><h2 id="related-title">Explore the lab</h2></div>
-          <a class="btn btn--ghost btn--small" href="#/">${icon("arrowLeft")}Back to dashboard</a>
+          <a class="btn btn--ghost btn--small" href="#/">${icon("arrowLeft")}Back to ${SE.homeLabel() === "Home" ? "home" : SE.homeLabel()}</a>
         </div>
         <div class="cards">${related.map((r) => activityCard(r, prof)).join("")}</div>
       </section>` : ""}`;
@@ -940,7 +942,7 @@
           ${icon("mountain")}
           <h1 tabindex="-1" class="empty__title">We couldn’t find that page</h1>
           <p>The page may have moved, or the link may be mistyped.</p>
-          <a class="btn btn--primary" href="#/">${icon("arrowLeft")}Back to dashboard</a>
+          <a class="btn btn--primary" href="#/">${icon("arrowLeft")}Back to ${SE.homeLabel() === "Home" ? "home" : SE.homeLabel()}</a>
         </div>
       </section>`;
   };

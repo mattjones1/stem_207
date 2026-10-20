@@ -74,7 +74,7 @@ async def cloud(b):
     S = C; errs = []; email = f"b9{int(time.time())}@school.org"
     tc = await b.new_context(viewport={"width": 1280, "height": 900}); t = await tc.new_page(); t.on("pageerror", lambda e: errs.append(str(e)))
     await t.goto(S + "#/signup"); await t.wait_for_timeout(400)
-    await t.fill("#su-name", "Ms. Rivera"); await t.fill("#su-class", "Room 9"); await t.fill("#su-email", email); await t.fill("#su-pw", "harbor207!")
+    await t.fill("#su-name", "Ms. Rivera"); await t.fill("#su-class", "Room 9"); await t.fill("#su-email", email); await t.fill("#su-pw", "harbor207!"); await t.fill("#su-pw2", "harbor207!")
     await t.click("#su-form button[type=submit]"); await t.wait_for_timeout(1200)
     await t.fill("#as-name", "Kai M."); await t.click("#add-student button[type=submit]"); await t.wait_for_timeout(400)
     await t.evaluate("""(() => { const c = SE.store.classesFor(SE.store.currentUser().id)[0];

@@ -79,7 +79,7 @@ async def cloud(b):
     S = C; errs = []; email = f"b10{int(time.time())}@school.org"
     tc = await b.new_context(viewport={"width": 1280, "height": 900}); t = await tc.new_page(); t.on("pageerror", lambda e: errs.append(str(e)))
     await t.goto(S + "#/signup"); await t.wait_for_timeout(400)
-    await t.fill("#su-name", "Mr. Ames"); await t.fill("#su-class", "Room 4"); await t.fill("#su-email", email); await t.fill("#su-pw", "harbor207!")
+    await t.fill("#su-name", "Mr. Ames"); await t.fill("#su-class", "Room 4"); await t.fill("#su-email", email); await t.fill("#su-pw", "harbor207!"); await t.fill("#su-pw2", "harbor207!")
     await t.click("#su-form button[type=submit]"); await t.wait_for_timeout(1200)
     for n in ["Lia P.", "Sam K."]:
         await t.fill("#as-name", n); await t.click("#add-student button[type=submit]"); await t.wait_for_timeout(400)

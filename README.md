@@ -10,7 +10,7 @@
 
 ## What's included
 
-- **Dashboard** with the six exploration areas, a featured classroom mission, a coding pathway overview, and a searchable activity library.
+- **Home** (guests) and **My expedition** (students) with the six exploration areas, a featured classroom mission, a coding pathway overview, and a searchable mission library. Signed-in students start on **Today**.
 - **Quick time picker**: "How much time do you have?" with 20, 30, and 45 minutes.
 - **Library filters**: topic, experience level, grade band, time, and equipment, plus search, a live result count, an empty state, and Reset filters.
 - **Activity pages** with Your mission, What you'll learn, Before you begin, Your steps, Launch activity, Think about it, Take it further, and Teacher notes. VR activities also include setup notes and a way to take part without a headset.

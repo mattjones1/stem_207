@@ -78,6 +78,9 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - UI: `SE.classJourneyBlock(journey, { compact })` on Today (class side), My expedition, and the teacher Overview; "My rewards" on Today's own side; the celebration shows "+100 class points" for a first send of an assigned mission.
 - Test: `python3 tests/site/test_batch10.py [local] [cloud|skip]` (cloud needs Postgres with update-4 + the mock on 8787).
 
+## Wording
+- Home (#/) is "Today" for students, "Educator dashboard" for teachers, and "Home" for guests: use `SE.homeLabel()` (the default for `SE.backLink`). The browse page is "Missions" in the student nav and "Mission library" elsewhere. Class rewards are the "class journey" (never "class expedition").
+
 ## Classroom and design rules
 - Grades 2–8: short sentences, large controls, buttons instead of dragging, keyboard access, and a visible focus outline. Never rely on color or sound alone.
 - Collect no student personal information. Students have a display name and picture codes only. Camera activities frame hands or objects, never faces.
@@ -88,9 +91,10 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - Local mode: `LOCAL_MODE=1 PORT=8767 node tests/backend/mock-supabase.js`, then open http://localhost:8767. The sample class code is `MOOSE7` (Ava R.: pine, lighthouse, moon). For an educator, use "Fill demo" on `#/signin/educator`.
 - Cloud mock: Postgres plus `node tests/backend/mock-supabase.js` on port 8787 (see `tests/backend/README.md`).
 - Lab tests (Playwright, Chromium preinstalled): `python3 tests/labs/test_<lab>.py [url]`. A test must not revisit the same `#/lab/...` hash without navigating away first, or the lab won't re-mount.
-- Effort guide: use a quick smoke check for drafts. Before pushing, run the full lab test plus `test_dance_party.py` as a regression.
+- **Test runner:** `tests/run.sh` (quick: Dance Party + Today + rewards), `tests/run.sh all` (every test, plus cloud checks when the test Postgres exists), `tests/run.sh local`, or `tests/run.sh <files>`. It starts and stops the mock servers and prints one line per test. Use it instead of hand-written loops.
+- Effort guide: use a quick smoke check for drafts. Before pushing, run the tests the change touches plus the quick set.
 - Single-file build: `python3 tools/build_single_file.py` writes `dist/STEM 207.html`. Run it before committing.
 
 ## Git
 - Work on `main`, then commit and push. The push deploys the site.
-- If the remote reports "repository moved", the remote is `https://github.com/mattjones1/stem_207.git`.
+- The remote is `https://github.com/mattjones1/stem_207.git` (if it ever shows `stem_explorer`, run `git remote set-url origin` with that URL).
