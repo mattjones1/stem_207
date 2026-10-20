@@ -4,6 +4,9 @@
 
 Sources: the *STEM Coliseum Media Brand Guide v1.1* (`brand/coliseum/STEM_Coliseum_Brand_Guide.docx`, with its logo files in `brand/coliseum/`) and the STEM 207 marketing kit (`brand/marketing-kit/`).
 
+## Downloadable kit
+`brand/STEM207_Brand_Kit.zip`: the PDF guide (`brand/STEM207_Brand_Guide.pdf`), STEM 207 logos (SVG + PNG), the "powered by" lockups, the nine STEM Coliseum logo files, and the palette as CSS and text.
+
 ## Mission (exact wording)
 **Keep the humanity in technology.** STEM 207's mission. Use these exact words, with the period.
 STEM Coliseum's tagline is **STEM • SPORT • LEARN**.
