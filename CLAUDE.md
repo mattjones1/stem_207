@@ -82,6 +82,7 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - Home (#/) is "Today" for students, "Educator dashboard" for teachers, and "Home" for guests: use `SE.homeLabel()` (the default for `SE.backLink`). The browse page is "Missions" in the student nav and "Mission library" elsewhere. Class rewards are the "class journey" (never "class expedition").
 
 ## Classroom and design rules
+- Accessibility test: `python3 tests/site/test_a11y.py [--report]` checks names, labels, ARIA ids, aria-hidden focus, headings, contrast (light and dark), 24px targets, and lang/title on ~28 pages. Keep it at 0 findings. (axe-core can't be downloaded in this sandbox; this is the stand-in.)
 - Grades 2–8: short sentences, large controls, buttons instead of dragging, keyboard access, and a visible focus outline. Never rely on color or sound alone.
 - Collect no student personal information. Students have a display name and picture codes only. Camera activities frame hands or objects, never faces.
 - External platforms: verify against official docs or the live site before writing steps, and mark anything unverified for the teacher. Don't build custom apps for external-platform missions.

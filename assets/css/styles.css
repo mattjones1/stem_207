@@ -1410,7 +1410,7 @@ a.kpi:hover { border-color: var(--teal); }
 .colchart__col { position: relative; height: 100%; display: flex; align-items: flex-end; }
 .colchart__bar { width: 100%; background: var(--teal); border-radius: 4px 4px 0 0; position: relative; min-height: 0; }
 .colchart__col.is-today .colchart__bar { background: var(--orange); }
-.colchart__bar em { position: absolute; top: -1.3em; left: 50%; transform: translateX(-50%); font-style: normal; font-size: .72rem; font-weight: 700; color: var(--fg); font-variant-numeric: tabular-nums; }
+.colchart__bar em { position: absolute; top: -1.55em; left: 50%; transform: translateX(-50%); font-style: normal; font-size: .72rem; font-weight: 700; color: var(--fg); font-variant-numeric: tabular-nums; }
 .colchart__x { position: absolute; top: calc(100% + .35rem); left: 50%; transform: translateX(-50%); font-size: .68rem; color: var(--muted); white-space: nowrap; }
 
 .hbars { list-style: none; display: grid; gap: .6rem; }
@@ -2147,3 +2147,12 @@ h1, h2, h3, h4 { letter-spacing: -.015em; }
 .celebrate__class svg { width: 20px; height: 20px; flex: none; fill: none; stroke: var(--teal); stroke-width: 2; margin-top: .1rem; }
 /* In the narrow journey panels, label only the next stop and the summit; the boat shows where the class is. */
 .cjourney .goal__labels li:not(.is-next):not(:last-child) { display: none; }
+
+/* Tier 2 accessibility fixes */
+.page-top .btn--ghost { color: var(--on-dark); border-color: rgba(255, 255, 255, .45); }
+.page-top .btn--ghost:hover { color: #b9e27f; border-color: #b9e27f; }
+.roster thead th button { min-width: 24px; min-height: 24px; align-items: center; }
+/* A certificate taller than the screen (Chromebooks are 768px tall) starts at the top and scrolls,
+   instead of being centered and cut off. */
+.cert-overlay { place-items: start center; padding-top: max(16px, env(safe-area-inset-top, 0px)); }
+.cert-wrap { margin-block: auto; }
