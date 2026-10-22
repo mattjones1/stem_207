@@ -1,0 +1,407 @@
+{
+ "capturedAt": "2026-10-21",
+ "note": "Baseline before the categories and pathways work. Every id and route must still resolve; counts change only where the plan says so.",
+ "total": 53,
+ "labs": 11,
+ "comingSoon": [
+  "notice-and-wonder-360",
+  "stop-motion-studio"
+ ],
+ "counts": {
+  "coding": 23,
+  "vr": 4,
+  "ai": 8,
+  "engineering": 7,
+  "science": 6,
+  "creative": 5
+ },
+ "areas": [
+  "coding",
+  "vr",
+  "ai",
+  "engineering",
+  "science",
+  "creative"
+ ],
+ "pathwayStages": [
+  {
+   "stage": 1,
+   "activities": [
+    "fix-the-recipe",
+    "lab-robot-chef",
+    "lab-dance-party",
+    "robot-maze-mission",
+    "pixel-art-code",
+    "sort-the-catch"
+   ]
+  },
+  {
+   "stage": 2,
+   "activities": [
+    "event-party",
+    "animate-your-name",
+    "lighthouse-network"
+   ]
+  },
+  {
+   "stage": 3,
+   "activities": [
+    "loop-dance",
+    "debug-animation",
+    "snowstorm-clones"
+   ]
+  },
+  {
+   "stage": 4,
+   "activities": [
+    "interactive-story",
+    "sense-think-act",
+    "lab-moon-gate",
+    "noreaster-alerts"
+   ]
+  },
+  {
+   "stage": 5,
+   "activities": [
+    "score-keeper",
+    "lab-space-blob",
+    "catch-log-lists"
+   ]
+  },
+  {
+   "stage": 6,
+   "activities": [
+    "my-blocks-patterns",
+    "snowflake-functions",
+    "python-turtle-bridge"
+   ]
+  },
+  {
+   "stage": 7,
+   "activities": [
+    "capstone-game",
+    "capstone-studio"
+   ]
+  }
+ ],
+ "missions": [
+  {
+   "id": "robot-maze-mission",
+   "area": "coding",
+   "route": "#/activity/robot-maze-mission",
+   "lab": null
+  },
+  {
+   "id": "event-party",
+   "area": "coding",
+   "route": "#/activity/event-party",
+   "lab": null
+  },
+  {
+   "id": "loop-dance",
+   "area": "coding",
+   "route": "#/activity/loop-dance",
+   "lab": null
+  },
+  {
+   "id": "debug-animation",
+   "area": "coding",
+   "route": "#/activity/debug-animation",
+   "lab": null
+  },
+  {
+   "id": "interactive-story",
+   "area": "coding",
+   "route": "#/activity/interactive-story",
+   "lab": null
+  },
+  {
+   "id": "score-keeper",
+   "area": "coding",
+   "route": "#/activity/score-keeper",
+   "lab": null
+  },
+  {
+   "id": "my-blocks-patterns",
+   "area": "coding",
+   "route": "#/activity/my-blocks-patterns",
+   "lab": null
+  },
+  {
+   "id": "capstone-game",
+   "area": "coding",
+   "route": "#/activity/capstone-game",
+   "lab": null
+  },
+  {
+   "id": "fix-the-recipe",
+   "area": "coding",
+   "route": "#/activity/fix-the-recipe",
+   "lab": null
+  },
+  {
+   "id": "lab-robot-chef",
+   "area": "coding",
+   "route": "#/activity/lab-robot-chef",
+   "lab": "robot-chef"
+  },
+  {
+   "id": "sort-the-catch",
+   "area": "coding",
+   "route": "#/activity/sort-the-catch",
+   "lab": null
+  },
+  {
+   "id": "lighthouse-network",
+   "area": "coding",
+   "route": "#/activity/lighthouse-network",
+   "lab": null
+  },
+  {
+   "id": "snowstorm-clones",
+   "area": "coding",
+   "route": "#/activity/snowstorm-clones",
+   "lab": null
+  },
+  {
+   "id": "noreaster-alerts",
+   "area": "coding",
+   "route": "#/activity/noreaster-alerts",
+   "lab": null
+  },
+  {
+   "id": "catch-log-lists",
+   "area": "coding",
+   "route": "#/activity/catch-log-lists",
+   "lab": null
+  },
+  {
+   "id": "snowflake-functions",
+   "area": "coding",
+   "route": "#/activity/snowflake-functions",
+   "lab": null
+  },
+  {
+   "id": "capstone-studio",
+   "area": "coding",
+   "route": "#/activity/capstone-studio",
+   "lab": null
+  },
+  {
+   "id": "python-turtle-bridge",
+   "area": "coding",
+   "route": "#/activity/python-turtle-bridge",
+   "lab": null
+  },
+  {
+   "id": "ecosystem-field-trip",
+   "area": "vr",
+   "route": "#/activity/ecosystem-field-trip",
+   "lab": null
+  },
+  {
+   "id": "notice-and-wonder-360",
+   "area": "vr",
+   "route": "#/activity/notice-and-wonder-360",
+   "lab": null
+  },
+  {
+   "id": "how-ai-sorts",
+   "area": "ai",
+   "route": "#/activity/how-ai-sorts",
+   "lab": null
+  },
+  {
+   "id": "teachable-machine-classroom",
+   "area": "ai",
+   "route": "#/activity/teachable-machine-classroom",
+   "lab": null
+  },
+  {
+   "id": "ai-secret-signals",
+   "area": "ai",
+   "route": "#/activity/ai-secret-signals",
+   "lab": null
+  },
+  {
+   "id": "ai-for-oceans",
+   "area": "ai",
+   "route": "#/activity/ai-for-oceans",
+   "lab": null
+  },
+  {
+   "id": "ai-limits-detectives",
+   "area": "ai",
+   "route": "#/activity/ai-limits-detectives",
+   "lab": null
+  },
+  {
+   "id": "pattern-predictors",
+   "area": "ai",
+   "route": "#/activity/pattern-predictors",
+   "lab": null
+  },
+  {
+   "id": "paper-bridge",
+   "area": "engineering",
+   "route": "#/activity/paper-bridge",
+   "lab": null
+  },
+  {
+   "id": "sense-think-act",
+   "area": "engineering",
+   "route": "#/activity/sense-think-act",
+   "lab": null
+  },
+  {
+   "id": "marble-run-iteration",
+   "area": "engineering",
+   "route": "#/activity/marble-run-iteration",
+   "lab": null
+  },
+  {
+   "id": "sink-or-float",
+   "area": "science",
+   "route": "#/activity/sink-or-float",
+   "lab": null
+  },
+  {
+   "id": "paper-helicopter",
+   "area": "science",
+   "route": "#/activity/paper-helicopter",
+   "lab": null
+  },
+  {
+   "id": "melting-race",
+   "area": "science",
+   "route": "#/activity/melting-race",
+   "lab": null
+  },
+  {
+   "id": "pixel-art-code",
+   "area": "creative",
+   "route": "#/activity/pixel-art-code",
+   "lab": null
+  },
+  {
+   "id": "animate-your-name",
+   "area": "creative",
+   "route": "#/activity/animate-your-name",
+   "lab": null
+  },
+  {
+   "id": "stop-motion-studio",
+   "area": "creative",
+   "route": "#/activity/stop-motion-studio",
+   "lab": null
+  },
+  {
+   "id": "lobster-trap-logic",
+   "area": "coding",
+   "route": "#/activity/lobster-trap-logic",
+   "lab": null
+  },
+  {
+   "id": "tide-watchers",
+   "area": "science",
+   "route": "#/activity/tide-watchers",
+   "lab": null
+  },
+  {
+   "id": "lighthouse-beam",
+   "area": "engineering",
+   "route": "#/activity/lighthouse-beam",
+   "lab": null
+  },
+  {
+   "id": "float-a-turbine",
+   "area": "engineering",
+   "route": "#/activity/float-a-turbine",
+   "lab": null
+  },
+  {
+   "id": "blueberry-sorter",
+   "area": "ai",
+   "route": "#/activity/blueberry-sorter",
+   "lab": null
+  },
+  {
+   "id": "sap-run-detectives",
+   "area": "science",
+   "route": "#/activity/sap-run-detectives",
+   "lab": null
+  },
+  {
+   "id": "acadia-from-above",
+   "area": "vr",
+   "route": "#/activity/acadia-from-above",
+   "lab": null
+  },
+  {
+   "id": "maine-postcard",
+   "area": "creative",
+   "route": "#/activity/maine-postcard",
+   "lab": null
+  },
+  {
+   "id": "lab-rover",
+   "area": "coding",
+   "route": "#/activity/lab-rover",
+   "lab": "rover"
+  },
+  {
+   "id": "lab-dance-party",
+   "area": "coding",
+   "route": "#/activity/lab-dance-party",
+   "lab": "dance-party"
+  },
+  {
+   "id": "lab-space-blob",
+   "area": "coding",
+   "route": "#/activity/lab-space-blob",
+   "lab": "space-blob"
+  },
+  {
+   "id": "lab-moon-gate",
+   "area": "coding",
+   "route": "#/activity/lab-moon-gate",
+   "lab": "moon-gate"
+  },
+  {
+   "id": "lab-field-station",
+   "area": "vr",
+   "route": "#/activity/lab-field-station",
+   "lab": "field-station"
+  },
+  {
+   "id": "lab-pattern-machine",
+   "area": "ai",
+   "route": "#/activity/lab-pattern-machine",
+   "lab": "pattern-machine"
+  },
+  {
+   "id": "lab-launcher",
+   "area": "engineering",
+   "route": "#/activity/lab-launcher",
+   "lab": "launcher"
+  },
+  {
+   "id": "lab-line-follower",
+   "area": "engineering",
+   "route": "#/activity/lab-line-follower",
+   "lab": "line-follower"
+  },
+  {
+   "id": "lab-ramp-racers",
+   "area": "science",
+   "route": "#/activity/lab-ramp-racers",
+   "lab": "ramp-racers"
+  },
+  {
+   "id": "lab-pixel-studio",
+   "area": "creative",
+   "route": "#/activity/lab-pixel-studio",
+   "lab": "pixel-studio"
+  }
+ ]
+}
