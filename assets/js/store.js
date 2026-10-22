@@ -970,6 +970,25 @@
       if (CLOUD) send(restOp("DELETE", `/pathway_assignments?id=eq.${encodeURIComponent(a.id)}`, undefined, "return=minimal")); else save();
     },
 
+    /* Learning Plans (the name educators and students see for pathways). */
+    planAssignmentsOf: (pathwayId) => (db.pathwayAssignments || []).filter((a) => a.pathwayId === pathwayId),
+    /* draft (never assigned) · current (assigned to a class) · finished (archived: it moves to history). */
+    planStatus: (p) => (p.status === "archived" ? "finished" : SE.store.planAssignmentsOf(p.id).length ? "current" : "draft"),
+    /* Is an assigned plan finished? Students get this from student_state (update-10); others read the plan. */
+    planFinished: (asg) => (asg.finished != null ? !!asg.finished : ((SE.store.pathwayById(asg.pathwayId) || {}).status === "archived")),
+    /* Publish the working copy and move every class that has this plan to it, in one step. */
+    updatePlanForStudents(id) {
+      const v = SE.store.publishPathway(id);
+      if (v) SE.store.planAssignmentsOf(id).forEach((a) => SE.store.assignPathway(a.classId, id));
+      return v;
+    },
+    addActivityToPlan(id, activityId) {
+      const p = SE.store.pathwayById(id), a = SE.activityById[activityId];
+      if (!p || !a) return null;
+      const step = { id: SE.uid("st"), kind: "mission", activityId, required: SE.content.readiness(a) !== "missing-resource", note: null };
+      return SE.store.savePathway(id, { steps: p.steps.concat(step) });
+    },
+
     deleteTeam(id) {
       db.teams = (db.teams || []).filter((t) => t.id !== id);
       if (CLOUD) send(restOp("DELETE", `/class_teams?id=eq.${encodeURIComponent(id)}`, undefined, "return=minimal")); else save();

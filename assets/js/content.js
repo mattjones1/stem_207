@@ -31,8 +31,11 @@
     if (isPublished(a)) return true;
     const role = user && user.role;
     if (role === "educator") return true;
-    return a.pub === "pilot" && role === "student" && !!(SE.store && SE.store.assignmentFor(user.classId, a.id));
+    return a.pub === "pilot" && role === "student" && classWork(user.classId, a.id);
   }
+  /* Assigned to the class: on its own (older assignments) or in an assigned Learning Plan. */
+  const classWork = (classId, id) => !!SE.store && (!!SE.store.assignmentFor(classId, id)
+    || SE.store.pathwayAssignmentsFor(classId).some((x) => x.snapshot && (x.snapshot.steps || []).some((st) => st.activityId === id)));
   const assignable = (a) => !!a && !a.placeholder && (isPublished(a) || a.pub === "pilot");
   /* Drafts in an area (educators only see these, on the area page). */
   const draftsIn = (areaId) => (STEM.drafts || []).filter((a) => a.area === areaId);

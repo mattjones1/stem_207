@@ -72,12 +72,13 @@
     if (!user && !isAuthRoute) { location.replace("#/signin"); return; }
 
     const MOVED = {
-      library: "#/activities", explore: "#/plans",   // #/teach/missions stays (assign, due dates, notes) until Learning Plans replace it
+      library: "#/activities", explore: "#/plans", "teach/missions": "#/teach/plans",
       "teach/pathways": "#/teach/plans", "teach/class": "#/teach/classes", "teach/reflections": "#/teach/checks"
     };
     const moved = MOVED[`${a}/${b}`] || (!b && MOVED[a]);
     if (moved) { location.replace(moved + (a === "teach" && b === "pathways" && c ? `/${parts.slice(2).join("/")}` : "")); return; }
     if (a === "area" && b) { location.replace(`#/activities/${b}`); return; }
+    if (a === "my" && b === "pathways") { location.replace(c ? `#/plans/${c}` : "#/plans"); return; }
     // The coding pathway and the AI route are Learning Plan templates now.
     const tpl = { pathway: "tpl-coding-foundations", "ai-route": "tpl-ai-route" }[a === "teach" && b === "pathway" ? "pathway" : a];
     if (tpl && (a !== "teach" || b === "pathway")) {
@@ -94,17 +95,17 @@
       navKey = { plans: "plans", classes: "classes", checks: "checks" }[b] || "teach";
       if (!b) SE.views.teach(user);
       else if (b === "student") SE.views.teachStudent(user, c);
-      else if (b === "missions") SE.views.teachMissions(user, c);
       else if (b === "checks") SE.views.teachChecks(user);
       else if (b === "classes") (c ? SE.views.teachClassPage(user, c) : SE.views.teachClasses(user));
-      else if (b === "plans") SE.views.teachPathways(user, parts.slice(2));
+      else if (b === "plans") SE.views.teachPlans(user, parts.slice(2));
       else SE.views.notFound();
       title = "Educator dashboard · STEM 207";
     }
     else if (!a && user.role === "student") { SE.views.today(user); navKey = "dashboard"; title = "Home · STEM 207"; }
     else if (a === "plans") {
       if (user.role !== "student") { location.replace("#/teach/plans"); return; }
-      SE.views.dashboard(user, "explore"); navKey = "plans"; title = "My Learning Plans · STEM 207";
+      if (b) SE.views.myPlan(user, b); else SE.views.dashboard(user, "explore");
+      navKey = "plans"; title = "My Learning Plans · STEM 207";
     }
     else if (!a) {
       if (user.role === "educator") { location.replace("#/teach"); return; }
@@ -113,10 +114,6 @@
     else if (a === "activities") {
       SE.views.activities(user, b); navKey = "activities";
       title = `${b && SE.areaById[b] ? SE.areaById[b].name : "Activities"} · STEM 207`;
-    }
-    else if (a === "my" && b === "pathways") {
-      if (user.role !== "student") { location.replace("#/"); return; }
-      SE.views.myPathway(user, c); navKey = "dashboard"; title = "My pathway · STEM 207";
     }
     else if (a === "me") {
       if (user.role !== "student") { location.replace("#/"); return; }

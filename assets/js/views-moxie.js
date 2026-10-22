@@ -578,12 +578,11 @@
   function sessionClassBox(user, a) {
     const { cls } = SE.teachClass(user);
     if (!cls) return "";
-    const asg = SE.store.assignmentFor(cls.id, a.id);
     return `
       <div class="block">
         <h2>In ${esc(cls.name)}</h2>
         ${SE.store.assignable(a)
-          ? `<button type="button" class="btn btn--small ${asg ? "btn--assigned" : "btn--ghost"}" data-assign="${a.id}" aria-pressed="${!!asg}">${icon(asg ? "check" : "plus")}${asg ? "Assigned" : "Assign"}</button>`
+          ? SE.planPicker(user, a)
           : `<p class="muted small">${esc(PUB[a.pub])}: can't be assigned until it reaches the pilot stage.</p>`}
         <p><a href="#/moxie/teach">Teams and capstone review</a></p>
       </div>`;
@@ -640,11 +639,10 @@
           <caption class="visually-hidden">Moxie sessions, their state, and the evidence to look for</caption>
           <thead><tr><th scope="col">Session</th><th scope="col">State</th><th scope="col">Evidence to look for</th><th scope="col">Teacher checks</th>${cls ? `<th scope="col">${esc(cls.name)}</th>` : ""}</tr></thead>
           <tbody>${sessions().map((s) => {
-            const asg = cls && SE.store.assignmentFor(cls.id, s.id);
             return `<tr><th scope="row"><a href="#/activity/${s.id}">${s.moxie.session}. ${esc(s.title)}</a><small>Unit ${s.moxie.unit} · v${esc(s.version)}</small></th>
               <td>${esc(PUB[s.pub])}</td><td class="mx-wrap">${esc(s.stopAt)}</td>
               <td>${s.moxie.gates.map((g) => esc(GATES[g])).join(", ") || "—"}</td>
-              ${cls ? `<td>${SE.store.assignable(s) ? `<button type="button" class="btn btn--small ${asg ? "btn--assigned" : "btn--ghost"}" data-assign="${s.id}" aria-pressed="${!!asg}">${icon(asg ? "check" : "plus")}${asg ? "Assigned" : "Assign"}<span class="visually-hidden"> ${esc(s.title)}</span></button>` : `<span class="muted small">Not yet assignable</span>`}</td>` : ""}</tr>`;
+              ${cls ? `<td>${SE.store.assignable(s) ? `<a class="btn btn--ghost btn--small" href="#/activity/${s.id}">${icon("plus")}Add to a Learning Plan<span class="visually-hidden">: ${esc(s.title)}</span></a>` : `<span class="muted small">Not yet assignable</span>`}</td>` : ""}</tr>`;
           }).join("")}</tbody></table></div>
         <p class="muted small">Rubric dimensions: ${esc(M.rubric.join(", "))}. The source rubric only describes “Meets” (3 of 4), so give written feedback per dimension. There are no scores until the other levels are written.</p>
       </section>

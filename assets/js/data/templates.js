@@ -1,23 +1,25 @@
 /*
- * STEM 207 — curated pathway templates (categories-pathways Phase 3).
+ * STEM 207 — Learning Plan templates.
  *
- * A template is a ready-made pathway an educator copies ("Use this template") and adapts. Copies are
- * the educator's own; editing one never changes the template, a mission, or anyone else's pathway.
+ * A template is a ready-made Learning Plan an educator copies ("Use this template") and adapts. Copies are
+ * the educator's own; editing one never changes the template, an activity, or anyone else's plan.
  *
- * Step: { id, kind: "mission" | "synthesis", activityId, required, label, bridge, evidence, prompt, minutes }
- *   evidence  what to collect for this step. null means the mission's own "Show what you know" check.
- *   prompt    a synthesis step's task (educator-authored; not a library mission).
- *   minutes   [min, max] for a synthesis step (mission steps use the mission's own time).
- * reviewed: true once an educator approved the prompts (approved October 21, 2026). Wording for
- * Maine Coast Explorers comes from the brief's table; the other templates use each mission's own
- * check, plus the brief's goal and final product. Coding Foundations is built from STEM.pathway.
+ * Step: { id, kind: "mission", activityId, required, note }
+ *   note   what students see next to the activity (optional). Each activity's own reflection is the
+ *          deliverable, checked with Pass / Try again, so steps carry no separate evidence or synthesis.
+ * reviewed: true once an educator approved the wording (October 21, 2026). Maine Coast Explorers' notes
+ * come from the brief's table; Coding Foundations is built from STEM.pathway; the AI route isn't reviewed.
  */
 window.STEM = window.STEM || {};
 (function () {
   const STEM = window.STEM;
-  const m = (activityId, extra = {}) => Object.assign({ kind: "mission", activityId, required: true, label: null, bridge: null, evidence: null }, extra);
-  const syn = (prompt, minutes, extra = {}) => Object.assign({ kind: "synthesis", required: true, label: "Synthesize", bridge: null, prompt, minutes }, extra);
-  const ids = (t) => { t.steps.forEach((s, i) => { s.id = `${t.id}-s${i + 1}`; }); return t; };
+  // One activity step. label/bridge/evidence are folded into the student note ("Observe. … Show: …").
+  const m = (activityId, extra = {}) => {
+    const note = [extra.label && !/^(Stage|Step) /.test(extra.label) ? `${extra.label}.` : null, extra.bridge, extra.evidence ? `Show: ${extra.evidence}` : null].filter(Boolean).join(" ");
+    return { kind: "mission", activityId, required: extra.required !== false, note: note || null };
+  };
+  const syn = () => null;   // final-reflection steps are retired: each activity's reflection is the deliverable
+  const ids = (t) => { t.steps = t.steps.filter(Boolean); t.steps.forEach((s, i) => { s.id = `${t.id}-s${i + 1}`; }); return t; };
 
   STEM.pathwayTemplates = [
     ids({
@@ -46,7 +48,7 @@ window.STEM = window.STEM || {};
       audience: { grades: ["6-8"], minutes: null, equipment: [], prior: "" },
       steps: [
         m("lab-moon-gate"),
-        m("lab-pattern-machine", { bridge: "A full lab: choose the levels to use and set your own time estimate." }),
+        m("lab-pattern-machine"),
         m("ai-limits-detectives"),
         m("interactive-story"),
         syn("Create a story in which a character checks a computer's recommendation.", null)

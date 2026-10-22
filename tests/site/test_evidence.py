@@ -103,9 +103,6 @@ async def local(b):
     await as_teacher(t, S); await go(t, S + f"#/teach/student/{sid}")
     txt = await t.inner_text("#app")
     ok("4. teacher views distinguish legacy, sent, passed", all(k in txt for k in ["legacy", "Passed"]) and ("sent" in txt.lower()), [k for k in ["legacy","Checked in lab","Teacher confirmed","submitted"] if k.lower() not in txt.lower()])
-    await go(t, S + "#/teach/missions/coding")
-    mt = await t.inner_text(".assigned-panel")
-    ok("Missions tab shows status counts", "passed" in mt and ("sent" in mt or "in progress" in mt), mt[:200].replace("\n", " | "))
     ok("local: no page errors", not errs, errs)
     await ctx.close()
 

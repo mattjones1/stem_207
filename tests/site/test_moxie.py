@@ -57,16 +57,18 @@ async def local(b):
     t = await pg.inner_text("#app")
     ok("educator: session shows the 8 parts", all(h in t for h in ["Your mission", "Before you wire", "Build it", "Code it", "Test it", "Explain it", "Stretch"]))
     ok("educator: empty lesson content says it's in review", "in review" in t)
-    ok("educator: a draft session can't be assigned", await pg.locator('[data-assign="moxie-11"]').count() == 0)
+    ok("educator: a draft session can't be assigned", await pg.locator("#plan-pick, a[href='#/teach/plans/new/moxie-11']").count() == 0)
     await go(pg, S + "#/moxie/teach")
     ok("educator: Teach Moxie shows the sample team", "Ava R. & Mateo L." in await pg.inner_text(".mx-teams"))
-    ok("educator: nothing is assignable while sessions are drafts", await pg.locator('[data-assign^="moxie-"]').count() == 0)
+    ok("educator: nothing is assignable while sessions are drafts", "Add to a Learning Plan" not in await pg.inner_text(".mx-table"))
 
     # Pilot: the teacher assigns capstone sessions; Ava designs, Mateo sees the shared design.
     await pg.evaluate(PILOT); await go(pg, S + "#/moxie/teach")
-    for sid in ["moxie-13", "moxie-14", "moxie-15", "moxie-16"]:
-        await pg.click(f'[data-assign="{sid}"]'); await pg.wait_for_timeout(200)
-    ok("educator: pilot sessions can be assigned", await pg.evaluate("['moxie-13','moxie-16'].every((id) => SE.store.assignmentFor(SE.store.classesFor(SE.store.currentUser().id)[0].id, id))"))
+    ok("educator: pilot sessions can be added to a Learning Plan", await pg.locator('a[href="#/activity/moxie-13"]').count() >= 1 and "Add to a Learning Plan" in await pg.inner_text(".mx-table"))
+    # Pilot sessions aren't published, so they go in a plan as optional activities.
+    await pg.evaluate("""(() => { const p = SE.store.createPathway({ title: 'Moxie capstone', steps: ['moxie-13','moxie-14','moxie-15','moxie-16'].map((id) => ({ kind: 'mission', activityId: id, required: false, note: null })) });
+      SE.store.publishPathway(p.id); SE.store.assignPathway(SE.store.classesFor(SE.store.currentUser().id)[0].id, p.id); })()""")
+    ok("educator: the capstone plan is assigned", await pg.evaluate("SE.store.pathwayAssignmentsFor(SE.store.classesFor(SE.store.currentUser().id)[0].id).some((x) => x.snapshot.title === 'Moxie capstone')"))
     await switch(pg, S, "student"); await pg.evaluate(PILOT)
     await go(pg, S + "#/activity/moxie-13")
     ok("student: assigned pilot session opens", NOT_FOUND not in await pg.inner_text("#app"))

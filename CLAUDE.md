@@ -112,7 +112,7 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 ## Moxie pathway (physical computing, draft)
 - Plan: `planning/MOXIE_PLAN.md`, `MOXIE_AUDIT.md`, `MOXIE_VALIDATION.md`. Data: `assets/js/data/moxie.js` (`STEM.moxie`, and `STEM.moxieSessions` `moxie-01`…`16`). Views and rules: `assets/js/views-moxie.js` (`#/moxie`, `#/moxie/teach`; the activity view hands `a.moxie` records to `SE.views.moxieSession`).
 - **Outline edition.** The repo is public, so don't add lesson text, wiring, code, or the DOCX files until reuse permissions are signed off (validation item 12). **Never** commit answer keys. Grades and time stay null/"pending" until a pilot sets them.
-- `pub`: draft → review → hardware → pilot → published. Only published sessions are in `STEM.activities`; every session is in `SE.activityById`. Educators see every state, and pilot sessions reach students only when assigned. `SE.store.assign` refuses anything earlier than pilot. `SE.moxie.readyToPublish(a)` must be empty before a pilot.
+- `pub`: draft → review → hardware → pilot → published. Only published sessions are in `STEM.activities`; every session is in `SE.activityById`. Educators see every state, and pilot sessions reach students only when assigned (in a Learning Plan, as optional activities, or an older single assignment). `SE.store.assign` refuses anything earlier than pilot. `SE.moxie.readyToPublish(a)` must be empty before a pilot.
 - Evidence uses `moxie_*` events with `v` (the content version). Partners share `SE.store.TEAM_TYPES` (design, codecheck, buglog, test, feedback_got, improve, card); plan, observe, and reflect stay individual. Teacher events: `moxie_gate {activityId, gate, ok}` and `moxie_rubric {activityId, dimension, note}`. There are no rubric scores.
 - Teams: `SE.store.teamsFor / teamOf / teammates / teamEvents / saveTeam / deleteTeam`. In cloud mode, `class_teams` plus `team_events(p_token)` come from `supabase/update-5-moxie-teams.sql`, and its type list must match `TEAM_TYPES`.
 - Test: `python3 tests/site/test_moxie.py [local] [cloud|skip]`.
@@ -131,33 +131,21 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
   - `tests/run.sh` runs `.js` tests with Node.
 - Baseline: `tests/fixtures/catalog-baseline.json`. Test: `python3 tests/site/test_categories.py`.
 
-## Educator pathways (categories-pathways Phase 3)
-- Views and rules live in `assets/js/views-pathways.js`, on the routes `#/teach/pathways`, `/new`, `/<id>`, and `/<id>/edit` (the Pathways tab).
-  - Pure rules: `SE.pathways.totals`, `warnings` (advice only), `publishBlockers`, `staleSteps`, `unpublished`, and `template`.
-  - It reuses the teacher frame through `SE.teachFrame`, `SE.teachBindFrame`, and `SE.teachClass`.
-- Templates are in `assets/js/data/templates.js`, with `reviewed: true` (prompts approved October 21, 2026). Copies are the educator's own; never edit a template through a copy.
-- Step shape: `{ id, kind: mission|synthesis, activityId, required, label, bridge, evidence (null = the mission's check), prompt, minutes, adaptation }`.
-- Store (local and cloud):
-  - `createPathway`, `savePathway`, `publishPathway` (an immutable snapshot that pins `missionVersion`), `archivePathway`, `duplicatePathway`;
-  - `assignPathway` (pins the version; called again, it moves the class to the latest), `unassignPathway`, and `pathwayAssignmentsFor` (each comes with its `snapshot`).
-- Supabase: `supabase/update-6-pathways.sql` (`pathways`, `pathway_versions`, `pathway_assignments`; `student_state` returns `pathways`). It's also folded into `schema.sql`.
-- Rules that must hold:
-  - A required step must be published and have a resource. Grade fit is advice only.
-  - Account, cost, and supervision limits are shown, never bypassed.
-- Test: `python3 tests/site/test_pathways.py [local] [cloud|skip]`.
-
-## Pathway evidence and review (categories-pathways Phase 4)
-- Code lives in `assets/js/views-pathway-work.js`:
-  - `SE.views.myPathway` (`#/my/pathways/<assignmentId>`, students only);
-  - `SE.pathwayToday(user)` (the cards on Today's class side);
-  - `SE.views.pathwayReview` (`#/teach/pathways/<id>/review`).
-  - Pure rules: `SE.pathwayWork.stepState`, `progress`, `workFor`, and `updated`.
-- Events carry `assignmentId`, `stepId`, and `v`:
-  - Student: `pathway_evidence {mode written|show, text, missionVersion}` and `pathway_synthesis {text}`, both individual. `pathway_artifact {text, link}` is shared with teammates; it's in `TEAM_TYPES` and in `update-7-pathway-teams.sql`.
-  - Teacher: `pathway_review {decision accepted|revise, criteria, note}` and `pathway_observation {note}`.
-- Step state: none → sent → accepted or revise. A review counts only if it's newer than the latest evidence, and new evidence after a review makes the step "sent" again.
-- Launching or opening a mission is never evidence. Mission status stays separate from pathway evidence.
-- A revise request needs a note. Artifact links must be https.
+## Learning Plans (usability Stage 4)
+- A **Learning Plan** is an ordered list of activities assigned to a whole class. Internally it's still a "pathway" (store API, tables from `update-6`).
+- Views and rules live in `assets/js/views-plans.js`:
+  - `#/teach/plans` (`SE.views.teachPlans`): Current / Finished toggle, drafts, templates, and a one-time banner that moves a class's old single assignments into a plan (`SE.plans.migrateLegacy`).
+  - `#/teach/plans/new[/<activityId>]`, `/<templateId>` (preview + Use this template), `/<id>[/students|checks]` (tabs Activities, Students, Checks), and `/<id>/edit`.
+  - Plan page actions: Edit, Assign to a class, **Update for students** (`SE.store.updatePlanForStudents`: publishes and moves every assigned class), Duplicate, Finish/Reopen (`archivePathway`).
+  - `SE.planPicker(user, a)` ("Add to a Learning Plan") on educator activity pages. There's no per-activity assign anymore; `#/teach/missions` redirects to `#/teach/plans`.
+  - Students: `SE.views.myPlan` (`#/plans/<assignmentId>`; `#/my/pathways/<id>` redirects) and `SE.pathwayToday(user)` (plan cards on Home).
+  - Pure rules: `SE.plans.stepsOf`, `totals`, `warnings` (advice only), `blockers`, `unpublished`, `progress` (passed of required, and the next activity), `template`.
+- Step shape: `{ id, kind: "mission", activityId, required, note }`. `stepsOf` drops old synthesis steps and reads an old `bridge` as the note.
+- Status: `SE.store.planStatus(p)` → draft · current (assigned) · finished (archived). `SE.store.planFinished(asg)` uses `asg.finished` from `student_state` (`supabase/update-10-plan-status.sql`) or the plan in local mode.
+- Rules: a required activity must be published and have a resource (`blockers`). Grade fit, accounts, cost, and supervision are shown as advice, never bypassed.
+- Templates are in `assets/js/data/templates.js`. Copies are the educator's own; never edit a template through a copy.
+- The Phase 4 step-evidence events (`pathway_*`) stay in the log but aren't shown or counted.
+- Test: `python3 tests/site/test_plans.py`.
 
 ## Classes and the Dashboard (usability Stage 3)
 - `#/teach` (`SE.views.teach`) is the **Dashboard** for every class: quick actions, Checks waiting, your classes, current Learning Plans with progress (`planProgress`), and "Needs a check-in" (`attentionFor`). There's no per-class dropdown and no 14-day chart.
@@ -188,7 +176,7 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
   - Guests: Home · Activities.
   - There's no Projector button.
 - `#/activities` is the shared category view, and `#/activities/<category>` is one category.
-- Old addresses redirect (`MOVED` in `main.js`): `#/library`, `#/area/<id>`, `#/explore`, `#/teach/pathways`, `#/teach/class`, and `#/teach/reflections`.
+- Old addresses redirect (`MOVED` in `main.js`): `#/library`, `#/area/<id>`, `#/explore`, `#/teach/pathways`, `#/teach/class`, `#/teach/reflections`, `#/teach/missions`, and `#/my/pathways/<id>`.
 - Class rewards are the "class journey".
 
 ## Classroom and design rules

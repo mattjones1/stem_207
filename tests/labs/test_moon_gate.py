@@ -156,8 +156,7 @@ async def main():
     await t.goto(S + "#/activity/lab-moon-gate"); await t.wait_for_timeout(400)
     txt = await t.inner_text("#app")
     ok("teacher note: conditionals, branch selection, why one test isn't enough", all(k in txt for k in ["Conditionals:", "Branch selection:", "Why one test isn't enough"]))
-    await t.goto(S + "#/teach/missions/coding"); await t.wait_for_timeout(400)
-    ok("assignable from educator Missions tab", await t.locator('[data-assign="lab-moon-gate"]').count() >= 1)
+    ok("educator can add it to a Learning Plan", await t.locator('a[href="#/teach/plans/new/lab-moon-gate"]').count() >= 1)
     # reduced motion + phone
     rm = await b.new_page(viewport={"width": 390, "height": 844}, reduced_motion="reduce"); watch(rm)
     await rm.goto(S); await rm.wait_for_timeout(300); await rm.click("text=Look around as a guest"); await rm.wait_for_timeout(300)

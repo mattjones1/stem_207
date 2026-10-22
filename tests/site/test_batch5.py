@@ -38,7 +38,7 @@ async def main():
     # AI route: a Learning Plan template now (students no longer see a separate route page)
     await pg.goto(S + "#/ai-route"); await pg.wait_for_timeout(400)
     ok("AI route: a student's old link goes to My Learning Plans", pg.url.endswith("#/plans"), pg.url)
-    ok("AI route template: 8 activities, every one resolves, marked for review", await pg.evaluate("(()=>{const t=SE.pathways.template('tpl-ai-route'); return t.steps.length===8 && t.steps.every(s=>!!SE.activityById[s.activityId]) && t.reviewed===false})()"))
+    ok("AI route template: 8 activities, every one resolves, marked for review", await pg.evaluate("(()=>{const t=SE.plans.template('tpl-ai-route'); return t.steps.length===8 && t.steps.every(s=>!!SE.activityById[s.activityId]) && t.reviewed===false})()"))
     # phone
     m = await ctx.new_page(); await m.set_viewport_size({"width": 390, "height": 844})
     for h in ["#/activities/ai", "#/activity/score-keeper", "#/activity/debug-animation"]:

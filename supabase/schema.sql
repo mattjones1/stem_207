@@ -463,10 +463,11 @@ begin
                                                             'createdAt', (extract(epoch from m.created_at) * 1000)::bigint) order by m.created_at desc)
                           from (select * from public.class_messages where class_id = v_student.class_id order by created_at desc limit 20) m), '[]'::json),
     'pathways', coalesce((select json_agg(json_build_object('id', pa.id, 'pathwayId', pa.pathway_id, 'version', pa.version,
-                                                            'dueDate', pa.due_date, 'note', pa.note, 'snapshot', pv.snapshot,
+                                                            'dueDate', pa.due_date, 'note', pa.note, 'snapshot', pv.snapshot, 'finished', (pw.status = 'archived'),
                                                             'assignedAt', (extract(epoch from pa.assigned_at) * 1000)::bigint) order by pa.assigned_at)
                           from public.pathway_assignments pa
                           join public.pathway_versions pv on pv.pathway_id = pa.pathway_id and pv.version = pa.version
+                          join public.pathways pw on pw.id = pa.pathway_id
                           where pa.class_id = v_student.class_id), '[]'::json));
 end $$;
 revoke all on function public.student_state(uuid) from public;

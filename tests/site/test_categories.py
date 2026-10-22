@@ -58,10 +58,10 @@ async def main():
     await go(pg, "#/activity/3d-printing-exercise-03")
     t = await pg.inner_text("#app")
     ok("educator: placeholder page says it has no content", "Exercise 3 — placeholder" in t and "no content yet" in t)
-    ok("educator: no assign button on a placeholder", await pg.locator('[data-assign="3d-printing-exercise-03"]').count() == 0)
+    ok("educator: no Add to a Learning Plan on a placeholder", await pg.locator("#plan-pick, a[href^='#/teach/plans/new/']").count() == 0)
     ok("store refuses to assign a placeholder", await pg.evaluate("(() => { const c = SE.store.classesFor(SE.store.currentUser().id)[0]; const n = SE.store.assignmentsFor(c.id).length; SE.store.assign(c.id, ['3d-printing-exercise-01']); return SE.store.assignmentsFor(c.id).length === n; })()"))
-    await go(pg, "#/teach/missions")
-    ok("teacher Missions tab has no 3D Printing tab", "3D Printing" not in await pg.inner_text("#app"))
+    await go(pg, "#/teach/plans/new"); await pg.wait_for_timeout(300)
+    ok("plan editor's category filter has no 3D Printing", "3D Printing" not in await pg.inner_text("#pw-area"))
 
     # Optional metadata shows when set (set in memory for the check).
     await pg.evaluate("Object.assign(SE.activityById['lab-field-station'], { delivery: 'Browser 360° (not headset VR)', skills: ['observation'] })")

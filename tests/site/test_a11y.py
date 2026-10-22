@@ -143,11 +143,11 @@ async def visit(pg, h):
     await pg.goto(S + "#/library"); await pg.wait_for_timeout(100); await pg.goto(S + h); await pg.wait_for_timeout(450)
 
 PUBLIC = ["#/signin", "#/signin/student", "#/signin/educator", "#/signup"]
-STUDENT = ["#/", "#/area/3d-printing", "#/library", "#/explore", "#/pathway", "#/base", "#/me", "#/activity/fix-the-recipe", "#/activity/noreaster-alerts",
-           "#/activity/python-turtle-bridge", "#/lab/pattern-machine/5", "#/lab/pattern-machine/6", "#/lab/robot-chef/4", "#/lab/rover/1", "#/lab/dance-party/1", "#/ai-route"]
-TEACHER = ["#/teach", "#/teach/missions", "#/teach/missions/pathway", "#/teach/pathway", "#/teach/reflections", "#/teach/class", "#/pathway/student",
+STUDENT = ["#/", "#/activities", "#/activities/3d-printing", "#/plans", "#/base", "#/me", "#/activity/fix-the-recipe", "#/activity/noreaster-alerts",
+           "#/activity/python-turtle-bridge", "#/lab/pattern-machine/5", "#/lab/pattern-machine/6", "#/lab/robot-chef/4", "#/lab/rover/1", "#/lab/dance-party/1"]
+TEACHER = ["#/teach", "#/activities", "#/activities/coding",
            "#/moxie", "#/moxie/teach", "#/activity/moxie-03", "#/activity/moxie-13", "#/activity/moxie-16",
-           "#/area/3d-printing", "#/activity/3d-printing-exercise-01", "#/teach/pathways", "#/teach/pathways/tpl-maine-coast"]
+           "#/activities/3d-printing", "#/activity/3d-printing-exercise-01", "#/activity/fix-the-recipe", "#/teach/plans", "#/teach/plans/tpl-maine-coast"]
 # Moxie sessions are drafts, so students only see them here by publishing them in memory for the audit.
 STUDENT_MOXIE = ["#/moxie", "#/activity/moxie-03", "#/activity/moxie-11", "#/activity/moxie-13", "#/activity/moxie-14", "#/activity/moxie-15", "#/activity/moxie-16"]
 
@@ -169,14 +169,14 @@ async def main():
         await audit(pg, "certificate", F); await pg.keyboard.press("Escape")
         await sign_teacher(pg)
         sid = await pg.evaluate("SE.store.studentsIn(SE.store.classesFor(SE.store.currentUser().id)[0].id)[0].id")
-        pw = await pg.evaluate("SE.store.duplicatePathway(SE.pathways.template('tpl-maine-coast')).id")
+        pw = await pg.evaluate("SE.store.duplicatePathway(SE.plans.template('tpl-maine-coast')).id")
         cid = await pg.evaluate("SE.store.classesFor(SE.store.currentUser().id)[0].id")
-        for h in TEACHER + ["#/teach/classes", f"#/teach/classes/{cid}", "#/teach/checks", f"#/teach/student/{sid}", f"#/teach/pathways/{pw}", f"#/teach/pathways/{pw}/edit"]: await visit(pg, h); await audit(pg, h, F)
-        # Phase 4 pages: publish and assign, then the review grid with a portfolio open, then the student's pathway page.
+        for h in TEACHER + ["#/teach/classes", f"#/teach/classes/{cid}", "#/teach/checks", f"#/teach/student/{sid}", f"#/teach/plans/{pw}/edit"]: await visit(pg, h); await audit(pg, h, F)
+        # Plan pages after assigning, then the student's plan page.
         aid = await pg.evaluate(f"(() => {{ SE.store.publishPathway('{pw}'); const c = SE.store.classesFor(SE.store.currentUser().id)[0]; return SE.store.assignPathway(c.id, '{pw}').id; }})()")
-        await visit(pg, f"#/teach/pathways/{pw}/review"); await pg.locator("[data-open]").first.click(); await pg.wait_for_timeout(300); await audit(pg, "pathway review", F)
+        for h in [f"#/teach/plans/{pw}", f"#/teach/plans/{pw}/students", f"#/teach/plans/{pw}/checks"]: await visit(pg, h); await audit(pg, h, F)
         await pg.evaluate("SE.store.signOut()"); await pg.wait_for_timeout(200); await sign_student(pg)
-        await visit(pg, f"#/my/pathways/{aid}"); await audit(pg, "my pathway", F)
+        await visit(pg, f"#/plans/{aid}"); await audit(pg, "my plan", F)
         await ctx.close()
         by = {}
         for f in F: by.setdefault(f["rule"], []).append(f)

@@ -143,8 +143,7 @@ async def main():
     txt = await t.inner_text("#app")
     ok("teacher note: objective, misconception, question", "Learning objective" in txt and "Common misconception" in txt and "Ask afterward" in txt)
     await t.screenshot(path=O+"teacher-page.png", full_page=True)
-    await t.goto(S+"#/teach/missions/coding"); await t.wait_for_timeout(400)
-    ok("assignable from educator Missions tab", await t.locator('[data-assign="lab-dance-party"]').count()>=1)
+    ok("educator can add it to a Learning Plan", await t.locator('a[href="#/teach/plans/new/lab-dance-party"]').count()>=1)
     # ── reduced motion + mobile
     rm=await b.new_page(viewport={"width":390,"height":844}, reduced_motion="reduce"); watch(rm)
     await rm.goto(S); await rm.wait_for_timeout(300); await rm.click("text=Look around as a guest"); await rm.wait_for_timeout(300)
