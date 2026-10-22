@@ -105,5 +105,6 @@ window.STEM.equipment = {
   webcam: { name: "Webcam", filter: false },
   building: { name: "Building materials", filter: true },
   science: { name: "Science supplies", filter: true },
-  art: { name: "Art supplies", filter: true }
+  art: { name: "Art supplies", filter: true },
+  electronics: { name: "Electronics kit (microcontroller)", filter: false }
 };

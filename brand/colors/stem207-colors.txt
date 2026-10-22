@@ -1,0 +1,12 @@
+STEM 207 brand colors (STEM Coliseum palette)
+
+Dark Teal   #012d2b   RGB 1, 45, 43      Anchor: dark backgrounds, main text, "STEM" in the logo
+Teal        #03968f   RGB 3, 150, 143    Accent: large headings, borders, graphics
+Text teal   #037872   RGB 3, 120, 114    Small text, links, and buttons (meets 4.5:1 on white)
+Green 2     #94c93d   RGB 148, 201, 61   Calls to action (Dark Teal text on it), "207" in the logo
+Blue        #3b8bcb   RGB 59, 139, 203   Interactive highlights, used sparingly
+Body gray   #555555                      Body and muted text
+White       #ffffff                      Backgrounds; the only background for full-color Coliseum logos
+
+Parent-brand extras (STEM Coliseum materials): Green 1 #66aa44, Orange 1 #fac01b, Orange 2 #f68922, Pink #ec008c
+Rules: at most three brand colors per layout. Never put Pink on Orange or Yellow. Dark Teal never on dark backgrounds.

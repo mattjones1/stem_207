@@ -3,6 +3,13 @@
 STEM learning site for grades 2–8, branded **STEM 207** (Maine theme). Mission, exact wording: **"Keep the humanity in technology."**
 Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattjones1/stem_207`; pushes deploy in about a minute).
 
+## Working with Claude Code
+- Work in this repository and read the relevant code and tests before changing behavior. Keep changes focused and preserve unrelated work.
+- Prioritize learning: use grade-appropriate language and meaningful student choices; check what students actually do rather than a completion click.
+- Keep the experience accessible, privacy-preserving, and teacher-ready. Follow the classroom and design rules below.
+- Make the smallest complete change, update directly related documentation, and run the narrowest relevant test. Report what changed and any checks that could not run.
+- Ask before making a significant product or teaching-design choice that the request does not settle.
+
 ## Stack and layout
 - Static vanilla JS/CSS. No build step and no framework. Hash router in `assets/js/main.js`. Globals are `window.SE` (app) and `window.STEM` (data).
 - Script order is set in `index.html`. Any new JS file needs its own `<script>` tag there.
@@ -44,10 +51,20 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - `starter: { file, label, how }`: a downloadable starter project (built by `python3 tools/build_starters.py` into `assets/starters/`). `figure: "<key>"`: a drawn block picture from `FIGURES` in `views-library.js` (with a text version). `bridge: { from, text }`: "You've seen this idea before" link from a lab to a platform activity.
 - `STEM.startHere` and `STEM.aiRoute` live in `pathway.js`. Pages: the pathway's "New to coding? Start here" and `#/ai-route`. Test: `python3 tests/site/test_batch5.py`.
 
+## Coding categories and progression (planning)
+- Read `planning/CODING_CATEGORIES.md` before any work on coding categories, coding missions, or educator coding pathways.
+- **Planning only by default.** The first pass inspects the repo and returns a plan (the six items listed in that file). Don't edit app code, create mission records, rename categories, write exercises, run migrations, or deploy until the user asks for implementation.
+- Keep **Coding & Computer Science** as the top-level category. The proposed groups (Coding Foundations, Scratch & Block Coding, Game & Interactive Story, Python & Text Coding, Web Development, Robotics & Physical Computing) are browsing groups inside it.
+- A category (browse) is not a pathway (sequence). Keep one canonical mission record and use references or tags for overlap. Store concept, tool/language, and category as separate metadata.
+- Keep the seven-stage pathway, routes, readiness statements, and mission IDs. Category browsing sits alongside them.
+- Map only reviewed content. Never show empty or draft groups as available curriculum. The candidate mappings in that file are unverified.
+- Use `CS curriculum.pptx` only as a reference. Don't copy Skill Samurai branding, prices, age bands, or certification claims.
+- Don't change AI, VR, Science & Discovery, Creative STEM, the Moxie pathway, or the five 3D Printing placeholders.
+
 ## Brand
-- Read `brand/BRAND.md` before any branding, marketing, or visual-identity work. The marketing kit (social posts, banner, flyer and partner templates, concept artwork) is in `brand/marketing-kit/`.
-- The logo master is `assets/img/brand/stem207-logo.svg`, the same file as the kit's approved logo. Indigo `#302568` = `--navy`, lime `#8CC832` = `--orange`.
-- Marketing images show no people. The kit artwork is AI-generated concept art, so never present it as real equipment or programs.
+- Read `brand/BRAND.md` before any branding, marketing, or visual-identity work. It follows the October 2026 standards (STEM 207, powered by STEM Coliseum): Dark Teal `#012d2b`, Teal `#03968f`, Green 2 `#94c93d`, Montserrat and Open Sans.
+- Those standards retire the indigo/lime palette, but the site hasn't been rethemed yet (`--navy #302568`, `--orange #8cc832`, older logo in `assets/img/brand/`). Approved logos are in `brand/logos/` and colors in `brand/colors/`. BRAND.md's "Site status" lists the gaps. Ask before retheming. The site keeps Atkinson Hyperlegible for body text (a decided exception).
+- Marketing images show no people. AI-generated concept art is illustrative only, so never present it as real equipment or programs.
 
 ## Mission context and certificates (Batch 6)
 - Activity fields: `why`, `realWorld`, `vocab: [{ term, def }]` render as "Why it matters" with key words (all 10 coding missions have them). `board: { title, lines, note }` shows a card students read in the mission block (Bug Hunt's buggy algorithm).
@@ -77,6 +94,14 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - `SE.game.classCounts(classId)` → counts; `journeyFrom(counts)` → `{ points, goal, badges }`; `classJourney(classId)` uses `SE.store.journeyCounts(classId)` (from the `class_journey(p_token)` RPC on a cloud student device) or counts locally. Keep the JS and `supabase/update-4-class-journey.sql` rules identical.
 - UI: `SE.classJourneyBlock(journey, { compact })` on Today (class side), My expedition, and the teacher Overview; "My rewards" on Today's own side; the celebration shows "+100 class points" for a first send of an assigned mission.
 - Test: `python3 tests/site/test_batch10.py [local] [cloud|skip]` (cloud needs Postgres with update-4 + the mock on 8787).
+
+## Moxie pathway (physical computing, draft)
+- Plan: `planning/MOXIE_PLAN.md`, `MOXIE_AUDIT.md`, `MOXIE_VALIDATION.md`. Data: `assets/js/data/moxie.js` (`STEM.moxie`, and `STEM.moxieSessions` `moxie-01`…`16`). Views and rules: `assets/js/views-moxie.js` (`#/moxie`, `#/moxie/teach`; the activity view hands `a.moxie` records to `SE.views.moxieSession`).
+- **Outline edition.** The repo is public, so don't add lesson text, wiring, code, or the DOCX files until reuse permissions are signed off (validation item 12). **Never** commit answer keys. Grades and time stay null/"pending" until a pilot sets them.
+- `pub`: draft → review → hardware → pilot → published. Only published sessions are in `STEM.activities`; every session is in `SE.activityById`. Educators see every state, and pilot sessions reach students only when assigned. `SE.store.assign` refuses anything earlier than pilot. `SE.moxie.readyToPublish(a)` must be empty before a pilot.
+- Evidence uses `moxie_*` events with `v` (the content version). Partners share `SE.store.TEAM_TYPES` (design, codecheck, buglog, test, feedback_got, improve, card); plan, observe, and reflect stay individual. Teacher events: `moxie_gate {activityId, gate, ok}` and `moxie_rubric {activityId, dimension, note}`. There are no rubric scores.
+- Teams: `SE.store.teamsFor / teamOf / teammates / teamEvents / saveTeam / deleteTeam`. In cloud mode, `class_teams` plus `team_events(p_token)` come from `supabase/update-5-moxie-teams.sql`, and its type list must match `TEAM_TYPES`.
+- Test: `python3 tests/site/test_moxie.py [local] [cloud|skip]`.
 
 ## Wording
 - Home (#/) is "Today" for students, "Educator dashboard" for teachers, and "Home" for guests: use `SE.homeLabel()` (the default for `SE.backLink`). The browse page is "Missions" in the student nav and "Mission library" elsewhere. Class rewards are the "class journey" (never "class expedition").

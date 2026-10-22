@@ -216,7 +216,7 @@
     const labOf = (a) => a.launch.status === "lab" && SE.labs.byId(a.launch.labId);
     const hrefOf = (a) => (labOf(a) ? `#/lab/${a.launch.labId}` : `#/activity/${a.id}`);
     const startedOn = (a) => prof.opened.has(a.id) || (prof.steps[a.id] && prof.steps[a.id].size > 0) || (labOf(a) && (prof.labLevels[a.launch.labId] || new Set()).size > 0);
-    const statuses = STEM.activities.map((a) => ({ a, st: SE.game.statusFor(prof, a) }));
+    const statuses = Object.values(SE.activityById).map((a) => ({ a, st: SE.game.statusFor(prof, a) }));
 
     // My class: a try-again comes first (it's direction from the teacher), then the earliest-due assignment.
     let classMain = null, classWhy = "", retry = null, classNote = null;
@@ -286,7 +286,8 @@
           ${notes ? `<div class="teacher-note-banner">${icon("message")}<p><strong>Note from your teacher</strong> on <a href="#/activity/${notes.c.activity.id}">${esc(notes.c.activity.title)}</a>: “${esc(notes.r.data.note)}”</p></div>` : ""}
           ${classMain ? bigCard(classMain, classWhy, "class",
             (retry && retry.data.note ? `<p class="today-card__retry">${icon("message")}<span><strong>Your teacher says:</strong> “${esc(retry.data.note)}”</span></p>` : "")
-            + (classNote ? `<p class="today-card__note">${icon("clipboard")}<span><strong>Instructions:</strong> ${esc(classNote)}</span></p>` : "")) : `
+            + (classNote ? `<p class="today-card__note">${icon("clipboard")}<span><strong>Instructions:</strong> ${esc(classNote)}</span></p>` : "")
+            + (classMain.notice ? `<p class="today-card__note">${icon("alert")}<span><strong>Update:</strong> ${esc(classMain.notice)}</span></p>` : "")) : `
           <div class="today-empty">
             <h3>${assigned.length ? "All your class missions are done!" : "Nothing assigned right now"}</h3>
             <p>${assigned.length ? "Nice work. Explore on your own until your teacher adds more." : "When your teacher assigns a mission, it shows up here."}</p>
@@ -294,7 +295,7 @@
           ${open.length > (retry ? 0 : 1) || doneN ? `
           <section class="today-more" aria-labelledby="also-title">
             <h3 id="also-title">Class missions <span class="muted">${doneN} of ${assigned.length} done</span></h3>
-            <ul class="today-list">${open.filter((r) => r.a !== classMain).map(({ x, a }) => `<li><a href="${hrefOf(a)}">${icon(SE.areaById[a.area].icon)}<span><strong>${esc(a.title)}</strong><small>${x.dueDate ? esc(SE.dueText(x.dueDate)) : "No due date"} · ${SE.timeText(a)}</small>${x.note ? `<small class="today-list__note">${icon("clipboard")}${esc(x.note)}</small>` : ""}</span></a></li>`).join("")}
+            <ul class="today-list">${open.filter((r) => r.a !== classMain).map(({ x, a }) => `<li><a href="${hrefOf(a)}">${icon(SE.areaById[a.area].icon)}<span><strong>${esc(a.title)}</strong><small>${x.dueDate ? esc(SE.dueText(x.dueDate)) : "No due date"} · ${SE.timeText(a)}</small>${x.note ? `<small class="today-list__note">${icon("clipboard")}${esc(x.note)}</small>` : ""}${a.notice ? `<small class="today-list__note">${icon("alert")}Update: ${esc(a.notice)}</small>` : ""}</span></a></li>`).join("")}
               ${assigned.filter((r) => SE.game.missionDone(prof, r.a)).map(({ a }) => `<li class="is-done"><a href="#/activity/${a.id}">${icon("check")}<span><strong>${esc(a.title)}</strong><small>Done</small></span></a></li>`).join("")}</ul>
           </section>` : ""}
           ${waiting.length ? `

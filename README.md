@@ -36,6 +36,35 @@ Six missions are marked as the pilot set (teachers can filter for them): Robot D
 
 **Learning routes.** Scratch missions that build on a lab say so ("You've seen this idea before") and link back to it. Debug the Broken Animation and Pattern Studio with My Blocks have downloadable starter projects (`assets/starters/`, rebuilt with `tools/build_starters.py`), and Score Keeper shows a picture of where its blocks go. The coding pathway opens with "New to coding? Start here" tracks for grades 2–3, 4–5, and older beginners, and the Mission Capstone is open to any student whose Stage 6 is confirmed. The [AI learning route](https://mattjones1.github.io/stem_207/#/ai-route) puts the AI missions in six steps, from patterns to responsible use.
 
+## Moxie: a physical computing pathway (draft)
+
+**Moxie: Code it. Build it. Make it matter.** Moxie is 16 ESP32 sessions in four units: Outputs; Inputs & Decisions; Displays, Time, Sensors & Motion; and a Capstone where partners build a device that helps someone. It belongs to Engineering & Robotics.
+
+**What's built:**
+- `#/moxie`: the overview, with the unit map, final-project requirements, kit, and how partners work.
+- A session page for each of the 16 sessions. Build sessions have these parts: Your mission, Before you wire, Build it, Plan it, Code it, Test it, Explain it, and Stretch.
+- Capstone tools:
+  - Session 13: a design worksheet that checks for one input, two different output types, and three measurable criteria.
+  - Session 14: a build log and code checklist.
+  - Session 15: test results, feedback, an improvement, and a showcase card.
+  - Session 16: a final checklist and a private reflection with self-ratings.
+- `#/moxie/teach` for educators: preparation, assigning, partner teams, teacher checks, and rubric feedback.
+  - Teacher checks: wiring in 11, plan in 8, design in 13, and pitch in 16.
+  - Rubric feedback is written per dimension, with no scores.
+
+**How partners work.** Partners share one design, build log, and test results. Each student's plan, explanation, and reflection stay their own.
+
+**Content versions.** Work saved against an older content version is labeled with that version.
+
+**This is the outline edition.** Every session is a draft that only educators can see. Grades and time per session say "pending". The lesson text, wiring, and code stay out of this public repo until reuse permissions are confirmed. Answer keys never go here.
+
+**More detail:**
+- The brief: [`planning/MOXIE_PLAN.md`](planning/MOXIE_PLAN.md)
+- What's reused and what was added: [`planning/MOXIE_AUDIT.md`](planning/MOXIE_AUDIT.md)
+- What to test before a pilot: [`planning/MOXIE_VALIDATION.md`](planning/MOXIE_VALIDATION.md)
+
+Partner teams in cloud mode need [`supabase/update-5-moxie-teams.sql`](supabase/update-5-moxie-teams.sql).
+
 ## Interactive labs
 
 Each exploration area has its own leveled, interactive lab that runs inside STEM 207, with no outside account or website. Every level teaches one idea, gives a hint on request, checks the student's work, and ends with "What you just learned." Signed-in students earn XP for each level (+30), and lab work counts toward patches and the weekly streak.
@@ -116,7 +145,7 @@ STEM 207 runs in one of two modes, chosen by `assets/js/config.js`:
 ### Set up the free back end (about 10 minutes)
 
 1. Create a free account at [supabase.com](https://supabase.com) and click **New project**. Pick a region near Maine (for example US East) and save the database password somewhere safe.
-2. In the project, open **SQL Editor → New query**, paste all of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**. (Already set up before? Run the updates you haven't run yet, in order: [`supabase/update-2-assignments.sql`](supabase/update-2-assignments.sql) for assigned missions, then [`supabase/update-3-class-messages.sql`](supabase/update-3-class-messages.sql) for class messages and assignment instructions, then [`supabase/update-4-class-journey.sql`](supabase/update-4-class-journey.sql) so students see the whole class's journey.) It creates the tables, the security rules, and the student sign-in functions. Running it again is safe.
+2. In the project, open **SQL Editor → New query**, paste all of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**. (Already set up before? Run the updates you haven't run yet, in order: [`supabase/update-2-assignments.sql`](supabase/update-2-assignments.sql) for assigned missions, then [`supabase/update-3-class-messages.sql`](supabase/update-3-class-messages.sql) for class messages and assignment instructions, then [`supabase/update-4-class-journey.sql`](supabase/update-4-class-journey.sql) so students see the whole class's journey, then [`supabase/update-5-moxie-teams.sql`](supabase/update-5-moxie-teams.sql) for Moxie partner teams.) It creates the tables, the security rules, and the student sign-in functions. Running it again is safe.
 3. Open **Authentication → Sign In / Providers → Email** and turn off **Confirm email** while you're prototyping, so new educator accounts work right away. (If you leave it on, teachers must click the link in a confirmation email first. In that case, set **Authentication → URL Configuration → Site URL** to wherever your site lives.)
 4. Open **Project Settings → API Keys**. Copy the **Project URL** and the **publishable** key (older projects call it the **anon public** key) into `assets/js/config.js`. Never use a secret or `service_role` key here.
 5. Commit and push. GitHub Pages serves the site with the back end on. To make the one-file version use it too, run `python tools/build_single_file.py` again.
@@ -170,6 +199,7 @@ assets/css/styles.css         All styles. Color and type tokens are at the top.
 assets/js/data/areas.js       Exploration areas, levels, grade bands, durations, formats, equipment
 assets/js/data/activities.js  The activity library
 assets/js/data/pathway.js     The seven coding pathway stages
+assets/js/data/moxie.js       The Moxie pathway: units, kit, capstone, and the 16 session records
 assets/js/data/progression.js XP rules, ranks, patches, class goal, picture codes
 assets/js/core.js             Shared helpers and icons
 assets/js/config.js           Back-end settings: empty = local mode, Supabase URL + key = cloud mode
@@ -180,7 +210,7 @@ tests/backend/                Supabase stand-in for testing cloud mode on plain 
 assets/js/game.js             Turns the activity log into XP, rank, patches, and pathway status
 assets/js/art.js              Insignia, patches, expedition map, class goal track
 assets/js/base.js             Student avatars, the "My harbor" scene, and gear/harbor unlocks
-assets/js/views-*.js          Library, student, sign-in, and educator views
+assets/js/views-*.js          Library, student, sign-in, educator, and Moxie views
 assets/js/main.js             Router and header
 ```
 
@@ -232,7 +262,7 @@ Two activities are marked **Resource coming soon** until the program picks a res
 
 The STEM 207 wordmark lives in `assets/img/brand/`: `stem207-logo.svg` (the vector master), `stem207-logo-reverse.svg` (white letters for dark backgrounds), `stem207-mark.svg` (the Maine "0" on an indigo tile, used as the favicon), and `stem207-pine.svg` (the pine from the M). In the app, `assets/js/brand.js` draws the same artwork inline so the letters can turn white in dark mode. Brand colors are indigo `#302568` and lime `#8CC832`. Headings use Montserrat and body text uses Atkinson Hyperlegible. Color tokens live at the top of `assets/css/styles.css`.
 
-The mission, in these exact words, is **Keep the humanity in technology.** The startup marketing kit (social posts, web banner, workshop flyer and partner sheet templates, concept artwork) is in `brand/marketing-kit/`, and `brand/BRAND.md` sums up its rules for voice, color, imagery and claims.
+The mission, in these exact words, is **Keep the humanity in technology.** The October 2026 brand standards (STEM 207, powered by STEM Coliseum) replace the indigo/lime palette above, but the site hasn't been rethemed yet. The approved logos are in `brand/logos/` and the colors in `brand/colors/`. `brand/BRAND.md` sums up the rules for voice, color, logos, imagery and claims, and lists what the site still needs to change.
 
 Maine design touches: a pine-ridge edge cut from the logo's own pine (on the hero, student home, star map, and footer), a coastal hero scene with a working lighthouse beam and one lobster buoy per exploration area, and a fog-white page background.
 

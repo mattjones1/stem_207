@@ -1,0 +1,12 @@
+/* STEM 207 (powered by STEM Coliseum) brand colors, from the STEM Coliseum Media Brand Guide v1.1. */
+:root {
+  --dark-teal: #012d2b;   /* RGB 1, 45, 43     anchor: dark backgrounds, main text */
+  --teal: #03968f;        /* RGB 3, 150, 143   accent: large headings, borders, graphics */
+  --teal-text: #037872;   /* RGB 3, 120, 114   small text, links, buttons (5.3:1 on white) */
+  --green-2: #94c93d;     /* RGB 148, 201, 61  calls to action (dark teal text on it), "207" in the logo */
+  --blue: #3b8bcb;        /* RGB 59, 139, 203  interactive highlights, sparingly */
+  --body-gray: #555555;   /* body and muted text */
+  --white: #ffffff;
+  /* Other STEM Coliseum colors, for parent-brand materials: */
+  --green-1: #66aa44; --orange-1: #fac01b; --orange-2: #f68922; --pink: #ec008c;
+}

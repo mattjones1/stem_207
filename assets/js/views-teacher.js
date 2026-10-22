@@ -81,6 +81,7 @@
     if (!classes.some((c) => c.id === currentClassId)) currentClassId = classes[0].id;
     return { classes, cls: classes.find((c) => c.id === currentClassId) };
   }
+  SE.teachClass = getClass; // the class the educator is working with (used by the Moxie pages)
 
   /* ───────── Event descriptions ───────── */
   function describe(e, withName) {
@@ -106,7 +107,7 @@
       case "lab_opened": { const lab = SE.labs.byId(e.data.labId); return { icon: "eye", text: `${who}opened ${esc(lab ? lab.title : "a lab")}, level ${e.data.level + 1}` }; }
       case "lab_hint": { const lab = SE.labs.byId(e.data.labId); return { icon: "question", text: `${who}used a hint in ${esc(lab ? lab.title : "a lab")}, level ${e.data.level + 1}` }; }
       case "reflection_reviewed": return { icon: "message", text: `Teacher ${e.data.note ? "replied to" : "read"} ${withName ? esc((SE.store.studentById(e.studentId) || {}).displayName) + "’s" : "a"} reflection` };
-      default: return { icon: "clock", text: esc(e.type) };
+      default: return (SE.moxie && SE.moxie.describe(e, who, title)) || { icon: "clock", text: esc(e.type) };
     }
   }
 

@@ -278,7 +278,9 @@
       { id: `msg_demo_1${sfx}`, classId: cls.id, isDemo: true, createdAt: now - 3 * SE.DAY, body: "Welcome to STEM 207! Start with your assigned missions. When you finish, explore anything you like." },
       { id: `msg_demo_2${sfx}`, classId: cls.id, isDemo: true, createdAt: now - 6 * 3600000, body: "This week we're working on loops and if–else. Tomorrow we'll share our lobster trap flowcharts." }
     ];
-    return { educator, cls, students, events, assignments, messages };
+    // One sample partner team (Moxie partners share capstone work).
+    const teams = [{ id: `team_demo_1${sfx}`, classId: cls.id, studentIds: [students[0].id, students[1].id], isDemo: true, createdAt: now - 7 * SE.DAY }];
+    return { educator, cls, students, events, assignments, messages, teams };
   }
 
   async function ensureDemoHash() {
@@ -297,6 +299,7 @@
     db.events = db.events.filter((e) => !e.isDemo).concat(d.events).sort((a, b) => a.at - b.at);
     db.assignments = (db.assignments || []).filter((x) => !x.isDemo).concat(d.assignments);
     db.messages = (db.messages || []).filter((x) => !x.isDemo).concat(d.messages);
+    db.teams = (db.teams || []).filter((x) => !x.isDemo).concat(d.teams);
   }
 
   function init() {
@@ -318,6 +321,11 @@
       d.assignments.forEach((x) => { const a = db.assignments.find((y) => y.id === x.id); if (a && x.note && a.note === undefined) a.note = x.note; });
       save();
     }
+    if (!db.teams) { // added with Moxie: partner teams, and the sample class's team
+      const d = seedDemo();
+      db.teams = db.classes.some((c) => c.id === d.cls.id) ? d.teams : [];
+      save();
+    }
     return ensureDemoHash();
   }
 
@@ -331,7 +339,8 @@
     student: (r) => ({ id: r.id, classId: r.class_id, displayName: r.display_name, gradeBand: r.grade_band, picCode: r.pic_code, isDemo: r.is_demo, createdAt: ms(r.created_at) }),
     event: (r) => ({ id: r.id, studentId: r.student_id, classId: r.class_id, type: r.type, at: Number(r.at), data: r.data || {}, by: r.by || undefined, isDemo: r.is_demo }),
     assignment: (r) => ({ id: r.id, classId: r.class_id, activityId: r.activity_id, assignedAt: ms(r.assigned_at), dueDate: r.due_date || null, note: r.note || null, isDemo: r.is_demo }),
-    message: (r) => ({ id: r.id, classId: r.class_id, body: r.body, createdAt: ms(r.created_at), isDemo: r.is_demo })
+    message: (r) => ({ id: r.id, classId: r.class_id, body: r.body, createdAt: ms(r.created_at), isDemo: r.is_demo }),
+    team: (r) => ({ id: r.id, classId: r.class_id, studentIds: r.student_ids || [], createdAt: ms(r.created_at), isDemo: r.is_demo })
   };
   const toRow = {
     cls: (c) => ({ id: c.id, educator_id: c.educatorId, name: c.name, code: c.code, is_demo: !!c.isDemo, created_at: iso(c.createdAt) }),
@@ -339,14 +348,15 @@
     event: (e) => ({ id: e.id, student_id: e.studentId, class_id: e.classId, type: e.type, at: e.at, data: e.data || {}, by: e.by || null, is_demo: !!e.isDemo }),
     // note is sent only when set, so assigning still works before supabase/update-3 is run.
     assignment: (a) => ({ id: a.id, class_id: a.classId, activity_id: a.activityId, assigned_at: iso(a.assignedAt), due_date: a.dueDate || null, is_demo: !!a.isDemo, ...(a.note ? { note: a.note } : {}) }),
-    message: (m) => ({ id: m.id, class_id: m.classId, body: m.body, created_at: iso(m.createdAt), is_demo: !!m.isDemo })
+    message: (m) => ({ id: m.id, class_id: m.classId, body: m.body, created_at: iso(m.createdAt), is_demo: !!m.isDemo }),
+    team: (t) => ({ id: t.id, class_id: t.classId, student_ids: t.studentIds, created_at: iso(t.createdAt), is_demo: !!t.isDemo })
   };
-  const emptyDb = () => ({ version: 7, educators: [], classes: [], students: [], events: [], assignments: [], messages: [] });
+  const emptyDb = () => ({ version: 7, educators: [], classes: [], students: [], events: [], assignments: [], messages: [], teams: [] });
   const cloudCode = () => `${CODE_WORDS[Math.floor(Math.random() * CODE_WORDS.length)]}${Math.floor(Math.random() * 900 + 100)}`;
 
   async function loadEducator(user) {
     journey = null;
-    const [eds, classes, students, events, assignments, messages] = await Promise.all([
+    const [eds, classes, students, events, assignments, messages, teams] = await Promise.all([
       SE.cloud.selectAll("educators", `id=eq.${user.id}`),
       SE.cloud.selectAll("classes", "order=created_at.asc"),
       SE.cloud.selectAll("students", "order=created_at.asc"),
@@ -354,7 +364,9 @@
       // Older databases may not have the assignments table yet (run supabase/schema.sql again to add it).
       SE.cloud.selectAll("assignments", "order=assigned_at.asc").catch((e) => { if (e.offline) throw e; console.warn("STEM 207: assignments table missing", e); return []; }),
       // Class messages arrive with supabase/update-3-class-messages.sql; until then there are none.
-      SE.cloud.selectAll("class_messages", "order=created_at.asc").catch((e) => { if (e.offline) throw e; console.warn("STEM 207: class_messages table missing (run supabase/update-3-class-messages.sql)", e); return []; })
+      SE.cloud.selectAll("class_messages", "order=created_at.asc").catch((e) => { if (e.offline) throw e; console.warn("STEM 207: class_messages table missing (run supabase/update-3-class-messages.sql)", e); return []; }),
+      // Partner teams arrive with supabase/update-5-moxie-teams.sql; until then there are none.
+      SE.cloud.selectAll("class_teams", "order=created_at.asc").catch((e) => { if (e.offline) throw e; console.warn("STEM 207: class_teams table missing (run supabase/update-5-moxie-teams.sql)", e); return []; })
     ]);
     if (!eds.length) {
       // The sign-up trigger normally creates this row; make it here if it's missing.
@@ -362,7 +374,16 @@
       await SE.cloud.rest("POST", "/educators", row, "resolution=ignore-duplicates");
       eds.push(row);
     }
-    db = { version: 7, educators: eds.map(fromRow.educator), classes: classes.map(fromRow.cls), students: students.map(fromRow.student), events: events.map(fromRow.event), assignments: assignments.map(fromRow.assignment), messages: messages.map(fromRow.message) };
+    db = { version: 7, educators: eds.map(fromRow.educator), classes: classes.map(fromRow.cls), students: students.map(fromRow.student), events: events.map(fromRow.event), assignments: assignments.map(fromRow.assignment), messages: messages.map(fromRow.message), teams: teams.map(fromRow.team) };
+  }
+  /* A student's partner team and their teammates' shared work, on a student's device in cloud mode
+     (supabase/update-5-moxie-teams.sql). Null until loaded, or if the function isn't there yet. */
+  let teamCache = null;
+  async function loadTeam(token, studentId) {
+    try {
+      const r = await SE.cloud.rpc("team_events", { p_token: token });
+      teamCache = r && r.ok ? { studentId, team: r.team || null, events: (r.events || []).map((e) => ({ ...e, at: Number(e.at), data: e.data || {} })) } : null;
+    } catch (e) { teamCache = null; if (!e.offline) console.warn("STEM 207: partner work unavailable (run supabase/update-5-moxie-teams.sql)", e); }
   }
   /* Class journey totals for a student's device in cloud mode (supabase/update-4-class-journey.sql).
      Counts only; null until loaded, or if the function isn't there yet (then the app counts what it has). */
@@ -440,7 +461,7 @@
         const st = await SE.cloud.rpc("student_state", { p_token: s.token });
         if (!st || !st.ok) { writeSession(null); return; }
         loadStudentState(st);
-        await loadJourney(s.token, st.class.id);
+        await Promise.all([loadJourney(s.token, st.class.id), loadTeam(s.token, st.student.id)]);
       }
     } catch (e) {
       if (e.status === 401 || e.status === 400) { writeSession(null); SE.cloud.forgetAuth(); }
@@ -462,6 +483,7 @@
       .catch(() => SE.cloud.rest("POST", "/assignments", d.assignments.map((a) => toRow.assignment({ ...a, note: null })), "return=minimal")) // before update-3
       .catch((e) => console.warn("STEM 207: couldn't add sample assignments", e));
     if (d.messages.length) await SE.cloud.rest("POST", "/class_messages", d.messages.map(toRow.message), "return=minimal").catch((e) => console.warn("STEM 207: couldn't add sample messages (run supabase/update-3-class-messages.sql)", e));
+    if (d.teams.length) await SE.cloud.rest("POST", "/class_teams", d.teams.map(toRow.team), "return=minimal").catch((e) => console.warn("STEM 207: couldn't add the sample team (run supabase/update-5-moxie-teams.sql)", e));
     const a = SE.cloud.auth();
     await loadEducator(a.user);
     return d.cls;
@@ -477,8 +499,17 @@
     return { field: "email", error: e.message || "Something went wrong. Try again." };
   };
 
+  /* Draft Moxie sessions can't be assigned; pilot and published ones can (see assets/js/data/moxie.js). */
+  const assignable = (a) => !!a && (!a.pub || a.pub === "pilot" || a.pub === "published");
+
+  /* Work that Moxie partners share (one copy, read by both). Keep this list the same as
+     team_events in supabase/update-5-moxie-teams.sql. Reflections and explanations stay individual. */
+  const TEAM_TYPES = ["moxie_design", "moxie_codecheck", "moxie_buglog", "moxie_test", "moxie_feedback_got", "moxie_improve", "moxie_card"];
+
   /* ───────── Public API ───────── */
   SE.store = {
+    TEAM_TYPES,
+    assignable,
     DEMO,
     mode: CLOUD ? "cloud" : "local",
     ready: null,
@@ -497,6 +528,7 @@
         if (s && s.role === "educator") await SE.cloud.signOut();
         db = emptyDb();
         journey = null;
+        teamCache = null;
       }
       writeSession(null);
     },
@@ -590,7 +622,7 @@
     assign(classId, activityIds, opts = {}) {
       const added = [];
       [].concat(activityIds).forEach((activityId, i) => {
-        if (SE.store.assignmentFor(classId, activityId) || !SE.activityById[activityId]) return;
+        if (SE.store.assignmentFor(classId, activityId) || !assignable(SE.activityById[activityId])) return;
         const a = { id: SE.uid("asg"), classId, activityId, assignedAt: Date.now() + i, dueDate: opts.dueDate || null };
         db.assignments.push(a);
         added.push(a);
@@ -675,6 +707,8 @@
       return s.picCode;
     },
     removeStudent(id) {
+      const team = (db.teams || []).find((t) => t.studentIds.includes(id));
+      if (team) SE.store.saveTeam(team.classId, team.studentIds.filter((x) => x !== id)).ok || SE.store.deleteTeam(team.id);
       db.students = db.students.filter((s) => s.id !== id);
       db.events = db.events.filter((e) => e.studentId !== id);
       if (CLOUD) send(restOp("DELETE", `/students?id=eq.${encodeURIComponent(id)}`, undefined, "return=minimal")); else save();
@@ -689,7 +723,7 @@
           return { ok: false, error: msg || "Those pictures don't match. Try again, or ask your teacher for your login card." };
         }
         loadStudentState(r);
-        await loadJourney(r.token, r.class.id);
+        await Promise.all([loadJourney(r.token, r.class.id), loadTeam(r.token, r.student.id)]);
         writeSession({ role: "student", id: r.student.id, token: r.token, cloud: true });
         SE.store.log("signed_in");
         return { ok: true, student: db.students[0] };
@@ -733,6 +767,57 @@
     },
     eventsFor: (studentId) => db.events.filter((e) => e.studentId === studentId),
     eventsForClass: (classId) => db.events.filter((e) => e.classId === classId),
+
+    /* Partner teams (Moxie). A student is in at most one team per class. */
+    teamsFor: (classId) => (db.teams || []).filter((t) => t.classId === classId),
+    teamOf(studentId) {
+      if (teamCache && teamCache.studentId === studentId) return teamCache.team ? { id: teamCache.team.id, studentIds: teamCache.team.members.map((m) => m.id) } : null;
+      return (db.teams || []).find((t) => t.studentIds.includes(studentId)) || null;
+    },
+    /* Display names of a student's teammates (not the student). */
+    teammates(studentId) {
+      if (teamCache && teamCache.studentId === studentId) return teamCache.team ? teamCache.team.members.filter((m) => m.id !== studentId) : [];
+      const t = SE.store.teamOf(studentId);
+      return t ? t.studentIds.filter((id) => id !== studentId).map((id) => ({ id, displayName: (SE.store.studentById(id) || {}).displayName || "Partner" })) : [];
+    },
+    /* Teammates' shared work (TEAM_TYPES only), oldest first. */
+    teamEvents(studentId) {
+      if (teamCache && teamCache.studentId === studentId) return teamCache.events.slice();
+      const t = SE.store.teamOf(studentId);
+      if (!t) return [];
+      return db.events.filter((e) => e.studentId !== studentId && t.studentIds.includes(e.studentId) && TEAM_TYPES.includes(e.type));
+    },
+    /* Reload partner work on a student's cloud device; resolves right away elsewhere. */
+    async refreshTeam() {
+      const s = readSession();
+      if (CLOUD && s && s.role === "student") await loadTeam(s.token, s.id);
+    },
+    saveTeam(classId, studentIds) {
+      const ids = [...new Set(studentIds)].filter((id) => db.students.some((s) => s.id === id && s.classId === classId));
+      if (ids.length < 2) return { ok: false, error: "Pick at least two different students." };
+      // Students leave any team they were in; a team left with one student is removed.
+      SE.store.teamsFor(classId).forEach((t) => {
+        const rest = t.studentIds.filter((id) => !ids.includes(id));
+        if (rest.length === t.studentIds.length) return;
+        if (rest.length < 2) return SE.store.deleteTeam(t.id);
+        t.studentIds = rest;
+        if (CLOUD) send(restOp("PATCH", `/class_teams?id=eq.${encodeURIComponent(t.id)}`, { student_ids: rest }, "return=minimal"));
+      });
+      const team = { id: SE.uid("team"), classId, studentIds: ids, createdAt: Date.now() };
+      db.teams = db.teams || [];
+      db.teams.push(team);
+      if (CLOUD) send(restOp("POST", "/class_teams", toRow.team(team), "return=minimal", async () => {
+        db.teams = db.teams.filter((x) => x.id !== team.id);
+        SE.toast && SE.toast("Couldn't save that team. Ask your admin to run supabase/update-5-moxie-teams.sql.");
+        return true;
+      }));
+      else save();
+      return { ok: true, team };
+    },
+    deleteTeam(id) {
+      db.teams = (db.teams || []).filter((t) => t.id !== id);
+      if (CLOUD) send(restOp("DELETE", `/class_teams?id=eq.${encodeURIComponent(id)}`, undefined, "return=minimal")); else save();
+    },
 
     /* Demo: in local mode, restores the built-in sample class. In cloud mode, adds a
        fresh sample class to the signed-in educator's account (replacing an older one). */

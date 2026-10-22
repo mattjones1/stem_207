@@ -145,7 +145,10 @@ async def visit(pg, h):
 PUBLIC = ["#/signin", "#/signin/student", "#/signin/educator", "#/signup"]
 STUDENT = ["#/", "#/library", "#/explore", "#/pathway", "#/base", "#/me", "#/activity/fix-the-recipe", "#/activity/noreaster-alerts",
            "#/activity/python-turtle-bridge", "#/lab/pattern-machine/5", "#/lab/pattern-machine/6", "#/lab/robot-chef/4", "#/lab/rover/1", "#/lab/dance-party/1", "#/ai-route"]
-TEACHER = ["#/teach", "#/teach/missions", "#/teach/missions/pathway", "#/teach/pathway", "#/teach/reflections", "#/teach/class", "#/pathway/student"]
+TEACHER = ["#/teach", "#/teach/missions", "#/teach/missions/pathway", "#/teach/pathway", "#/teach/reflections", "#/teach/class", "#/pathway/student",
+           "#/moxie", "#/moxie/teach", "#/activity/moxie-03", "#/activity/moxie-13", "#/activity/moxie-16"]
+# Moxie sessions are drafts, so students only see them here by publishing them in memory for the audit.
+STUDENT_MOXIE = ["#/moxie", "#/activity/moxie-03", "#/activity/moxie-11", "#/activity/moxie-13", "#/activity/moxie-14", "#/activity/moxie-15", "#/activity/moxie-16"]
 
 async def main():
   async with async_playwright() as p:
@@ -158,6 +161,9 @@ async def main():
         for h in PUBLIC: await visit(pg, h); await audit(pg, h, F)
         await sign_student(pg)
         for h in STUDENT: await visit(pg, h); await audit(pg, h, F)
+        await pg.evaluate("STEM.moxieSessions.forEach((s) => { s.pub = 'published'; })")
+        for h in STUDENT_MOXIE: await visit(pg, h); await audit(pg, h, F)
+        await pg.evaluate("STEM.moxieSessions.forEach((s) => { s.pub = 'draft'; })")
         await pg.evaluate("SE.certificate.open({award:'Responsible AI Explorer',course:'Pattern Machine Lab',detail:'Passed with 8 of 10',name:'Ava R.',className:'Room 12'})"); await pg.wait_for_timeout(200)
         await audit(pg, "certificate", F); await pg.keyboard.press("Escape")
         await sign_teacher(pg)

@@ -11,7 +11,8 @@
   SE.areaById = Object.fromEntries(STEM.areas.map((a) => [a.id, a]));
   SE.levelById = Object.fromEntries(STEM.levels.map((l) => [l.id, l]));
   SE.gradeById = Object.fromEntries(STEM.gradeBands.map((g) => [g.id, g]));
-  SE.activityById = Object.fromEntries(STEM.activities.map((a) => [a.id, a]));
+  // Moxie sessions are looked up by id in every publication state; only published ones are in STEM.activities.
+  SE.activityById = Object.fromEntries(STEM.activities.concat(STEM.moxieSessions || []).map((a) => [a.id, a]));
   SE.levelOrder = Object.fromEntries(STEM.levels.map((l, i) => [l.id, i]));
   SE.patchById = Object.fromEntries(STEM.progression.patches.map((p) => [p.id, p]));
   SE.pictureById = Object.fromEntries(STEM.progression.pictures.map((p) => [p.id, p]));

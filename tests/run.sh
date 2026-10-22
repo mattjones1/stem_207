@@ -45,7 +45,7 @@ trap cleanup EXIT
 
 LABS=(tests/labs/test_*.py)
 SITE=(tests/site/test_*.py)
-CLOUD_TESTS=" test_evidence.py test_batch9.py test_batch10.py "
+CLOUD_TESTS=" test_evidence.py test_batch9.py test_batch10.py test_moxie.py "
 mode=${1:-quick}
 case "$mode" in
   quick) files=(tests/labs/test_dance_party.py tests/site/test_today_pilot.py tests/site/test_batch10.py); cloud=0 ;;

@@ -474,6 +474,13 @@
             <a class="btn btn--primary btn--small" href="#/pathway">Open the coding pathway ${icon("arrowRight")}</a>
           </div>
         </section>` : ""}
+      ${id === "engineering" && SE.moxie.pathwayVisible(user) ? `
+        <section class="wrap section">
+          <div class="notice notice--row">
+            <p><strong>Moxie: ${esc(STEM.moxie.tagline)}</strong> A 16-session pathway that ends with a device you build for someone.${STEM.moxie.pub === "published" ? "" : ` <span class="muted">(${esc(SE.moxie.PUB[STEM.moxie.pub])}: only educators see this.)</span>`}</p>
+            <a class="btn btn--primary btn--small" href="#/moxie">Open Moxie ${icon("arrowRight")}</a>
+          </div>
+        </section>` : ""}
       <section class="wrap section" aria-labelledby="area-acts">
         <div class="section__head">
           <div><span class="eyebrow">Choose your next adventure</span><h2 id="area-acts">${plural(list.length, "mission", "missions")}</h2></div>
@@ -627,6 +634,7 @@
   SE.views.activity = function (user, id) {
     const a = SE.activityById[id];
     if (!a) return SE.views.notFound();
+    if (a.moxie) return SE.views.moxieSession(user, a);   // Moxie sessions have their own layout (views-moxie.js)
     const area = SE.areaById[a.area];
     const stage = a.pathwayStage ? pathway.find((s) => s.stage === a.pathwayStage) : null;
     const isStudent = user && user.role === "student";

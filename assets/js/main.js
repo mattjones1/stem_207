@@ -123,6 +123,11 @@
       title = `${lab ? lab.title : "Lab"} · STEM 207`;
     }
     else if (a === "ai-route") { SE.views.aiRoute(user); navKey = "library"; title = "AI learning route · STEM 207"; }
+    else if (a === "moxie" && !b) { SE.views.moxie(user); navKey = "library"; title = "Moxie · STEM 207"; }
+    else if (a === "moxie" && b === "teach") {
+      if (user.role !== "educator") { location.replace("#/signin/educator"); return; }
+      SE.views.moxieTeach(user); navKey = "teach"; title = "Teach Moxie · STEM 207";
+    }
     else if (a === "pathway") {
       // Educators get their own pathway (in sync with the student one); #/pathway/student previews the student view.
       if (user.role === "educator" && b !== "student") { location.replace("#/teach/pathway"); return; }
