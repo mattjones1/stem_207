@@ -93,6 +93,7 @@
     const labOf = (a) => a.launch.status === "lab" && SE.labs.byId(a.launch.labId);
     const waiting = Object.values(SE.activityById).filter((a) => SE.game.statusFor(prof, a).state === "submitted").length;
     const messages = user.classId ? SE.store.messagesFor(user.classId) : [];
+    const note = prof.notes.find((e) => Date.now() - e.at < 14 * SE.DAY);
     const first = user.displayName.split(" ")[0];
     const msg = (m) => `<li><p>${esc(m.body)}</p><small>${SE.timeAgo(m.createdAt)}</small></li>`;
 
@@ -141,10 +142,11 @@
       <div class="wrap home">
         ${card}
         ${waiting ? `<p class="home-line home-waiting">${icon("clock")}<span><strong>Waiting for your teacher:</strong> ${waiting}</span> <a href="#/me#log-title">See what you sent</a></p>` : ""}
-        ${messages.length ? `
+        ${messages.length || note ? `
         <section class="home-msg" aria-labelledby="msg-title">
           <h2 id="msg-title">${icon("message")}From your teacher</h2>
-          <ul class="home-msg__list">${msg(messages[0])}</ul>
+          ${note ? `<div class="home-note"><span class="home-note__tag">${icon("star")}Just for you</span><p>${esc(note.data.note)}</p><small>${SE.timeAgo(note.at)}</small></div>` : ""}
+          ${messages.length ? `<ul class="home-msg__list">${msg(messages[0])}</ul>` : ""}
           ${messages.length > 1 ? `<details class="home-msg__more"><summary>Older messages (${messages.length - 1})</summary><ul class="home-msg__list">${messages.slice(1).map(msg).join("")}</ul></details>` : ""}
         </section>` : ""}
         ${user.classId ? SE.classJourneyLine(SE.game.classJourney(user.classId)) : ""}
@@ -417,6 +419,12 @@
 
       ${SE.views.creationsGallery(prof) ? `<section class="section wrap" aria-labelledby="gal-title"><div class="section__head"><div><span class="eyebrow">Gallery</span><h2 id="gal-title">My creations</h2></div></div>${SE.views.creationsGallery(prof)}</section>` : ""}
       ${SE.labsStrip(user, null, "My labs")}
+
+      ${prof.notes.length ? `
+      <section class="section wrap" aria-labelledby="notes-title">
+        <div class="section__head"><div><span class="eyebrow">Just for you</span><h2 id="notes-title">Notes from your teacher</h2></div></div>
+        <ul class="home-msg__list notes-list">${prof.notes.map((e) => `<li><p>${esc(e.data.note)}</p><small>${SE.dateShort(e.at)}</small></li>`).join("")}</ul>
+      </section>` : ""}
 
       <section class="section wrap" aria-labelledby="log-title">
         <div class="section__head"><div><span class="eyebrow">Activity log</span><h2 id="log-title" tabindex="-1">${log.length ? "Everything you've sent" : "Your log is empty, for now"}</h2></div></div>

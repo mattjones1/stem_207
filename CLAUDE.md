@@ -150,6 +150,17 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - The Phase 4 step-evidence events (`pathway_*`) stay in the log but aren't shown or counted.
 - Test: `python3 tests/site/test_plans.py`.
 
+## Educator QA round: modal, à la carte plans, workshops, dashboard, notes
+- **Shared modal** (`SE.modal.open({ title, body, wide, onOpen(dlg), onClose })`, `SE.modal.close()` in `core.js`): a native `<dialog>` with a Dark Teal header. Esc, Close, or a backdrop click closes it, and focus returns to the opener. The router closes it on navigation. Use it only for quick tasks; full work stays on pages. Styles: `.modal`.
+- **Quick tasks** (`views-teacher.js`, delegated clicks, any page): `data-add-students="<classId>"`, `data-message-class="<classId or empty>"`, `data-note-student="<studentId>"`. Also `SE.teachQuick.addStudents / message / note`.
+  - **Add students:** paste names, one per line, with a live check (`SE.roster.checkNames(text, existing)` → `[{ name, ok, reason }]`: email/number, too long (24), already in class, listed twice). One grade band for the batch. Afterward it shows the new login cards with Print these cards (`body.modal-printing`). The inline add form is gone.
+  - **Send a note:** `teacher_note { note }` (up to 200 characters) via `SE.store.teacherLog`. The student sees the newest one from the last 14 days on Home as **Just for you** (`.home-note`); all notes are on Me (`.notes-list`); `prof.notes` is newest first. No other student sees it. No SQL needed.
+- **Dashboard** (`SE.views.teach`): a greeting band (`.dash-hello`), palette KPI tiles (`.kpi--green` Checks, `.kpi--teal` Classes, `.kpi--blue` plans; `--brand-blue` only for borders and icons), class cards with Add students and Message, and a side column with **Recent activity** (last 8 sent, passed, try again, help, and note events) and Needs a check-in with a Note button.
+- **À la carte picker** in the plan editor: category tabs (`.pk-tab`, `data-pick-area`, `aria-pressed`, 3D Printing a disabled Coming soon tab) list **every** activity in the category. Search (`#pw-q`) looks across every category; grade (`#pw-fgrade`) and time (`#pw-ftime`) filter. "Your mix" (`#pw-mix`) counts activities per category. The plan list offers **Build your own** and **Start from a template**.
+- **Workshops:** templates with `group: "workshop"`, `workshop: { format, sessions: [{ title, steps: [step numbers] }] }`, and `future: [text]` (content not ready yet; text only, never a step): `tpl-ws-sampler` (Maine Tech Sampler), `tpl-ws-robots` (Robots & Smart Machines), `tpl-ws-katahdin` (Coast to Katahdin Explorers). All `reviewed: false`. Copies keep `basedOn`, so a copied plan's page still shows the workshop format.
+- 2.0 depth analysis: `planning/STEM207_2.0_Analysis.md`.
+- Test: `python3 tests/site/test_educator_qa.py`.
+
 ## Classes and the Dashboard (usability Stage 3)
 - `#/teach` (`SE.views.teach`) is the **Dashboard** for every class: quick actions, Checks waiting, your classes, current Learning Plans with progress (`planProgress`), and "Needs a check-in" (`attentionFor`). There's no per-class dropdown and no 14-day chart.
 - `#/teach/classes` (`teachClasses`): class cards, Add a class, and Archived with Restore.

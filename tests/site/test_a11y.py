@@ -175,6 +175,13 @@ async def main():
         # Plan pages after assigning, then the student's plan page.
         aid = await pg.evaluate(f"(() => {{ SE.store.publishPathway('{pw}'); const c = SE.store.classesFor(SE.store.currentUser().id)[0]; return SE.store.assignPathway(c.id, '{pw}').id; }})()")
         for h in [f"#/teach/plans/{pw}", f"#/teach/plans/{pw}/students", f"#/teach/plans/{pw}/checks"]: await visit(pg, h); await audit(pg, h, F)
+        await visit(pg, "#/teach/plans/tpl-ws-sampler"); await audit(pg, "workshop template", F)
+        # The shared modal, open: Add students (with a checked list), Message a class, and Send a note.
+        await visit(pg, f"#/teach/classes/{cid}"); await pg.locator("[data-add-students]").first.click(); await pg.wait_for_timeout(250)
+        await pg.fill("#ms-names", "Sam P.\nava r.\nx@y.org"); await pg.wait_for_timeout(150); await audit(pg, "modal: add students", F)
+        await pg.click("#ms-add"); await pg.wait_for_timeout(300); await audit(pg, "modal: added cards", F); await pg.keyboard.press("Escape"); await pg.wait_for_timeout(300)
+        await visit(pg, "#/teach"); await pg.locator(".dash-actions [data-message-class]").click(); await pg.wait_for_timeout(250); await audit(pg, "modal: message", F); await pg.keyboard.press("Escape")
+        await visit(pg, f"#/teach/student/{sid}"); await pg.click("[data-note-student]"); await pg.wait_for_timeout(250); await audit(pg, "modal: note", F); await pg.keyboard.press("Escape")
         await pg.evaluate("SE.store.signOut()"); await pg.wait_for_timeout(200); await sign_student(pg)
         await visit(pg, f"#/plans/{aid}"); await audit(pg, "my plan", F)
         await ctx.close()

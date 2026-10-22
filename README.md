@@ -47,8 +47,14 @@ Each activity shows one status per student, in words: *Not started*, *In progres
 
 A **Learning Plan** is an ordered set of activities from any category, assigned to a whole class. Educators find them under **Learning Plans** (`#/teach/plans`), with a **Current / Finished** toggle, drafts, and templates.
 
-- **Start from a template, or from scratch.** The templates are in `assets/js/data/templates.js`: Maine Coast Explorers, How Machines Make Decisions, From Instructions to Invention, AI Learning Route (proposed, review before teaching), and Coding Foundations (built from the seven coding stages). "Use this template" makes the educator's own copy; the template never changes.
-- **Edit** the title, goal, grades, and the activities. Each activity is required or optional and can have a note to students. Reorder with Move up and Move down (keyboard) or by dragging, and add activities by search or category. Changes save automatically.
+- **Build your own, à la carte.** Pick activities from any category: category tabs list every activity in that category (3D Printing shows as coming soon), with grade and time filters and a search across every category. "Your mix" shows how many activities come from each category, for example one Coding, one Virtual Reality, and one AI.
+- **Or start from a template** (`assets/js/data/templates.js`). "Use this template" makes the educator's own copy; the template never changes.
+  - **STEM 207 workshops** (proposed, review before teaching), each with a workshop format, sessions, and content that's coming later:
+    - **Maine Tech Sampler**: grades 4–5, a half day, one activity from each category.
+    - **Robots & Smart Machines**: grades 4–8, two 90-minute sessions, from rules to learning machines. Moxie comes later.
+    - **Coast to Katahdin Explorers**: grades 2–5, four 45-minute sessions. 3D Printing comes later.
+  - **Classroom templates:** Maine Coast Explorers, How Machines Make Decisions, From Instructions to Invention, AI Learning Route (proposed), and Coding Foundations (the seven coding stages).
+- **Edit** the title, goal, grades, and the activities. Each activity is required or optional and can have a note to students. Reorder with Move up and Move down (keyboard) or by dragging. Changes save automatically.
 - **At a glance**: student time (optional activities listed separately), teacher prep or "not recorded", categories, equipment, and advice on grade fit, accounts, cost, supervision, full labs, multi-session activities, and coding-stage order.
 - **Assign to a class.** Every student in the class sees it. A required activity must be published and have a resource; one with no resource can only be optional.
 - **Update for students** appears after you edit an assigned plan, and sends the changes to every class that has it. Underneath, each class stays on the version it was given until you update.
@@ -132,7 +138,7 @@ Top menu: **Home · My Learning Plans · Activities · My harbor**.
   - a greeting with their rank;
   - one **Up next** card: a Try again first, then the next activity in a current Learning Plan, then an older single assignment, then their own work in progress or a suggestion. It has a big Start or Continue button and an **I need help** button that tells the teacher;
   - one line for what's waiting for the teacher;
-  - the newest message from the teacher (older ones fold away);
+  - the newest message from the teacher (older ones fold away), and a private note marked **Just for you** when the teacher sends one;
   - one line for the class journey;
   - two buttons: **My Learning Plans** and **Explore activities**.
 - **My Learning Plans** (`#/plans`) with a **Current / All** toggle. Each plan shows its goal, "3 of 6 passed", and the next activity. A plan page (`#/plans/<id>`) lists its activities in order, each with its status, the teacher's note, and a Start, Continue, or Try again button.
@@ -147,16 +153,17 @@ Top menu: **Home · My Learning Plans · Activities · My harbor**.
 
 Top menu: **Dashboard · Learning Plans · Activities · Classes · Checks**.
 
-- **Dashboard** (`#/teach`) across all classes: checks waiting, your classes, current Learning Plans with class progress, a "needs a check-in" list, and quick actions (New Learning Plan, Add a class).
+- **Dashboard** (`#/teach`) across all classes: a greeting, checks waiting, your classes (each with Add students and Message), current Learning Plans with class progress, a **Recent activity** feed (sent, passed, try again, help, notes), a "needs a check-in" list with a **Note** button, and quick actions (New Learning Plan, Message a class, Add a class).
+- **Quick tasks open in one shared dialog:** **Add students** (paste names one per line; each is checked for privacy and duplicates, then the new login cards are ready to print), **Message a class**, and **Send a note** to one student.
 - **Learning Plans** (`#/teach/plans`): see above.
 - **Activities** (`#/activities`): every activity by category, with **Add to a Learning Plan** on each activity page.
 - **Classes** (`#/teach/classes`): a card per class with Add a class, and Archived classes with Restore. A class page has rename, archive, and delete (type the class name to confirm, since it removes the students and their work), the roster, Learning Plans, the class journey, labs, **messages** to the class, adding students, sign-in steps, printable login cards, and a live activity log.
 - **Checks** (`#/teach/checks`): one queue of every sent reflection across classes, with Pass and Try again, and "Show what you checked in the last 2 weeks".
-- **Student detail**: rank, XP, patches, every activity with its status and reflections, and a full activity timeline.
+- **Student detail**: rank, XP, patches, every activity with its status and reflections, a full activity timeline, and **Send a note**.
 
 ### What gets recorded
 
-Each student action is saved as an event: signed in, opened an activity, checked a step, launched a resource, sent a reflection (`mission_completed`, with the answer and confidence), asked for help. Teacher actions are also events: passed (`teacher_confirmed`) or try again (`teacher_try_again`). XP, ranks, and patches are calculated from the events using the rules in `assets/js/data/progression.js`, so changing a rule updates everyone.
+Each student action is saved as an event: signed in, opened an activity, checked a step, launched a resource, sent a reflection (`mission_completed`, with the answer and confidence), asked for help. Teacher actions are also events: passed (`teacher_confirmed`), try again (`teacher_try_again`), or a private note (`teacher_note`). XP, ranks, and patches are calculated from the events using the rules in `assets/js/data/progression.js`, so changing a rule updates everyone.
 
 ## Back end (Supabase, free)
 

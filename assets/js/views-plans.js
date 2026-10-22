@@ -192,6 +192,7 @@
           <h3><a href="#/teach/plans/${p.id}">${esc(p.title)}</a></h3>
           <p class="pw-card__meta">${isTpl ? `<span class="chip chip--ok">${p.reviewed ? "Reviewed template" : "Proposed: review before teaching"}</span>` : statusChip(p)}${!isTpl && SE.store.planStatus(p) === "current" && unpublished(p) ? ` <span class="chip chip--warn">Changes not sent to students</span>` : ""}</p>
           <p>${esc(p.goal || "No goal yet")}</p>
+          ${isTpl && p.workshop ? `<p class="small pw-card__ws">${icon("clock")}${esc(p.workshop.format)}</p>` : ""}
           <p class="muted small">${plural(stepsOf(p).length, "activity", "activities")} · ${plural(t.areas.length, "category", "categories")} · ${timeText(t.min, t.max)}${names.length ? ` · ${esc(names.join(", "))}` : ""}</p>
           <div class="pw-card__actions">
             ${isTpl ? `<a class="btn btn--ghost btn--small" href="#/teach/plans/${p.id}">${icon("eye")}Preview<span class="visually-hidden"> ${esc(p.title)}</span></a>
@@ -209,8 +210,12 @@
       <section class="wrap section">
         <div class="section__head">
           <div><span class="eyebrow">Activities in order, for a whole class</span><h2>Your Learning Plans</h2></div>
-          <a class="btn btn--primary" href="#/teach/plans/new">${icon("plus")}New Learning Plan</a>
+          <div class="pw-actions">
+            <a class="btn btn--primary" href="#/teach/plans/new">${icon("plus")}Build your own</a>
+            <a class="btn btn--ghost" href="#pw-tpl" data-jump="pw-tpl">${icon("list")}Start from a template</a>
+          </div>
         </div>
+        <p class="muted">Build your own: pick activities from any category, for example one coding, one VR, and one AI activity.</p>
         <div class="seg" role="group" aria-label="Show">
           <button type="button" class="seg__btn" data-mode="current" aria-pressed="${listMode === "current"}">Current and drafts</button>
           <button type="button" class="seg__btn" data-mode="finished" aria-pressed="${listMode === "finished"}">Finished (${finished.length})</button>
@@ -221,9 +226,12 @@
         ? section("plans-current", "Current", current, "No plan is assigned to a class yet.") + section("plans-drafts", "Drafts", drafts, "No drafts. Start a new plan, or use a template below.")
         : section("plans-finished", "Finished", finished, "No finished plans yet. Finish a plan when the class is done with it.")}
       <section class="wrap section" aria-labelledby="pw-tpl">
-        <div class="section__head"><div><span class="eyebrow">Ready to adapt</span><h2 id="pw-tpl">Templates</h2></div>
+        <div class="section__head"><div><span class="eyebrow">Ready to adapt</span><h2 id="pw-tpl" tabindex="-1">Templates</h2></div>
           <p>Using a template makes your own copy. The template never changes.</p></div>
-        <ul class="pw-cards">${(STEM.pathwayTemplates || []).map((t) => card(t, true)).join("")}</ul>
+        <h3 class="pw-group-h">${icon("star")}STEM 207 workshops</h3>
+        <ul class="pw-cards">${(STEM.pathwayTemplates || []).filter((t) => t.group === "workshop").map((t) => card(t, true)).join("")}</ul>
+        <h3 class="pw-group-h">${icon("list")}Classroom templates</h3>
+        <ul class="pw-cards">${(STEM.pathwayTemplates || []).filter((t) => t.group !== "workshop").map((t) => card(t, true)).join("")}</ul>
       </section>`);
     app().querySelectorAll("[data-mode]").forEach((b) => b.addEventListener("click", () => { listMode = b.dataset.mode; rerender(`[data-mode="${listMode}"]`); }));
     app().querySelectorAll("[data-migrate]").forEach((b) => b.addEventListener("click", () => {
@@ -259,6 +267,18 @@
     }));
   }
 
+  /* A workshop's format and sessions, and content that's coming later (text only). */
+  function workshopBoxes(t, steps) {
+    if (!t) return "";
+    const ws = t.workshop;
+    return (ws ? `
+      <div class="block pw-ws"><h2>${icon("clock")}Workshop format</h2><p><strong>${esc(ws.format)}</strong></p>
+        ${steps ? `<ol class="pw-ws__sessions">${ws.sessions.map((x) => `<li><strong>${esc(x.title)}</strong><span>${x.steps.map((n) => steps[n - 1] && actOf(steps[n - 1])).filter(Boolean).map((a) => esc(a.title)).join(", ")}</span></li>`).join("")}</ol>` : ""}</div>` : "")
+      + (t.future && t.future.length ? `
+      <div class="block pw-future"><h2>${icon("rocket")}Coming with future content</h2><ul>${t.future.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+        <p class="muted small">Not part of the plan yet. It's added when that content is ready.</p></div>` : "");
+  }
+
   function templateView(user, t) {
     page(user, "plans", `
       <section class="wrap section">
@@ -277,6 +297,7 @@
         </div>
         <aside class="aside" aria-label="Plan at a glance">
           <div class="block"><h2>At a glance</h2>${totalsBox(t)}</div>
+          ${workshopBoxes(t, stepsOf(t))}
           ${listBox("pw-box--warn", "Check before teaching", warnings(t), "alert")}
         </aside>
       </div>`, "Learning Plans");
@@ -306,6 +327,7 @@
         </div>
         <aside class="aside" aria-label="Plan at a glance">
           <div class="block"><h2>At a glance</h2>${totalsBox(p)}</div>
+          ${workshopBoxes(template(p.basedOn), null)}
           ${listBox("pw-box--warn", "Check before teaching", warnings(p), "alert")}
         </aside>
       </div>`;
@@ -381,6 +403,7 @@
 
   /* ───────── Editor: title, goal, grades, and the activities ───────── */
   let ed = null;        // { id, steps }
+  const pick = { area: "coding" };   // the picker's category
   let saveTimer = null, pendingSave = null;
 
   function editView(user, p) {
@@ -411,13 +434,21 @@
             <div id="pw-steps"></div>
             <p class="visually-hidden" id="pw-live" aria-live="polite"></p>
           </section>
-          <section class="block" aria-labelledby="pw-add-h">
-            <h2 id="pw-add-h">${icon("search")}Add activities from any category</h2>
-            <div class="pw-search">
-              <div class="form__field"><label for="pw-q">Search activities</label><input id="pw-q" class="input" type="search" placeholder="Title or keyword"></div>
-              <div class="form__field"><label for="pw-area">Category</label><select id="pw-area" class="input"><option value="">All categories</option>${SE.liveAreas.map((a) => `<option value="${a.id}">${esc(a.name)}</option>`).join("")}</select></div>
+          <section class="block pk" aria-labelledby="pw-add-h" id="pw-add">
+            <h2 id="pw-add-h">${icon("plus")}Add activities from any category</h2>
+            <p class="muted">Mix and match. For example, one coding, one virtual reality, and one AI activity.</p>
+            <div class="pk-tabs" role="group" aria-label="Category">
+              ${STEM.areas.map((ar) => ar.status === "coming-soon"
+                ? `<button type="button" class="pk-tab is-soon" aria-disabled="true">${icon(ar.icon)}<span>${esc(ar.short)}<small>Coming soon</small></span></button>`
+                : `<button type="button" class="pk-tab" data-pick-area="${ar.id}" aria-pressed="${pick.area === ar.id}">${icon(ar.icon)}<span>${esc(ar.short)}<small>${STEM.activities.filter((a) => a.area === ar.id).length} activities</small></span></button>`).join("")}
             </div>
-            <ul class="pw-results" id="pw-results"></ul>
+            <div class="pw-search pk-filters">
+              <div class="form__field"><label for="pw-q">Search every category</label><input id="pw-q" class="input" type="search" placeholder="Title or keyword"></div>
+              <div class="form__field"><label for="pw-fgrade">Grades</label><select id="pw-fgrade" class="input"><option value="">Any grade</option>${STEM.gradeBands.map((g) => `<option value="${g.id}">${esc(g.name)}</option>`).join("")}</select></div>
+              <div class="form__field"><label for="pw-ftime">Time</label><select id="pw-ftime" class="input"><option value="">Any length</option>${STEM.durations.map((d) => `<option value="${d.max}">${esc(d.name)}</option>`).join("")}</select></div>
+            </div>
+            <p class="pk-count muted small" id="pw-count" role="status"></p>
+            <ul class="pk-results" id="pw-results"></ul>
           </section>
         </div>
         <aside class="aside" aria-label="Preview">
@@ -454,8 +485,8 @@
   function renderSteps(focusSel) {
     const box = document.getElementById("pw-steps");
     if (!box) return;
-    box.innerHTML = ed.steps.length ? `<ol class="pw-edit-steps">${ed.steps.map((s, i) => stepEditor(s, i, ed.steps.length)).join("")}</ol>`
-      : `<p class="muted">No activities yet. Add some below.</p>`;
+    box.innerHTML = ed.steps.length ? `${mixStrip()}<ol class="pw-edit-steps">${ed.steps.map((s, i) => stepEditor(s, i, ed.steps.length)).join("")}</ol>`
+      : `<p class="muted">No activities yet. Pick from any category below.</p>`;
     renderPreview();
     const el = [].concat(focusSel || []).map((sel) => document.querySelector(sel)).find((x) => x && !x.disabled);
     if (el) el.focus();
@@ -470,18 +501,33 @@
     const p = { ...SE.store.pathwayById(ed.id), ...readForm(), steps: ed.steps };
     box.innerHTML = `${totalsBox(p)}${listBox("pw-box--block", "Before you can assign it", blockers(p), "alert")}${listBox("pw-box--warn", "Check before teaching", warnings(p), "alert")}`;
   }
+  /* The picker: one category at a time (every activity in it), or a search across every category. */
+  function pickList() {
+    const v = (id) => (document.getElementById(id) || {}).value || "";
+    const q = v("pw-q").trim().toLowerCase(), grade = v("pw-fgrade"), time = Number(v("pw-ftime")) || 0;
+    return SE.sortActivities(STEM.activities.filter((a) => (q ? `${a.title} ${a.summary} ${(a.keywords || []).join(" ")}`.toLowerCase().includes(q) : (a.area === pick.area || (a.alsoIn || []).includes(pick.area)))
+      && (!grade || (a.grades || []).includes(grade)) && (!time || SE.timeMax(a) <= time)));
+  }
   function renderResults() {
     const list = document.getElementById("pw-results");
     if (!list) return;
-    const q = (document.getElementById("pw-q").value || "").trim().toLowerCase();
-    const area = document.getElementById("pw-area").value;
     const inPlan = new Set(ed.steps.map((s) => s.activityId));
-    const hits = SE.sortActivities(STEM.activities.filter((a) => (!area || a.area === area || (a.alsoIn || []).includes(area))
-      && (!q || `${a.title} ${a.summary} ${(a.keywords || []).join(" ")}`.toLowerCase().includes(q)))).slice(0, 12);
+    const hits = pickList();
+    const q = (document.getElementById("pw-q").value || "").trim();
+    document.getElementById("pw-count").textContent = q ? `${plural(hits.length, "match", "matches")} in every category` : `${plural(hits.length, "activity", "activities")} in ${SE.areaById[pick.area].name}`;
     list.innerHTML = hits.length ? hits.map((a) => `
-      <li><span><strong>${esc(a.title)}</strong> ${areaChip(a)} <span class="muted small">${SE.timeText(a)} · ${SE.gradesText(a.grades)}</span>${SE.content.readiness(a) === "missing-resource" ? ` <span class="chip chip--soon">No resource yet</span>` : ""}</span>
-        <button type="button" class="btn btn--ghost btn--small" data-add="${a.id}" ${inPlan.has(a.id) ? 'aria-disabled="true"' : ""}>${icon(inPlan.has(a.id) ? "check" : "plus")}${inPlan.has(a.id) ? "In the plan" : "Add"}<span class="visually-hidden">: ${esc(a.title)}</span></button></li>`).join("")
-      : `<li class="muted">No activities match. Try another word or category.</li>`;
+      <li class="pk-card ${inPlan.has(a.id) ? "is-in" : ""}">
+        <div class="pk-card__main"><strong>${esc(a.title)}</strong>
+          <span class="pk-card__meta">${areaChip(a)}${a.launch.status === "lab" ? ` <span class="chip">Lab</span>` : ""} <span class="muted small">${SE.timeText(a)} · ${SE.gradesText(a.grades)}</span>${SE.content.readiness(a) === "missing-resource" ? ` <span class="chip chip--soon">No resource yet</span>` : ""}</span></div>
+        <button type="button" class="btn ${inPlan.has(a.id) ? "btn--ghost" : "btn--primary"} btn--small" data-add="${a.id}" ${inPlan.has(a.id) ? 'aria-disabled="true"' : ""}>${icon(inPlan.has(a.id) ? "check" : "plus")}${inPlan.has(a.id) ? "In the plan" : "Add"}<span class="visually-hidden">: ${esc(a.title)}</span></button></li>`).join("")
+      : `<li class="muted">No activities match. Try another category, grade, or word.</li>`;
+  }
+  /* "Your mix": how many activities come from each category, and the total time. */
+  function mixStrip() {
+    const n = {};
+    ed.steps.forEach((s) => { const a = actOf(s); if (a) n[a.area] = (n[a.area] || 0) + 1; });
+    const t = totals(ed.steps);
+    return `<p class="pk-mix" id="pw-mix"><span class="pk-mix__label">Your mix</span>${Object.entries(n).map(([id, k]) => `<span class="pw-area">${icon(SE.areaById[id].icon)}${esc(SE.areaById[id].short)} · ${k}</span>`).join("")}<span class="muted small">${timeText(t.min, t.max)} required${t.optMax ? `, plus ${timeText(t.optMin, t.optMax)} optional` : ""}</span></p>`;
   }
   function save() {
     const out = document.getElementById("pw-saved");
@@ -549,7 +595,13 @@
       save();
     });
     document.getElementById("pw-q").addEventListener("input", renderResults);
-    document.getElementById("pw-area").addEventListener("change", renderResults);
+    ["pw-fgrade", "pw-ftime"].forEach((id) => document.getElementById(id).addEventListener("change", renderResults));
+    app().querySelectorAll("[data-pick-area]").forEach((b) => b.addEventListener("click", () => {
+      pick.area = b.dataset.pickArea;
+      app().querySelectorAll("[data-pick-area]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      document.getElementById("pw-q").value = "";
+      renderResults();
+    }));
     let dragId = null;
     const steps = document.getElementById("pw-steps");
     steps.addEventListener("dragstart", (e) => { const li = e.target.closest("[data-id]"); if (li) { dragId = li.dataset.id; e.dataTransfer.effectAllowed = "move"; } });

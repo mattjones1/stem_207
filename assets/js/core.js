@@ -150,4 +150,62 @@
     clearTimeout(SE._toastT);
     SE._toastT = setTimeout(() => el.classList.remove("is-on"), 2600);
   };
+
+  /* One shared modal for quick tasks (Add students, Send a note, Message a class). Built on <dialog>:
+     the browser traps focus and Esc closes it; focus goes back to whatever opened it.
+     SE.modal.open({ title, body, wide, onOpen(dlg), onClose() }) → the dialog. body is HTML. */
+  let openDlg = null;
+  SE.modal = {
+    open({ title, body, wide, onOpen, onClose }) {
+      SE.modal.close();
+      const opener = document.activeElement;
+      const dlg = document.createElement("dialog");
+      const id = SE.uid("mdl");
+      dlg.className = `modal${wide ? " modal--wide" : ""}`;
+      dlg.setAttribute("aria-labelledby", `${id}-t`);
+      dlg.innerHTML = `
+        <div class="modal__head"><h2 id="${id}-t">${SE.esc(title)}</h2>
+          <button type="button" class="modal__close" data-modal-close aria-label="Close">${SE.icon("plus")}</button></div>
+        <div class="modal__body">${body}</div>`;
+      document.body.appendChild(dlg);
+      const done = () => {
+        if (openDlg === dlg) openDlg = null;
+        dlg.remove();
+        if (onClose) onClose();
+        if (opener && opener.isConnected && opener.focus) opener.focus();
+      };
+      dlg.addEventListener("close", done);
+      dlg.addEventListener("click", (e) => {
+        if (e.target.closest("[data-modal-close]")) dlg.close();
+        else if (e.target === dlg) dlg.close();   // a click on the backdrop
+      });
+      openDlg = dlg;
+      dlg.showModal();
+      const first = dlg.querySelector(".modal__body input:not([type=hidden]), .modal__body textarea, .modal__body select, .modal__body button");
+      if (first) first.focus();
+      if (onOpen) onOpen(dlg);
+      return dlg;
+    },
+    close() { if (openDlg && openDlg.open) openDlg.close(); },
+    current: () => openDlg
+  };
+
+  /* Display names a teacher pastes, one per line: first name and last initial, nothing personal. */
+  SE.roster = {
+    MAX: 24,
+    checkNames(text, existing = []) {
+      const taken = new Set(existing.map((n) => n.trim().toLowerCase()));
+      const seen = new Set();
+      return String(text || "").split(/\r?\n/).map((l) => l.replace(/\s+/g, " ").trim()).filter(Boolean).map((name) => {
+        const key = name.toLowerCase();
+        let reason = "";
+        if (/@|\d/.test(name)) reason = "Looks like an email or number. Use a first name and last initial.";
+        else if (name.length > SE.roster.MAX) reason = `Too long (${name.length} letters). Keep it to ${SE.roster.MAX}.`;
+        else if (taken.has(key)) reason = "Already in this class.";
+        else if (seen.has(key)) reason = "Listed twice.";
+        seen.add(key);
+        return { name, ok: !reason, reason };
+      });
+    }
+  };
 })();

@@ -112,7 +112,7 @@ async def cloud(b):
     await t.goto(S + "#/signup"); await t.wait_for_timeout(400)
     await t.fill("#su-name", "Ms. Rivera"); await t.fill("#su-class", "Room 9"); await t.fill("#su-email", email); await t.fill("#su-pw", "harbor207!"); await t.fill("#su-pw2", "harbor207!")
     await t.click("#su-form button[type=submit]"); await t.wait_for_timeout(1200)
-    await t.fill("#as-name", "Kai M."); await t.click("#add-student button[type=submit]"); await t.wait_for_timeout(400)
+    await t.locator("[data-add-students]").first.click(); await t.fill("#ms-names", "Kai M."); await t.click("#ms-add"); await t.wait_for_timeout(400); await t.keyboard.press("Escape"); await t.wait_for_timeout(300)
     await t.evaluate("SE.store.flush()"); await t.wait_for_timeout(500)
     code = await t.evaluate("SE.store.classesFor(SE.store.currentUser().id)[0].code")
     sid, pc = await t.evaluate("(()=>{const s=SE.store.studentsIn(SE.store.classesFor(SE.store.currentUser().id)[0].id)[0]; return [s.id, s.picCode]})()")

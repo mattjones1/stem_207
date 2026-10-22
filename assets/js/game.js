@@ -70,6 +70,7 @@
     const passes = [];                // every first pass, with the XP it earned
     const stages = {}; // stage -> { status: "claimed" | "cleared", at }
     const reviewed = {}; // completionId -> review event
+    const notes = [];    // teacher_note events, private to this student
     const earned = {}; // patchId -> at
     const opened = new Set();
     const steps = {}; // activityId -> Set of checked step indexes
@@ -131,6 +132,7 @@
       }
 
       if (e.type === "reflection_reviewed") reviewed[e.data.completionId] = e;
+      if (e.type === "teacher_note" && e.data.note) notes.unshift(e);   // newest first
 
       if (e.type === "lab_test_run" || e.type === "lab_hint") {
         const st = (labStats[e.data.labId] = labStats[e.data.labId] || { runs: 0, hints: 0 });
@@ -178,6 +180,7 @@
       steps,
       stages,
       reviewed,
+      notes,
       patches,
       earnedCount: patches.filter((p) => p.earned).length,
       lastActive,

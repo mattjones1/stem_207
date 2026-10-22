@@ -890,7 +890,7 @@
       if (!s || s.role !== "educator") return null;
       const now = Date.now();
       const p = {
-        id: SE.uid("pw"), educatorId: s.id, title: clip(fields.title, 120) || "Untitled pathway",
+        id: SE.uid("pw"), educatorId: s.id, title: clip(fields.title, 120) || "Untitled Learning Plan",
         essentialQuestion: clip(fields.essentialQuestion, 300), goal: clip(fields.goal, 600), finalProduct: clip(fields.finalProduct, 600),
         audience: Object.assign({ grades: [], minutes: null, equipment: [], prior: "" }, fields.audience || {}),
         status: "draft", version: 0, steps: (fields.steps || []).map((st) => ({ ...st, id: SE.uid("st") })),

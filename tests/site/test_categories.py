@@ -61,7 +61,7 @@ async def main():
     ok("educator: no Add to a Learning Plan on a placeholder", await pg.locator("#plan-pick, a[href^='#/teach/plans/new/']").count() == 0)
     ok("store refuses to assign a placeholder", await pg.evaluate("(() => { const c = SE.store.classesFor(SE.store.currentUser().id)[0]; const n = SE.store.assignmentsFor(c.id).length; SE.store.assign(c.id, ['3d-printing-exercise-01']); return SE.store.assignmentsFor(c.id).length === n; })()"))
     await go(pg, "#/teach/plans/new"); await pg.wait_for_timeout(300)
-    ok("plan editor's category filter has no 3D Printing", "3D Printing" not in await pg.inner_text("#pw-area"))
+    ok("plan editor: 3D Printing is a disabled Coming soon tab", await pg.locator(".pk-tab.is-soon[aria-disabled=true]", has_text="3D Printing").count() == 1 and await pg.locator("[data-pick-area='3d-printing']").count() == 0)
 
     # Optional metadata shows when set (set in memory for the check).
     await pg.evaluate("Object.assign(SE.activityById['lab-field-station'], { delivery: 'Browser 360° (not headset VR)', skills: ['observation'] })")

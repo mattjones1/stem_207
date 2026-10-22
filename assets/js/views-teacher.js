@@ -84,13 +84,14 @@
     const who = withName ? `<strong>${esc((SE.store.studentById(e.studentId) || {}).displayName || "A student")}</strong> ` : "";
     switch (e.type) {
       case "signed_in": return { icon: "user", text: `${who}signed in` };
-      case "teacher_confirmed": return { icon: "shield", text: `Teacher confirmed ${withName ? esc((SE.store.studentById(e.studentId) || {}).displayName) + "’s " : ""}${title}${e.data.how ? ` (${esc({ oral: "spoken check", demo: "watched a demo", work: "reviewed work" }[e.data.how] || "")})` : ""}`, strong: true };
-      case "teacher_try_again": return { icon: "refresh", text: `Teacher asked ${withName ? esc((SE.store.studentById(e.studentId) || {}).displayName) : "them"} to try again on ${title}` };
+      case "teacher_confirmed": return { icon: "shield", text: `You passed ${withName ? esc((SE.store.studentById(e.studentId) || {}).displayName) + "’s " : ""}${title}${e.data.how ? ` (${esc({ oral: "spoken check", demo: "watched a demo", work: "reviewed work" }[e.data.how] || "")})` : ""}`, strong: true };
+      case "teacher_try_again": return { icon: "refresh", text: `You asked ${withName ? esc((SE.store.studentById(e.studentId) || {}).displayName) : "them"} to try again on ${title}` };
+      case "teacher_note": return { icon: "message", text: `You sent ${withName ? esc((SE.store.studentById(e.studentId) || {}).displayName) : "them"} a note: “${esc(e.data.note || "")}”` };
       case "help_requested": return { icon: "question", text: `${who}asked for help on ${title}`, strong: true };
       case "mission_opened": return { icon: "eye", text: `${who}opened ${title}` };
       case "launched": return { icon: "external", text: `${who}launched ${a ? esc(a.launch.provider) : "a resource"} for ${title}` };
       case "step_checked": return { icon: "list", text: `${who}${e.data.checked ? "checked off" : "unchecked"} step ${e.data.step + 1} of ${title}` };
-      case "mission_completed": return { icon: "check", text: `${who}${e.data.evidence ? "sent" : "marked"} ${title}${e.data.evidence ? "" : " complete"} ${completionTag(e)}`, strong: true };
+      case "mission_completed": { const tag = completionTag(e); return { icon: "check", text: `${who}sent ${title}${/submitted</.test(tag) ? "" : ` ${tag}`}`, strong: true }; }
       case "ican_claimed": return { icon: "flag", text: `${who}said “I can” for pathway stage ${e.data.stage}` };
       case "ican_verified": return { icon: "shield", text: `${withName ? who : ""}Stage ${e.data.stage} confirmed by teacher` };
       case "ican_returned": return { icon: "refresh", text: `${withName ? who : ""}Stage ${e.data.stage}: teacher said “not yet”` };
@@ -200,7 +201,7 @@
     return out;
   }
   const attentionList = (items, withClass) => items.length
-    ? `<ul class="attn">${items.map((x) => `<li>${icon(x.icon)}<span><a href="#/teach/student/${x.student.id}"><strong>${esc(x.student.displayName)}</strong></a>${withClass ? ` <span class="muted">(${esc(x.c.name)})</span>` : ""}<small>${esc(x.why)}</small></span></li>`).join("")}</ul>`
+    ? `<ul class="attn">${items.map((x) => `<li>${icon(x.icon)}<span><a href="#/teach/student/${x.student.id}"><strong>${esc(x.student.displayName)}</strong></a>${withClass ? ` <span class="muted">(${esc(x.c.name)})</span>` : ""}<small>${esc(x.why)}</small></span><button type="button" class="btn btn--ghost btn--small attn__note" data-note-student="${x.student.id}">${icon("message")}Note<span class="visually-hidden"> to ${esc(x.student.displayName)}</span></button></li>`).join("")}</ul>`
     : `<p class="muted">Everyone has been active this week and nobody is flagging trouble.</p>`;
   /* A Learning Plan's progress in one class: students who passed every required activity. */
   function planProgress(sum, pa) {
@@ -221,42 +222,62 @@
     const students = rows.reduce((n, r) => n + r.sum.students.length, 0);
     const plans = rows.flatMap((r) => r.plans.map((pa) => ({ r, pa })));
     const attention = rows.flatMap((r) => attentionFor(r.sum).map((x) => ({ ...x, c: r.c }))).slice(0, 8);
+    // Recent activity across classes: the events a teacher acts on (sent, passed, try again, help, notes).
+    const FEED = ["mission_completed", "teacher_confirmed", "teacher_try_again", "help_requested", "teacher_note"];
+    const feed = rows.flatMap((r) => r.sum.events.filter((e) => FEED.includes(e.type)).map((e) => ({ e, c: r.c }))).sort((x, y) => y.e.at - x.e.at).slice(0, 8);
+    const hour = new Date().getHours();
+    const hello = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
     const body = `
-      <section class="wrap section">
+      <section class="wrap section dash">
+        <p class="dash-hello">${icon("compass")}<span><strong>${hello}, ${esc(user.name || "educator")}.</strong> ${new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</span></p>
         <div class="dash-actions">
           <a class="btn btn--primary" href="#/teach/checks">${icon("check")}Checks${waiting ? ` (${waiting})` : ""}</a>
           <a class="btn btn--ghost" href="#/teach/plans/new">${icon("plus")}New Learning Plan</a>
+          <button type="button" class="btn btn--ghost" data-message-class="">${icon("message")}Message a class</button>
           <a class="btn btn--ghost" href="#/teach/classes">${icon("users")}Add a class</a>
         </div>
-        <div class="kpis">
-          <a class="kpi ${waiting ? "kpi--action" : ""}" href="#/teach/checks"><span class="kpi__label">Checks waiting</span><span class="kpi__value">${waiting}</span><span class="kpi__foot">${waiting ? "Pass or Try again" : "All caught up"}</span></a>
-          <a class="kpi" href="#/teach/classes"><span class="kpi__label">Classes</span><span class="kpi__value">${classes.length}</span><span class="kpi__foot">${plural(students, "student", "students")}</span></a>
-          <a class="kpi" href="#/teach/plans"><span class="kpi__label">Current Learning Plans</span><span class="kpi__value">${plans.length}</span><span class="kpi__foot">assigned to your classes</span></a>
+        <div class="kpis kpis--dash">
+          <a class="kpi kpi--green ${waiting ? "kpi--action" : ""}" href="#/teach/checks"><span class="kpi__label">Checks waiting</span><span class="kpi__value">${waiting}</span><span class="kpi__foot">${waiting ? "Pass or Try again" : "You're all caught up"}</span></a>
+          <a class="kpi kpi--teal" href="#/teach/classes"><span class="kpi__label">Classes</span><span class="kpi__value">${classes.length}</span><span class="kpi__foot">${plural(students, "student", "students")}</span></a>
+          <a class="kpi kpi--blue" href="#/teach/plans"><span class="kpi__label">Current Learning Plans</span><span class="kpi__value">${plans.length}</span><span class="kpi__foot">assigned to your classes</span></a>
         </div>
       </section>
-      <section class="wrap section" aria-labelledby="dash-classes">
-        <div class="section__head"><div><span class="eyebrow">Classes</span><h2 id="dash-classes">Your classes</h2></div>
-          <a class="btn btn--ghost btn--small" href="#/teach/classes">Manage classes ${icon("arrowRight")}</a></div>
-        <ul class="dash-classes">${rows.map((r) => `
-          <li class="block dash-class">
-            <h3><a href="#/teach/classes/${r.c.id}">${esc(r.c.name)}</a>${r.c.isDemo ? ` <span class="chip">Sample</span>` : ""}</h3>
-            <p class="muted small">Class code ${esc(r.c.code)}</p>
-            <p>${plural(r.sum.students.length, "student", "students")} · ${r.waiting ? `<a href="#/teach/checks">${plural(r.waiting, "check", "checks")} waiting</a>` : "no checks waiting"} · ${plural(r.plans.length, "Learning Plan", "Learning Plans")}</p>
-          </li>`).join("")}</ul>
-      </section>
-      <section class="wrap section" aria-labelledby="dash-plans">
-        <div class="section__head"><div><span class="eyebrow">Learning Plans</span><h2 id="dash-plans">Current Learning Plans</h2></div>
-          <a class="btn btn--ghost btn--small" href="#/teach/plans">All Learning Plans ${icon("arrowRight")}</a></div>
-        ${plans.length ? `<ul class="dash-plans">${plans.map(({ r, pa }) => { const p = planProgress(r.sum, pa); return `
-          <li class="block"><h3><a href="#/teach/plans/${pa.pathwayId}">${esc(pa.snapshot.title)}</a> <span class="muted small">· ${esc(r.c.name)}</span></h3>
-            <p>${p.done} of ${p.total} students passed all ${plural(p.req, "required activity", "required activities")}</p>
-            <div class="mini-meter" aria-hidden="true"><span style="width:${p.total ? (p.done / p.total) * 100 : 0}%"></span></div></li>`; }).join("")}</ul>`
-          : `<div class="empty">${icon("map")}<h3>No Learning Plans assigned yet</h3><p>A Learning Plan puts activities in order for a class.</p><a class="btn btn--primary" href="#/teach/plans">${icon("plus")}Start a Learning Plan</a></div>`}
-      </section>
-      <section class="wrap section" aria-labelledby="dash-attn">
-        <div class="section__head"><div><span class="eyebrow">Students</span><h2 id="dash-attn">Needs a check-in</h2></div></div>
-        <div class="block">${attentionList(attention, classes.length > 1)}</div>
-      </section>`;
+      <div class="wrap dash-cols">
+        <div class="dash-main">
+          <section class="section" aria-labelledby="dash-classes">
+            <div class="section__head"><div><span class="eyebrow">Classes</span><h2 id="dash-classes">Your classes</h2></div>
+              <a class="btn btn--ghost btn--small" href="#/teach/classes">Manage classes ${icon("arrowRight")}</a></div>
+            <ul class="dash-classes">${rows.map((r) => `
+              <li class="block dash-class">
+                <h3><a href="#/teach/classes/${r.c.id}">${esc(r.c.name)}</a>${r.c.isDemo ? ` <span class="chip">Sample</span>` : ""}</h3>
+                <p class="muted small">Class code ${esc(r.c.code)}</p>
+                <p>${plural(r.sum.students.length, "student", "students")} · ${r.waiting ? `<a href="#/teach/checks">${plural(r.waiting, "check", "checks")} waiting</a>` : "no checks waiting"} · ${plural(r.plans.length, "Learning Plan", "Learning Plans")}</p>
+                ${classTools(r.c)}
+              </li>`).join("")}</ul>
+          </section>
+          <section class="section" aria-labelledby="dash-plans">
+            <div class="section__head"><div><span class="eyebrow">Learning Plans</span><h2 id="dash-plans">Current Learning Plans</h2></div>
+              <a class="btn btn--ghost btn--small" href="#/teach/plans">All Learning Plans ${icon("arrowRight")}</a></div>
+            ${plans.length ? `<ul class="dash-plans">${plans.map(({ r, pa }) => { const p = planProgress(r.sum, pa); return `
+              <li class="block"><h3><a href="#/teach/plans/${pa.pathwayId}">${esc(pa.snapshot.title)}</a> <span class="muted small">· ${esc(r.c.name)}</span></h3>
+                <p>${p.done} of ${p.total} students passed all ${plural(p.req, "required activity", "required activities")}</p>
+                <div class="mini-meter" aria-hidden="true"><span style="width:${p.total ? (p.done / p.total) * 100 : 0}%"></span></div></li>`; }).join("")}</ul>`
+              : `<div class="empty">${icon("map")}<h3>No Learning Plans assigned yet</h3><p>A Learning Plan puts activities in order for a class.</p><a class="btn btn--primary" href="#/teach/plans">${icon("plus")}Start a Learning Plan</a></div>`}
+          </section>
+        </div>
+        <aside class="dash-side" aria-label="Activity and students">
+          <section class="block dash-feed" aria-labelledby="dash-feed">
+            <h2 id="dash-feed">${icon("clock")}Recent activity</h2>
+            ${feed.length ? `<ol class="feed feed--dash">${feed.map(({ e, c }) => { const d = describe(e, true); return `<li class="${d.strong ? "is-strong" : ""}">${icon(d.icon)}<span>${d.text}${classes.length > 1 ? ` <small class="muted">${esc(c.name)}</small>` : ""}</span><time datetime="${new Date(e.at).toISOString()}">${SE.timeAgo(e.at)}</time></li>`; }).join("")}</ol>`
+              : `<p class="muted">When students send work, it shows up here.</p>`}
+            ${classes.length === 1 ? `<a class="small" href="#/teach/classes/${classes[0].id}#class-feed">See everything on the class page</a>` : ""}
+          </section>
+          <section class="block" aria-labelledby="dash-attn">
+            <h2 id="dash-attn">${icon("users")}Needs a check-in</h2>
+            ${attentionList(attention, classes.length > 1)}
+          </section>
+        </aside>
+      </div>`;
     app().innerHTML = frame(user, null, classes, "teach", body, { title: "Dashboard", demo: classes.some((c) => c.isDemo) });
     bindFrame(user);
   };
@@ -295,7 +316,7 @@
     }));
   }
 
-  function rosterTable(sum) {
+  function rosterTable(sum, classId) {
     const rows = sum.profiles.map(({ student, prof }) => {
       // Reflections this student has sent that are waiting for your Pass or Try again.
       const waiting = Object.keys(prof.missions).map((id) => SE.activityById[id]).filter((a) => a && SE.game.statusFor(prof, a).state === "submitted").length;
@@ -318,7 +339,7 @@
       return `<th scope="col" class="${num ? "num" : ""}" aria-sort="${sorted ? (rosterSort.dir === 1 ? "ascending" : "descending") : "none"}">
         <button type="button" data-sort="${key}">${label}<span aria-hidden="true">${sorted ? (rosterSort.dir === 1 ? " ▲" : " ▼") : ""}</span></button></th>`;
     };
-    if (!rows.length) return `<div class="empty">${icon("users")}<h3>No students yet</h3><p>Add students on the Class & logins tab, then hand out login cards.</p><a class="btn btn--primary" href="#add-student-block" data-jump="add-student-block">${icon("plus")}Add students</a></div>`;
+    if (!rows.length) return `<div class="empty">${icon("users")}<h3>No students yet</h3><p>Add students, then hand out their login cards.</p>${classId ? `<button type="button" class="btn btn--primary" data-add-students="${classId}">${icon("plus")}Add students</button>` : ""}</div>`;
     return `
       <div class="table-wrap">
         <table class="roster">
@@ -346,7 +367,7 @@
       const key = b.dataset.sort;
       rosterSort = { key, dir: rosterSort.key === key ? -rosterSort.dir : key === "name" ? 1 : -1 };
       const sum = SE.game.classSummary(currentClassId);
-      document.querySelector(".table-wrap").outerHTML = rosterTable(sum);
+      document.querySelector(".table-wrap").outerHTML = rosterTable(sum, currentClassId);
       bindRoster();
       const again = app().querySelector(`[data-sort="${key}"]`);
       if (again) again.focus();
@@ -373,6 +394,7 @@
             <h2>${esc(student.displayName)}</h2>
             <p class="muted">${esc(prof.rank.name)} · ${esc(SE.gradeById[student.gradeBand] ? SE.gradeById[student.gradeBand].name : "")} · last active ${prof.lastActive ? SE.timeAgo(prof.lastActive) : "never"}</p>
             ${SE.rankBar(prof, true)}
+            <button type="button" class="btn btn--ghost btn--small" data-note-student="${student.id}">${icon("message")}Send a note</button>
           </div>
           <dl class="xstats xstats--light">
             <div><dt>XP</dt><dd>${SE.num(prof.xp)}</dd></div>
@@ -486,6 +508,13 @@
   };
 
   /* ───────── Classes ───────── */
+  /* Two quick actions on a class card (they open the shared modal). */
+  const classTools = (c) => `
+    <div class="class-tools">
+      <button type="button" class="btn btn--ghost btn--small" data-add-students="${c.id}">${icon("plus")}Add students<span class="visually-hidden"> to ${esc(c.name)}</span></button>
+      <button type="button" class="btn btn--ghost btn--small" data-message-class="${c.id}">${icon("message")}Message<span class="visually-hidden"> ${esc(c.name)}</span></button>
+    </div>`;
+
   SE.views.teachClasses = function (user) {
     const classes = SE.store.classesFor(user.id), archived = SE.store.archivedClassesFor(user.id);
     if (!classes.length && !archived.length) return noClass(user);
@@ -496,7 +525,7 @@
           <h3><a href="#/teach/classes/${c.id}">${esc(c.name)}</a>${c.isDemo ? ` <span class="chip">Sample</span>` : ""}</h3>
           <p class="muted small">Class code ${esc(c.code)} · ${plural(n, "student", "students")}</p>
           ${c.archivedAt ? `<p class="small">Archived ${SE.dateShort(c.archivedAt)}. Students can't sign in.</p>
-            <button type="button" class="btn btn--ghost btn--small" data-restore="${c.id}">${icon("refresh")}Restore<span class="visually-hidden"> ${esc(c.name)}</span></button>` : ""}
+            <button type="button" class="btn btn--ghost btn--small" data-restore="${c.id}">${icon("refresh")}Restore<span class="visually-hidden"> ${esc(c.name)}</span></button>` : classTools(c)}
         </li>`;
     };
     const body = `
@@ -549,7 +578,6 @@
     const waiting = pendingChecks(sum).length;
     const activeIds = new Set(sum.events.filter((e) => e.at >= Date.now() - 7 * SE.DAY && !e.by).map((e) => e.studentId));
     const plans = SE.store.pathwayAssignmentsFor(cls.id).filter((pa) => pa.snapshot);
-    const pic = (pid) => `<span class="pic-chip">${icon(pid)}<span>${esc(SE.pictureById[pid].name)}</span></span>`;
     const legacy = SE.store.assignmentsFor(cls.id).map((x) => ({ x, a: SE.activityById[x.activityId] })).filter((r) => r.a);
     const body = `
       <section class="wrap section">
@@ -582,8 +610,8 @@
 
       <section class="wrap section" id="roster" aria-labelledby="roster-title">
         <div class="section__head"><div><span class="eyebrow">Roster</span><h2 id="roster-title">${plural(students.length, "student", "students")}</h2></div>
-          <a class="btn btn--ghost btn--small" href="#add-student-block" data-jump="add-student-block">${icon("plus")}Add students</a></div>
-        ${rosterTable(sum)}
+          <button type="button" class="btn btn--primary btn--small" data-add-students="${cls.id}">${icon("plus")}Add students</button></div>
+        ${rosterTable(sum, cls.id)}
       </section>
 
       <section class="wrap section teach-grid">
@@ -618,21 +646,10 @@
       <section class="wrap section">${messageBlock(cls)}</section>
 
       <section class="wrap section teach-grid teach-grid--class" id="add-student-block">
-        <div class="block">
-          <div class="block__head"><h2>Add a student</h2></div>
-          <form id="add-student" class="form" novalidate>
-            <div class="form__field">
-              <label for="as-name">Display name</label>
-              <input id="as-name" class="input" maxlength="24" placeholder="First name and last initial, like Sam P." aria-describedby="as-help as-err">
-              <p class="field-help" id="as-help">Use a first name and last initial. Don't add emails, birthdays, or other personal details.</p>
-              <p class="form__error" id="as-err" role="alert"></p>
-            </div>
-            <div class="form__field">
-              <label for="as-grade">Grade band</label>
-              <select id="as-grade" class="input">${STEM.gradeBands.map((g) => `<option value="${g.id}" ${g.id === "4-5" ? "selected" : ""}>${esc(g.name)}</option>`).join("")}</select>
-            </div>
-            <button class="btn btn--primary" type="submit">${icon("plus")}Add student</button>
-          </form>
+        <div class="block add-students-block">
+          <div class="block__head"><h2>Add students</h2></div>
+          <p>Paste a list of names, one per line, or add one at a time. Each student gets a login card with secret pictures.</p>
+          <button type="button" class="btn btn--primary" data-add-students="${cls.id}">${icon("plus")}Add students</button>
         </div>
         <div class="block class-code-block">
           <div class="block__head"><h2>How students sign in</h2></div>
@@ -650,11 +667,7 @@
           <p>Cut these out and hand them to students. Each card has the class code and that student's secret pictures.</p>
         </div>
         ${students.length ? `<div class="login-cards">
-          ${students.map((st) => `
-            <article class="login-card">
-              <header><span class="login-card__brand">${SE.brandLogo(17)}</span><strong>${esc(st.displayName)}</strong></header>
-              <p class="login-card__code">Class code <b>${esc(cls.code)}</b></p>
-              <div class="login-card__pics">${st.picCode.map(pic).join("")}</div>
+          ${students.map((st) => loginCard(st, cls, `
               <footer class="login-card__tools">
                 <label class="visually-hidden" for="g-${st.id}">Grade band for ${esc(st.displayName)}</label>
                 <select id="g-${st.id}" class="input input--small" data-grade="${st.id}">${STEM.gradeBands.map((g) => `<option value="${g.id}" ${g.id === st.gradeBand ? "selected" : ""}>${esc(g.name)}</option>`).join("")}</select>
@@ -662,12 +675,11 @@
                 ${pendingRemove === st.id
                   ? `<span class="confirm-inline">Remove ${esc(st.displayName)} and their progress? <button type="button" class="btn btn--danger btn--small" data-remove-yes="${st.id}">Remove</button><button type="button" class="btn btn--ghost btn--small" data-remove-no>Keep</button></span>`
                   : `<button type="button" class="btn btn--ghost btn--small" data-remove="${st.id}">${icon("trash")}Remove</button>`}
-              </footer>
-            </article>`).join("")}
-        </div>` : `<div class="empty">${icon("users")}<h3>No students yet</h3><p>Add your first student above. Their login card appears here.</p></div>`}
+              </footer>`)).join("")}
+        </div>` : `<div class="empty">${icon("users")}<h3>No students yet</h3><p>Add your first students. Their login cards appear here.</p><button type="button" class="btn btn--primary" data-add-students="${cls.id}">${icon("plus")}Add students</button></div>`}
       </section>
 
-      <section class="wrap section" aria-labelledby="feed-title">
+      <section class="wrap section" id="class-feed" aria-labelledby="feed-title">
         <div class="section__head"><div><span class="eyebrow">Live log</span><h2 id="feed-title">Recent activity</h2></div></div>
         <ol class="feed">
           ${sum.events.filter((e) => !FEED_NOISE.includes(e.type)).slice(-14).reverse().map((e) => {
@@ -702,19 +714,6 @@
       SE.toast(`Deleted ${name}`);
       location.hash = "#/teach/classes";
     });
-    $("add-student").addEventListener("submit", (e) => {
-      e.preventDefault();
-      const res = SE.store.addStudent(cls.id, { displayName: $("as-name").value, gradeBand: $("as-grade").value });
-      if (!res.ok) {
-        $("as-err").textContent = res.error;
-        $("as-name").setAttribute("aria-invalid", "true");
-        $("as-name").focus();
-        return;
-      }
-      SE.toast(`${res.student.displayName} added`);
-      SE.route(true);
-      $("as-name").focus();
-    });
     app().querySelectorAll("[data-grade]").forEach((sel) => sel.addEventListener("change", () => {
       SE.store.updateStudent(sel.dataset.grade, { gradeBand: sel.value });
       SE.toast("Grade band updated");
@@ -742,6 +741,171 @@
     return days < 0 ? `Was due ${label}` : days === 0 ? "Due today" : days === 1 ? "Due tomorrow" : `Due ${label}`;
   };
   SE.dueText = dueText;
+
+  /* ───────── Quick tasks in the shared modal ─────────
+   * Any button can open these: data-add-students="<classId>", data-message-class="<classId or empty>",
+   * data-note-student="<studentId>". The page behind re-renders when the modal closes. */
+  const picChip = (pid) => `<span class="pic-chip">${icon(pid)}<span>${esc(SE.pictureById[pid].name)}</span></span>`;
+  function loginCard(st, cls, tools = "") {
+    return `
+      <article class="login-card">
+        <header><span class="login-card__brand">${SE.brandLogo(17)}</span><strong>${esc(st.displayName)}</strong></header>
+        <p class="login-card__code">Class code <b>${esc(cls.code)}</b></p>
+        <div class="login-card__pics">${st.picCode.map(picChip).join("")}</div>
+        ${tools}
+      </article>`;
+  }
+
+  function addStudentsModal(cls) {
+    const existing = () => SE.store.studentsIn(cls.id).map((s) => s.displayName);
+    let changed = false;
+    SE.modal.open({
+      title: `Add students to ${cls.name}`, wide: true,
+      onClose: () => { if (changed) SE.route(true); },
+      body: `
+        <form id="ms-form" class="ms-form" novalidate>
+          <div class="ms-cols">
+            <div class="form__field">
+              <label for="ms-names">Names, one per line</label>
+              <textarea id="ms-names" class="input" rows="8" placeholder="Sam P.&#10;Maya R.&#10;Jonah T." aria-describedby="ms-help"></textarea>
+              <p class="field-help" id="ms-help">Paste a list or type one name per line. Use a first name and last initial. No emails, birthdays, or other personal details.</p>
+            </div>
+            <div class="ms-side">
+              <h3 class="ms-side__h">Check</h3>
+              <ul class="ms-check" id="ms-check" aria-live="polite"><li class="muted">Names you type show up here.</li></ul>
+            </div>
+          </div>
+          <div class="form__field">
+            <label for="ms-grade">Grade band for these students</label>
+            <select id="ms-grade" class="input">${STEM.gradeBands.map((g) => `<option value="${g.id}" ${g.id === "4-5" ? "selected" : ""}>${esc(g.name)}</option>`).join("")}</select>
+          </div>
+          <p class="form__error" id="ms-err" role="alert"></p>
+          <div class="modal__actions">
+            <button type="button" class="btn btn--ghost" data-modal-close>Cancel</button>
+            <button type="submit" class="btn btn--primary" id="ms-add">${icon("plus")}Add students</button>
+          </div>
+        </form>`,
+      onOpen(dlg) {
+        const ta = dlg.querySelector("#ms-names"), list = dlg.querySelector("#ms-check"), btn = dlg.querySelector("#ms-add");
+        const refresh = () => {
+          const rows = SE.roster.checkNames(ta.value, existing());
+          const ok = rows.filter((r) => r.ok).length;
+          list.innerHTML = rows.length ? rows.map((r) => `<li class="${r.ok ? "is-ok" : "is-bad"}">${icon(r.ok ? "check" : "alert")}<span><strong>${esc(r.name)}</strong>${r.ok ? " Ready" : ` ${esc(r.reason)}`}</span></li>`).join("")
+            : `<li class="muted">Names you type show up here.</li>`;
+          btn.innerHTML = `${icon("plus")}${ok ? `Add ${plural(ok, "student", "students")}` : "Add students"}`;
+        };
+        ta.addEventListener("input", refresh);
+        dlg.querySelector("#ms-form").addEventListener("submit", (e) => {
+          e.preventDefault();
+          const rows = SE.roster.checkNames(ta.value, existing()).filter((r) => r.ok);
+          const err = dlg.querySelector("#ms-err");
+          if (!rows.length) { err.textContent = "Add at least one name that's ready."; ta.focus(); return; }
+          const grade = dlg.querySelector("#ms-grade").value;
+          const added = rows.map((r) => SE.store.addStudent(cls.id, { displayName: r.name, gradeBand: grade })).filter((r) => r.ok).map((r) => r.student);
+          const skipped = SE.roster.checkNames(ta.value, []).length - added.length;
+          changed = true;
+          const body = dlg.querySelector(".modal__body");
+          body.innerHTML = `
+            <p class="ms-done" tabindex="-1">${icon("check")}<span><strong>Added ${plural(added.length, "student", "students")}.</strong>${skipped > 0 ? ` ${plural(skipped, "name was", "names were")} skipped. Fix ${skipped === 1 ? "it" : "them"} and add again.` : ""} Hand out these login cards.</span></p>
+            <div class="login-cards ms-cards">${added.map((st) => loginCard(st, cls)).join("")}</div>
+            <div class="modal__actions">
+              <button type="button" class="btn btn--ghost" id="ms-more">${icon("plus")}Add more</button>
+              <button type="button" class="btn btn--ghost" id="ms-print">${icon("print")}Print these cards</button>
+              <button type="button" class="btn btn--primary" data-modal-close>Done</button>
+            </div>`;
+          body.querySelector(".ms-done").focus();
+          body.querySelector("#ms-print").addEventListener("click", () => {
+            document.body.classList.add("modal-printing");
+            window.print();
+            document.body.classList.remove("modal-printing");
+          });
+          body.querySelector("#ms-more").addEventListener("click", () => { SE.modal.close(); setTimeout(() => addStudentsModal(cls), 0); });
+        });
+      }
+    });
+  }
+
+  function messageModal(user, classId) {
+    const classes = SE.store.classesFor(user.id);
+    if (!classes.length) return SE.toast("Add a class first.");
+    const one = classes.find((c) => c.id === classId) || (classes.length === 1 ? classes[0] : null);
+    let changed = false;
+    SE.modal.open({
+      title: one ? `Message ${one.name}` : "Message a class",
+      onClose: () => { if (changed) SE.route(true); },
+      body: `
+        <form id="mm-form" class="form" novalidate>
+          ${one ? `<input type="hidden" id="mm-class" value="${one.id}">` : `<div class="form__field"><label for="mm-class">Class</label>
+            <select id="mm-class" class="input">${classes.map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join("")}</select></div>`}
+          <div class="form__field">
+            <label for="mm-body">Message</label>
+            <textarea id="mm-body" class="input" rows="3" maxlength="500" placeholder="Example: Finish Lobster Trap Logic by Thursday. Bring your flowchart." aria-describedby="mm-help"></textarea>
+            <p class="field-help" id="mm-help">Every student in the class sees it on Home. Keep it short and about class work. No student names or personal details.</p>
+          </div>
+          <p class="form__error" id="mm-err" role="alert"></p>
+          <div class="modal__actions">
+            <button type="button" class="btn btn--ghost" data-modal-close>Cancel</button>
+            <button type="submit" class="btn btn--primary">${icon("message")}Post message</button>
+          </div>
+        </form>`,
+      onOpen(dlg) {
+        dlg.querySelector("#mm-form").addEventListener("submit", (e) => {
+          e.preventDefault();
+          const text = dlg.querySelector("#mm-body").value.trim();
+          if (!text) { dlg.querySelector("#mm-err").textContent = "Write a message first."; dlg.querySelector("#mm-body").focus(); return; }
+          const cid = dlg.querySelector("#mm-class").value;
+          SE.store.postMessage(cid, text);
+          changed = true;
+          SE.modal.close();
+          SE.toast(`Posted to ${(SE.store.classById(cid) || {}).name}`);
+        });
+      }
+    });
+  }
+
+  function noteModal(student) {
+    let changed = false;
+    SE.modal.open({
+      title: `Note to ${student.displayName}`,
+      onClose: () => { if (changed) SE.route(true); },
+      body: `
+        <form id="mn-form" class="form" novalidate>
+          <div class="form__field">
+            <label for="mn-body">Your note</label>
+            <textarea id="mn-body" class="input" rows="3" maxlength="200" placeholder="Example: Great test notes on the bridge. Try one more change before you send it." aria-describedby="mn-help"></textarea>
+            <p class="field-help" id="mn-help">Only ${esc(student.displayName)} sees it, on their Home. Keep it about their work.</p>
+          </div>
+          <p class="form__error" id="mn-err" role="alert"></p>
+          <div class="modal__actions">
+            <button type="button" class="btn btn--ghost" data-modal-close>Cancel</button>
+            <button type="submit" class="btn btn--primary">${icon("message")}Send note</button>
+          </div>
+        </form>`,
+      onOpen(dlg) {
+        dlg.querySelector("#mn-form").addEventListener("submit", (e) => {
+          e.preventDefault();
+          const note = dlg.querySelector("#mn-body").value.trim().slice(0, 200);
+          if (!note) { dlg.querySelector("#mn-err").textContent = "Write a note first."; dlg.querySelector("#mn-body").focus(); return; }
+          SE.store.teacherLog(student.id, "teacher_note", { note });
+          changed = true;
+          SE.modal.close();
+          SE.toast(`Note sent to ${student.displayName}`);
+        });
+      }
+    });
+  }
+
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-add-students], [data-message-class], [data-note-student]");
+    if (!b) return;
+    const user = SE.store.currentUser();
+    if (!user || user.role !== "educator") return;
+    e.preventDefault();
+    if (b.dataset.addStudents !== undefined) { const c = SE.store.classById(b.dataset.addStudents); if (c) addStudentsModal(c); }
+    else if (b.dataset.messageClass !== undefined) messageModal(user, b.dataset.messageClass);
+    else { const s = SE.store.studentById ? SE.store.studentById(b.dataset.noteStudent) : null; if (s) noteModal(s); }
+  });
+  SE.teachQuick = { addStudents: addStudentsModal, message: messageModal, note: noteModal };
 
   /* ───────── Bits used on library pages ───────── */
   SE.views.educatorStrip = function (user) {

@@ -69,7 +69,7 @@ async def cloud(b):
     await t.goto(S + "#/signup"); await t.wait_for_timeout(400)
     await t.fill("#su-name", "Ms. Rivera"); await t.fill("#su-class", "Room 9"); await t.fill("#su-email", email); await t.fill("#su-pw", "harbor207!"); await t.fill("#su-pw2", "harbor207!")
     await t.click("#su-form button[type=submit]"); await t.wait_for_timeout(1200)
-    await t.fill("#as-name", "Kai M."); await t.click("#add-student button[type=submit]"); await t.wait_for_timeout(400)
+    await t.locator("[data-add-students]").first.click(); await t.fill("#ms-names", "Kai M."); await t.click("#ms-add"); await t.wait_for_timeout(400); await t.keyboard.press("Escape"); await t.wait_for_timeout(300)
     await t.evaluate("""(() => { const c = SE.store.classesFor(SE.store.currentUser().id)[0];
       SE.store.assign(c.id, ['event-party']); SE.store.setAssignmentNote(c.id, 'event-party', 'Use the space key first.');
       SE.store.postMessage(c.id, 'Welcome to Room 9!'); })()""")

@@ -7,6 +7,8 @@
  * Step: { id, kind: "mission", activityId, required, note }
  *   note   what students see next to the activity (optional). Each activity's own reflection is the
  *          deliverable, checked with Pass / Try again, so steps carry no separate evidence or synthesis.
+ * group: "workshop" marks a packaged STEM 207 workshop; workshop: { format, sessions: [{ title, steps: [step numbers] }] };
+ * future: [text] names content that isn't ready yet (shown as text, never as a step).
  * reviewed: true once an educator approved the wording (October 21, 2026). Maine Coast Explorers' notes
  * come from the brief's table; Coding Foundations is built from STEM.pathway; the AI route isn't reviewed.
  */
@@ -22,6 +24,62 @@ window.STEM = window.STEM || {};
   const ids = (t) => { t.steps = t.steps.filter(Boolean); t.steps.forEach((s, i) => { s.id = `${t.id}-s${i + 1}`; }); return t; };
 
   STEM.pathwayTemplates = [
+    // ───── STEM 207 workshops: packaged plans for a workshop day or series (proposed, not yet reviewed).
+    // workshop.sessions group the steps; future names content that isn't ready yet (text only, never a step).
+    ids({
+      id: "tpl-ws-sampler", group: "workshop", reviewed: false,
+      title: "Maine Tech Sampler",
+      essentialQuestion: "What can you make with code, AI, virtual reality, and engineering?",
+      goal: "Try five kinds of STEM in one day, one activity from each category, and say which you'd explore next.",
+      audience: { grades: ["4-5"], minutes: null, equipment: [], prior: "No experience needed." },
+      workshop: { format: "Half day, about 3 hours with breaks", sessions: [
+        { title: "Code and AI", steps: [1, 3] }, { title: "Explore and build", steps: [2, 4] }, { title: "Create", steps: [5, 6] }] },
+      future: ["3D Printing: design and print a buoy or lighthouse charm to take home."],
+      steps: [
+        m("lab-dance-party", { label: "Coding", bridge: "Warm up: program a robot dance." }),
+        m("acadia-from-above", { label: "Virtual reality", bridge: "Look closely before you guess." }),
+        m("how-ai-sorts", { label: "AI", bridge: "Teach a computer to sort, then catch its mistakes." }),
+        m("paper-bridge", { label: "Engineering", bridge: "Test, change one thing, test again." }),
+        m("pixel-art-code", { label: "Creative", bridge: "Code a picture with pixels." }),
+        m("sink-or-float", { label: "Science", required: false, bridge: "If there's time: predict, test, explain." })
+      ]
+    }),
+    ids({
+      id: "tpl-ws-robots", group: "workshop", reviewed: false,
+      title: "Robots & Smart Machines",
+      essentialQuestion: "How do machines follow rules, and when do they learn instead?",
+      goal: "Write precise instructions, program sensors and decisions, and explain when a person should check a machine.",
+      audience: { grades: ["4-5", "6-8"], minutes: null, equipment: [], prior: "No coding experience needed." },
+      workshop: { format: "Two sessions of about 90 minutes", sessions: [
+        { title: "Machines that follow rules", steps: [1, 2, 3] }, { title: "Machines that decide and learn", steps: [4, 5, 6] }] },
+      future: ["Moxie Capstone: build a working ESP32 device that helps someone (when Moxie reaches pilot)."],
+      steps: [
+        m("lab-robot-chef", { label: "Session 1", bridge: "Robots do exactly what you say. Find the bugs." }),
+        m("sense-think-act", { label: "Session 1", bridge: "Be the robot: sense, think, act." }),
+        m("lab-line-follower", { label: "Session 1", bridge: "Give a snowplow robot rules for its two sensors." }),
+        m("lab-moon-gate", { label: "Session 2", bridge: "If this, then that: test every case." }),
+        m("lab-pattern-machine", { label: "Session 2", bridge: "Now the machine learns from examples instead of rules." }),
+        m("ai-limits-detectives", { label: "Session 2", required: false, bridge: "Grades 6–8: when is the computer wrong?" })
+      ]
+    }),
+    ids({
+      id: "tpl-ws-katahdin", group: "workshop", reviewed: false,
+      title: "Coast to Katahdin Explorers",
+      essentialQuestion: "What can we notice, test, and build about Maine, from the coast to the mountains?",
+      goal: "Observe Maine places, code a lobster boat, sort with a machine, and build a working lighthouse beam.",
+      audience: { grades: ["2-3", "4-5"], minutes: null, equipment: [], prior: "No experience needed." },
+      workshop: { format: "Four sessions of about 45 minutes", sessions: [
+        { title: "Observe", steps: [1] }, { title: "Code", steps: [2] }, { title: "Sort and test", steps: [3, 4] }, { title: "Build", steps: [5, 6] }] },
+      future: ["3D Printing: design and print a Maine trail marker."],
+      steps: [
+        m("lab-field-station", { label: "Session 1", bridge: "Tide pools and the North Woods. What do you notice?" }),
+        m("lab-rover", { label: "Session 2", bridge: "Steer a lobster boat with code. Do the first voyage." }),
+        m("blueberry-sorter", { label: "Session 3", bridge: "Help a machine sort wild blueberries." }),
+        m("melting-race", { label: "Session 3", bridge: "Predict which ice melts first, then test it." }),
+        m("lighthouse-beam", { label: "Session 4", bridge: "Build a beam that reaches the far shore." }),
+        m("animate-your-name", { label: "Session 4", required: false, bridge: "If there's time: make your initials move." })
+      ]
+    }),
     ids({
       id: "tpl-maine-coast", reviewed: true,
       title: "Maine Coast Explorers",

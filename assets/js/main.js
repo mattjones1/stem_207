@@ -67,6 +67,7 @@
     let title = "STEM 207";
 
     document.querySelectorAll(".overlay").forEach((o) => o.remove());
+    if (SE.modal) SE.modal.close();
     document.body.classList.remove("has-overlay");
 
     if (!user && !isAuthRoute) { location.replace("#/signin"); return; }

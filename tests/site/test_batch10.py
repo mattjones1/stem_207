@@ -80,7 +80,7 @@ async def cloud(b):
     await t.fill("#su-name", "Mr. Ames"); await t.fill("#su-class", "Room 4"); await t.fill("#su-email", email); await t.fill("#su-pw", "harbor207!"); await t.fill("#su-pw2", "harbor207!")
     await t.click("#su-form button[type=submit]"); await t.wait_for_timeout(1200)
     for n in ["Lia P.", "Sam K."]:
-        await t.fill("#as-name", n); await t.click("#add-student button[type=submit]"); await t.wait_for_timeout(400)
+        await t.locator("[data-add-students]").first.click(); await t.fill("#ms-names", n); await t.click("#ms-add"); await t.wait_for_timeout(400); await t.keyboard.press("Escape"); await t.wait_for_timeout(300)
     await t.evaluate("""(() => { const c = SE.store.classesFor(SE.store.currentUser().id)[0];
       SE.store.assign(c.id, ['event-party'], { dueDate: new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10) }); })()""")
     await t.evaluate("SE.store.flush()"); await t.wait_for_timeout(800)

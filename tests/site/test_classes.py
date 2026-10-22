@@ -35,7 +35,7 @@ async def main():
     ok("adding a class opens its page", "#/teach/classes/" in pg.url and "Room 9" in await pg.inner_text("#app h1"))
     cid = pg.url.split("#/teach/classes/")[1]
     ok("class page shows its sign-in code", await pg.locator(".code-chip").count() == 1)
-    await pg.fill("#as-name", "Kai M."); await pg.click("#add-student button[type=submit]"); await pg.wait_for_timeout(400)
+    await pg.locator("[data-add-students]").first.click(); await pg.fill("#ms-names", "Kai M."); await pg.click("#ms-add"); await pg.wait_for_timeout(400); await pg.keyboard.press("Escape"); await pg.wait_for_timeout(300)
     ok("add a student on the class page", "Kai M." in await pg.inner_text(".login-cards"))
     await pg.fill("#cr-name", "Room 9 Science"); await pg.click("#rename-class button[type=submit]"); await pg.wait_for_timeout(400)
     ok("rename the class", "Room 9 Science" in await pg.inner_text("#app h1"))
