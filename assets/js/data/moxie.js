@@ -3,11 +3,12 @@
  *
  * Planning brief: planning/MOXIE_PLAN.md. Validation backlog: planning/MOXIE_VALIDATION.md.
  *
- * This is an OUTLINE edition. The repo is public, so the source lesson text, wiring,
- * and code stay out of it until reuse permissions are confirmed. Fields that hold that
- * content (wiring, diagram, code, tests, stretch, steps) are empty, and the pages say
- * "in review". Grades and minutes stay null until a pilot sets them; never guess them.
- * Answer sketches never go in this repo: anything here is readable by anyone.
+ * Course material comes from the 16 Moxie student sheets (Session_01…16.docx), imported by
+ * tools/import_moxie_sheets.py into data/moxie-content.js (STEM.moxieContent, loaded before
+ * this file) and merged onto each session below. Reuse permission for the text, diagrams,
+ * and code was confirmed by Program on October 22, 2026 (MOXIE_VALIDATION.md, item 12).
+ * The sheets' blanks stay blanks: answer keys never go in this public repo. Grades and
+ * minutes stay null until a pilot sets them; never guess them.
  *
  * pub (publication state, per session and for the pathway):
  *   "draft" → "review" → "hardware" → "pilot" → "published"
@@ -24,8 +25,8 @@ window.STEM.moxie = {
   promise: "A STEM 207 pathway where students turn code into working devices that help people.",
   intro:
     "Start with a blinking light. Finish with something that matters. In Moxie, students learn to code, connect circuits, and bring their ideas to life with lights, buttons, displays, sensors, and movement. Working with a partner, they test ideas, track down bugs, and build a device for a real person's problem. Every project tells a story: who it helps, how it works, and what changed along the way.",
-  pub: "draft",
-  version: "0.1",
+  pub: "pilot",
+  version: "1.0",
   units: [
     { n: 1, title: "Outputs", question: "How can code change something in the physical world?",
       progress: "Explain and intentionally change an output pattern.", sessions: ["moxie-01", "moxie-02", "moxie-03", "moxie-04"] },
@@ -75,18 +76,37 @@ window.STEM.moxie = {
   const STEM = window.STEM;
   const UNIT_OF = (n) => Math.ceil(n / 4);
   const COMMON_NOTES = [
-    "Outline edition: the lesson text, wiring, and code stay out of this public site until reuse permissions are confirmed.",
-    "Answer sketches and teacher solutions are in the private Moxie teacher kit, never on this site.",
+    "Answer sketches and teacher solutions are in the private Moxie teacher kit, never on this site. The blanks students fill in aren't graded on screen: check them at checkoff.",
     "Check each student's own explanation. A shared circuit doesn't mean both partners understand it."
   ];
   const kitBasics = ["ESP32 board", "Data-capable USB cable", "Computer with the Arduino IDE"];
 
+  /* Diagram alt text, written by looking at each sheet's picture. The text version comes from the wiring table. */
+  const ALT = {
+    1: "Diagram of the ESP32 board: the antenna at the top, pins down both sides (EN to VIN on the left, D23 to 3V3 on the right), the red power LED, the blue built-in LED on D2, the EN and BOOT buttons, and the USB-C port at the bottom.",
+    2: "Breadboard diagram: the ESP32 with a red LED on pin D25 and a green LED on pin D26, each through a 220 Ω resistor, and both LEDs to the GND rail.",
+    3: "Breadboard diagram: the ESP32 with red, yellow, and green LEDs, each through a 220 Ω resistor, on pins D25, D26, and D27, and all to GND.",
+    4: "Breadboard diagram: the ESP32 with one blue LED on pin D25 through a 220 Ω resistor, and the LED to the GND rail.",
+    5: "Breadboard diagram: the ESP32 with three button-and-LED sets. Yellow: button on D16, LED on D25. Green: button on D17, LED on D26. Blue: button on D18, LED on D27. Each button goes from 3V3 with a 10 kΩ pull-down to GND; each LED has a 220 Ω resistor.",
+    6: "Breadboard diagram: the ESP32 with red, yellow, and green LEDs on D25, D26, and D27, and two buttons, S1 on D16 and S2 on D17, each with a 10 kΩ pull-down.",
+    7: "Breadboard diagram: the ESP32 with a knob (potentiometer): outer legs to 3V3 and GND, middle leg to D34. A blue LED on D25 through a 220 Ω resistor.",
+    8: "Breadboard diagram of the Smart Crosswalk: WALK (white) on D32, DON'T WALK (red) on D33, car red on D25, car yellow on D26, car green on D27, a passive buzzer with its + leg on D23, and a WALK button on D16 (RX2) with a pull-down.",
+    9: "Breadboard diagram: the ESP32 with a 128×64 OLED display (GND, VCC to 3V3, SCL to D22, SDA to D21) and a knob whose middle leg goes to D34.",
+    10: "Breadboard diagram: the ESP32 with the OLED display (SCL to D22, SDA to D21) and one button from 3V3 to D16 with a 10 kΩ pull-down to GND.",
+    11: "Breadboard diagram: the ESP32 with an HC-SR04 distance sensor (VCC to VIN 5 V, Trig to D5, Echo through a 1 kΩ and 2 kΩ voltage divider to D4), green, yellow, and red LEDs on D25, D26, and D27, and a buzzer on D23.",
+    12: "Breadboard diagram: the ESP32 with an SG90 servo (signal to D13, power to VIN 5 V, ground to GND) and a knob whose middle leg goes to D34."
+  };
+  const BOARD_TEXT = "Left side, top to bottom: EN, VP, VN, D34, D35, D32, D33, D25, D26, D27, D14, D12, D13, GND, VIN. Right side, top to bottom: D23, D22, TX0, RX0, D21, D19, D18, D5, TX2, RX2, D4, D2, D15, GND, 3V3. D-numbers are the pins you use in code (D25 = pin 25). GND is ground (−). VIN is 5 V from USB, for servo and sensor power only. 3V3 is 3.3 V power. The red LED means power is on. The blue LED is the built-in LED on D2. EN restarts the board; hold BOOT if an upload is stuck at \"Connecting...\". USB-C gives power and uploads code.";
+  /* A wiring table as text, row by row: "Header: cell. Header: cell." */
+  const tableText = (t) => t.rows.map((r) => r.map((c, i) => (c ? `${t.head[i] || ""}: ${c}` : "")).filter(Boolean).join(", ")).filter(Boolean).join(". ") + ".";
+
   /* One session record. Shared fields match activities.js so a published session works everywhere. */
   function session(n, title, kind, focus, evidence, check, extra = {}) {
     const id = `moxie-${String(n).padStart(2, "0")}`;
+    const C = (STEM.moxieContent || {})[id] || null;   // the sheet's content
     const u = STEM.moxie.units[UNIT_OF(n) - 1];
     const prev = n > 1 ? `moxie-${String(n - 1).padStart(2, "0")}` : null;
-    return {
+    const rec = {
       id, title, area: "engineering",
       summary: `Moxie session ${n} of 16. ${focus}.`,
       // Readiness within Moxie by unit (a proposal until the pilot): outputs, then decisions and sensing, then the capstone.
@@ -99,8 +119,8 @@ window.STEM.moxie = {
       keywords: ["moxie", "esp32", "arduino", "electronics", "physical computing", "coding"],
       access: { account: "none", cost: "free", supervision: true, hardware: ["ESP32 kit (exact board pending validation)", "Computer with the Arduino IDE"] },
       launch: { status: "none" },
-      pub: "draft",
-      version: "0.1",
+      pub: "pilot",
+      version: "1.0",
       moxie: Object.assign({ session: n, unit: u.n, kind, focus, evidence, gates: [], plan: null,
         sourceFile: extra.sourceFile }, extra.moxie || {}),
       mission: `Learning focus: ${focus}.`,
@@ -124,6 +144,42 @@ window.STEM.moxie = {
       notice: null,     // an urgent correction students and teachers must see
       teacherNotes: (extra.notes || []).concat(COMMON_NOTES)
     };
+    return C ? withSheet(rec, C) : rec;
+  }
+
+  /* Put the sheet's content on a session record. Everything students read comes from the sheet. */
+  function withSheet(rec, C) {
+    const M = rec.moxie;
+    M.sheet = C;                                   // the full sheet, for capstone pages and print
+    M.based = C.based || "";
+    M.unitLabel = C.unitLabel || "";
+    rec.mission = (C.mission || []).join(" ") || rec.mission;
+    rec.summary = `Moxie session ${M.session} of 16. ${(C.mission || [])[0] || M.focus}`;
+    if (C.need) rec.before.materials = C.need;
+    if (C.before || C.howWeWork) rec.before.setup = C.before || C.howWeWork;
+    M.setupTitle = C.howWeWork ? "How we work" : "Before you wire";
+    if (C.meet) M.meet = { text: C.meet.text };
+    if (C.connect) rec.steps = C.connect;
+    if (C.build && C.build.tables.length) {
+      const [head, ...rows] = C.build.tables[0];
+      rec.wiring = { head, rows: rows.filter((r) => r.some(Boolean)) };
+      M.buildNotes = C.build.notes;
+    }
+    const img = C.images || {};
+    if (img.board) M.board = { src: img.board, alt: ALT[1], text: BOARD_TEXT };
+    if (img.wiring) rec.diagram = { src: img.wiring, alt: ALT[M.session] || `Wiring diagram for ${rec.title}.`, text: rec.wiring ? tableText(rec.wiring) : "" };
+    if (C.concept) M.concept = { title: C.concept.heading, text: C.concept.text, tables: C.concept.tables };
+    if (C.plan) M.planSheet = { title: C.plan.heading, text: C.plan.text, tables: C.plan.tables };
+    if (C.code) rec.code = { intro: C.code.intro, lines: C.code.lines, remember: C.code.remember, file: null };
+    if (C.test) rec.tests = C.test;
+    if (C.stuck) rec.stuck = C.stuck;
+    if (C.stretch) { rec.stretch = C.stretch.text; M.stretchHint = C.stretch.hint; rec.extend = C.stretch.text; }
+    if (C.think) { M.think = C.think; rec.reflect = C.think; }
+    if (C.checkoff && C.checkoff.length) M.checkoff = C.checkoff;
+    if (C.explain) rec.check = C.explain;
+    M.signoffs = C.signoffs || [];
+    if (M.signoffs.includes("Stretch goal") && !M.gates.includes("stretch")) M.gates = M.gates.concat("stretch");
+    return rec;
   }
 
   const S = (n, ...args) => session(n, ...args);
@@ -199,11 +255,11 @@ window.STEM.moxie = {
     S(14, "Capstone: Build Sprint", "buildlog", "Testing subsystems; putting them together; debugging",
       "A working subsystem, the build checklist, a bug log, and any changes to the plan.",
       "Explain one bug you found and how you fixed it.",
-      { sourceFile: "Session_14_Capstone_Build_Sprint.docx" }),
+      { sourceFile: "Session_14_Capstone_Build_Sprint.docx", moxie: { gates: ["subsystem"] } }),
     S(15, "Capstone: Test & Improve", "testimprove", "Testing against criteria; feedback; revision",
       "Three test results, peer feedback, an improvement, a showcase card, and a pitch plan.",
       "Explain one change you made after testing or feedback, and why.",
-      { sourceFile: "Session_15_Capstone_Test_Improve.docx" }),
+      { sourceFile: "Session_15_Capstone_Test_Improve.docx", moxie: { gates: ["card"] } }),
     S(16, "Capstone Showcase", "showcase", "Demonstration; explanation; reflection",
       "A one-minute pitch, a device demo, feedback, and your own reflection and self-rating.",
       "Explain what you would improve next, and why.",

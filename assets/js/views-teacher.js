@@ -474,7 +474,8 @@
           ${conf ? `<span class="conf conf--${conf.id}">${esc(conf.name)}</span>` : ""}
         </div>
         ${(() => { const st = SE.game.statusFor(prof, c.activity); return st.sub && st.sub.id === c.event.id ? `<div class="check-row-wrap">${statusChip(st)}${checkActions(student, c.activity, st, open)}</div>` : ""; })()}
-        ${c.event.data.extensionNote ? `<p class="muted small"><strong>Take it further:</strong> “${esc(c.event.data.extensionNote)}”</p>` : ""}
+        ${c.event.data.extensionNote ? `<p class="muted small"><strong>Go deeper:</strong> “${esc(c.event.data.extensionNote)}”</p>` : ""}
+        ${c.activity.moxie && SE.moxie && SE.moxie.checkDetails ? SE.moxie.checkDetails(student.id, c.activity) : ""}
         ${answer ? `<p class="mission-log__q">${esc(c.event.data.evidence && c.activity.check ? c.activity.check : c.activity.reflect)}</p><p class="mission-log__answer">“${esc(answer)}”</p>` : (c.event.data.evidence === "show" ? `<p class="muted">${icon("users", 'class="inline-icon"')}Chose to show or tell you instead of writing.</p>` : `<p class="muted">No answer to the reflection question.</p>`)}
         ${r && r.data.note ? `<p class="teacher-reply">${icon("message")}<span><strong>You replied:</strong> ${esc(r.data.note)}</span></p>` : ""}
       </li>`;

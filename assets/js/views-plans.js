@@ -81,7 +81,8 @@
       const a = actOf(s);
       if (!a) { out.push(`Activity ${i + 1} no longer exists. Remove it.`); return; }
       if (!s.required) return;
-      if (!SE.content.isPublished(a)) out.push(`${a.title} isn't published yet. Make it optional or remove it.`);
+      // Published activities and pilot sessions (Moxie) can be required; drafts can't.
+      if (!SE.content.assignable(a)) out.push(`${a.title} isn't ready for students yet. Make it optional or remove it.`);
       else if (SE.content.readiness(a) === "missing-resource") out.push(`${a.title} has no resource yet. Make it optional or remove it.`);
     });
     return out;

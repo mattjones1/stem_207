@@ -23,11 +23,14 @@
 
   const PUB = { draft: "Draft", review: "In curriculum review", hardware: "In hardware validation", pilot: "In pilot", published: "Published" };
   const STATUS = { none: "Not started", started: "In progress", submitted: "Ready for review", checked: "Ready for review", tryagain: "Try again", confirmed: "Verified" };
-  const GATES = { wiring: "Wiring checked", design: "Design approved", plan: "Plan approved", pitch: "Pitch given" };
+  /* Teacher sign-offs. The labels match the sheets' checkoff boxes. "Core challenge" is the teacher's Pass. */
+  const GATES = { wiring: "Wiring checked", design: "Design approved", plan: "Plan approved", stretch: "Stretch goal", subsystem: "Subsystem demo",
+    card: "Criteria tested + showcase card", pitch: "Pitch + demo" };
+  const BAD_PINS = [0, 2, 6, 7, 8, 9, 10, 11, 12, 15];   // the Session 13 sheet's don't-use list
   const INPUTS = [["button", "Button"], ["knob", "Knob (potentiometer)"], ["light", "Light sensor"], ["temperature", "Temperature sensor"], ["distance", "Distance sensor"]];
   const OUTPUTS = [["led", "LED", "light"], ["rgb", "RGB LED", "light"], ["buzzer", "Buzzer", "sound"], ["oled", "OLED display", "display"], ["servo", "Servo", "motion"]];
   const BUGLOG = { subsystem: "Subsystem test", bug: "Bug and fix", change: "Change to the plan" };
-  const MET = { yes: "Met", partly: "Partly met", no: "Not met yet" };
+  const MET = { yes: "Yes", no: "No" };
   const PLAN_PROMPT = {
     pseudocode: "Before you code, write your plan in plain steps, in order.",
     "truth-table": "Before you code, fill in what each light does for every button case."
@@ -45,14 +48,17 @@
   const visible = (a, user) => !a || !a.moxie || SE.content.visibleTo(a, user);
   const pathwayVisible = (user) => M.pub === "published" || isEdu(user) || sessions().some((s) => visible(s, user));
 
-  /* What a session still needs before it can go to a pilot or be published. */
-  function readyToPublish(a) {
+  /* What a session still needs. "pilot" needs the sheet's content; "publish" (everyone) also needs the
+     grade range and student time, which the pilot sets (never guessed). */
+  function readyToPublish(a, level = "publish") {
     const out = [];
-    if (!a.grades || !a.grades.length) out.push("grade range");
-    if (!a.duration && !(a.time && a.time.core)) out.push("student time");
-    if (!a.steps || !a.steps.length) out.push("steps");
+    if (level === "publish") {
+      if (!a.grades || !a.grades.length) out.push("grade range");
+      if (!a.duration && !(a.time && a.time.core)) out.push("student time");
+    }
+    if (!a.mission || !a.moxie.sheet) out.push("the sheet's content");
     if (a.moxie.kind === "build") {
-      if (!a.wiring) out.push("wiring table");
+      if (!a.wiring && (!a.moxie.sheet || a.moxie.sheet.build)) out.push("wiring table");
       if (!a.code) out.push("starter code");
       if (!a.tests) out.push("test checks");
     }
@@ -68,16 +74,28 @@
   function designCheck(d) {
     if (!d) return ["Fill in your design and save it."];
     const out = [];
-    if (!clean(d.problem)) out.push("Write the problem your device solves.");
-    if (!clean(d.user)) out.push("Write who your device helps.");
+    if (!clean(d.user)) out.push("Write who has the problem.");
+    if (!clean(d.problem)) out.push("Write what the problem is.");
+    if ("device" in d && !clean(d.device)) out.push("Finish the sentence “Our device will…”.");
     const crit = (d.criteria || []).filter(clean);
     if (crit.length < 3) out.push(`You have ${crit.length} of 3 criteria. Write ${crit.length === 2 ? "one more" : `${3 - crit.length} more`} that you can measure.`);
+    (d.criteria || []).forEach((c, i) => { if (clean(c) && d.tests && !clean(d.tests[i])) out.push(`Criterion ${i + 1}: write how you will test it.`); });
     if (!(d.inputs || []).length) out.push("Pick at least one input.");
     const outs = d.outputs || [];
     const types = [...new Set(outs.map(outputType))];
     if (!outs.length) out.push("Pick at least two outputs of different types.");
     else if (types.length < 2) out.push(`Your output${outs.length === 1 ? "" : "s"} (${outs.map(outputName).join(", ")}) ${outs.length === 1 ? "is" : "are all"} one type: ${types[0]}. Add an output of a different type.`);
-    if (!clean(d.pins)) out.push("List each part and the pin it uses.");
+    const parts = d.parts || [];
+    if (!parts.length && !clean(d.pins)) out.push("List each part and the pin it uses.");
+    parts.forEach((p, i) => {
+      if (!clean(p.part)) return;
+      if (!clean(p.pin)) { out.push(`Part ${i + 1} (${p.part}) needs a pin.`); return; }
+      const n = Number((String(p.pin).match(/\d+/) || [])[0]);
+      if (/^(3v3|vin|gnd|5v)$/i.test(String(p.pin).trim())) return;
+      if (BAD_PINS.includes(n)) out.push(`Pin ${n} (${p.part}) is on the don't-use list: 0, 2, 6–11, 12, and 15. Pick another pin.`);
+    });
+    if (parts.length && !parts.some((p) => p.io === "input")) out.push("Mark at least one part as an input.");
+    if ("sketched" in d && !d.sketched) out.push("Sketch your circuit on paper and show your teacher, then tick the box.");
     if (!clean(d.pseudocode)) out.push("Write your plan in plain steps (pseudocode).");
     return out;
   }
@@ -89,8 +107,10 @@
     return !!(g && g.data.ok);
   }
   function work(studentId) {
-    return SE.store.eventsFor(studentId).filter((e) => /^moxie_/.test(e.type))
-      .concat(SE.store.teamEvents(studentId)).sort((x, y) => x.at - y.at);
+    // Cards other teams sent count as feedback this team received (moxie_feedback_card_got, read-only).
+    const got = (SE.store.feedbackCards ? SE.store.feedbackCards(studentId) : []).map((e) => ({ ...e, type: "moxie_feedback_card_got" }));
+    return SE.store.eventsFor(studentId).filter((e) => /^moxie_/.test(e.type) && e.type !== "moxie_feedback_card")
+      .concat(SE.store.teamEvents(studentId), got).sort((x, y) => x.at - y.at);
   }
 
   /* One team's capstone record. */
@@ -107,8 +127,15 @@
       feedback: evs.filter((e) => e.type === "moxie_feedback_got"),
       improvements: evs.filter((e) => e.type === "moxie_improve"),
       card: data(latest(evs, "moxie_card")),
+      standups: evs.filter((e) => e.type === "moxie_standup").reduce((m, e) => ((m[e.data.session] = e.data), m), {}),
+      subsystems: data(latest(evs, "moxie_subsystem")),
+      change: data(latest(evs, "moxie_change")),
+      pitch: data(latest(evs, "moxie_pitch")),
+      cards: evs.filter((e) => e.type === "moxie_feedback_card_got"),
       designApproved: gateOpen(evs, "moxie-13", "design"),
-      pitch: gateOpen(evs, "moxie-16", "pitch")
+      subsystemDemo: gateOpen(evs, "moxie-14", "subsystem"),
+      cardChecked: gateOpen(evs, "moxie-15", "card"),
+      pitched: gateOpen(evs, "moxie-16", "pitch")
     };
   }
 
@@ -122,10 +149,11 @@
     ((rec.design && rec.design.criteria) || []).filter(clean).forEach((c, i) => {
       if (!rec.tests[i] || !clean(rec.tests[i].result)) out.push(`Criterion ${i + 1} (“${c}”) has no test result yet.`);
     });
-    if (!rec.feedback.length) out.push("Ask a classmate for feedback, and write down what they said.");
+    if (!rec.feedback.length && !rec.cards.length) out.push("Get a feedback card from another team.");
     if (!rec.improvements.length) out.push("Make at least one improvement, and write what you changed.");
     if (!rec.card || !clean(rec.card.title)) out.push("Fill in your showcase card.");
-    if (!rec.pitch) out.push("Give your one-minute pitch with your partner. Your teacher marks it.");
+    if (!rec.pitch || !clean(Object.values(rec.pitch).join(""))) out.push("Plan your 1-minute pitch.");
+    if (!rec.pitched) out.push("Give your one-minute pitch with your partner. Your teacher marks it.");
     return out;
   }
   const capstoneComplete = (rec) => { const missing = capstoneCheck(rec); return { ok: !missing.length, missing }; };
@@ -144,6 +172,11 @@
       moxie_buglog: ["tools", `${who}added to the capstone build log`], moxie_test: ["flask", `${who}recorded a capstone test result`],
       moxie_feedback_got: ["message", `${who}recorded feedback on the capstone`], moxie_improve: ["refresh", `${who}recorded a capstone improvement`],
       moxie_card: ["flag", `${who}updated the showcase card`], moxie_reflect: ["question", `${who}wrote a Moxie reflection`],
+      moxie_code: ["code", `${who}saved their code for ${title}`], moxie_think: ["message", `${who}answered Think about it for ${title}`],
+      moxie_checklist: ["list", `${who}updated a checklist for ${title}`], moxie_kit: ["box", `${who}set their kit number`],
+      moxie_standup: ["users", `${who}wrote a stand-up`], moxie_subsystem: ["list", `${who}updated the subsystem checklist`],
+      moxie_change: ["refresh", `${who}wrote what changed from the plan`], moxie_pitch: ["message", `${who}planned the pitch`],
+      moxie_feedback_card: ["star", `${who}sent a feedback card to ${esc(e.data.toNames || "another team")}`],
       moxie_gate: ["shield", `Teacher marked “${esc(GATES[e.data.gate] || e.data.gate)}” as ${e.data.ok ? "done" : "not yet"} on ${title}`],
       moxie_rubric: ["clipboard", `Teacher left ${esc(e.data.dimension || "")} feedback on ${title}`]
     }[e.type];
@@ -241,7 +274,31 @@
       </div>`;
   };
 
-  /* ───────── Session page: #/activity/moxie-NN ───────── */
+  /* ───────── Session page: #/activity/moxie-NN ─────────
+   * The page follows the student sheet section by section, with the sheet's headings, so a class can
+   * switch between paper and screen. Work saves as moxie_* events (see SAVE below). */
+  const TEAMS_FOR = (user) => (isStu(user) ? SE.store.classTeams(user.id) : []);
+  const tableHtml = (t, caption, cls = "") => {
+    if (!t || !t.length) return "";
+    const [head, ...rows] = t;
+    return `<div class="table-wrap"><table class="roster mx-sheet-table ${cls}"><caption class="visually-hidden">${esc(caption)}</caption>
+      <thead><tr>${head.map((h) => `<th scope="col">${esc(h)}</th>`).join("")}</tr></thead>
+      <tbody>${rows.map((r) => `<tr>${r.map((c, i) => (i === 0 ? `<th scope="row">${esc(c)}</th>` : `<td>${esc(c)}</td>`)).join("")}</tr>`).join("")}</tbody></table></div>`;
+  };
+  const bullets = (list) => (list && list.length ? `<ul class="bullets">${list.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul>` : "");
+  const sec = (id, ic, title, body, extra = "") => `<section class="block mx-sec ${extra}" aria-labelledby="${id}"><h2 id="${id}">${icon(ic)}${esc(title)}</h2>${body}</section>`;
+  const latestFor = (evs, type, a, pred) => evs.filter((e) => e.type === type && e.data.activityId === a.id && (!pred || pred(e))).pop() || null;
+  const checklistState = (evs, a, list) => ((latestFor(evs, "moxie_checklist", a, (e) => e.data.list === list) || {}).data || {}).items || [];
+
+  /* Code with blanks: every run of 3+ underscores is one blank the student fills in. */
+  function codeModel(lines) {
+    let k = 0;
+    return { lines: lines.map((l, i) => ({ n: i + 1, segs: l.split(/(_{3,})/).filter((p) => p !== "").map((p) => (/^_{3,}$/.test(p) ? { b: k++, len: p.length } : p)) })), count: k };
+  }
+  const filledCode = (model, values) => model.lines.map((ln) => ln.segs.map((s) => (typeof s === "string" ? s : (values[s.b] || "").trim() || "____")).join("")).join("\n");
+  const emptyBlankLines = (model, values) => [...new Set(model.lines.filter((ln) => ln.segs.some((s) => typeof s !== "string" && !(values[s.b] || "").trim())).map((ln) => ln.n))];
+  SE.moxieCode = { codeModel, filledCode, emptyBlankLines };
+
   SE.views.moxieSession = function (user, a) {
     if (!visible(a, user)) return SE.views.notFound();
     const stu = isStu(user), edu = isEdu(user);
@@ -250,8 +307,8 @@
     const k = a.moxie.kind;
     const u = M.units[a.moxie.unit - 1];
     const st = prof ? statusOf(prof, a) : null;
-    const gates = a.moxie.gates.map((g) => ({ g, open: stu && gateOpen(evs, a.id, g) }));
-    const capstoneKind = k !== "build";
+    const mates = stu ? SE.store.teammates(user.id) : [];
+    const kit = stu ? ((latest(evs, "moxie_kit") || {}).data || {}).kit : "";
 
     app().innerHTML = `
       <section class="page-top">
@@ -259,11 +316,11 @@
           <div class="backbar">${SE.backLink("#/moxie", "Moxie")}
             <nav class="crumbs" aria-label="Breadcrumb"><a href="#/moxie">Moxie</a> / Unit ${u.n}: ${esc(u.title)} / <span aria-current="page">${esc(a.title)}</span></nav></div>
           <div class="page-top__head"><span class="icon-badge">${icon("gear")}</span>
-            <div><span class="eyebrow">Moxie · ${num(a)} of 16 · Unit ${u.n}</span><h1 tabindex="-1">${esc(a.title)}</h1></div></div>
-          <p class="page-top__lede">${esc(a.moxie.focus)}.</p>
+            <div><span class="eyebrow">Moxie · ${num(a)} of 16 · Unit ${u.n}: ${esc(u.title)}</span><h1 tabindex="-1">${esc(a.title)}</h1></div></div>
+          ${a.moxie.based ? `<p class="mx-based">${esc(a.moxie.based)}</p>` : ""}
           <div class="page-top__tags">
             ${st ? `<span class="chip chip--done-dark">${esc(st.label)}</span>` : ""}
-            ${stu && SE.store.assignmentFor(user.classId, a.id) ? `<span class="assigned-tag">${icon("clipboard")}Assigned by your teacher</span>` : ""}
+            <button type="button" class="btn btn--ghost btn--small mx-print-btn" id="mx-print">${icon("print")}Print this sheet</button>
           </div>
         </div>
       </section>
@@ -271,34 +328,22 @@
         <div class="activity-main">
           ${edu ? pubBanner(a.pub, "this session") : ""}
           ${a.notice ? `<p class="mx-banner mx-banner--notice">${icon("alert")}<span><strong>Update:</strong> ${esc(a.notice)}</span></p>` : ""}
-          <section class="block block--mission" aria-labelledby="s-mission">
-            <h2 id="s-mission">${icon("target")}Your mission</h2>
-            <p>${esc(a.mission)}</p>
-          </section>
-          <section class="block" aria-label="When you are done">
-            <p class="stop-at">${icon("flag")}<span><strong>You're done when:</strong> ${esc(a.stopAt)}</span></p>
-            ${gates.length ? (stu ? `<p class="mx-gates">${gates.map((x) => gateChip(x.open, x.g)).join("")}</p>` : `<p class="muted small">${icon("shield")}Teacher check in this session: ${esc(gates.map((x) => GATES[x.g]).join(", "))}. Mark it on the <a href="#/moxie/teach">Teach Moxie</a> page.</p>`) : ""}
-          </section>
-          ${capstoneKind && stu ? teamPanel(user) : ""}
-          ${capstoneKind ? capstoneSections(user, a, evs) : buildSections(user, a, evs, prof)}
-          <section class="block" aria-labelledby="s-explain">
-            <h2 id="s-explain">${icon("question")}Explain it</h2>
-            <p>${esc(a.check)}</p>
-            <p class="muted">${stu ? "Explain it in your own words, even if your partner built the circuit. Write it below, or show your teacher." : "Each partner explains on their own. Confirm or ask them to try again from the student page."}</p>
-          </section>
+          ${stu ? `
+          <form class="block mx-names" data-mx="kit" novalidate>
+            <p><strong>Name:</strong> ${esc(user.displayName)}</p>
+            <p><strong>Partner:</strong> ${mates.length ? esc(mates.map((m) => m.displayName).join(" & ")) : `<span class="muted">Not on a team yet</span>`}</p>
+            <div class="mx-kit">${line("mx-kit", "Kit #", kit, 12)}<button type="submit" class="btn btn--ghost btn--small">${icon("check")}Save</button>${status("mx-kit-status")}</div>
+          </form>` : ""}
+          ${k === "build" ? buildSections(user, a, evs, prof) : (stu ? teamPanel(user) : "") + capstoneSections(user, a, evs)}
+          ${checkoffSection(user, a, evs, prof)}
           ${stu ? SE.views.debrief(user, a, prof) : ""}
-          <section class="block block--extend" aria-labelledby="s-stretch">
-            <h2 id="s-stretch">${icon("rocket")}Stretch</h2>
-            <p class="muted">Optional. You don't need it to finish the session.</p>
-            ${a.stretch ? `<p>${esc(a.stretch)}</p>` : inReview("The stretch challenge")}
-          </section>
           ${stu ? "" : `
           <details class="block teacher-notes" open>
             <summary><h2>${icon("clipboard")}Teacher notes</h2><span class="toggle-hint" aria-hidden="true"></span></summary>
             <div class="teacher-notes__body">
               <ul class="bullets">${a.teacherNotes.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul>
               <p><strong>Source:</strong> ${esc(a.moxie.sourceFile)} · content v${esc(a.version)}</p>
-              ${readyToPublish(a).length ? `<p><strong>Still needed before a pilot:</strong> ${esc(readyToPublish(a).join(", "))}.</p>` : ""}
+              ${readyToPublish(a, "publish").length ? `<p><strong>Still needed before publishing to everyone:</strong> ${esc(readyToPublish(a, "publish").join(", "))}.</p>` : ""}
             </div>
           </details>`}
         </div>
@@ -308,17 +353,24 @@
             <dl class="facts">
               <div><dt>Pathway</dt><dd><a href="#/moxie">Moxie</a>, ${num(a)} of 16</dd></div>
               <div><dt>Unit</dt><dd>${u.n}: ${esc(u.title)}</dd></div>
-              <div><dt>Grades</dt><dd>${a.grades.length ? SE.gradesText(a.grades) : "Pending validation"}</dd></div>
+              <div><dt>Grades</dt><dd>${a.grades.length ? SE.gradesText(a.grades) : "Pending a pilot"}</dd></div>
               <div><dt>Time</dt><dd>${a.duration || a.time ? SE.timeText(a) : "Pending a pilot"}</dd></div>
               <div><dt>Format</dt><dd>With a partner</dd></div>
             </dl>
           </div>
           ${edu ? sessionClassBox(user, a) : ""}
-          <div class="block"><h2>What you need</h2><ul class="bullets">${a.before.materials.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul>
-            <p class="muted small"><strong>Before this:</strong> ${esc(a.before.prerequisites)}</p></div>
+          <div class="block"><h2>Before this</h2><p class="muted small">${esc(a.before.prerequisites)}</p></div>
         </aside>
-      </div>`;
+      </div>
+      <div id="mx-print-sheet" class="mx-print-sheet" aria-hidden="true"></div>`;
 
+    document.getElementById("mx-print").addEventListener("click", () => {
+      const box = document.getElementById("mx-print-sheet");
+      box.innerHTML = printSheet(a);
+      document.body.classList.add("mx-printing");
+      window.print();
+      document.body.classList.remove("mx-printing");
+    });
     if (stu) {
       SE.logOpen(user, a.id);
       SE.views.bindDebrief(user, a);
@@ -326,128 +378,239 @@
     }
   };
 
-  /* The 8 sections of a build session (3–6 here; mission, explain, and stretch are shared). */
-  function buildSections(user, a, evs, prof) {
+  /* The checkoff, like the bottom of the sheet: the list before you call your teacher over, the
+     question to be ready for (sent through the debrief below), and the teacher's sign-offs. */
+  function checkoffSection(user, a, evs, prof) {
     const stu = isStu(user);
-    const wiringGate = a.moxie.gates.includes("wiring");
-    const plan = stu ? latest(evs, "moxie_plan", a.id) : null;
-    const obs = stu ? latest(evs, "moxie_observe", a.id) : null;
-    const checked = prof ? (prof.steps[a.id] || new Set()) : new Set();
+    const items = a.moxie.checkoff || [];
+    const done = stu ? checklistState(evs, a, "checkoff") : [];
+    const st = prof ? SE.game.statusFor(prof, a) : null;
+    const signoff = (label) => {
+      const gate = Object.keys(GATES).find((g) => GATES[g] === label);
+      if (!gate) {   // "Core challenge": the teacher's Pass
+        const ok = st && st.state === "confirmed";
+        return `<li class="${ok ? "is-done" : ""}">${icon(ok ? "check" : "clock")}<span><strong>${esc(label)}</strong> · ${ok ? "passed by your teacher" : "your teacher passes it after you send your answer"}</span></li>`;
+      }
+      const g = latest(evs.filter((e) => e.data.gate === gate), "moxie_gate", a.id);
+      const ok = !!(g && g.data.ok);
+      return `<li class="${ok ? "is-done" : ""}">${icon(ok ? "check" : "clock")}<span><strong>${esc(label)}</strong> · ${ok ? `checked ${SE.dateShort(g.at)}` : "your teacher checks this off"}</span></li>`;
+    };
     return `
-      <section class="block" aria-labelledby="s-before">
-        <h2 id="s-before">${icon("shield")}Before you wire</h2>
-        <ul class="bullets">${a.before.setup.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}
-          <li><span>Unplug the board before you change any wires.</span></li></ul>
-        ${wiringGate ? `<p class="mx-stop">${icon("alert")}<span><strong>Stop and check:</strong> your teacher checks your wiring before you power this circuit.${stu ? ` ${gateOpen(evs, a.id, "wiring") ? "Your wiring is checked. You can power it on." : "Not checked yet. Raise your hand when your circuit is built."}` : ""}</span></p>` : ""}
-      </section>
-      <section class="block" aria-labelledby="s-build">
-        <h2 id="s-build">${icon("tools")}Build it</h2>
-        ${a.diagram ? `<figure class="mx-diagram"><img src="${esc(a.diagram.src)}" alt="${esc(a.diagram.alt)}"><figcaption>${esc(a.diagram.alt)}</figcaption>
-          <details><summary>Read the diagram as text</summary><p>${esc(a.diagram.text)}</p></details></figure>` : ""}
-        ${a.wiring ? `<div class="table-wrap"><table class="roster mx-wiring"><caption class="visually-hidden">Wiring for ${esc(a.title)}</caption>
-          <thead><tr><th scope="col">Part</th><th scope="col">Connects to</th><th scope="col">Notes</th></tr></thead>
-          <tbody>${a.wiring.map(([part, pin, note]) => `<tr><th scope="row">${esc(part)}</th><td>${esc(pin)}</td><td>${esc(note || "")}</td></tr>`).join("")}</tbody></table></div>
-          <p class="muted small">Wire colors don't matter. Follow the pin names in the table.</p>` : inReview("The wiring table and diagram")}
-        ${a.steps.length ? `<ol class="steps ${stu ? "steps--check" : ""}">${a.steps.map((x, i) => stu ? `
-          <li><label class="step-check"><input type="checkbox" data-step="${i}" ${checked.has(i) ? "checked" : ""}>
-            <span class="step-check__box" aria-hidden="true">${icon("check")}</span><span class="step-check__num" aria-hidden="true">${i + 1}</span>
-            <span class="step-check__text"><span class="visually-hidden">Step ${i + 1}: </span>${esc(x)}</span></label></li>` : `<li><span>${esc(x)}</span></li>`).join("")}</ol>` : ""}
-      </section>
-      ${a.moxie.plan ? `
-      <section class="block" aria-labelledby="s-plan">
-        <h2 id="s-plan">${icon("list")}Plan it</h2>
-        <p>${esc(PLAN_PROMPT[a.moxie.plan])}</p>
-        ${a.moxie.gates.includes("plan") ? `${stu ? `<p class="mx-gates">${gateChip(gateOpen(evs, a.id, "plan"), "plan")}</p>` : ""}<p class="muted small">Show your teacher your plan before you code.</p>` : ""}
-        ${stu ? `<form data-mx="plan" novalidate>${area("mx-plan", "Your plan", plan && plan.data.text, 6, 1500)}
-          <button type="submit" class="btn btn--primary">${icon("check")}Save my plan</button>${status("mx-plan-status")}</form>`
-          : `<p class="muted">Each student writes and saves their own plan here.</p>`}
-      </section>` : ""}
-      <section class="block" aria-labelledby="s-code">
-        <h2 id="s-code">${icon("code")}Code it</h2>
-        ${a.code ? `<p>Type the code in the Arduino IDE and fill in each blank (<code>____</code>). You can copy it from here.</p>
-          <pre class="mx-code" tabindex="0" aria-label="Starter code for ${esc(a.title)}"><code>${a.code.lines.map(esc).join("\n")}</code></pre>
-          ${a.code.file ? `<a class="btn btn--ghost btn--small" href="${esc(a.code.file)}" download>${icon("arrowRight")}Download the starter sketch</a>` : ""}` : inReview("The starter code")}
-      </section>
-      <section class="block" aria-labelledby="s-test">
-        <h2 id="s-test">${icon("flask")}Test it</h2>
-        ${a.tests ? `<ul class="bullets">${a.tests.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul>` : inReview("The test checks")}
-        ${stu ? `<form data-mx="observe" novalidate>${area("mx-observe", "What happened when you tested it?", obs && obs.data.text, 4, 800, "Write what you saw, and anything you changed.")}
-          <button type="submit" class="btn btn--primary">${icon("check")}Save my notes</button>${status("mx-observe-status")}</form>` : ""}
+      <section class="block mx-sec mx-checkoff" aria-labelledby="s-checkoff">
+        <h2 id="s-checkoff">${icon("shield")}${items.length ? "Checkoff: before you call your teacher over" : "Checkoff"}</h2>
+        ${items.length ? (stu ? `<fieldset class="mx-checklist" data-checklist="checkoff"><legend class="visually-hidden">Checkoff list</legend>
+          ${items.map((x, i) => `<label class="mx-check"><input type="checkbox" data-ci="${i}" ${done[i] ? "checked" : ""}><span>${esc(x)}</span></label>`).join("")}</fieldset>` : bullets(items)) : ""}
+        ${a.check ? `<p class="mx-explain">${icon("message")}<span><strong>Be ready to explain:</strong> ${esc(a.check)}</span></p>` : ""}
+        ${stu ? `<p class="muted small">When your list is done, send your answer below. That's how you call your teacher over.</p>` : ""}
+        <ul class="mx-signoffs">${(a.moxie.signoffs || []).map(signoff).join("")}</ul>
       </section>`;
   }
 
-  /* Capstone sessions: a design worksheet (13), a build log (14), tests and improvement (15), showcase (16). */
+  /* Sessions 1–12: the sheet's sections, in the sheet's order. */
+  function buildSections(user, a, evs, prof) {
+    const stu = isStu(user);
+    const m = a.moxie;
+    const wiringGate = m.gates.includes("wiring");
+    const plan = stu ? latest(evs, "moxie_plan", a.id) : null;
+    const obs = stu ? latest(evs, "moxie_observe", a.id) : null;
+    const think = stu ? latest(evs, "moxie_think", a.id) : null;
+    const code = stu ? latest(evs, "moxie_code", a.id) : null;
+    const tested = stu ? checklistState(evs, a, "test") : [];
+    const checked = prof ? (prof.steps[a.id] || new Set()) : new Set();
+    const model = a.code ? codeModel(a.code.lines) : null;
+    const values = (code && code.data.blanks) || [];
+    const planLines = m.planSheet ? m.planSheet.text.filter((t) => !/^Instructor approval/i.test(t)) : [];
+    const savedPlan = (plan && plan.data.lines) || [];
+    let blankNo = 0;
+    return `
+      ${sec("s-mission", "target", "Your mission", `<p>${esc(a.mission)}</p>`, "block--mission")}
+      ${sec("s-need", "box", "What you need", bullets(a.before.materials))}
+      ${sec("s-before", "shield", m.setupTitle || "Before you wire", `${bullets(a.before.setup)}
+        ${wiringGate ? `<p class="mx-stop">${icon("alert")}<span><strong>Stop and check:</strong> your teacher checks your wiring before you power this circuit.${stu ? ` ${gateOpen(evs, a.id, "wiring") ? "Your wiring is checked. You can power it on." : "Not checked yet."}` : ""}</span></p>` : ""}`)}
+      ${m.board ? sec("s-meet", "tools", "Meet your ESP32", `
+        <figure class="mx-diagram"><img src="${esc(m.board.src)}" alt="${esc(m.board.alt)}" loading="lazy"><figcaption>${esc((m.meet && m.meet.text[0]) || "")}</figcaption>
+          <details><summary>Read the board as text</summary><p>${esc(m.board.text)}</p></details></figure>`) : ""}
+      ${a.steps.length ? sec("s-connect", "list", "Connect it", `<ol class="steps ${stu ? "steps--check" : ""}">${a.steps.map((x, i) => stu ? `
+          <li><label class="step-check"><input type="checkbox" data-step="${i}" ${checked.has(i) ? "checked" : ""}>
+            <span class="step-check__box" aria-hidden="true">${icon("check")}</span><span class="step-check__num" aria-hidden="true">${i + 1}</span>
+            <span class="step-check__text"><span class="visually-hidden">Step ${i + 1}: </span>${esc(x)}</span></label></li>` : `<li><span>${esc(x)}</span></li>`).join("")}</ol>`) : ""}
+      ${a.wiring || a.diagram ? sec("s-build", "tools", "Build it", `
+        ${a.diagram ? `<figure class="mx-diagram"><a href="${esc(a.diagram.src)}" target="_blank" rel="noopener" class="mx-diagram__zoom"><img src="${esc(a.diagram.src)}" alt="${esc(a.diagram.alt)}" loading="lazy"><span class="visually-hidden"> (opens the full-size diagram in a new tab)</span></a>
+          <details><summary>Read the diagram as text</summary><p>${esc(a.diagram.text)}</p></details></figure>` : ""}
+        ${(m.buildNotes || []).map((x) => `<p class="mx-note">${esc(x)}</p>`).join("")}
+        ${a.wiring ? tableHtml([a.wiring.head].concat(a.wiring.rows), `Wiring for ${a.title}`, "mx-wiring") : ""}`) : ""}
+      ${m.concept ? sec("s-concept", "bulb", sentence(m.concept.title), `${m.concept.text.map((x) => `<p>${esc(x)}</p>`).join("")}${m.concept.tables.map((t) => tableHtml(t, m.concept.title)).join("")}`) : ""}
+      ${m.planSheet ? sec("s-plan", "list", sentence(m.planSheet.title), `
+        ${m.planSheet.tables.map((t) => tableHtml(t, "Truth table")).join("")}
+        ${planLines.some((t) => /^\d+\.\s*_{3,}/.test(t)) ? `
+          ${planLines.filter((t) => !/^\d+\./.test(t)).map((t) => `<p>${esc(t)}</p>`).join("")}
+          ${stu ? `<form data-mx="plan" novalidate><ol class="mx-plan">${planLines.filter((t) => /^\d+\./.test(t)).map((t) => {
+              const [, n, rest] = t.match(/^(\d+)\.\s*(.*)$/);
+              if (!/^_{3,}$/.test(rest.trim())) return `<li><span>${esc(rest)}</span></li>`;
+              const i = blankNo++;
+              return `<li><label class="visually-hidden" for="mx-pl-${i}">Step ${n} of your plan</label><input id="mx-pl-${i}" class="input" data-plan="${i}" maxlength="200" value="${esc(savedPlan[i] || "")}" placeholder="Step ${n}"></li>`;
+            }).join("")}</ol>
+            <button type="submit" class="btn btn--primary">${icon("check")}Save my plan</button>${status("mx-plan-status")}</form>`
+          : `<ol class="mx-plan">${planLines.filter((t) => /^\d+\./.test(t)).map((t) => `<li><span>${esc(t.replace(/^\d+\.\s*/, ""))}</span></li>`).join("")}</ol>`}`
+        : planLines.map((t) => `<p>${esc(t)}</p>`).join("")}
+        ${m.gates.includes("plan") ? `<p class="mx-gates">${stu ? gateChip(gateOpen(evs, a.id, "plan"), "plan") : ""}</p><p class="muted small">Show your plan to your teacher before you code.</p>` : ""}`) : ""}
+      ${a.code ? sec("s-code", "code", "Code it", `
+        ${a.code.intro ? `<p>${esc(a.code.intro)}</p>` : ""}
+        ${stu ? `<p class="muted small">Fill in each blank right in the code. Then copy it into the Arduino IDE, or download it.</p>` : ""}
+        <pre class="mx-code mx-code--blanks" aria-label="Code for ${esc(a.title)}"><code>${model.lines.map((ln) => `<span class="mx-ln" aria-hidden="true">${ln.n}</span>${ln.segs.map((s) => typeof s === "string" ? esc(s)
+          : stu ? `<input class="mx-blank" data-blank="${s.b}" size="${Math.max(4, Math.min(s.len, 22))}" maxlength="80" aria-label="Blank ${s.b + 1}, line ${ln.n}" value="${esc(values[s.b] || "")}" spellcheck="false" autocapitalize="off" autocomplete="off">`
+          : `<span class="mx-blank-line">${"_".repeat(Math.min(s.len, 14))}</span>`).join("")}`).join("\n")}</code></pre>
+        ${stu ? `<div class="mx-code-tools">
+          <button type="button" class="btn btn--primary btn--small" id="mx-code-save">${icon("check")}Save my code</button>
+          <button type="button" class="btn btn--ghost btn--small" id="mx-code-copy">${icon("clipboard")}Copy my code</button>
+          <button type="button" class="btn btn--ghost btn--small" id="mx-code-dl">${icon("arrowRight")}Download .ino</button>
+          ${status("mx-code-status")}</div>` : `<p class="muted small">Students fill the ${plural(model.count, "blank", "blanks")} on screen; you see their answers in Checks.</p>`}
+        ${a.code.remember ? `<p class="mx-remember">${icon("bulb")}<span>${esc(a.code.remember)}</span></p>` : ""}`) : ""}
+      ${a.tests ? sec("s-test", "flask", "Test it", `
+        ${stu ? `<fieldset class="mx-checklist" data-checklist="test"><legend class="visually-hidden">Tests</legend>
+          ${a.tests.map((x, i) => `<label class="mx-check"><input type="checkbox" data-ci="${i}" ${tested[i] ? "checked" : ""}><span>${esc(x)}</span></label>`).join("")}</fieldset>` : bullets(a.tests)}
+        ${stu ? `<form data-mx="observe" novalidate>${area("mx-observe", "What happened when you tested it?", obs && obs.data.text, 3, 800, "Write what you saw, and anything you changed.")}
+          <button type="submit" class="btn btn--ghost">${icon("check")}Save my notes</button>${status("mx-observe-status")}</form>` : ""}`) : ""}
+      ${a.stuck && a.stuck.length ? sec("s-stuck", "question", "Stuck? Check these first", bullets(a.stuck), "mx-stuck") : ""}
+      ${a.stretch ? sec("s-stretch", "rocket", "Stretch goal", `<p class="muted small">Optional. You don't need it to finish the session.</p><p>${esc(a.stretch)}</p>
+        ${m.stretchHint ? `<details class="mx-hint"><summary>Show the hint</summary><p>${esc(m.stretchHint)}</p></details>` : ""}`, "block--extend") : ""}
+      ${m.think ? sec("s-think", "message", "Think about it", `<p>${esc(m.think)}</p>
+        ${stu ? `<form data-mx="think" novalidate>${area("mx-think", "Your answer", think && think.data.text, 3, 600)}
+          <button type="submit" class="btn btn--ghost">${icon("check")}Save my answer</button>${status("mx-think-status")}</form>` : ""}`) : ""}`;
+  }
+  /* "PLAN IT FIRST: TRUTH TABLE" → "Plan it first: truth table" */
+  const sentence = (t) => { const s = String(t || "").toLowerCase(); return s.charAt(0).toUpperCase() + s.slice(1).replace(/esp32/g, "ESP32").replace(/oled/g, "OLED"); };
+
+  /* Capstone sessions 13–16, following each sheet. Partners share one copy (TEAM_TYPES). */
   function capstoneSections(user, a, evs) {
     const stu = isStu(user);
+    const S = a.moxie.sheet || {};
     const rec = capstone(evs);
     const d = rec.design || {};
     const lock = stu ? "" : " disabled";
     const preview = stu ? "" : `<p class="mx-preview">${icon("eye")}<span><strong>Student view preview.</strong> Students fill this in. Partners share one copy.</span></p>`;
-    const designSummary = rec.design ? `
-      <dl class="mx-design">
-        <div><dt>Problem</dt><dd>${esc(d.problem)}</dd></div><div><dt>Who it helps</dt><dd>${esc(d.user)}</dd></div>
-        <div><dt>Criteria</dt><dd><ol>${(d.criteria || []).filter(clean).map((c) => `<li>${esc(c)}</li>`).join("")}</ol></dd></div>
-        <div><dt>Inputs</dt><dd>${esc((d.inputs || []).map(inputName).join(", ") || "None yet")}</dd></div>
-        <div><dt>Outputs</dt><dd>${esc((d.outputs || []).map(outputName).join(", ") || "None yet")}</dd></div>
-      </dl>` : `<p>No design saved yet. Start in <a href="#/activity/moxie-13">Session 13: Define & Design</a>.</p>`;
     const missing = (list, okText) => list.length
       ? `<ul class="mx-missing">${list.map((m) => `<li>${icon("alert")}<span>${esc(m)}</span></li>`).join("")}</ul>`
       : `<p class="mx-done">${icon("check")}<span>${esc(okText)}</span></p>`;
+    const designSummary = rec.design ? `
+      <dl class="mx-design">
+        <div><dt>Problem</dt><dd>${esc(d.problem)}</dd></div><div><dt>Who has it</dt><dd>${esc(d.user)}</dd></div>
+        ${d.device ? `<div><dt>Our device will</dt><dd>${esc(d.device)}</dd></div>` : ""}
+        <div><dt>Criteria</dt><dd><ol>${(d.criteria || []).filter(clean).map((c, i) => `<li>${esc(c)}${(d.tests || [])[i] ? ` <span class="muted">(test: ${esc(d.tests[i])})</span>` : ""}</li>`).join("")}</ol></dd></div>
+      </dl>` : `<p>No design saved yet. Start in <a href="#/activity/moxie-13">Session 13: Define & Design</a>.</p>`;
+    const mission = sec("s-mission", "target", "Your mission", `<p>${esc(a.mission)}</p>`, "block--mission");
+    const cardsBox = (session) => feedbackCardsSection(user, a, session, lock);
 
     if (a.moxie.kind === "design") {
       const dc = rec.design ? designCheck(rec.design) : [];
+      const parts = d.parts && d.parts.length ? d.parts : [];
+      const PARTS = 6;
       return `
-      <section class="block" aria-labelledby="s-design">
-        <h2 id="s-design">${icon("target")}Design your device</h2>
+      ${mission}
+      ${sec("s-must", "list", "Your project must have", bullets(S.mustHave))}
+      ${sec("s-limits", "shield", "Constraints (limits)", bullets(S.constraints))}
+      ${S.ideaBank ? sec("s-ideas", "bulb", "Idea bank (or invent your own!)", tableHtml(S.ideaBank.tables[0], "Idea bank")) : ""}
+      <section class="block mx-sec" aria-labelledby="s-design">
+        <h2 id="s-design">${icon("target")}Plan your device</h2>
         ${preview}
-        <p>Pick a real problem for someone at home, at school, or at the Coliseum. Use only parts from your kit.</p>
         <form data-mx="design" novalidate><fieldset class="mx-fieldset"${lock}><legend class="visually-hidden">Capstone design</legend>
-          ${area("mx-problem", "What problem does your device solve?", d.problem, 3, 400)}
-          ${line("mx-user", "Who does it help?", d.user)}
-          <fieldset class="mx-group"><legend>Three things you can measure to show it works</legend>
-            ${[0, 1, 2].map((i) => line(`mx-crit-${i}`, `Criterion ${i + 1}`, (d.criteria || [])[i])).join("")}
-            <p class="field-help">Measurable means you can test it. Example: “The light turns on within 1 second.”</p></fieldset>
-          <fieldset class="mx-group"><legend>Inputs (at least one)</legend><div class="mx-checks">
+          <h3>1. Define the problem</h3>
+          ${line("mx-user", "Who has the problem?", d.user)}
+          ${area("mx-problem", "What is the problem?", d.problem, 2, 400)}
+          ${line("mx-device", "Our device (one sentence): “Our device will…”", d.device, 200)}
+          <h3>2. Criteria: how will we know it works?</h3>
+          <p class="field-help">${esc((S.criteria && S.criteria.text[0]) || "Make each one measurable.")}</p>
+          <div class="mx-rows">${[0, 1, 2].map((i) => `<div class="mx-row">
+            ${line(`mx-crit-${i}`, `${i + 1}. Our device must…`, (d.criteria || [])[i])}
+            ${line(`mx-how-${i}`, `How we will test it`, (d.tests || [])[i])}</div>`).join("")}</div>
+          <h3>3. Parts & pin plan</h3>
+          <p class="field-help">${esc((S.pins && S.pins.text[0]) || "")}</p>
+          <div class="table-wrap"><table class="roster mx-parts"><caption class="visually-hidden">Parts and pins</caption>
+            <thead><tr><th scope="col">Part</th><th scope="col">Input or output?</th><th scope="col">ESP32 pin</th><th scope="col">Learned in session</th></tr></thead>
+            <tbody>${Array.from({ length: PARTS }, (_, i) => { const p = parts[i] || {}; return `<tr>
+              <td><label class="visually-hidden" for="mx-pp-${i}">Part ${i + 1}</label><input id="mx-pp-${i}" class="input input--small" maxlength="60" value="${esc(p.part || "")}"></td>
+              <td><label class="visually-hidden" for="mx-pio-${i}">Part ${i + 1}: input or output</label><select id="mx-pio-${i}" class="input input--small"><option value=""></option><option value="input" ${p.io === "input" ? "selected" : ""}>Input</option><option value="output" ${p.io === "output" ? "selected" : ""}>Output</option></select></td>
+              <td><label class="visually-hidden" for="mx-ppin-${i}">Part ${i + 1}: ESP32 pin</label><input id="mx-ppin-${i}" class="input input--small" maxlength="12" value="${esc(p.pin || "")}" placeholder="D25"></td>
+              <td><label class="visually-hidden" for="mx-pses-${i}">Part ${i + 1}: learned in session</label><input id="mx-pses-${i}" class="input input--small" maxlength="4" inputmode="numeric" value="${esc(p.session || "")}"></td></tr>`; }).join("")}</tbody></table></div>
+          <fieldset class="mx-group"><legend>What kinds of inputs?</legend><div class="mx-checks">
             ${INPUTS.map(([id, name]) => `<label class="mx-check"><input type="checkbox" name="mx-in" value="${id}" ${(d.inputs || []).includes(id) ? "checked" : ""}><span>${esc(name)}</span></label>`).join("")}</div></fieldset>
-          <fieldset class="mx-group"><legend>Outputs (at least two different types)</legend><div class="mx-checks">
+          <fieldset class="mx-group"><legend>What kinds of outputs? (at least two different types)</legend><div class="mx-checks">
             ${OUTPUTS.map(([id, name, type]) => `<label class="mx-check"><input type="checkbox" name="mx-out" value="${id}" ${(d.outputs || []).includes(id) ? "checked" : ""}><span>${esc(name)} <small>(${esc(type)})</small></span></label>`).join("")}</div></fieldset>
-          ${area("mx-pins", "Parts and pins", d.pins, 3, 600, "One line per part, like: Buzzer → pin 18.")}
-          ${area("mx-pseudo", "Your plan in plain steps (pseudocode)", d.pseudocode, 6, 1500)}
+          <h3>4. Sketch your circuit</h3>
+          <label class="mx-check"><input type="checkbox" id="mx-sketch" ${d.sketched ? "checked" : ""}><span>We drew the ESP32, each part, and every wire on paper, with the pins labeled, and showed our teacher.</span></label>
+          <h3>5. Plan the code</h3>
+          ${area("mx-pseudo", esc((S.codePlan || [])[0] || "Your plan in plain steps (pseudocode)"), d.pseudocode, 6, 1500)}
           <button type="submit" class="btn btn--primary">${icon("check")}Save our design</button>${status("mx-design-status")}
         </fieldset></form>
         ${rec.design ? `<h3>Design check</h3>${missing(dc, "Your design has everything the project needs. Ask your teacher to approve it.")}
           <p class="mx-gates">${gateChip(rec.designApproved, "design")}</p>${versionNote(rec.designEvent)}` : ""}
-      </section>`;
+      </section>
+      ${S.rubric ? sec("s-rubric", "clipboard", "How your project will be scored", tableHtml(S.rubric.tables[0], "Scoring")) : ""}`;
     }
 
     if (a.moxie.kind === "buildlog") {
       const cc = rec.codecheck || {};
+      const stand = (n) => ((rec.standups || {})[n]) || {};
+      const subs = (rec.subsystems && rec.subsystems.rows) || [];
+      const ROWS = 6;
       return `
-      <section class="block" aria-labelledby="s-plan">
+      ${mission}
+      <section class="block mx-sec" aria-labelledby="s-plan">
         <h2 id="s-plan">${icon("target")}Your approved design</h2>
         ${designSummary}
         ${stu ? `<p class="mx-gates">${gateChip(rec.designApproved, "design")}</p>` : ""}
         ${rec.design && !rec.designApproved ? `<p class="mx-stop">${icon("alert")}<span>Ask your teacher to approve your design before you build.</span></p>` : ""}
       </section>
-      <section class="block" aria-labelledby="s-log">
-        <h2 id="s-log">${icon("tools")}Build log</h2>
+      <section class="block mx-sec" aria-labelledby="s-standup">
+        <h2 id="s-standup">${icon("users")}Stand-up meeting (start of class, 2 minutes)</h2>
         ${preview}
-        <p>Build one part at a time and test it before you add the next. Write down every test, bug, and change.</p>
-        <form data-mx="buglog" novalidate><fieldset class="mx-fieldset"${lock}><legend class="visually-hidden">New build log entry</legend>
-          ${field("mx-log-kind", "What kind of entry?", `<select id="mx-log-kind" class="input">${Object.entries(BUGLOG).map(([id, t]) => `<option value="${id}">${esc(t)}</option>`).join("")}</select>`)}
-          ${area("mx-log-what", "What did you test, find, or change?", "", 3, 400)}
-          ${area("mx-log-result", "What happened, or how did you fix it?", "", 3, 400)}
-          <button type="submit" class="btn btn--primary">${icon("plus")}Add to the log</button>${status("mx-log-status")}
-        </fieldset></form>
-        ${rec.bugs.length ? `<h3>Your team's log (${rec.bugs.length})</h3><ol class="mx-log">${rec.bugs.map((e) => `
-          <li><strong>${esc(BUGLOG[e.data.kind] || "Entry")}</strong> · <span class="muted small">${who(e, user)}, ${SE.dateShort(e.at)}</span>
-            <p>${esc(e.data.what)}</p>${clean(e.data.result) ? `<p class="muted">${esc(e.data.result)}</p>` : ""}</li>`).join("")}</ol>` : ""}
+        <div class="mx-two">${[14, 15].map((n) => `
+          <form data-mx="standup" data-session="${n}" novalidate><fieldset class="mx-fieldset"${lock}><legend><strong>Session ${n}</strong></legend>
+            ${area(`mx-su-done-${n}`, "What is done?", stand(n).done, 2, 300)}
+            ${area(`mx-su-today-${n}`, "What will we do today?", stand(n).today, 2, 300)}
+            ${area(`mx-su-block-${n}`, "What is blocking us?", stand(n).blocking, 2, 300)}
+            <button type="submit" class="btn btn--ghost btn--small">${icon("check")}Save Session ${n}</button>${status(`mx-su-status-${n}`)}
+          </fieldset></form>`).join("")}</div>
       </section>
-      <section class="block" aria-labelledby="s-codecheck">
+      <section class="block mx-sec" aria-labelledby="s-subs">
+        <h2 id="s-subs">${icon("list")}Subsystem checklist</h2>
+        <p>${esc((S.subsystems && S.subsystems.text[0]) || "")}</p>
+        <form data-mx="subsystems" novalidate><fieldset class="mx-fieldset"${lock}><legend class="visually-hidden">Subsystems</legend>
+          <div class="table-wrap"><table class="roster mx-parts"><caption class="visually-hidden">Subsystem checklist</caption>
+            <thead><tr><th scope="col">Subsystem (part)</th><th scope="col">Wired</th><th scope="col">Tested alone</th><th scope="col">Added to main code</th><th scope="col">Notes</th></tr></thead>
+            <tbody>${Array.from({ length: ROWS }, (_, i) => { const r = subs[i] || {}; return `<tr>
+              <td><label class="visually-hidden" for="mx-ss-${i}">Subsystem ${i + 1}</label><input id="mx-ss-${i}" class="input input--small" maxlength="60" value="${esc(r.part || "")}"></td>
+              ${["wired", "alone", "added"].map((k) => `<td><label class="mx-tick"><input type="checkbox" id="mx-ss-${k}-${i}" ${r[k] ? "checked" : ""}><span class="visually-hidden">Subsystem ${i + 1}: ${k === "wired" ? "wired" : k === "alone" ? "tested alone" : "added to main code"}</span></label></td>`).join("")}
+              <td><label class="visually-hidden" for="mx-ssn-${i}">Subsystem ${i + 1}: notes</label><input id="mx-ssn-${i}" class="input input--small" maxlength="120" value="${esc(r.notes || "")}"></td></tr>`; }).join("")}</tbody></table></div>
+          <button type="submit" class="btn btn--primary btn--small">${icon("check")}Save the checklist</button>${status("mx-ss-status")}
+        </fieldset></form>
+      </section>
+      ${sec("s-tips", "bulb", "Build tips", bullets(S.tips))}
+      <section class="block mx-sec" aria-labelledby="s-log">
+        <h2 id="s-log">${icon("tools")}Bug log</h2>
+        <p>${esc((S.bugLog && S.bugLog.text[0]) || "")}</p>
+        <form data-mx="buglog" novalidate><fieldset class="mx-fieldset"${lock}><legend class="visually-hidden">New bug log entry</legend>
+          ${area("mx-log-what", "What went wrong?", "", 2, 400)}
+          ${area("mx-log-result", "What we tried", "", 2, 400)}
+          <label class="mx-check"><input type="checkbox" id="mx-log-fixed"><span>Fixed</span></label>
+          <button type="submit" class="btn btn--primary btn--small">${icon("plus")}Add to the bug log</button>${status("mx-log-status")}
+        </fieldset></form>
+        ${rec.bugs.length ? `<div class="table-wrap"><table class="roster mx-sheet-table"><caption class="visually-hidden">Your team's bug log</caption>
+          <thead><tr><th scope="col">What went wrong?</th><th scope="col">What we tried</th><th scope="col">Fixed?</th><th scope="col">Who</th></tr></thead>
+          <tbody>${rec.bugs.map((e) => `<tr><td>${esc(e.data.what)}</td><td>${esc(e.data.result || "")}</td><td>${e.data.fixed ? "Yes" : "Not yet"}</td><td class="small">${who(e, user)}, ${SE.dateShort(e.at)}</td></tr>`).join("")}</tbody></table></div>` : ""}
+      </section>
+      <section class="block mx-sec" aria-labelledby="s-changed">
+        <h2 id="s-changed">${icon("refresh")}What changed from our plan, and why?</h2>
+        <form data-mx="change" novalidate><fieldset class="mx-fieldset"${lock}><legend class="visually-hidden">Changes from the plan</legend>
+          ${area("mx-change", "What changed, and why", (rec.change || {}).text, 3, 600)}
+          <button type="submit" class="btn btn--ghost btn--small">${icon("check")}Save</button>${status("mx-change-status")}
+        </fieldset></form>
+      </section>
+      <section class="block mx-sec" aria-labelledby="s-codecheck">
         <h2 id="s-codecheck">${icon("code")}Code checklist</h2>
         <form data-mx="codecheck" novalidate><fieldset class="mx-fieldset"${lock}><legend>Our code has:</legend><div class="mx-checks">
           ${[["variable", "A variable"], ["ifelse", "An if/else"], ["comments", "Comments that explain it"]].map(([id, t]) => `<label class="mx-check"><input type="checkbox" name="mx-cc" value="${id}" ${cc[id] ? "checked" : ""}><span>${esc(t)}</span></label>`).join("")}</div>
-          <button type="submit" class="btn btn--primary">${icon("check")}Save the checklist</button>${status("mx-cc-status")}
+          <button type="submit" class="btn btn--ghost btn--small">${icon("check")}Save the checklist</button>${status("mx-cc-status")}
         </fieldset></form>
       </section>`;
     }
@@ -455,67 +618,108 @@
     if (a.moxie.kind === "testimprove") {
       const crit = (d.criteria || []).filter(clean);
       const card = rec.card || {};
+      const pitch = rec.pitch || {};
+      const PITCH = [["hook", "Hook (1 sentence): Have you ever…?"], ["problem", "Problem: who has it and why it matters."], ["demo", "Demo: show it working. Say what each part does."],
+        ["challenge", "Challenge: the hardest bug and how you fixed it."], ["next", "Next: what you would add with more time."], ["who", "Who says what"]];
+      const CARD = [["title", "Project name", 60], ["by", "Made by", 120], ["problem", "The problem", 300], ["inputs", "Inputs (what it senses)", 200], ["outputs", "Outputs (what it does)", 200], ["how", "How it works", 400], ["next", "What we would add next", 300]];
       return `
-      <section class="block" aria-labelledby="s-tests">
-        <h2 id="s-tests">${icon("flask")}Test against your criteria</h2>
+      ${mission}
+      <section class="block mx-sec" aria-labelledby="s-tests">
+        <h2 id="s-tests">${icon("flask")}1. Test against your criteria</h2>
         ${preview}
         ${crit.length ? `<form data-mx="tests" novalidate><fieldset class="mx-fieldset"${lock}><legend class="visually-hidden">Test results</legend>
-          ${crit.map((c, i) => `<fieldset class="mx-group"><legend>Criterion ${i + 1}: ${esc(c)}</legend>
-            ${area(`mx-test-${i}`, "What did you measure?", (rec.tests[i] || {}).result, 2, 300)}
-            ${field(`mx-met-${i}`, "Result", `<select id="mx-met-${i}" class="input">${Object.entries(MET).map(([id, t]) => `<option value="${id}" ${(rec.tests[i] || {}).met === id ? "selected" : ""}>${esc(t)}</option>`).join("")}</select>`)}</fieldset>`).join("")}
+          ${crit.map((c, i) => `<fieldset class="mx-group"><legend>${i + 1}. ${esc(c)}</legend>
+            ${area(`mx-test-${i}`, "What happened when we tested it", (rec.tests[i] || {}).result, 2, 300)}
+            ${field(`mx-met-${i}`, "Pass?", `<select id="mx-met-${i}" class="input input--small"><option value=""></option>${Object.entries(MET).map(([id, t]) => `<option value="${id}" ${(rec.tests[i] || {}).met === id ? "selected" : ""}>${esc(t)}</option>`).join("")}</select>`)}</fieldset>`).join("")}
           <button type="submit" class="btn btn--primary">${icon("check")}Save test results</button>${status("mx-tests-status")}
         </fieldset></form>` : designSummary}
       </section>
-      <section class="block" aria-labelledby="s-feedback">
-        <h2 id="s-feedback">${icon("message")}Feedback and one improvement</h2>
-        <form data-mx="feedback" novalidate><fieldset class="mx-fieldset"${lock}><legend class="visually-hidden">Feedback from a classmate</legend>
-          ${area("mx-fb", "What feedback did a classmate give you?", "", 2, 300)}
-          <button type="submit" class="btn btn--primary">${icon("plus")}Save feedback</button>${status("mx-fb-status")}
-        </fieldset></form>
-        ${rec.feedback.length ? `<ul class="bullets">${rec.feedback.map((e) => `<li><span>${esc(e.data.text)} <span class="muted small">(${who(e, user)})</span></span></li>`).join("")}</ul>` : ""}
+      ${cardsBox(15)}
+      <section class="block mx-sec" aria-labelledby="s-improve">
+        <h2 id="s-improve">${icon("refresh")}3. Improve it</h2>
         <form data-mx="improve" novalidate><fieldset class="mx-fieldset"${lock}><legend class="visually-hidden">An improvement</legend>
-          ${area("mx-imp", "What did you change?", "", 2, 300)}
-          ${area("mx-imp-why", "Why? What did the test or feedback show?", "", 2, 300)}
-          <button type="submit" class="btn btn--primary">${icon("plus")}Save improvement</button>${status("mx-imp-status")}
+          ${area("mx-imp-why", "Feedback or test result we used", "", 2, 300)}
+          ${area("mx-imp", "What we changed", "", 2, 300)}
+          <button type="submit" class="btn btn--primary btn--small">${icon("plus")}Save the improvement</button>${status("mx-imp-status")}
         </fieldset></form>
-        ${rec.improvements.length ? `<ul class="bullets">${rec.improvements.map((e) => `<li><span><strong>${esc(e.data.change)}</strong> ${esc(e.data.why || "")} <span class="muted small">(${who(e, user)})</span></span></li>`).join("")}</ul>` : ""}
+        ${rec.improvements.length ? `<ul class="bullets">${rec.improvements.map((e) => `<li><span><strong>${esc(e.data.change)}</strong> ${e.data.why ? `(from: ${esc(e.data.why)})` : ""} <span class="muted small">${who(e, user)}</span></span></li>`).join("")}</ul>` : ""}
       </section>
-      <section class="block" aria-labelledby="s-card">
-        <h2 id="s-card">${icon("flag")}Showcase card and pitch plan</h2>
+      <section class="block mx-sec" aria-labelledby="s-card">
+        <h2 id="s-card">${icon("flag")}4. Showcase card</h2>
+        <p>${esc((S.card && S.card.text[0]) || "")}</p>
         <form data-mx="card" novalidate><fieldset class="mx-fieldset"${lock}><legend class="visually-hidden">Showcase card</legend>
-          ${line("mx-card-title", "Device name", card.title, 60)}
-          ${area("mx-card-helps", "Who it helps, and how", card.helps, 2, 300)}
-          ${area("mx-card-how", "How it works", card.how, 2, 300)}
-          ${area("mx-card-pitch", "Pitch plan: who says what in your one minute?", card.pitch, 3, 500)}
-          <button type="submit" class="btn btn--primary">${icon("check")}Save the card</button>${status("mx-card-status")}
+          ${CARD.map(([k, label, max]) => (max > 200 ? area(`mx-card-${k}`, label, card[k], 2, max) : line(`mx-card-${k}`, label, k === "by" && !card.by && stu ? [user.displayName].concat(SE.store.teammates(user.id).map((m) => m.displayName)).join(" & ") : card[k], max))).join("")}
+          <button type="submit" class="btn btn--primary btn--small">${icon("check")}Save the card</button>${status("mx-card-status")}
+        </fieldset></form>
+      </section>
+      <section class="block mx-sec" aria-labelledby="s-pitch">
+        <h2 id="s-pitch">${icon("message")}5. Plan your 1-minute pitch</h2>
+        <form data-mx="pitch" novalidate><fieldset class="mx-fieldset"${lock}><legend class="visually-hidden">Pitch plan</legend>
+          ${PITCH.map(([k, label]) => line(`mx-pitch-${k}`, label, pitch[k], 300)).join("")}
+          <button type="submit" class="btn btn--primary btn--small">${icon("check")}Save the pitch plan</button>${status("mx-pitch-status")}
         </fieldset></form>
       </section>`;
     }
 
-    // showcase
+    // showcase (16)
     const reflect = stu ? latest(evs, "moxie_reflect", a.id) : null;
+    const answers = (reflect && reflect.data.answers) || [];
     const ratings = (reflect && reflect.data.ratings) || {};
+    const present = stu ? checklistState(evs, a, "present") : [];
+    const PROMPTS = (S.reflection && S.reflection.text) || [];
+    const RATE = ((S.rate && S.rate.tables[0]) || []).slice(1).map((r) => r[0]);
     return `
-      <section class="block" aria-labelledby="s-check">
-        <h2 id="s-check">${icon("list")}Final project checklist</h2>
-        ${stu ? missing(capstoneCheck(rec), "Your project meets every requirement. Get ready to show it!") : `<ul class="bullets">${M.capstone.requirements.map((r) => `<li><span>${esc(r)}</span></li>`).join("")}</ul>`}
-        ${stu ? `<p class="mx-gates">${gateChip(rec.pitch, "pitch")}</p>` : ""}
-        <p class="muted small">${esc(M.capstone.schedule)}</p>
+      ${mission}
+      <section class="block mx-sec" aria-labelledby="s-present">
+        <h2 id="s-present">${icon("list")}Before you present</h2>
+        ${stu ? `<fieldset class="mx-checklist" data-checklist="present"><legend class="visually-hidden">Before you present</legend>
+          ${(S.present || []).map((x, i) => `<label class="mx-check"><input type="checkbox" data-ci="${i}" ${present[i] ? "checked" : ""}><span>${esc(x)}</span></label>`).join("")}</fieldset>` : bullets(S.present)}
+        <h3>Final project checklist</h3>
+        ${stu ? missing(capstoneCheck(rec), "Your project meets every requirement. Get ready to show it!") : bullets(M.capstone.requirements)}
       </section>
-      <section class="block" aria-labelledby="s-reflect">
+      ${cardsBox(16)}
+      <section class="block mx-sec" aria-labelledby="s-reflect">
         <h2 id="s-reflect">${icon("question")}My reflection</h2>
         ${preview}
         <p>This part is just yours, not your team's.</p>
         <form data-mx="reflect" novalidate><fieldset class="mx-fieldset"${lock}><legend class="visually-hidden">Reflection and self-rating</legend>
-          ${area("mx-refl", "What did you learn? What would you do differently?", reflect && reflect.data.text, 4, 800)}
-          <fieldset class="mx-group"><legend>Rate yourself on each part (3 means “meets”)</legend>
-            ${M.rubric.map((dim, i) => `<div class="mx-rate" role="radiogroup" aria-labelledby="mx-rate-${i}"><span id="mx-rate-${i}">${esc(dim)}</span>
-              ${[1, 2, 3, 4].map((n) => `<label class="mx-rate__opt"><input type="radio" name="mx-rate-${i}" value="${n}" ${ratings[dim] === n ? "checked" : ""}><span>${n}${n === 3 ? " (meets)" : ""}</span></label>`).join("")}</div>`).join("")}
+          ${PROMPTS.map((p, i) => area(`mx-refl-${i}`, esc(p), answers[i], 2, 400)).join("")}
+          <fieldset class="mx-group"><legend>Rate yourself: I can…</legend>
+            ${RATE.map((item, i) => `<div class="mx-rate" role="radiogroup" aria-labelledby="mx-rate-${i}"><span id="mx-rate-${i}">${esc(item)}</span>
+              ${[[1, "Not yet"], [2, "Getting there"], [3, "Yes!"]].map(([n, t]) => `<label class="mx-rate__opt"><input type="radio" name="mx-rate-${i}" value="${n}" ${ratings[item] === n ? "checked" : ""}><span>${t}</span></label>`).join("")}</div>`).join("")}
           </fieldset>
           <button type="submit" class="btn btn--primary">${icon("check")}Save my reflection</button>${status("mx-refl-status")}
         </fieldset></form>
       </section>`;
   }
+
+  /* Star, Star, Wish cards: send one to another team; see the ones sent to yours. */
+  function feedbackCardsSection(user, a, session, lock) {
+    const stu = isStu(user);
+    const S = a.moxie.sheet || {};
+    const mine = stu ? SE.store.teamOf(user.id) : null;
+    const teams = TEAMS_FOR(user).filter((t) => !mine || t.id !== mine.id);
+    const got = stu ? SE.store.feedbackCards(user.id).filter((e) => Number(e.data.session) === session) : [];
+    const sent = stu ? SE.store.eventsFor(user.id).filter((e) => e.type === "moxie_feedback_card" && Number(e.data.session) === session) : [];
+    const intro = session === 15 ? ((S.peer && S.peer.text[0]) || "") : ((S.audience && S.audience.text[0]) || "");
+    const stars = session === 15 ? ["Something that works really well", "Something else that's great", "A wish (one idea to make it better)"] : ["Star", "Star", "Wish"];
+    return `
+      <section class="block mx-sec" aria-labelledby="s-cards-${session}">
+        <h2 id="s-cards-${session}">${icon("star")}${session === 15 ? "2. Peer feedback" : "Audience feedback cards"}</h2>
+        <p>${esc(intro.replace(/ Cut (them|out).*$/, ""))}</p>
+        ${stu ? (teams.length ? `
+        <form data-mx="fbcard" data-session="${session}" novalidate><fieldset class="mx-fieldset"${lock}><legend class="visually-hidden">A feedback card</legend>
+          ${field(`mx-fc-to-${session}`, "For", `<select id="mx-fc-to-${session}" class="input">${teams.map((t) => `<option value="${t.id}">${esc(t.members.join(" & "))}</option>`).join("")}</select>`)}
+          ${line(`mx-fc-s1-${session}`, `⭐ ${stars[0]}`, "", 200)}
+          ${line(`mx-fc-s2-${session}`, `⭐ ${stars[1]}`, "", 200)}
+          ${line(`mx-fc-w-${session}`, `💡 ${stars[2]}`, "", 200)}
+          <button type="submit" class="btn btn--primary btn--small">${icon("message")}Send the card</button>${status(`mx-fc-status-${session}`)}
+        </fieldset></form>` : `<p class="muted">There are no other teams in your class yet. Your teacher makes the teams.</p>`) : `<p class="muted">Students send cards to other teams in their class, and see the cards sent to them.</p>`}
+        ${sent.length ? `<h3>Cards you sent (${sent.length})</h3><ul class="mx-cards">${sent.map((e) => cardHtml(e, `For ${esc(e.data.toNames || "a team")}`)).join("")}</ul>` : ""}
+        ${stu ? `<h3>Cards for your team (${got.length})</h3>${got.length ? `<ul class="mx-cards">${got.map((e) => cardHtml(e, `From ${esc(e.data.fromNames || "a classmate")}`)).join("")}</ul>` : `<p class="muted small">None yet.${SE.store.mode === "cloud" ? " Press See my partner's latest to check again." : ""}</p>`}` : ""}
+      </section>`;
+  }
+  const cardHtml = (e, head) => `<li class="mx-card"><p class="mx-card__head">${head}</p><p>⭐ ${esc(e.data.star1 || "")}</p><p>⭐ ${esc(e.data.star2 || "")}</p><p>💡 ${esc(e.data.wish || "")}</p></li>`;
 
   function teamPanel(user) {
     const mates = SE.store.teammates(user.id);
@@ -526,24 +730,81 @@
         ${SE.store.mode === "cloud" && mates.length ? `<button type="button" class="btn btn--ghost btn--small" id="mx-refresh">${icon("refresh")}See my partner's latest</button>` : ""}</p>`;
   }
 
+  /* A clean paper version of the sheet, built from the same data (blanks print as lines). */
+  function printSheet(a) {
+    const m = a.moxie, S = m.sheet || {};
+    const line = '<span class="mx-pl">&nbsp;</span>';
+    const list = (xs, box) => (xs && xs.length ? `<ul class="${box ? "mx-pbox" : ""}">${xs.map((x) => `<li>${box ? "☐ " : ""}${esc(x)}</li>`).join("")}</ul>` : "");
+    const tbl = (t) => tableHtml(t, "Table");
+    const h = (t) => `<h3>${esc(t)}</h3>`;
+    const code = a.code ? `<pre class="mx-pcode">${esc(a.code.lines.join("\n"))}</pre>${a.code.remember ? `<p><em>${esc(a.code.remember)}</em></p>` : ""}` : "";
+    return `
+      <header class="mx-phead"><p>${esc(m.unitLabel || `SESSION ${m.session}`)}</p><h1>${esc(a.title)}</h1>${m.based ? `<p>${esc(m.based)}</p>` : ""}
+        <p class="mx-pnames">Name: ${line} Partner: ${line} ${m.kind === "build" ? "Kit #:" : "Project:"} ${line}</p></header>
+      ${h("Your mission")}<p>${esc(a.mission)}</p>
+      ${m.kind === "build" ? `
+        ${h("What you need")}${list(a.before.materials)}
+        ${h(m.setupTitle || "Before you wire")}${list(a.before.setup)}
+        ${m.board ? `${h("Meet your ESP32")}<img src="${esc(m.board.src)}" alt="${esc(m.board.alt)}">` : ""}
+        ${a.steps.length ? `${h("Connect it")}<ol>${a.steps.map((x) => `<li>${esc(x)}</li>`).join("")}</ol>` : ""}
+        ${a.diagram ? `${h("Build it")}<img src="${esc(a.diagram.src)}" alt="${esc(a.diagram.alt)}">${(m.buildNotes || []).map((x) => `<p>${esc(x)}</p>`).join("")}${a.wiring ? tbl([a.wiring.head].concat(a.wiring.rows)) : ""}` : ""}
+        ${m.concept ? `${h(sentence(m.concept.title))}${m.concept.text.map((x) => `<p>${esc(x)}</p>`).join("")}${m.concept.tables.map(tbl).join("")}` : ""}
+        ${m.planSheet ? `${h(sentence(m.planSheet.title))}${m.planSheet.text.map((x) => `<p>${esc(x)}</p>`).join("")}${m.planSheet.tables.map(tbl).join("")}` : ""}
+        ${h("Code it")}${a.code && a.code.intro ? `<p>${esc(a.code.intro)}</p>` : ""}${code}
+        ${h("Test it")}${list(a.tests, true)}
+        ${h("Stuck? Check these first")}${list(a.stuck)}
+        ${a.stretch ? `${h("Stretch goal")}<p>${esc(a.stretch)}</p>${m.stretchHint ? `<p><em>Hint: ${esc(m.stretchHint)}</em></p>` : ""}` : ""}
+        ${m.think ? `${h("Think about it")}<p>${esc(m.think)}</p><p>${line}</p><p>${line}</p>` : ""}`
+      : `${Object.entries(S).filter(([k, v]) => v && typeof v === "object" && !Array.isArray(v) && v.heading).map(([, v]) => `${h(sentence(v.heading))}${v.text.map((x) => `<p>${esc(x)}</p>`).join("")}${v.tables.map(tbl).join("")}`).join("")}
+         ${["mustHave", "constraints", "tips", "present"].filter((k) => S[k] && S[k].length).map((k) => list(S[k], k === "present")).join("")}`}
+      ${h("Checkoff: before you call the instructor over")}${list(m.checkoff, true)}
+      ${a.check ? `<p><strong>Be ready to explain:</strong> ${esc(a.check)}</p>` : ""}
+      <p class="mx-psign">${(m.signoffs || []).map((s) => `☐ ${esc(s)} &nbsp; Initials / date: ${line}`).join("<br>")}</p>`;
+  }
+
   /* ───────── Student saves ───────── */
   const val = (f, id) => (f.querySelector(`#${id}`) || {}).value || "";
+  const chk = (f, id) => !!(f.querySelector(`#${id}`) || {}).checked;
   const SAVE = {
-    plan: (f) => clean(val(f, "mx-plan")) ? ["moxie_plan", { text: val(f, "mx-plan").trim().slice(0, 1500) }, "mx-plan-status", "Plan saved."] : "Write your plan first.",
+    kit: (f) => ["moxie_kit", { kit: val(f, "mx-kit").trim().slice(0, 12) }, "mx-kit-status", "Kit number saved."],
+    plan: (f) => { const lines = [...f.querySelectorAll("[data-plan]")].map((x) => x.value.trim().slice(0, 200)); return lines.some(clean) ? ["moxie_plan", { lines, text: lines.filter(clean).map((x, i) => `${i + 1}. ${x}`).join("\n") }, "mx-plan-status", "Plan saved."] : "Write at least one step of your plan."; },
     observe: (f) => clean(val(f, "mx-observe")) ? ["moxie_observe", { text: val(f, "mx-observe").trim().slice(0, 800) }, "mx-observe-status", "Notes saved."] : "Write what happened first.",
+    think: (f) => clean(val(f, "mx-think")) ? ["moxie_think", { text: val(f, "mx-think").trim().slice(0, 600) }, "mx-think-status", "Answer saved."] : "Write your answer first.",
     design: (f) => ["moxie_design", {
-      problem: val(f, "mx-problem").trim().slice(0, 400), user: val(f, "mx-user").trim().slice(0, 160),
-      criteria: [0, 1, 2].map((i) => val(f, `mx-crit-${i}`).trim().slice(0, 160)),
+      problem: val(f, "mx-problem").trim().slice(0, 400), user: val(f, "mx-user").trim().slice(0, 160), device: val(f, "mx-device").trim().slice(0, 200),
+      criteria: [0, 1, 2].map((i) => val(f, `mx-crit-${i}`).trim().slice(0, 160)), tests: [0, 1, 2].map((i) => val(f, `mx-how-${i}`).trim().slice(0, 160)),
+      parts: Array.from({ length: 6 }, (_, i) => ({ part: val(f, `mx-pp-${i}`).trim().slice(0, 60), io: val(f, `mx-pio-${i}`), pin: val(f, `mx-ppin-${i}`).trim().slice(0, 12), session: val(f, `mx-pses-${i}`).trim().slice(0, 4) })).filter((p) => clean(p.part) || clean(p.pin)),
       inputs: [...f.querySelectorAll("input[name=mx-in]:checked")].map((x) => x.value),
       outputs: [...f.querySelectorAll("input[name=mx-out]:checked")].map((x) => x.value),
-      pins: val(f, "mx-pins").trim().slice(0, 600), pseudocode: val(f, "mx-pseudo").trim().slice(0, 1500)
+      sketched: chk(f, "mx-sketch"), pseudocode: val(f, "mx-pseudo").trim().slice(0, 1500)
     }, "mx-design-status", "Design saved. Check the list below."],
-    buglog: (f) => clean(val(f, "mx-log-what")) ? ["moxie_buglog", { kind: val(f, "mx-log-kind"), what: val(f, "mx-log-what").trim().slice(0, 400), result: val(f, "mx-log-result").trim().slice(0, 400) }, "mx-log-status", "Added to the log."] : "Write what you tested, found, or changed.",
+    standup: (f) => { const n = Number(f.dataset.session); const d = { session: n, done: val(f, `mx-su-done-${n}`).trim().slice(0, 300), today: val(f, `mx-su-today-${n}`).trim().slice(0, 300), blocking: val(f, `mx-su-block-${n}`).trim().slice(0, 300) };
+      return clean(d.done + d.today + d.blocking) ? ["moxie_standup", d, `mx-su-status-${n}`, `Session ${n} stand-up saved.`] : "Answer at least one stand-up question."; },
+    subsystems: (f) => ["moxie_subsystem", { rows: Array.from({ length: 6 }, (_, i) => ({ part: val(f, `mx-ss-${i}`).trim().slice(0, 60), wired: chk(f, `mx-ss-wired-${i}`), alone: chk(f, `mx-ss-alone-${i}`), added: chk(f, `mx-ss-added-${i}`), notes: val(f, `mx-ssn-${i}`).trim().slice(0, 120) })).filter((r) => clean(r.part)) }, "mx-ss-status", "Subsystem checklist saved."],
+    buglog: (f) => clean(val(f, "mx-log-what")) ? ["moxie_buglog", { kind: "bug", what: val(f, "mx-log-what").trim().slice(0, 400), result: val(f, "mx-log-result").trim().slice(0, 400), fixed: chk(f, "mx-log-fixed") }, "mx-log-status", "Added to the bug log."] : "Write what went wrong.",
+    change: (f) => clean(val(f, "mx-change")) ? ["moxie_change", { text: val(f, "mx-change").trim().slice(0, 600) }, "mx-change-status", "Saved."] : "Write what changed and why.",
     codecheck: (f) => ["moxie_codecheck", Object.fromEntries(["variable", "ifelse", "comments"].map((k) => [k, !!f.querySelector(`input[name=mx-cc][value=${k}]:checked`)])), "mx-cc-status", "Checklist saved."],
-    feedback: (f) => clean(val(f, "mx-fb")) ? ["moxie_feedback_got", { text: val(f, "mx-fb").trim().slice(0, 300) }, "mx-fb-status", "Feedback saved."] : "Write the feedback first.",
     improve: (f) => clean(val(f, "mx-imp")) ? ["moxie_improve", { change: val(f, "mx-imp").trim().slice(0, 300), why: val(f, "mx-imp-why").trim().slice(0, 300) }, "mx-imp-status", "Improvement saved."] : "Write what you changed.",
-    card: (f) => clean(val(f, "mx-card-title")) ? ["moxie_card", { title: val(f, "mx-card-title").trim().slice(0, 60), helps: val(f, "mx-card-helps").trim().slice(0, 300), how: val(f, "mx-card-how").trim().slice(0, 300), pitch: val(f, "mx-card-pitch").trim().slice(0, 500) }, "mx-card-status", "Showcase card saved."] : "Give your device a name first.",
-    reflect: (f) => clean(val(f, "mx-refl")) ? ["moxie_reflect", { text: val(f, "mx-refl").trim().slice(0, 800), ratings: Object.fromEntries(M.rubric.map((dim, i) => [dim, Number((f.querySelector(`input[name=mx-rate-${i}]:checked`) || {}).value) || null]).filter(([, n]) => n)) }, "mx-refl-status", "Reflection saved."] : "Write your reflection first."
+    card: (f) => clean(val(f, "mx-card-title")) ? ["moxie_card", Object.fromEntries(["title", "by", "problem", "inputs", "outputs", "how", "next"].map((k) => [k, val(f, `mx-card-${k}`).trim().slice(0, 400)])), "mx-card-status", "Showcase card saved."] : "Give your project a name first.",
+    pitch: (f) => { const d = Object.fromEntries(["hook", "problem", "demo", "challenge", "next", "who"].map((k) => [k, val(f, `mx-pitch-${k}`).trim().slice(0, 300)])); return clean(Object.values(d).join("")) ? ["moxie_pitch", d, "mx-pitch-status", "Pitch plan saved."] : "Write at least one part of your pitch."; },
+    fbcard: (f) => {
+      const n = Number(f.dataset.session), user = SE.store.currentUser();
+      const to = val(f, `mx-fc-to-${n}`), t = SE.store.classTeams(user.id).find((x) => x.id === to);
+      const d = { session: n, toTeam: to, toNames: t ? t.members.join(" & ") : "", star1: val(f, `mx-fc-s1-${n}`).trim().slice(0, 200), star2: val(f, `mx-fc-s2-${n}`).trim().slice(0, 200), wish: val(f, `mx-fc-w-${n}`).trim().slice(0, 200),
+        fromNames: [user.displayName].concat(SE.store.teammates(user.id).map((x) => x.displayName)).join(" & ") };
+      if (!to) return "Pick the team the card is for.";
+      if (!clean(d.star1) || !clean(d.wish)) return "Write at least one star and a wish.";
+      return ["moxie_feedback_card", d, `mx-fc-status-${n}`, `Card sent to ${d.toNames}.`];
+    },
+    reflect: (f) => {
+      const S = (SE.activityById["moxie-16"].moxie.sheet) || {};
+      const prompts = (S.reflection && S.reflection.text) || [];
+      const rate = ((S.rate && S.rate.tables[0]) || []).slice(1).map((r) => r[0]);
+      const answers = prompts.map((_, i) => val(f, `mx-refl-${i}`).trim().slice(0, 400));
+      if (!answers.some(clean)) return "Answer at least one reflection question.";
+      return ["moxie_reflect", { answers, text: prompts.map((p, i) => (clean(answers[i]) ? `${p} ${answers[i]}` : "")).filter(Boolean).join("\n"),
+        ratings: Object.fromEntries(rate.map((item, i) => [item, Number((f.querySelector(`input[name=mx-rate-${i}]:checked`) || {}).value) || null]).filter(([, n]) => n)) }, "mx-refl-status", "Reflection saved."];
+    }
   };
 
   function bindStudent(user, a) {
@@ -558,7 +819,7 @@
           SE.store.log("moxie_test", { activityId: a.id, v: a.version, criterion: i, text: c, result, met: val(f, `mx-met-${i}`) });
           n++;
         });
-        if (!n) { f.querySelector(".mx-status").textContent = "Write what you measured for at least one criterion."; return; }
+        if (!n) { f.querySelector(".mx-status").textContent = "Write what happened for at least one criterion."; return; }
         return rerender("mx-tests-status", `${plural(n, "test result", "test results")} saved.`);
       }
       const r = SAVE[f.dataset.mx](f);
@@ -570,9 +831,54 @@
     app().querySelectorAll("[data-step]").forEach((cb) => cb.addEventListener("change", () => {
       SE.store.log("step_checked", { activityId: a.id, step: Number(cb.dataset.step), checked: cb.checked });
     }));
+    app().querySelectorAll("[data-checklist]").forEach((fs) => fs.addEventListener("change", () => {
+      SE.store.log("moxie_checklist", { activityId: a.id, v: a.version, list: fs.dataset.checklist, items: [...fs.querySelectorAll("input[data-ci]")].map((x) => x.checked) });
+    }));
+    // Code blanks: save, copy, download.
+    if (a.code) {
+      const model = codeModel(a.code.lines);
+      const values = () => { const v = []; app().querySelectorAll("[data-blank]").forEach((x) => { v[Number(x.dataset.blank)] = x.value; }); return v; };
+      const out = document.getElementById("mx-code-status");
+      const note = (v) => { const e = emptyBlankLines(model, v); return e.length ? ` ${plural(e.length, "line still has", "lines still have")} an empty blank: ${e.join(", ")}.` : ""; };
+      const save = () => { const v = values(); SE.store.log("moxie_code", { activityId: a.id, v: a.version, blanks: v.map((x) => String(x || "").slice(0, 80)) }); return v; };
+      document.getElementById("mx-code-save").addEventListener("click", () => { const v = save(); out.textContent = `Code saved.${note(v)}`; });
+      document.getElementById("mx-code-copy").addEventListener("click", async () => {
+        const v = save(), text = filledCode(model, v);
+        try { await navigator.clipboard.writeText(text); out.textContent = `Copied. Paste it into the Arduino IDE.${note(v)}`; }
+        catch (err) { out.textContent = `Your browser blocked copying. Use Download .ino instead.${note(v)}`; }
+      });
+      document.getElementById("mx-code-dl").addEventListener("click", () => {
+        const v = save(), blob = new Blob([filledCode(model, v) + "\n"], { type: "text/plain" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `Session_${String(a.moxie.session).padStart(2, "0")}_${a.title.replace(/[^A-Za-z0-9]+/g, "_").replace(/_+$/, "")}.ino`;
+        document.body.appendChild(link); link.click(); link.remove();
+        setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+        out.textContent = `Downloaded.${note(v)}`;
+      });
+    }
     const refresh = document.getElementById("mx-refresh");
     if (refresh) refresh.addEventListener("click", async () => { refresh.disabled = true; await SE.store.refreshTeam(); rerender("mx-refresh", ""); SE.toast("Up to date with your partner's work"); });
   }
+
+  /* What a teacher sees with a Moxie answer in Checks: the student's code blanks, Think about it, and checklists. */
+  SE.moxie.checkDetails = function (studentId, a) {
+    const evs = work(studentId);
+    const code = latestFor(evs, "moxie_code", a);
+    const think = latestFor(evs, "moxie_think", a);
+    const list = checklistState(evs, a, "checkoff");
+    const items = a.moxie.checkoff || [];
+    const parts = [];
+    if (a.code) {
+      const model = codeModel(a.code.lines);
+      const v = (code && code.data.blanks) || [];
+      parts.push(`<details class="mx-check-code"><summary>Their code (${v.filter(clean).length} of ${model.count} blanks filled)</summary>
+        <pre class="mx-code"><code>${model.lines.map((ln) => ln.segs.map((s) => (typeof s === "string" ? esc(s) : `<mark>${esc((v[s.b] || "").trim() || "____")}</mark>`)).join("")).join("\n")}</code></pre></details>`);
+    }
+    if (think) parts.push(`<p class="small"><strong>Think about it:</strong> “${esc(think.data.text)}”</p>`);
+    if (items.length) parts.push(`<p class="small"><strong>Checkoff list:</strong> ${list.filter(Boolean).length} of ${items.length} checked${items.some((_, i) => !list[i]) ? ` (not yet: ${esc(items.filter((_, i) => !list[i]).join("; "))})` : ""}</p>`);
+    return parts.join("");
+  };
 
   /* Assign box on a session page (educators). Draft sessions can't be assigned. */
   function sessionClassBox(user, a) {
@@ -621,7 +927,7 @@
             <ul class="bullets">${Object.values(M.pending).map((p) => `<li><span>${esc(p)}</span></li>`).join("")}</ul>
             <p class="muted small">The full validation list is in <code>planning/MOXIE_VALIDATION.md</code>. Nothing on it is tested until it's signed off there.</p>
             <h3>Teacher kit</h3>
-            <p>Answer sketches, solutions, and the lesson sheets are in the private Moxie teacher kit, not on this site.</p>
+            <p>The student sheets are on each session page (Print this sheet makes a paper copy). Answer sketches and solutions are in the private Moxie teacher kit, not on this site.</p>
           </div>
           <div class="block">
             <h3>Kit checklist (per pair)</h3>
@@ -667,12 +973,37 @@
         </div>
       </section>
 
+      <section class="wrap section" aria-labelledby="mx-grid">
+        <div class="section__head"><div><span class="eyebrow">${esc(cls.name)}</span><h2 id="mx-grid">Checkoffs</h2></div>
+          <p>Core challenge is your Pass in Checks. Press ★ to mark a stretch goal done.</p></div>
+        ${checkoffGrid(students)}
+      </section>
+
       <section class="wrap section" aria-labelledby="mx-review">
         <div class="section__head"><div><span class="eyebrow">Gates, capstone, and feedback</span><h2 id="mx-review">Review</h2></div></div>
         ${groups.length ? groups.map((g) => reviewCard(g)).join("") : `<p class="muted">No Moxie work in this class yet.</p>`}
       </section>` : `<p class="wrap muted">Create a class on the educator dashboard to pair students and review work.</p>`}`;
     bindTeach(user, cls);
   };
+
+  /* One row per student, one column per session: Passed / Sent / Try again, plus the stretch star. */
+  function checkoffGrid(students) {
+    if (!students.length) return `<p class="muted">No students in this class yet.</p>`;
+    const SHORT = { confirmed: ["✓", "Passed"], submitted: ["•", "Sent"], tryagain: ["↻", "Try again"], started: ["…", "In progress"] };
+    return `<div class="table-wrap"><table class="roster mx-grid">
+      <caption class="visually-hidden">Moxie checkoffs by student and session</caption>
+      <thead><tr><th scope="col">Student</th>${sessions().map((s) => `<th scope="col"><abbr title="${esc(s.title)}">${s.moxie.session}</abbr></th>`).join("")}</tr></thead>
+      <tbody>${students.map((st) => {
+        const prof = SE.game.profile(st.id), evs = work(st.id);
+        return `<tr><th scope="row">${esc(st.displayName)}</th>${sessions().map((s) => {
+          const state = SE.game.statusFor(prof, s).state, sh = SHORT[state];
+          const star = s.moxie.gates.includes("stretch") ? gateOpen(evs, s.id, "stretch") : null;
+          return `<td class="mx-grid__cell mx-grid__cell--${state}">${sh ? `<span title="${sh[1]}"><span aria-hidden="true">${sh[0]}</span><span class="visually-hidden">${sh[1]}</span></span>` : `<span class="visually-hidden">Not started</span>`}
+            ${star !== null && state === "confirmed" ? `<button type="button" class="mx-star ${star ? "is-on" : ""}" data-gate="${s.id}|stretch|${star ? 0 : 1}" data-students="${st.id}" aria-pressed="${star}" aria-label="Stretch goal, ${esc(st.displayName)}, session ${s.moxie.session}">★</button>` : ""}</td>`;
+        }).join("")}</tr>`;
+      }).join("")}</tbody></table></div>
+      <p class="muted small">✓ Passed · • Sent, waiting for your check · ↻ Try again · … In progress · ★ Stretch goal done</p>`;
+  }
 
   function reviewCard(g) {
     const evs = work(g.ids[0]);
@@ -712,8 +1043,8 @@
             <div><dt>Pins</dt><dd>${esc(d.pins)}</dd></div>
             <div><dt>Plan</dt><dd class="mx-pre">${esc(d.pseudocode)}</dd></div>
           </dl>${versionNote(rec.designEvent)}` : `<p class="muted">No design saved yet.</p>`}
-          <p class="mx-gates">${gateBtn("moxie-13", "design", g.ids, rec.designApproved)}${gateBtn("moxie-16", "pitch", g.ids, rec.pitch)}</p>
-          <p><strong>Build log:</strong> ${plural(rec.bugs.length, "entry", "entries")} · <strong>Feedback:</strong> ${rec.feedback.length} · <strong>Improvements:</strong> ${rec.improvements.map((e) => esc(e.data.change)).join("; ") || "none yet"}</p>
+          <p class="mx-gates">${gateBtn("moxie-13", "design", g.ids, rec.designApproved)}${gateBtn("moxie-14", "subsystem", g.ids, rec.subsystemDemo)}${gateBtn("moxie-15", "card", g.ids, rec.cardChecked)}${gateBtn("moxie-16", "pitch", g.ids, rec.pitched)}</p>
+          <p><strong>Bug log:</strong> ${plural(rec.bugs.length, "entry", "entries")} · <strong>Feedback cards:</strong> ${rec.cards.length + rec.feedback.length} · <strong>Improvements:</strong> ${rec.improvements.map((e) => esc(e.data.change)).join("; ") || "none yet"}</p>
           ${rec.card ? `<p><strong>Showcase card:</strong> ${esc(rec.card.title)}. ${esc(rec.card.helps || "")}</p>` : ""}
           <h3 class="small">Still to do</h3>
           ${capstoneCheck(rec).length ? `<ul class="bullets small">${capstoneCheck(rec).map((m) => `<li><span>${esc(m)}</span></li>`).join("")}</ul>` : `<p class="small">${icon("check")}Every requirement is met.</p>`}

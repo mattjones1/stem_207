@@ -408,7 +408,8 @@
   async function loadTeam(token, studentId) {
     try {
       const r = await SE.cloud.rpc("team_events", { p_token: token });
-      teamCache = r && r.ok ? { studentId, team: r.team || null, events: (r.events || []).map((e) => ({ ...e, at: Number(e.at), data: e.data || {} })) } : null;
+      teamCache = r && r.ok ? { studentId, team: r.team || null, events: (r.events || []).map((e) => ({ ...e, at: Number(e.at), data: e.data || {} })),
+        cards: (r.cards || []).map((e) => ({ ...e, at: Number(e.at), data: e.data || {} })), classTeams: r.classTeams || [] } : null;
     } catch (e) { teamCache = null; if (!e.offline) console.warn("STEM 207: partner work unavailable (run supabase/update-5-moxie-teams.sql)", e); }
   }
   /* Class journey totals for a student's device in cloud mode (supabase/update-4-class-journey.sql).
@@ -532,7 +533,8 @@
 
   /* Work that Moxie partners share (one copy, read by both). Keep this list the same as
      team_events in supabase/update-7-pathway-teams.sql. Reflections and explanations stay individual. */
-  const TEAM_TYPES = ["moxie_design", "moxie_codecheck", "moxie_buglog", "moxie_test", "moxie_feedback_got", "moxie_improve", "moxie_card", "pathway_artifact"];
+  const TEAM_TYPES = ["moxie_design", "moxie_codecheck", "moxie_buglog", "moxie_test", "moxie_feedback_got", "moxie_improve", "moxie_card",
+    "moxie_kit", "moxie_standup", "moxie_subsystem", "moxie_change", "moxie_pitch", "pathway_artifact"];
 
   /* Pathways: a published version is a snapshot that pins each mission step to the mission's current version. */
   const clip = (v, n) => String(v == null ? "" : v).trim().slice(0, n);
@@ -859,6 +861,20 @@
       const t = SE.store.teamOf(studentId);
       if (!t) return [];
       return db.events.filter((e) => e.studentId !== studentId && t.studentIds.includes(e.studentId) && TEAM_TYPES.includes(e.type));
+    },
+    /* Moxie feedback cards other students sent to this student's team (supabase/update-12-moxie-feedback.sql). */
+    feedbackCards(studentId) {
+      if (teamCache && teamCache.studentId === studentId) return (teamCache.cards || []).slice();
+      const t = SE.store.teamOf(studentId);
+      if (!t) return [];
+      return db.events.filter((e) => e.type === "moxie_feedback_card" && e.data.toTeam === t.id && !t.studentIds.includes(e.studentId));
+    },
+    /* The teams in a student's class (first names only), for choosing who gets a feedback card. */
+    classTeams(studentId) {
+      if (teamCache && teamCache.studentId === studentId) return (teamCache.classTeams || []).slice();
+      const st = db.students.find((x) => x.id === studentId);
+      if (!st) return [];
+      return SE.store.teamsFor(st.classId).map((t) => ({ id: t.id, members: t.studentIds.map((id) => (db.students.find((x) => x.id === id) || {}).displayName).filter(Boolean).sort() }));
     },
     /* Reload partner work on a student's cloud device; resolves right away elsewhere. */
     async refreshTeam() {

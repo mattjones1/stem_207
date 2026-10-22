@@ -66,34 +66,51 @@ A **Learning Plan** is an ordered set of activities from any category, assigned 
 - **Old single assignments.** A class that still has activities assigned one at a time gets a banner on Learning Plans that moves them into one plan.
 - In cloud mode, plans need `supabase/update-6-pathways.sql` (each educator sees only their own, and given versions can't be edited) and `supabase/update-10-plan-status.sql` (students can tell current plans from finished ones).
 
-## Moxie: a physical computing pathway (draft)
+## Moxie: a physical computing pathway (pilot)
 
 **Moxie: Code it. Build it. Make it matter.** Moxie is 16 ESP32 sessions in four units: Outputs; Inputs & Decisions; Displays, Time, Sensors & Motion; and a Capstone where partners build a device that helps someone. It belongs to Engineering & Robotics.
 
-**What's built:**
-- `#/moxie`: the overview, with the unit map, final-project requirements, kit, and how partners work.
-- A session page for each of the 16 sessions. Build sessions have these parts: Your mission, Before you wire, Build it, Plan it, Code it, Test it, Explain it, and Stretch.
-- Capstone tools:
-  - Session 13: a design worksheet that checks for one input, two different output types, and three measurable criteria.
-  - Session 14: a build log and code checklist.
-  - Session 15: test results, feedback, an improvement, and a showcase card.
-  - Session 16: a final checklist and a private reflection with self-ratings.
-- `#/moxie/teach` for educators: preparation, assigning, partner teams, teacher checks, and rubric feedback.
-  - Teacher checks: wiring in 11, plan in 8, design in 13, and pitch in 16.
-  - Rubric feedback is written per dimension, with no scores.
+**The course material is the 16 student sheets, on screen.** Each session page follows its paper sheet, section by section and with the same headings:
+- Name, Partner, and Kit #;
+- Your mission, What you need, Before you wire (or How we work), and Meet your ESP32 and Connect it in Session 1;
+- **Build it:** the wiring diagram (with a text version) and the part → pin table;
+- the "How it works" panel;
+- **Plan it first:** pseudocode lines to fill in, or the truth table;
+- **Code it:** every blank (`____`) is a box to type in, with **Copy my code** and **Download .ino** for the Arduino IDE. Blanks aren't graded on screen;
+- Test it, Stuck? Check these first, Stretch goal (with the hint), and Think about it;
+- **Checkoff:** the list before calling the teacher over, "Be ready to explain", and the Core challenge and Stretch goal sign-offs.
 
-**How partners work.** Partners share one design, build log, and test results. Each student's plan, explanation, and reflection stay their own.
+**Print this sheet** turns any session back into a paper worksheet.
 
-**Content versions.** Work saved against an older content version is labeled with that version.
+**Capstone (Sessions 13–16):**
+- **13 Define & Design:** problem, criteria with how each is tested, and a parts and pin plan that refuses the sheet's don't-use pins.
+- **14 Build Sprint:** stand-ups, a subsystem checklist, a bug log, and what changed from the plan.
+- **15 Test & Improve:** criteria tests, Star, Star, Wish feedback cards sent to another team, an improvement, the showcase card, and the pitch plan.
+- **16 Showcase:** a checklist, audience feedback cards, the reflection, and "I can" self-ratings.
 
-**This is the outline edition.** Every session is a draft that only educators can see. Grades and time per session say "pending". The lesson text, wiring, and code stay out of this public repo until reuse permissions are confirmed. Answer keys never go here.
+**For teachers** (`#/moxie/teach`):
+- a checkoff grid for every student and session (Pass, plus a ★ for stretch goals);
+- partner teams;
+- the plan, wiring, design, subsystem, card, and pitch sign-offs;
+- rubric feedback per dimension (no scores).
+
+In Checks, a Moxie answer comes with the student's filled-in code and checklist.
+
+**How it reaches students.** The sessions are in **pilot**. Assign the **Moxie: ESP32 Physical Computing** Learning Plan template (16 sessions in 4 units) to a class, and its students see the sessions. Grades and minutes per session stay "pending a pilot".
+
+**Where the content comes from:**
+- `tools/import_moxie_sheets.py` reads the sheets (DOCX) into `assets/js/data/moxie-content.js` and `assets/img/moxie/`. Run it with `--check` to see whether the sheets changed.
+- The sheets are based on the STEM Coliseum Arduino Introduction and Challenges, and Session 13 on TeachEngineering's "An Arduino Warning System". Reuse permission was confirmed on October 22, 2026.
+- Answer keys are never in this repo.
+
+**How partners work.** Partners share one design, kit number, stand-ups, subsystem checklist, bug log, tests, showcase card, and pitch plan. Each student's code, plans, Think about it, checklists, and reflection stay their own.
 
 **More detail:**
 - The brief: [`planning/MOXIE_PLAN.md`](planning/MOXIE_PLAN.md)
 - What's reused and what was added: [`planning/MOXIE_AUDIT.md`](planning/MOXIE_AUDIT.md)
 - What to test before a pilot: [`planning/MOXIE_VALIDATION.md`](planning/MOXIE_VALIDATION.md)
 
-Partner teams in cloud mode need [`supabase/update-5-moxie-teams.sql`](supabase/update-5-moxie-teams.sql).
+Partner teams in cloud mode need [`supabase/update-5-moxie-teams.sql`](supabase/update-5-moxie-teams.sql), and feedback cards between teams need [`supabase/update-12-moxie-feedback.sql`](supabase/update-12-moxie-feedback.sql).
 
 ## Interactive labs
 
@@ -183,7 +200,7 @@ STEM 207 runs in one of two modes, chosen by `assets/js/config.js`:
 ### Set up the free back end (about 10 minutes)
 
 1. Create a free account at [supabase.com](https://supabase.com) and click **New project**. Pick a region near Maine (for example US East) and save the database password somewhere safe.
-2. In the project, open **SQL Editor → New query**, paste all of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**. (Already set up before? Run the updates you haven't run yet, in order: [`supabase/update-2-assignments.sql`](supabase/update-2-assignments.sql) for assigned missions, then [`supabase/update-3-class-messages.sql`](supabase/update-3-class-messages.sql) for class messages and assignment instructions, then [`supabase/update-4-class-journey.sql`](supabase/update-4-class-journey.sql) so students see the whole class's journey, then [`supabase/update-5-moxie-teams.sql`](supabase/update-5-moxie-teams.sql) for Moxie partner teams, then [`supabase/update-6-pathways.sql`](supabase/update-6-pathways.sql) for educator pathways, then [`supabase/update-7-pathway-teams.sql`](supabase/update-7-pathway-teams.sql) so partners share pathway team artifacts, then [`supabase/update-8-class-journey-passes.sql`](supabase/update-8-class-journey-passes.sql) so class points come from teacher passes, then [`supabase/update-9-classes.sql`](supabase/update-9-classes.sql) to archive classes, then [`supabase/update-10-plan-status.sql`](supabase/update-10-plan-status.sql) so students can tell current Learning Plans from finished ones, then [`supabase/update-11-teacher-only-events.sql`](supabase/update-11-teacher-only-events.sql) so only teachers can pass work.) It creates the tables, the security rules, and the student sign-in functions. Running it again is safe.
+2. In the project, open **SQL Editor → New query**, paste all of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**. (Already set up before? Run the updates you haven't run yet, in order: [`supabase/update-2-assignments.sql`](supabase/update-2-assignments.sql) for assigned missions, then [`supabase/update-3-class-messages.sql`](supabase/update-3-class-messages.sql) for class messages and assignment instructions, then [`supabase/update-4-class-journey.sql`](supabase/update-4-class-journey.sql) so students see the whole class's journey, then [`supabase/update-5-moxie-teams.sql`](supabase/update-5-moxie-teams.sql) for Moxie partner teams, then [`supabase/update-6-pathways.sql`](supabase/update-6-pathways.sql) for educator pathways, then [`supabase/update-7-pathway-teams.sql`](supabase/update-7-pathway-teams.sql) so partners share pathway team artifacts, then [`supabase/update-8-class-journey-passes.sql`](supabase/update-8-class-journey-passes.sql) so class points come from teacher passes, then [`supabase/update-9-classes.sql`](supabase/update-9-classes.sql) to archive classes, then [`supabase/update-10-plan-status.sql`](supabase/update-10-plan-status.sql) so students can tell current Learning Plans from finished ones, then [`supabase/update-11-teacher-only-events.sql`](supabase/update-11-teacher-only-events.sql) so only teachers can pass work, then [`supabase/update-12-moxie-feedback.sql`](supabase/update-12-moxie-feedback.sql) for Moxie feedback cards between teams.) It creates the tables, the security rules, and the student sign-in functions. Running it again is safe.
 3. Open **Authentication → Sign In / Providers → Email** and turn off **Confirm email** while you're prototyping, so new educator accounts work right away. (If you leave it on, teachers must click the link in a confirmation email first. In that case, set **Authentication → URL Configuration → Site URL** to wherever your site lives.)
 4. Open **Project Settings → API Keys**. Copy the **Project URL** and the **publishable** key (older projects call it the **anon public** key) into `assets/js/config.js`. Never use a secret or `service_role` key here.
 5. Commit and push. GitHub Pages serves the site with the back end on. To make the one-file version use it too, run `python tools/build_single_file.py` again.

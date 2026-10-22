@@ -24,6 +24,18 @@ window.STEM = window.STEM || {};
   const ids = (t) => { t.steps = t.steps.filter(Boolean); t.steps.forEach((s, i) => { s.id = `${t.id}-s${i + 1}`; }); return t; };
 
   STEM.pathwayTemplates = [
+    // ───── Moxie: the 16-session ESP32 course (pilot). Each step is one session sheet; the units are the sessions groups.
+    ids({
+      id: "tpl-moxie", group: "workshop", reviewed: false,
+      title: "Moxie: ESP32 Physical Computing",
+      essentialQuestion: "What could we build that helps someone?",
+      goal: "Start with a blinking light and finish with a working device, built with a partner, that solves a real problem for someone.",
+      audience: { grades: [], minutes: null, equipment: [], prior: "No experience needed. Students work in partner teams the teacher sets on the Moxie teacher page." },
+      workshop: { format: "16 sessions in 4 units (session length set by the pilot)", sessions: [
+        { title: "Unit 1: Outputs", steps: [1, 2, 3, 4] }, { title: "Unit 2: Inputs & Decisions", steps: [5, 6, 7, 8] },
+        { title: "Unit 3: Displays, Time, Sensors & Motion", steps: [9, 10, 11, 12] }, { title: "Unit 4: Capstone", steps: [13, 14, 15, 16] }] },
+      steps: Array.from({ length: 16 }, (_, i) => m(`moxie-${String(i + 1).padStart(2, "0")}`, { label: `Session ${i + 1}` }))
+    }),
     // ───── STEM 207 workshops: packaged plans for a workshop day or series (proposed, not yet reviewed).
     // workshop.sessions group the steps; future names content that isn't ready yet (text only, never a step).
     ids({
@@ -52,7 +64,7 @@ window.STEM = window.STEM || {};
       audience: { grades: ["4-5", "6-8"], minutes: null, equipment: [], prior: "No coding experience needed." },
       workshop: { format: "Two sessions of about 90 minutes", sessions: [
         { title: "Machines that follow rules", steps: [1, 2, 3] }, { title: "Machines that decide and learn", steps: [4, 5, 6] }] },
-      future: ["Moxie Capstone: build a working ESP32 device that helps someone (when Moxie reaches pilot)."],
+      future: ["Next step: the Moxie course (in pilot), where partners build a working ESP32 device that helps someone."],
       steps: [
         m("lab-robot-chef", { label: "Session 1", bridge: "Robots do exactly what you say. Find the bugs." }),
         m("sense-think-act", { label: "Session 1", bridge: "Be the robot: sense, think, act." }),

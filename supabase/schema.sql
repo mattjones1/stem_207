@@ -478,20 +478,25 @@ end $$;
 revoke all on function public.student_state(uuid) from public;
 grant execute on function public.student_state(uuid) to anon, authenticated;
 
--- ───────── Team artifacts on pathway steps (same as supabase/update-7-pathway-teams.sql) ─────────
--- A student's team (names only) and their teammates' shared Moxie and pathway work.
+-- ───────── Team artifacts on pathway steps and Moxie feedback cards (same as supabase/update-12-moxie-feedback.sql) ─────────
+-- A student's team (names only), their teammates' shared Moxie and pathway work, cards sent to the team, and the class's teams.
 --    Keep the list of types the same as TEAM_TYPES in assets/js/store.js.
 create or replace function public.team_events(p_token uuid)
 returns json language plpgsql stable security definer set search_path = public as $$
-declare v_student public.students; v_team public.class_teams;
+declare v_student public.students; v_team public.class_teams; v_teams json;
 begin
   select s.* into v_student from public.student_sessions t join public.students s on s.id = t.student_id
    where t.token = p_token and t.expires_at > now();
   if not found then return json_build_object('ok', false, 'error', 'session'); end if;
+  v_teams := coalesce((
+    select json_agg(json_build_object('id', ct.id, 'members', coalesce((
+      select json_agg(s.display_name order by s.display_name)
+      from public.students s where s.id = any(ct.student_ids) and s.class_id = v_student.class_id), '[]'::json)) order by ct.created_at)
+    from public.class_teams ct where ct.class_id = v_student.class_id), '[]'::json);
   select * into v_team from public.class_teams
    where class_id = v_student.class_id and v_student.id = any(student_ids)
    order by created_at desc limit 1;
-  if not found then return json_build_object('ok', true, 'team', null, 'events', '[]'::json); end if;
+  if not found then return json_build_object('ok', true, 'team', null, 'events', '[]'::json, 'cards', '[]'::json, 'classTeams', v_teams); end if;
   return json_build_object(
     'ok', true,
     'team', json_build_object('id', v_team.id, 'members', coalesce((
@@ -504,7 +509,16 @@ begin
       where e.class_id = v_student.class_id
         and e.student_id = any(v_team.student_ids)
         and e.student_id <> v_student.id
-        and e.type in ('moxie_design', 'moxie_codecheck', 'moxie_buglog', 'moxie_test', 'moxie_feedback_got', 'moxie_improve', 'moxie_card', 'pathway_artifact')), '[]'::json));
+        and e.type in ('moxie_design', 'moxie_codecheck', 'moxie_buglog', 'moxie_test', 'moxie_feedback_got', 'moxie_improve', 'moxie_card',
+                       'moxie_kit', 'moxie_standup', 'moxie_subsystem', 'moxie_change', 'moxie_pitch', 'pathway_artifact')), '[]'::json),
+    'cards', coalesce((
+      select json_agg(json_build_object('id', e.id, 'at', e.at, 'data', e.data) order by e.at)
+      from public.events e
+      where e.class_id = v_student.class_id
+        and e.type = 'moxie_feedback_card'
+        and e.data->>'toTeam' = v_team.id
+        and not (e.student_id = any(v_team.student_ids))), '[]'::json),
+    'classTeams', v_teams);
 end $$;
 revoke all on function public.team_events(uuid) from public;
 grant execute on function public.team_events(uuid) to anon, authenticated;

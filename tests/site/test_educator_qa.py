@@ -80,7 +80,7 @@ async def main():
     # À la carte plan: one Coding, one VR, one AI
     await go(pg, "#/teach/plans")
     ok("plans: Build your own and Start from a template", await pg.locator('a[href="#/teach/plans/new"]').count() >= 1 and await pg.locator('a[data-jump="pw-tpl"]').count() == 1)
-    ok("plans: 3 workshops listed first, then 5 classroom templates", await pg.locator(".pw-group-h").first.inner_text() and await pg.locator("[data-use^=tpl-ws-]").count() == 3 and await pg.locator("[data-use^=tpl-]").count() == 8)
+    ok("plans: the Moxie course and 3 workshops first, then 5 classroom templates", await pg.locator(".pw-group-h").first.inner_text() and await pg.locator("[data-use^=tpl-ws-]").count() == 3 and await pg.locator("[data-use^=tpl-]").count() == 9)
     await pg.goto(S + "#/teach/plans/new"); await pg.wait_for_timeout(700)
     coding_n = await pg.evaluate("STEM.activities.filter((a) => a.area === 'coding' || (a.alsoIn || []).includes('coding')).length")
     ok("picker: every coding activity is listed (no 12 cap)", await pg.locator("#pw-results .pk-card").count() == coding_n, coding_n)
@@ -103,7 +103,7 @@ async def main():
 
     # Workshops
     tpls = await pg.evaluate("JSON.stringify(STEM.pathwayTemplates.filter((t) => t.group === 'workshop').map((t) => ({ id: t.id, n: t.steps.length, ok: t.steps.every((s) => !!SE.activityById[s.activityId]), fmt: !!(t.workshop && t.workshop.format), fut: (t.future || []).length, sess: t.workshop.sessions.every((x) => x.steps.every((k) => k >= 1 && k <= t.steps.length)) })))")
-    ok("workshops: 3, every step resolves, format, valid sessions", tpls.count('"ok":true') == 3 and tpls.count('"fmt":true') == 3 and tpls.count('"sess":true') == 3, tpls)
+    ok("workshops (3 plus the Moxie course): every step resolves, format, valid sessions", tpls.count('"ok":true') == 4 and tpls.count('"fmt":true') == 4 and tpls.count('"sess":true') == 4, tpls)
     ok("workshops: 3D Printing is an optional add-on step now; Moxie is still future text", await pg.evaluate("['tpl-ws-sampler', 'tpl-ws-katahdin'].every((id) => SE.plans.stepsOf(SE.plans.template(id)).some((s) => SE.activityById[s.activityId].area === '3d-printing' && !s.required)) && SE.plans.template('tpl-ws-robots').future.length === 1"))
     ok("workshops: future content is never a step", await pg.evaluate("STEM.pathwayTemplates.every((t) => t.steps.every((s) => !(SE.activityById[s.activityId] || {}).placeholder))"))
     await go(pg, "#/teach/plans/tpl-ws-sampler")

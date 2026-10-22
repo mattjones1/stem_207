@@ -149,7 +149,7 @@ TEACHER = ["#/teach", "#/activities", "#/activities/coding",
            "#/moxie", "#/moxie/teach", "#/activity/moxie-03", "#/activity/moxie-13", "#/activity/moxie-16",
            "#/activities/3d-printing", "#/activity/3d-printing-exercise-04", "#/activity/3d-buoy-charm", "#/activity/fix-the-recipe", "#/teach/plans", "#/teach/plans/tpl-maine-coast"]
 # Moxie sessions are drafts, so students only see them here by publishing them in memory for the audit.
-STUDENT_MOXIE = ["#/moxie", "#/activity/moxie-03", "#/activity/moxie-11", "#/activity/moxie-13", "#/activity/moxie-14", "#/activity/moxie-15", "#/activity/moxie-16"]
+STUDENT_MOXIE = ["#/moxie", "#/activity/moxie-01", "#/activity/moxie-06", "#/activity/moxie-08", "#/activity/moxie-03", "#/activity/moxie-11", "#/activity/moxie-13", "#/activity/moxie-14", "#/activity/moxie-15", "#/activity/moxie-16"]
 
 async def main():
   async with async_playwright() as p:
