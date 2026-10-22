@@ -61,14 +61,16 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - Use `CS curriculum.pptx` only as a reference. Don't copy Skill Samurai branding, prices, age bands, or certification claims.
 - Don't change AI, VR, Science & Discovery, Creative STEM, the Moxie pathway, or the five 3D Printing placeholders.
 
-## Brand
-- Read `brand/BRAND.md` before any branding, marketing, or visual-identity work. It follows the October 2026 standards (STEM 207, powered by STEM Coliseum): Dark Teal `#012d2b`, Teal `#03968f`, Green 2 `#94c93d`, Montserrat and Open Sans.
-- Those standards retire the indigo/lime palette, but the site hasn't been rethemed yet (`--navy #302568`, `--orange #8cc832`, older logo in `assets/img/brand/`). Approved logos are in `brand/logos/` and colors in `brand/colors/`. BRAND.md's "Site status" lists the gaps. Ask before retheming. The site keeps Atkinson Hyperlegible for body text (a decided exception).
+## Brand (co-branded with STEM Coliseum)
+- STEM Coliseum and Learning Center is the parent; STEM 207, LLC is a program offered exclusively through it. Read `brand/BRAND.md` before any branding work. The parent guide and all its logo files are in `brand/coliseum/`.
+- Every page: a white `.cobrand-bar` brand row (STEM 207 logo linking home, "powered by", and the Coliseum logo at 300px linking to https://stem-coliseum.odoo.com/ in a new tab), the navigation in `.site-header`, and the parent block in the footer. The sign-in card and certificates also show the Coliseum logo. The Coliseum logo always sits on white and is never recolored or redrawn.
+- Palette: Dark Teal `#012d2b` (`--navy`, `--fg`), Teal `#03968f` (`--brand-teal`, large type and graphics), text teal `#037872` (`--teal`, small text and buttons, for 4.5:1 contrast), Green 2 `#94c93d` (`--orange`, CTAs). Fonts: Montserrat and Open Sans. The STEM 207 logo is STEM in Dark Teal and 207 in Green 2.
+- Approved kit files (unchanged originals): `brand/logos/stem-207/` (logo, reverse, mark; SVG and PNG), `brand/logos/lockups/` ("powered by" lockups), `brand/colors/` (palette CSS and text). The old indigo/lime `brand/marketing-kit/` is retired (in git history).
 - Marketing images show no people. AI-generated concept art is illustrative only, so never present it as real equipment or programs.
 
 ## Mission context and certificates (Batch 6)
 - Activity fields: `why`, `realWorld`, `vocab: [{ term, def }]` render as "Why it matters" with key words (all 10 coding missions have them). `board: { title, lines, note }` shows a card students read in the mission block (Bug Hunt's buggy algorithm).
-- `SE.certificate.open(info)` / `SE.certificate.button(info, label)` in `assets/js/certificate.js`: a printable certificate on warm paper. `info = { award, course, detail, name, className, at }`. Use the display name and class name only. Pattern Machine Level 6 awards "Responsible AI Explorer" at 7 of 10 (`SE.patternMachine.scoreUses`, `PASS`).
+- `SE.certificate.open(info)` / `SE.certificate.button(info, label)` in `assets/js/certificate.js`: a printable certificate on white paper, co-branded with STEM Coliseum. `info = { award, course, detail, name, className, at }`. Use the display name and class name only. Pattern Machine Level 6 awards "Responsible AI Explorer" at 7 of 10 (`SE.patternMachine.scoreUses`, `PASS`).
 - Test: `python3 tests/site/test_batch6.py`.
 
 ## Grades 6–8 track and Robot Chef (Batch 7)

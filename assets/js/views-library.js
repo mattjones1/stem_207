@@ -235,11 +235,11 @@
      water, granite ledge, a pine ridge, Katahdin in the distance, and one lobster buoy per
      exploration area. Each buoy is a link to its area. */
   const BUOYS = [
-    { x: 182, y: 270, label: "Coding", c1: "#8cc832", c2: "#302568" },
-    { x: 290, y: 270, label: "VR", c1: "#ffffff", c2: "#8cc832" },
-    { x: 398, y: 270, label: "AI", c1: "#f2c14e", c2: "#302568" },
+    { x: 182, y: 270, label: "Coding", c1: "#94c93d", c2: "#012d2b" },
+    { x: 290, y: 270, label: "VR", c1: "#ffffff", c2: "#94c93d" },
+    { x: 398, y: 270, label: "AI", c1: "#f2c14e", c2: "#012d2b" },
     { x: 128, y: 312, label: "Engineering", c1: "#e9603f", c2: "#ffffff" },
-    { x: 238, y: 312, label: "Science", c1: "#8cc832", c2: "#ffffff" },
+    { x: 238, y: 312, label: "Science", c1: "#94c93d", c2: "#ffffff" },
     { x: 348, y: 312, label: "Creative", c1: "#ffffff", c2: "#e9603f" }
   ];
   function coastSvg() {
@@ -257,10 +257,10 @@
         <g transform="translate(${b.x} ${b.y})">
           <ellipse class="buoy-ring" cx="0" cy="1" rx="13" ry="3.5" fill="none" stroke="#b9e27f" stroke-opacity=".35" stroke-width="1.2"/>
           <g class="buoy">
-            <line x1="0" y1="-24" x2="0" y2="-36" stroke="#d9d6f0" stroke-width="1.6"/>
+            <line x1="0" y1="-24" x2="0" y2="-36" stroke="#cfe9e6" stroke-width="1.6"/>
             <rect x="-6.5" y="-25" width="13" height="25" rx="6.5" fill="${b.c1}"/>
             <rect x="-6.5" y="-16" width="13" height="7" fill="${b.c2}"/>
-            <rect x="-6.5" y="-25" width="13" height="25" rx="6.5" fill="none" stroke="#1d1647" stroke-opacity=".35"/>
+            <rect x="-6.5" y="-25" width="13" height="25" rx="6.5" fill="none" stroke="#01201e" stroke-opacity=".35"/>
           </g>
           <text x="0" y="19" text-anchor="middle">${esc(b.label)}</text>
         </g></a>`;
@@ -270,7 +270,7 @@
         <defs>
           <symbol id="pine207" viewBox="1138 172 117 332"><path d="${SE.brand.PINE_D}"/></symbol>
           <linearGradient id="beamGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff9d6" stop-opacity=".75"/><stop offset="1" stop-color="#fff9d6" stop-opacity="0"/></linearGradient>
-          <linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a2170"/><stop offset="1" stop-color="#171240"/></linearGradient>
+          <linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#073431"/><stop offset="1" stop-color="#03211f"/></linearGradient>
           <linearGradient id="fadeX" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000"/><stop offset=".12" stop-color="#fff"/><stop offset=".88" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
           <linearGradient id="fadeY" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".78" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
           <mask id="coastFadeX" maskUnits="userSpaceOnUse" x="0" y="0" width="440" height="340"><rect width="440" height="340" fill="url(#fadeX)"/></mask>
@@ -278,27 +278,27 @@
         </defs>
         <g mask="url(#coastFadeX)"><g mask="url(#coastFadeY)">
         ${stars}
-        <circle cx="384" cy="46" r="15" fill="#f6f1d3" opacity=".9"/><circle cx="391" cy="41" r="13" fill="#2b2263" opacity=".9"/>
-        <path d="M150 252 L214 196 L236 206 L262 168 L284 180 L300 160 L338 196 L372 214 L440 232 L440 252 Z" fill="#3c3190"/>
-        <path d="M262 168 L270 172 L284 180 L275 183 L268 177 Z M300 160 L310 170 L304 172 Z" fill="#c9c4ec" opacity=".55"/>
-        <g fill="#1a1440">${pines.join("")}</g>
+        <circle cx="384" cy="46" r="15" fill="#f6f1d3" opacity=".9"/><circle cx="391" cy="41" r="13" fill="#083733" opacity=".9"/>
+        <path d="M150 252 L214 196 L236 206 L262 168 L284 180 L300 160 L338 196 L372 214 L440 232 L440 252 Z" fill="#096660"/>
+        <path d="M262 168 L270 172 L284 180 L275 183 L268 177 Z M300 160 L310 170 L304 172 Z" fill="#bfe4e0" opacity=".55"/>
+        <g fill="#03221f">${pines.join("")}</g>
         <rect x="0" y="250" width="440" height="90" fill="url(#seaGrad)"/>
-        <g stroke="#8cc832" stroke-opacity=".18" stroke-width="1.2" fill="none" stroke-linecap="round">
+        <g stroke="#94c93d" stroke-opacity=".18" stroke-width="1.2" fill="none" stroke-linecap="round">
           <path d="M160 262 q8 -3 16 0 t16 0"/><path d="M330 290 q8 -3 16 0 t16 0"/><path d="M60 326 q8 -3 16 0 t16 0"/><path d="M280 332 q8 -3 16 0 t16 0"/><path d="M410 300 q8 -3 16 0 t16 0"/>
         </g>
         <path d="M70 262 L56 340 L84 340 Z" fill="#fff9d6" opacity=".08"/>
         <path class="beam" style="--lx:70px;--ly:140px" d="M70 140 L440 100 L440 176 Z" fill="url(#beamGrad)"/>
-        <path d="M0 240 C18 230 40 236 58 232 C80 228 104 236 124 244 C146 252 160 262 170 276 C150 282 120 280 96 284 C64 290 30 284 0 288 Z" fill="#3b3a4a"/>
-        <path d="M0 252 C24 246 46 252 70 248 C94 244 120 254 140 262 C120 270 90 268 64 274 C40 278 18 274 0 278 Z" fill="#55546a"/>
-        <path d="M22 258 l18 -4 M80 256 l22 3 M108 266 l14 -2" stroke="#7b7a8c" stroke-width="1.5" stroke-linecap="round"/>
-        <path d="M96 246 h34 v-20 h-34 Z" fill="#efece2"/><path d="M92 228 L113 214 L134 228 Z" fill="#8a2c2c"/><rect x="104" y="232" width="7" height="8" fill="#f2c14e" opacity=".85"/><rect x="117" y="232" width="7" height="8" fill="#2b2263"/>
+        <path d="M0 240 C18 230 40 236 58 232 C80 228 104 236 124 244 C146 252 160 262 170 276 C150 282 120 280 96 284 C64 290 30 284 0 288 Z" fill="#2f4341"/>
+        <path d="M0 252 C24 246 46 252 70 248 C94 244 120 254 140 262 C120 270 90 268 64 274 C40 278 18 274 0 278 Z" fill="#4f5f5d"/>
+        <path d="M22 258 l18 -4 M80 256 l22 3 M108 266 l14 -2" stroke="#6f8482" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M96 246 h34 v-20 h-34 Z" fill="#efece2"/><path d="M92 228 L113 214 L134 228 Z" fill="#8a2c2c"/><rect x="104" y="232" width="7" height="8" fill="#f2c14e" opacity=".85"/><rect x="117" y="232" width="7" height="8" fill="#083733"/>
         <path d="M58 248 L62 150 H78 L82 248 Z" fill="#f4f2ea"/>
         <path d="M60.6 200 H79.4" stroke="#d9d5c6" stroke-width="2"/>
-        <rect x="56" y="146" width="28" height="5" rx="1" fill="#1d1647"/>
-        <rect x="62" y="132" width="16" height="14" fill="#1d1647"/>
+        <rect x="56" y="146" width="28" height="5" rx="1" fill="#01201e"/>
+        <rect x="62" y="132" width="16" height="14" fill="#01201e"/>
         <rect x="64" y="134" width="12" height="10" fill="#fff4b0"/>
         <circle cx="70" cy="139" r="9" fill="#fff4b0" opacity=".35"/>
-        <path d="M60 132 L70 122 L80 132 Z" fill="#1d1647"/><line x1="70" y1="122" x2="70" y2="116" stroke="#1d1647" stroke-width="1.6"/>
+        <path d="M60 132 L70 122 L80 132 Z" fill="#01201e"/><line x1="70" y1="122" x2="70" y2="116" stroke="#01201e" stroke-width="1.6"/>
         </g></g>
         ${buoys}
       </svg>`;
@@ -613,7 +613,7 @@
     const rowH = 34, indent = 26, x0 = 12;
     const rows = f.lines.map(([d, kind, text], i) => {
       const x = x0 + d * indent, y = 12 + i * rowH, w = kind === "end" ? 70 : Math.max(150, text.length * 7.4 + 28);
-      return `<g><rect x="${x}" y="${y}" width="${w}" height="${kind === "end" ? 16 : 28}" rx="${kind === "event" ? 12 : 4}" fill="${BLOCK_FILL[kind]}" stroke="rgba(0,0,0,.25)"/>${text ? `<text x="${x + 10}" y="${y + 19}" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="${kind === "event" || kind === "control" || kind === "variables" ? "#1d1647" : "#ffffff"}">${esc(text)}</text>` : ""}</g>`;
+      return `<g><rect x="${x}" y="${y}" width="${w}" height="${kind === "end" ? 16 : 28}" rx="${kind === "event" ? 12 : 4}" fill="${BLOCK_FILL[kind]}" stroke="rgba(0,0,0,.25)"/>${text ? `<text x="${x + 10}" y="${y + 19}" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="${kind === "event" || kind === "control" || kind === "variables" ? "#01201e" : "#ffffff"}">${esc(text)}</text>` : ""}</g>`;
     }).join("");
     // The left arm of each C block (forever, if): from its row down to its matching end.
     const arms = f.lines.map(([d, kind], i) => {

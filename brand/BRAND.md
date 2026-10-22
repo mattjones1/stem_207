@@ -1,86 +1,71 @@
-# STEM 207 brand guide
+# STEM 207 brand guide (co-branded with STEM Coliseum)
 
-Source: *STEM207bySCLC Updated Brand Marketing Kit* (October 20, 2026), which adopts `STEM207_Brand_Guide.pdf` v1.0 (October 2026). The approved logos and colors are copied, unchanged, into this repo:
-- `brand/logos/stem-207/`: the STEM 207 logo, reverse logo, and mark (SVG and PNG)
-- `brand/logos/lockups/`: "STEM 207 powered by STEM Coliseum", horizontal and stacked, on white
-- `brand/logos/stem-coliseum/`: the nine approved STEM Coliseum logo versions
-- `brand/colors/`: the palette as CSS and plain text
+**STEM Coliseum and Learning Center** is the parent company. **STEM 207, LLC** is a program offered exclusively through STEM Coliseum. The site is co-branded: the STEM 207 logo leads, and STEM Coliseum appears as the parent on every page.
 
-The rest of the kit is kept outside this repo, in `OneDrive/Desktop/STEM_207/STEM207bySCLC/`: the brand guide PDF, the detailed standards (`01_Guide/STEM207bySCLC_Standards.md`), draft copy (`05_Copy/STEM207bySCLC_Copy_Bank.md`), the flyer, social posts, and fonts. This page pulls out the rules that matter for the site and for any new material.
+Sources: the *STEM 207 Brand Guide v1.0* (October 2026, `brand/STEM207_Brand_Guide.pdf`), adopted as the standard from October 20, 2026, and the *STEM Coliseum Media Brand Guide v1.1* (`brand/coliseum/STEM_Coliseum_Brand_Guide.docx`). These replace earlier directions, including the indigo/lime palette.
 
-**These standards replace earlier visual directions,** including the retired indigo/lime palette. The Round 2 marketing kit (`brand/marketing-kit/`) has been removed; it is still in git history. See "Site status" below.
+## Files
+- `brand/STEM207_Brand_Kit.zip`: the whole kit in one download.
+- `brand/logos/stem-207/`: the STEM 207 logo, reverse logo, and Maine-zero mark (SVG, plus 2000 px and 512 px PNGs).
+- `brand/logos/lockups/`: the "STEM 207 powered by STEM Coliseum" lockups, horizontal and stacked, on white.
+- `brand/coliseum/`: the parent guide and the nine STEM Coliseum logo files.
+- `brand/colors/`: the palette as CSS and plain text.
+- Use these originals. Never recreate a logo or use an AI-generated version of one.
 
-## Identity and exact wording
-- Brand: **STEM 207**. Maine-rooted STEM learning for grades 2–8.
-- Mission, with the period: **Keep the humanity in technology.** This is the mission, not a campaign tagline. Don't rephrase it (e.g. "Keeping the humanity…").
-- Beside logos: **STEM 207 powered by STEM Coliseum**
-- Short reference in text: **STEM 207, powered by STEM Coliseum**
-- Formal line (website footer, formal materials): **STEM 207, LLC is a program offered exclusively through STEM Coliseum and Learning Center.**
-- Parent brand: STEM Coliseum and Learning Center. Its tagline is **STEM • SPORT • LEARN**, and its website is https://stem-coliseum.odoo.com/
-- "STEM207bySCLC" is only the kit's package name. It is not a public name or logo.
+## Mission and exact wording
+- Mission: **Keep the humanity in technology.** Use these exact words, with the period.
+- Beside logos: **STEM 207 powered by STEM Coliseum**. In text: **STEM 207, powered by STEM Coliseum**.
+- Formal line: **STEM 207, LLC is a program offered exclusively through STEM Coliseum and Learning Center.**
+- STEM Coliseum's tagline is **STEM • SPORT • LEARN**.
+- "STEM207bySCLC" is only the kit's package name, not a public name.
 
 ## Voice
 - Warm, curious, and plain. Short sentences that suit grades 2–8.
 - Lead line: **Wonder what you could make.** Follow-up line: **Your idea. Give it a go.**
-- Hierarchy on any piece: logo first, invitation second, one clear next step, mission always.
 - Technology supports the learner's ideas. The learner is the maker; the tool is never the hero.
 
-## Logos and co-branding
-- The approved logo has a pine tree forming the right edge of the M and Maine inside the zero. STEM is Dark Teal and 207 is Green 2. Keep the 207.
-- Use the supplied files; never redraw them. Prefer the SVGs: `stem207-logo.svg` (full color, on white), `stem207-logo-reverse.svg` (white STEM, on Dark Teal), and `stem207-mark.svg` (the Maine-zero mark, for icons and favicons). PNG versions are 2000 px wide; the mark is 512 px.
-- Minimum full-logo width: 120 px on screen or 1 inch in print. Clear space: the height of the S in STEM on every side.
-- Co-brand lockup: STEM 207 first, then POWERED BY, then the full-color STEM Coliseum logo, on white. Use the supplied horizontal or stacked PNG lockups.
-- STEM Coliseum logo: clear space is the height of the C in COLISEUM, and minimum width is 120 px or 1 inch. Its supplied files are 700 px wide; get originals from the parent media team for large print. Show the full-color logo on white only, and keep its original multicolor version.
-- Never recolor, stretch, or redraw either logo, and never add shadows, glows, or outlines. Never use an AI-generated rendering of a logo.
+## How the two brands appear together
+| Place | What shows |
+| --- | --- |
+| Top of every page | A white brand row: the STEM 207 logo (links home), "powered by", and a large full-color STEM Coliseum logo that links to the STEM Coliseum and Learning Center website, https://stem-coliseum.odoo.com/ (new tab) |
+| Header | The navigation, under the brand row |
+| Footer | The STEM Coliseum and Learning Center logo on a white plate (links to the STEM Coliseum site), "STEM 207, LLC is a program offered exclusively through STEM Coliseum and Learning Center", STEM • SPORT • LEARN, and the STEM 207 mission |
+| Sign-in card | "Powered by" + the STEM Coliseum logo (links to the STEM Coliseum site) |
+| Certificates | The STEM 207 logo, then "Powered by" + the STEM Coliseum logo |
 
-## Color
-| Color | Hex | Use |
+## STEM Coliseum logo rules (from the parent guide)
+- Use the original files only (`assets/img/brand/coliseum/` for the site, all versions in `brand/coliseum/`). Never recolor, stretch, redraw, or add shadows or effects.
+- The full-color versions go on white or light backgrounds only. On the site they always sit on white, in light and dark mode.
+- Keep clear space around it equal to the height of the "C" in COLISEUM. Minimum 120 px wide on screens.
+- The files supplied are 700 px wide PNGs with solid backgrounds. Ask the STEM Coliseum media team for SVG or transparent PNG originals before large or print use.
+
+## STEM 207 logo
+- Same drawing as before (the pine in the M, Maine in the 0), recolored to the parent palette: **STEM in Dark Teal #012d2b, 207 in Green 2 #94c93d**. On dark backgrounds, STEM turns white.
+- Site copy: `assets/img/brand/stem207-logo.svg` (plus `-reverse`, `-mark`, `-pine`). `assets/js/brand.js` draws it inline. The kit originals are in `brand/logos/stem-207/`. Use those for print and marketing.
+- Minimum width: 120 px on screen or 1 inch in print. Clear space: the height of the S in STEM on every side. Use the reverse version (white STEM) on Dark Teal, and the mark for icons and favicons.
+- For flyers, social posts, and partner sheets, put the horizontal lockup at the top or bottom, and include the exact mission line.
+
+## Color (STEM Coliseum palette)
+| Role | Color | Site token |
 | --- | --- | --- |
-| Dark Teal | `#012d2b` | Anchor: main text, dark backgrounds, STEM in the logo |
-| Teal | `#03968f` | Large headings, borders, graphics |
-| Text teal | `#037872` | Small text, links, buttons (5.3:1 on white) |
-| Green 2 | `#94c93d` | Calls to action with Dark Teal text on it; 207 in the logo |
-| Blue | `#3b8bcb` | Interactive highlights, sparingly |
-| Body gray | `#555555` | Body and muted text |
-| White | `#ffffff` | Backgrounds; full-color logo fields |
+| Anchor: dark backgrounds (header, page tops, footer), main text | Dark Teal `#012d2b` | `--navy`, `--fg`, `--brand-dark-teal` |
+| Primary accent: large headings, borders, graphics, certificate frame | Teal `#03968f` | `--brand-teal` |
+| Links, small accent text, primary buttons | Teal, text shade `#037872` | `--teal` |
+| Calls to action (dark teal text on green), energy | Green 2 `#94c93d` | `--orange` (name kept for code history) |
+| Interactive highlights (available, used sparingly) | Blue `#3b8bcb` | `--brand-blue` |
+| Body text, muted | `#555555` | `--muted` |
 
-- Use at most three brand colors in one layout. The usual set is Dark Teal, Teal, and Green 2.
-- Parent-brand extras (Green 1 `#66aa44`, Orange 1 `#fac01b`, Orange 2 `#f68922`, Pink `#ec008c`) are for STEM Coliseum materials and its logo, not STEM 207 layouts.
-- Never put Pink on Orange or Yellow. Never put Dark Teal on a dark background.
-- Contrast: 4.5:1 for small text, 3:1 for large text and graphics. Teal and Blue on white are for large headings or graphics only. Use Text teal for small text on white. Green 2 is a fill behind Dark Teal text, never the color of text on white.
-- The kit's CSS tokens: `--dark-teal`, `--teal`, `--teal-text`, `--green-2`, `--blue`, `--body-gray`, `--white` (`brand/colors/stem207-colors.css`).
+**Why the text shade:** brand Teal and Blue measure 3.6:1 on white. That passes for large text and graphics but not for small text (WCAG needs 4.5:1). Small text and button labels use `#037872` (5.3:1 on white, 4.8:1 on the light teal tint), so the site stays readable for grades 2–8. Never put Pink on orange or yellow. Use at most three brand colors in a layout; the site uses Dark Teal, Teal, and Green 2.
 
 ## Type
-| Typeface | Weights | Use |
-| --- | --- | --- |
-| Montserrat | Bold, SemiBold | Titles, headings, navigation, buttons, POWERED BY |
-| Open Sans | Regular, Bold | Body text, captions, form fields |
+- **Montserrat** for headings, navigation, and buttons. **Open Sans** for body text. Both from Google Fonts. No other typefaces.
 
-The standard says to use no other typefaces. Never stretch or condense type. The kit ships the fonts and their SIL Open Font Licenses in `fonts/`.
+## Imagery and claims (STEM 207)
+- STEM 207 site and marketing images show **no people**, and never students' faces. (The parent guide's photo style, with real students, is for STEM Coliseum's own media and needs parental consent on file. It isn't used on this site.)
+- STEM 207 concept artwork is AI-generated and illustrative only. Don't present it as real facilities, equipment, or programs.
+- Advertise coding, AI, VR, or AR sessions only when they're confirmed.
 
-## Imagery
-- Maine scenes (pines, coast, lighthouses, harbors) next to inventive technology.
-- **No people in STEM 207 imagery, and never students' faces.** This also fits the classroom rule against collecting or showing student faces. (STEM Coliseum's own materials need parental consent on file for any real student photo.)
-- AI-generated concept art is illustrative only. Never present it as real facilities, equipment, software, or programs.
+- Before publishing, confirm offerings, dates, grade ranges, prices, venue, and links, and remove every template placeholder.
 
-## Where each element goes
-- **Website:** a white brand row on every page. Link the STEM Coliseum logo to its website, and put the formal line in the footer.
-- **Sign-in and certificates:** include "Powered by" with the STEM Coliseum logo.
-- **Flyers, social posts, partner sheets:** the horizontal lockup at the top or bottom, plus the exact mission line.
-- **Anything else new:** the same logos, palette, type, voice, and imagery rules.
-
-## Claims and accuracy
-- Advertise coding, AI, VR, or AR sessions only when the curriculum, equipment, and delivery are confirmed.
-- Before publishing, confirm offerings, dates, grade ranges, prices, venue, capacity, and links. Remove every template placeholder.
-- The copy bank's captions, partner email, and event template are drafts. Nothing has been posted or sent.
-- Use only the permissions and organizational claims the brand owner has approved. The kit transcribes the formal line; it doesn't verify legal status.
-
-## Site status (not yet updated)
-Adopting the new standards did not change the site. As of October 21, 2026, the app still uses the retired brand:
-- Colors in `assets/css/styles.css`: indigo `--navy #302568` and `--teal #4a3ba6`, lime `--orange #8cc832`, with dark-mode versions.
-- Logos in `assets/img/brand/` and `assets/js/brand.js`: the older indigo logo. It doesn't match the approved `brand/logos/stem-207/stem207-logo.svg`.
-- There is no STEM Coliseum lockup, "Powered by" line, or formal footer line on the site, sign-in, or certificates yet.
-
-**Site exception (decided):** the site keeps **Atkinson Hyperlegible** for body text, with Montserrat headings, because it is easier for young readers. Use Open Sans for marketing and other new materials.
-
-A site retheme needs the accessibility test to stay at 0 findings in light and dark mode (`python3 tests/site/test_a11y.py`).
+## Marketing kit status
+The Round 2 marketing kit (`brand/marketing-kit/`, indigo and lime, no STEM Coliseum) has been retired and removed. It's still in git history. New co-branded flyers, social posts, and a copy bank are in the October 2026 kit (`OneDrive/Desktop/STEM_207/STEM207bySCLC/`). Bring files into the repo as they're needed.

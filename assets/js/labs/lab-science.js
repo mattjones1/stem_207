@@ -97,7 +97,7 @@
       // tape measure
       const x0 = 150;
       ctx.fillStyle = "#f4d35e"; ctx.fillRect(x0, floorY + 30, W - x0 - 10, 22);
-      ctx.fillStyle = "#0d1d36"; ctx.font = "700 15px 'Atkinson Hyperlegible', sans-serif"; ctx.textAlign = "center";
+      ctx.fillStyle = "#0d1d36"; ctx.font = "700 15px 'Open Sans', sans-serif"; ctx.textAlign = "center";
       for (let cm = 0; x0 + cm * PX < W - 12; cm += 25) {
         ctx.fillRect(x0 + cm * PX - 1, floorY + 30, 2, cm % 50 === 0 ? 12 : 7);
         if (cm % 50 === 0) ctx.fillText(`${cm}`, x0 + cm * PX, floorY + 66);

@@ -101,19 +101,19 @@
   /* ───────── The robot ───────── */
   const robotSvg = () => `
     <svg class="dp-robot__svg" viewBox="0 0 120 150" aria-hidden="true">
-      <line x1="60" y1="8" x2="60" y2="24" stroke="#302568" stroke-width="4" stroke-linecap="round"/>
-      <circle class="dp-antenna" cx="60" cy="8" r="6" fill="#8cc832" stroke="#302568" stroke-width="3"/>
-      <rect x="22" y="22" width="76" height="48" rx="14" fill="#f4f2ea" stroke="#302568" stroke-width="4"/>
-      <rect x="32" y="31" width="56" height="30" rx="9" fill="#302568"/>
+      <line x1="60" y1="8" x2="60" y2="24" stroke="#012d2b" stroke-width="4" stroke-linecap="round"/>
+      <circle class="dp-antenna" cx="60" cy="8" r="6" fill="#94c93d" stroke="#012d2b" stroke-width="3"/>
+      <rect x="22" y="22" width="76" height="48" rx="14" fill="#f4f2ea" stroke="#012d2b" stroke-width="4"/>
+      <rect x="32" y="31" width="56" height="30" rx="9" fill="#012d2b"/>
       <g class="dp-eyes"><circle cx="48" cy="44" r="5" fill="#b9e27f"/><circle cx="72" cy="44" r="5" fill="#b9e27f"/></g>
       <path class="dp-mouth" d="M50 52 Q60 58 70 52" stroke="#b9e27f" stroke-width="3" fill="none" stroke-linecap="round"/>
-      <rect x="30" y="68" width="60" height="46" rx="10" fill="#8cc832" stroke="#302568" stroke-width="4"/>
-      <rect x="44" y="78" width="32" height="18" rx="4" fill="#302568"/>
+      <rect x="30" y="68" width="60" height="46" rx="10" fill="#94c93d" stroke="#012d2b" stroke-width="4"/>
+      <rect x="44" y="78" width="32" height="18" rx="4" fill="#012d2b"/>
       <circle cx="52" cy="87" r="3" fill="#f2c14e"/><circle cx="60" cy="87" r="3" fill="#e9603f"/><circle cx="68" cy="87" r="3" fill="#b9e27f"/>
-      <g class="dp-arm dp-arm--l"><path d="M30 70 L12 92" stroke="#302568" stroke-width="9" stroke-linecap="round"/><circle cx="12" cy="92" r="7" fill="#8cc832" stroke="#302568" stroke-width="3"/></g>
-      <g class="dp-arm dp-arm--r"><path d="M90 70 L108 92" stroke="#302568" stroke-width="9" stroke-linecap="round"/><circle cx="108" cy="92" r="7" fill="#8cc832" stroke="#302568" stroke-width="3"/></g>
-      <rect x="40" y="114" width="12" height="22" rx="4" fill="#302568"/><rect x="68" y="114" width="12" height="22" rx="4" fill="#302568"/>
-      <rect x="34" y="134" width="22" height="10" rx="5" fill="#302568"/><rect x="64" y="134" width="22" height="10" rx="5" fill="#302568"/>
+      <g class="dp-arm dp-arm--l"><path d="M30 70 L12 92" stroke="#012d2b" stroke-width="9" stroke-linecap="round"/><circle cx="12" cy="92" r="7" fill="#94c93d" stroke="#012d2b" stroke-width="3"/></g>
+      <g class="dp-arm dp-arm--r"><path d="M90 70 L108 92" stroke="#012d2b" stroke-width="9" stroke-linecap="round"/><circle cx="108" cy="92" r="7" fill="#94c93d" stroke="#012d2b" stroke-width="3"/></g>
+      <rect x="40" y="114" width="12" height="22" rx="4" fill="#012d2b"/><rect x="68" y="114" width="12" height="22" rx="4" fill="#012d2b"/>
+      <rect x="34" y="134" width="22" height="10" rx="5" fill="#012d2b"/><rect x="64" y="134" width="22" height="10" rx="5" fill="#012d2b"/>
     </svg>`;
 
   function mount(el, idx, api) {

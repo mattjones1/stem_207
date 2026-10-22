@@ -11,7 +11,7 @@
 
   /* Fixed object colors: insignia and patches are "physical" objects, so they keep
      their colors in both themes, like a real embroidered patch would. */
-  const C = { navy: "#302568", navyDeep: "#1d1647", teal: "#4a3ba6", tealLight: "#b9e27f", orange: "#8cc832", cream: "#f7f6f0", ink: "#1d1647" };
+  const C = { navy: "#012d2b", navyDeep: "#01201e", teal: "#037872", tealLight: "#b9e27f", orange: "#94c93d", cream: "#f7f6f0", ink: "#01201e" };
 
   function starPath(cx, cy, r) {
     const pts = [];
@@ -43,7 +43,7 @@
   SE.patchArt = (patch, earned, size = 96) => {
     const id = `arc${++uid}`;
     const ring = { teal: C.teal, orange: C.orange, navy: C.navy }[patch.ring] || C.teal;
-    const inner = patch.ring === "navy" ? "#4a3ba6" : C.navy;
+    const inner = patch.ring === "navy" ? "#037872" : C.navy;
     const cls = earned ? "patch" : "patch patch--locked";
     const ink = patch.ring === "orange" ? C.ink : C.cream; // dark lettering on the lime ring
     return `<svg class="${cls}" width="${size}" height="${size}" viewBox="0 0 120 120" role="img" aria-label="${SE.esc(patch.name)} patch${earned ? "" : ", not earned yet"}">
@@ -113,11 +113,11 @@
     }
     return `<svg class="starmap" viewBox="0 0 960 500" role="group" aria-label="Expedition map of the Maine night sky. Each star is a mission; completed missions light up.">
       <defs><symbol id="mapPine" viewBox="1138 172 117 332"><path d="${SE.brand.PINE_D}"/></symbol>
-        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.navyDeep}"/><stop offset=".8" stop-color="${C.navy}"/><stop offset="1" stop-color="#43379a"/></linearGradient></defs>
+        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.navyDeep}"/><stop offset=".8" stop-color="${C.navy}"/><stop offset="1" stop-color="#0a6f6a"/></linearGradient></defs>
       <rect width="960" height="500" fill="url(#skyGrad)"/>
       ${parts.join("")}${labels.join("")}
-      <path d="M0 470 L120 452 L210 462 L330 440 L420 455 L560 438 L700 458 L820 446 L960 460 V500 H0Z" fill="#2a2068"/>
-      <g fill="#120d33">${pines.join("")}</g><rect y="490" width="960" height="10" fill="#120d33"/>
+      <path d="M0 470 L120 452 L210 462 L330 440 L420 455 L560 438 L700 458 L820 446 L960 460 V500 H0Z" fill="#063532"/>
+      <g fill="#011817">${pines.join("")}</g><rect y="490" width="960" height="10" fill="#011817"/>
     </svg>`;
   };
 

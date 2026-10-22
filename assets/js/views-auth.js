@@ -18,7 +18,9 @@
     <section class="auth">
       <div class="auth__sky" aria-hidden="true">${SE.starMap(null, [], { decorative: true })}</div>
       <div class="wrap auth__inner">
-        <div class="auth__card ${wide ? "auth__card--wide" : ""}">${inner}</div>
+        <div class="auth__card ${wide ? "auth__card--wide" : ""}">${inner}
+          <p class="auth__parent"><span>Powered by</span><a href="https://stem-coliseum.odoo.com/" target="_blank" rel="noopener" aria-label="STEM Coliseum and Learning Center website (opens in a new tab)"><img src="assets/img/brand/coliseum/stem-coliseum.png" alt="STEM Coliseum" width="700" height="105"></a></p>
+        </div>
       </div>
     </section>`;
 
