@@ -1,7 +1,7 @@
 {
  "capturedAt": "2026-10-21",
- "note": "Baseline before the categories and pathways work. Every id and route must still resolve; counts change only where the plan says so.",
- "total": 53,
+ "note": "Baseline before the categories and pathways work, plus the three 3D Printing exercises added October 22, 2026 (Tinkercad). Every id and route must still resolve; counts change only where a plan says so.",
+ "total": 56,
  "labs": 11,
  "comingSoon": [
   "notice-and-wonder-360",
@@ -13,7 +13,8 @@
   "ai": 8,
   "engineering": 7,
   "science": 6,
-  "creative": 5
+  "creative": 5,
+  "3d-printing": 3
  },
  "areas": [
   "coding",
@@ -21,7 +22,8 @@
   "ai",
   "engineering",
   "science",
-  "creative"
+  "creative",
+  "3d-printing"
  ],
  "pathwayStages": [
   {
@@ -402,6 +404,24 @@
    "area": "creative",
    "route": "#/activity/lab-pixel-studio",
    "lab": "pixel-studio"
+  },
+  {
+   "id": "3d-buoy-charm",
+   "area": "3d-printing",
+   "route": "#/activity/3d-buoy-charm",
+   "lab": null
+  },
+  {
+   "id": "3d-trail-marker",
+   "area": "3d-printing",
+   "route": "#/activity/3d-trail-marker",
+   "lab": null
+  },
+  {
+   "id": "3d-fix-it-clip",
+   "area": "3d-printing",
+   "route": "#/activity/3d-fix-it-clip",
+   "lab": null
   }
  ]
 }

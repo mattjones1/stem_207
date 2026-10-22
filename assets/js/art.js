@@ -60,7 +60,7 @@
   };
 
   /* Star map: each exploration area is a constellation; each activity a star. */
-  const SECTORS = [[170, 125], [480, 95], [800, 130], [250, 315], [570, 320], [860, 310]];
+  const SECTORS = [[170, 125], [480, 95], [800, 130], [250, 315], [570, 320], [860, 310], [400, 215]];
   SE.starMap = (prof, recIds = [], opts = {}) => {
     const parts = [];
     const labels = [];
@@ -69,7 +69,7 @@
     for (let i = 0; i < 70; i++) {
       parts.push(`<circle cx="${(bg() * 960).toFixed(1)}" cy="${(bg() * 440).toFixed(1)}" r="${(bg() * 1.2 + 0.3).toFixed(2)}" fill="${C.cream}" opacity="${(bg() * 0.35 + 0.1).toFixed(2)}"/>`);
     }
-    SE.liveAreas.forEach((area, ai) => {   // one sector per area with activities (SECTORS has six spots)
+    SE.liveAreas.slice(0, SECTORS.length).forEach((area, ai) => {   // one sector per area with activities (SECTORS has seven spots)
       const [cx, cy] = SECTORS[ai];
       const acts = STEM.activities.filter((a) => a.area === area.id && !(SE.hiddenForUser && SE.hiddenForUser(a)));
       const r = SE.rng(`sector-${area.id}`);

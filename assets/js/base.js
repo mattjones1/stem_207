@@ -39,7 +39,7 @@
     if (!n) return "";
     if (n.rank) return `Reach ${P.ranks[rankIdx(n.rank)].name}`;
     if (n.patch) { const p = P.patches.find((x) => x.id === n.patch); return p ? `Earn the ${p.name} patch` : "Earn a patch"; }
-    if (n.missions) return `Finish ${n.missions} activities`;
+    if (n.missions) return `Pass ${n.missions} activities`;
     if (n.labLevels) return `Finish ${n.labLevels} lab levels`;
     if (n.xp) return `Earn ${SE.num(n.xp)} XP`;
     return "";
@@ -48,7 +48,7 @@
     if (!n || !prof) return null;
     if (n.rank) { const r = P.ranks[rankIdx(n.rank)]; return { have: prof.xp, want: r.xp, unit: "XP" }; }
     if (n.patch) { const p = prof.patches.find((x) => x.patch.id === n.patch); return p ? { have: p.progress, want: p.target, unit: "" } : null; }
-    if (n.missions) return { have: prof.counts.missions, want: n.missions, unit: "missions" };
+    if (n.missions) return { have: prof.counts.missions, want: n.missions, unit: "activities passed" };
     if (n.labLevels) return { have: prof.counts.labLevelsDone || 0, want: n.labLevels, unit: "levels" };
     return null;
   }
@@ -333,14 +333,14 @@
             <div class="base-head">
               <div class="base-head__avatar">${avatar(state.look, 132, { label: "Your explorer" })}</div>
               <div><span class="eyebrow">${esc(prof.rank.name)} · ${SE.num(prof.xp)} XP</span><h1 tabindex="-1">My harbor</h1>
-                <p class="page-top__lede">Design your explorer, paint your boat, and watch your harbor grow. Every activity, lab level, patch, and rank adds something new.</p>
+                <p class="page-top__lede">Design your explorer, paint your boat, and watch your harbor grow. Every activity your teacher passes, every lab level, patch, and rank adds something new.</p>
                 <p class="base-head__count">${icon("star")}<b>${openCount}</b> of ${all.length} unlocks earned</p></div>
             </div>
           </div>
         </section>
         <div class="wrap base-grid">
           <section class="block base-harbor" aria-labelledby="harbor-title">
-            <div class="block__head"><h2 id="harbor-title">Your harbor</h2><span class="muted">${prof.counts.missions} activities · ${prof.counts.labLevelsDone || 0} lab levels</span></div>
+            <div class="block__head"><h2 id="harbor-title">Your harbor</h2><span class="muted">${prof.counts.missions} passed · ${prof.counts.labLevelsDone || 0} lab levels</span></div>
             <div class="harbor-frame">${harbor(prof, state, { seed: user.id, name: user.displayName.split(" ")[0] })}</div>
             <div class="boat-design">
               <h3>${icon("buoy")}Your buoy colors <small>Every Maine lobsterman paints their buoys in their own colors.</small></h3>

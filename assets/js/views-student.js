@@ -223,9 +223,8 @@
             <p class="form__error" id="d-err" role="alert"></p>
           </div>
           <div class="debrief-q debrief-q--extend">
-            <span class="debrief-q__tag">${icon("rocket")}Take it further (optional)</span>
-            <p>${esc(a.extend)}</p>
-            <label for="d-extend-note">Did you try it? What happened?</label>
+            <span class="debrief-q__tag">${icon("rocket")}Go deeper (optional)</span>
+            <label for="d-extend-note">Did you try Go deeper? What did you find?</label>
             <input id="d-extend-note" class="input" maxlength="200" placeholder="Optional">
           </div>
           <fieldset class="debrief-q confidence">

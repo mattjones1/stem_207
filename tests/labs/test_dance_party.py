@@ -1,4 +1,4 @@
-# Browser test for Robot Dance Party (46 checks).
+# Browser test for Robot Dance Party: the basics (levels 1–4) and the Go deeper levels 5–8 (loops, debugging, fewest blocks).
 # Serve the app in local mode first:  LOCAL_MODE=1 PORT=8767 node tests/backend/mock-supabase.js
 # Then run:  python3 tests/labs/test_dance_party.py [http://localhost:8767/]   (needs: pip install playwright)
 import asyncio
@@ -119,6 +119,68 @@ async def main():
     await pg.keyboard.press("Tab")
     ol2 = await pg.evaluate("getComputedStyle(document.activeElement).outlineStyle")
     ok("visible focus outline", "solid" in (ol+ol2), f"{ol} {ol2}")
+    # ── Go deeper (grades 4–6): levels 5–8
+    r = await pg.evaluate("""[SE.dance.expand(['pose',{repeat:2,body:['jump','spin']}]).join(), SE.dance.blocks(['pose',{repeat:2,body:['jump','spin']}]),
+      SE.dance.check(4,[{repeat:3,body:['jump','spin']},'pose']).ok, SE.dance.check(4,['jump','spin','jump','spin','jump','spin','pose']).ok,
+      SE.dance.check(5,SE.dance.BUGGY).ok, SE.dance.check(6,[{repeat:3,body:['left','jump','right','spin']}]).ok, SE.dance.check(6,SE.dance.T7).ok,
+      SE.dance.check(7,[{repeat:4,body:['left','jump','right']}]).ok, SE.dance.check(7,[{repeat:2,body:['jump']}]).ok]""")
+    ok("Go deeper rule matrix (expand, blocks, levels 5–8)", r==["pose,jump,spin,jump,spin",4,True,False,False,True,False,True,False], r)
+    await pg.goto(S+"#/lab/dance-party/5"); await pg.wait_for_timeout(500)
+    ok("L5: in the Go deeper chapter", "Go deeper" in await pg.inner_text("#app"))
+    ok("L5: target dance of 7 moves and a Repeat button", await pg.locator(".dp-target__move").count()==7 and await pg.locator("#dp-addrep").count()==1)
+    await add(pg,"jump","spin","jump","spin","jump","spin","pose"); await run_done(pg)
+    f=await fb(pg); ok("L5: the long way matches but asks for a Repeat", "use a Repeat block" in f and not await pg.is_visible("#lab-win"), f)
+    await pg.click("#dp-clear"); await pg.click("#dp-addrep")
+    ok("L5: a new Repeat takes the next moves", await pg.get_attribute('[data-op="into"][data-i="0"]', "aria-pressed")=="true" and "inside the Repeat at step 1" in await pg.inner_text("#dp-into"))
+    await add(pg,"jump","spin"); await pg.click('[data-op="more"][data-i="0"]')
+    ok("L5: + raises the repeat count to 3", (await pg.inner_text(".dp-rep__n")).strip()=="3")
+    await pg.click('[data-op="into"][data-i="0"]'); await add(pg,"pose")
+    ok("L5: count shows 4 blocks · 7 moves", "4 blocks · 7 moves" in await pg.inner_text("#dp-count"), await pg.inner_text("#dp-count"))
+    await pg.click("#dp-run"); seen_time=""
+    for _ in range(80):
+        t_ = await pg.inner_text("#dp-now")
+        if "time 2 of 3" in t_: seen_time=t_; break
+        await pg.wait_for_timeout(60)
+    await pg.wait_for_function("!document.querySelector('.dp').classList.contains('is-running')", timeout=20000); await pg.wait_for_timeout(150)
+    ok("L5: the trace names the loop pass (time 2 of 3)", "Repeat 3 times, time 2 of 3" in seen_time, seen_time)
+    f=await fb(pg); ok("L5: wins with the repeat", await pg.is_visible("#lab-win") and "7 moves from only 4 blocks" in f, f)
+    # L6: fix the bug
+    await pg.goto(S+"#/lab/dance-party/6"); await pg.wait_for_timeout(500)
+    await run_done(pg); f=await fb(pg)
+    ok("L6: names the first wrong move with the student's own move", "Move 4 should be Spin, but your robot did Strike a pose" in f, f)
+    await pg.click('[data-op="more"][data-i="1"]'); await run_done(pg); f=await fb(pg)
+    ok("L6: after one fix, points to the next bug", "Move 5 should be Move left" in f and not await pg.is_visible("#lab-win"), f)
+    await pg.click('[data-op="down"][data-i="2"]'); await run_done(pg)
+    ok("L6: fixed program wins", await pg.is_visible("#lab-win") and "Bug fixed" in await fb(pg), await fb(pg))
+    # L7: fewest blocks
+    await pg.goto(S+"#/lab/dance-party/7"); await pg.wait_for_timeout(500)
+    ok("L7: starts with the 12-block long version", "12 blocks · 12 moves" in await pg.inner_text("#dp-count"))
+    await run_done(pg); f=await fb(pg)
+    ok("L7: same dance, too many blocks, says the count", "you used 12 blocks" in f, f)
+    await pg.click("#dp-clear"); await pg.click("#dp-addrep"); await add(pg,"left","jump","right","spin")
+    await pg.click("[data-add=pose]"); f=await fb(pg)
+    ok("L7: a Repeat holds at most 4 moves", "up to 4 moves" in f, f)
+    await pg.click('[data-op="more"][data-i="0"]'); await run_done(pg)
+    ok("L7: 5 blocks wins", await pg.is_visible("#lab-win") and "5 blocks" in await fb(pg), await fb(pg))
+    # L8: keyboard only, then the Scratch handoff
+    await pg.goto(S+"#/lab/dance-party/8"); await pg.wait_for_timeout(500)
+    await pg.focus("#dp-addrep"); await pg.keyboard.press("Enter")
+    for m in ["left","jump","right"]:
+        await pg.focus(f'[data-add="{m}"]'); await pg.keyboard.press("Enter")
+    await pg.focus('[data-op="more"][data-i="0"]'); await pg.keyboard.press("Enter"); await pg.keyboard.press("Enter")
+    ok("L8: keyboard builds Repeat 4 with 3 moves", "4 blocks · 12 moves" in await pg.inner_text("#dp-count"), await pg.inner_text("#dp-count"))
+    await pg.focus("#dp-run"); await pg.keyboard.press("Enter")
+    await pg.wait_for_function("!document.querySelector('.dp').classList.contains('is-running')", timeout=20000); await pg.wait_for_timeout(200)
+    ok("L8: wins, with the Scratch handoff", await pg.is_visible("#lab-win") and await pg.locator('#lab-win a[href="#/activity/loop-dance"]').count()==1 and await pg.locator('#lab-win a[href="assets/starters/dance-crew.sb3"]').count()==1)
+    await pg.screenshot(path=O+"l8-done.png", full_page=True)
+    await pg.goto(S+"#/lab/dance-party/7"); await pg.wait_for_timeout(300); await pg.goto(S+"#/lab/dance-party/8"); await pg.wait_for_timeout(500)
+    await pg.click("#dp-clear")
+    for _ in range(2):
+        await pg.click("#dp-addrep"); await add(pg,"left","jump","right","spin")
+    for i in range(2):
+        await pg.click(f'[data-op="more"][data-i="{i}"]'); await pg.click(f'[data-op="more"][data-i="{i}"]')
+    await pg.click("#dp-run"); await pg.wait_for_timeout(200)
+    ok("L8: too many moves is refused before running", "up to 24" in await fb(pg) and await pg.get_attribute("#dp-run","aria-disabled") is None, await fb(pg))
     # ── Signed-in student: logs, one run per click
     st=await b.new_page(viewport={"width":1280,"height":900}); watch(st)
     await st.goto(S+"#/signin/student"); await st.wait_for_timeout(300)
@@ -157,6 +219,9 @@ async def main():
     ok("reduced motion run completes and checks", await rm.is_visible("#lab-win"))
     ok("phone: no sideways scroll", await rm.evaluate("document.documentElement.scrollWidth")<=390, await rm.evaluate("document.documentElement.scrollWidth"))
     await rm.goto(S+"#/lab/dance-party/1"); await rm.wait_for_timeout(400); await rm.screenshot(path=O+"m-l1.png", full_page=True)
+    await rm.goto(S+"#/lab/dance-party/6"); await rm.wait_for_timeout(400)
+    ok("phone: a Repeat block fits with no sideways scroll", await rm.locator(".dp-step--repeat").count()==1 and await rm.evaluate("document.documentElement.scrollWidth")<=390, await rm.evaluate("document.documentElement.scrollWidth"))
+    await rm.screenshot(path=O+"m-l6.png", full_page=True)
     ok("no page errors", not errs, errs)
     print(f"\n{sum(1 for _,c in results if c)}/{len(results)} passed")
     await b.close()

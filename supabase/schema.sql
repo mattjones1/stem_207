@@ -250,6 +250,11 @@ begin
   select s.* into v_student from public.student_sessions t join public.students s on s.id = t.student_id
    where t.token = p_token and t.expires_at > now();
   if not found then return json_build_object('ok', false, 'error', 'session'); end if;
+  -- Teacher-only events (a Pass, a Try again, a note, reviews, checks) can't come from a student device.
+  if (p_event ->> 'type') in ('teacher_confirmed', 'teacher_try_again', 'teacher_note', 'reflection_reviewed', 'ican_verified',
+                              'ican_returned', 'moxie_gate', 'moxie_rubric', 'pathway_review', 'pathway_observation') then
+    return json_build_object('ok', false, 'error', 'teacher_only');
+  end if;
   insert into public.events (id, student_id, class_id, type, at, data)
   values (p_event ->> 'id', v_student.id, v_student.class_id, p_event ->> 'type',
           least(coalesce((p_event ->> 'at')::bigint, 0), (extract(epoch from now()) * 1000)::bigint + 60000),
@@ -515,7 +520,7 @@ begin
   select count(*) into v_students from public.students where class_id = v_class;
   return (
     with st as (select id from public.students where class_id = v_class),
-    ev as (select e.student_id, e.type, e.at, e.data from public.events e join st on st.id = e.student_id),
+    ev as (select e.student_id, e.type, e.at, e.data, e.by from public.events e join st on st.id = e.student_id),
     -- assigned work: single assigned activities, plus every activity in an assigned Learning Plan version
     assigned as (
       select activity_id as act from public.assignments where class_id = v_class
@@ -526,7 +531,8 @@ begin
        where pa.class_id = v_class and step->>'kind' = 'mission'),
     sent as (select student_id, data->>'activityId' as act, min(at) as at from ev
              where type = 'mission_completed' and data ? 'activityId' group by 1, 2),
-    passed_all as (select distinct student_id, data->>'activityId' as act from ev where type = 'teacher_confirmed' and data ? 'activityId'),
+    -- a pass counts only when a teacher wrote it (by is set), never from a student device
+    passed_all as (select distinct student_id, data->>'activityId' as act from ev where type = 'teacher_confirmed' and by is not null and data ? 'activityId'),
     passed as (select * from passed_all where act in (select act from assigned)),
     per as (select student_id, count(*) as n from passed_all group by 1),
     -- assigned activities with a due date that every student sent before the end of that day (UTC)

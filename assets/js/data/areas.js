@@ -68,16 +68,15 @@ window.STEM.areas = [
     topics: ["Digital art", "Animation", "Storytelling", "Creative technology"]
   },
   {
-    // status "coming-soon": shown as a category card, but left out of filters, the map, and suggestions
-    // (SE.liveAreas) until it has published activities. Its five placeholders are in data/drafts-3d-printing.js.
+    // Live since October 22, 2026 with three Tinkercad exercises. Two unpublished placeholders remain in
+    // data/drafts-3d-printing.js (educators only). An area with status "coming-soon" is left out of SE.liveAreas.
     id: "3d-printing",
     name: "3D Printing",
     short: "3D Printing",
     icon: "cube",
-    status: "coming-soon",
-    tagline: "Coming soon. No exercises yet.",
-    description: "Coming soon. 3D Printing exercises are being prepared and aren't ready to teach yet.",
-    topics: []
+    tagline: "Design it on screen, then hold it in your hand.",
+    description: "Design real objects in Tinkercad, measure in millimeters, and print them. Make a lobster buoy charm, a trail marker for the way to Katahdin, and a clip that solves a classroom problem.",
+    topics: ["3D design (CAD)", "Measurement", "Prototyping", "Engineering design"]
   }
 ];
 
@@ -141,5 +140,6 @@ window.STEM.equipment = {
   building: { name: "Building materials", filter: true },
   science: { name: "Science supplies", filter: true },
   art: { name: "Art supplies", filter: true },
-  electronics: { name: "Electronics kit (microcontroller)", filter: false }
+  electronics: { name: "Electronics kit (microcontroller)", filter: false },
+  printer3d: { name: "3D printer and filament", filter: true }
 };

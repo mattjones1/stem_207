@@ -48,7 +48,7 @@ window.STEM.progression = {
     { id: "logbook", name: "Logbook Keeper", icon: "clipboard", ring: "teal", rule: "reflections", n: 5,
       how: "Pass 5 activities with a written reflection." },
     { id: "further", name: "Past the Breakwater", icon: "flag", ring: "navy", rule: "extensions", n: 3,
-      how: "Pass 3 activities where you tried \"Take it further.\"" },
+      how: "Pass 3 activities where you tried Go deeper." },
     { id: "wide-horizon", name: "Down East", icon: "compass", ring: "orange", rule: "sectors", n: 4,
       how: "Pass activities in 4 different categories." },
     { id: "crew", name: "Sternman", icon: "users", ring: "teal", rule: "collaborative", n: 3,

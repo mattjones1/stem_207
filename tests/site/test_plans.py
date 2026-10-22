@@ -135,7 +135,8 @@ async def local_student(b):
     ok("My Learning Plans lists the plan with progress", "From Instructions to Invention" in await pg.inner_text(".myplans") and "of 3" in await pg.inner_text(".myplans"))
     await pg.click(f'a[href="#/plans/{aid}"]'); await pg.wait_for_timeout(600)
     ok("the plan page lists 3 activities", await pg.locator(".plan-item").count() == 3)
-    ok("progress reads 0 of 3", "0 of 3" in await pg.inner_text(".page-top__progress"))
+    want = await pg.evaluate(f"(() => {{ const a = SE.store.pathwayAssignmentsFor(SE.store.currentUser().classId).find((x) => x.id === '{aid}'); return SE.plans.progress(SE.game.profile(SE.store.currentUser().id), a.snapshot).passed; }})()")
+    ok("progress reads N of 3 (passed of required)", f"{want} of 3" in await pg.inner_text(".page-top__progress"), want)
     # The sample student already sent Bug Hunt and Pixel Art Code, so the one not started comes first.
     ok("the next activity is offered first", await pg.locator('.page-top a[href="#/activity/sense-think-act"]').count() == 1)
     ok("statuses are words, not color", "Not started" in await pg.inner_text(".plan-list"))

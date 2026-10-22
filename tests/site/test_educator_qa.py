@@ -84,7 +84,7 @@ async def main():
     await pg.goto(S + "#/teach/plans/new"); await pg.wait_for_timeout(700)
     coding_n = await pg.evaluate("STEM.activities.filter((a) => a.area === 'coding' || (a.alsoIn || []).includes('coding')).length")
     ok("picker: every coding activity is listed (no 12 cap)", await pg.locator("#pw-results .pk-card").count() == coding_n, coding_n)
-    ok("picker: 3D Printing is Coming soon and disabled", await pg.locator(".pk-tab.is-soon[aria-disabled=true]").count() == 1)
+    ok("picker: all 7 categories are live tabs", await pg.locator("[data-pick-area]").count() == 7 and await pg.locator(".pk-tab.is-soon").count() == 0)
     for area, aid in [("coding", "lab-dance-party"), ("vr", "acadia-from-above"), ("ai", "how-ai-sorts")]:
         await pg.click(f"[data-pick-area={area}]"); await pg.wait_for_timeout(150)
         ok(f"picker: {area} tab is pressed", await pg.get_attribute(f"[data-pick-area={area}]", "aria-pressed") == "true")
@@ -103,11 +103,15 @@ async def main():
 
     # Workshops
     tpls = await pg.evaluate("JSON.stringify(STEM.pathwayTemplates.filter((t) => t.group === 'workshop').map((t) => ({ id: t.id, n: t.steps.length, ok: t.steps.every((s) => !!SE.activityById[s.activityId]), fmt: !!(t.workshop && t.workshop.format), fut: (t.future || []).length, sess: t.workshop.sessions.every((x) => x.steps.every((k) => k >= 1 && k <= t.steps.length)) })))")
-    ok("workshops: 3, every step resolves, format, future text, valid sessions", tpls.count('"ok":true') == 3 and tpls.count('"fmt":true') == 3 and tpls.count('"sess":true') == 3 and '"fut":0' not in tpls, tpls)
+    ok("workshops: 3, every step resolves, format, valid sessions", tpls.count('"ok":true') == 3 and tpls.count('"fmt":true') == 3 and tpls.count('"sess":true') == 3, tpls)
+    ok("workshops: 3D Printing is an optional add-on step now; Moxie is still future text", await pg.evaluate("['tpl-ws-sampler', 'tpl-ws-katahdin'].every((id) => SE.plans.stepsOf(SE.plans.template(id)).some((s) => SE.activityById[s.activityId].area === '3d-printing' && !s.required)) && SE.plans.template('tpl-ws-robots').future.length === 1"))
     ok("workshops: future content is never a step", await pg.evaluate("STEM.pathwayTemplates.every((t) => t.steps.every((s) => !(SE.activityById[s.activityId] || {}).placeholder))"))
     await go(pg, "#/teach/plans/tpl-ws-sampler")
     t = await pg.inner_text("#app")
-    ok("workshop preview: format, sessions, and coming later", "Workshop format" in t and "Half day" in t and "Coming with future content" in t and "3D Printing" in t)
+    ok("workshop preview: format, sessions, and the 3D add-on", "Workshop format" in t and "Half day" in t and "Add-on: 3D printing" in t and "Lobster Buoy Charm" in t)
+    await go(pg, "#/teach/plans/tpl-ws-robots")
+    ok("Robots workshop shows Moxie as coming later", "Coming with future content" in await pg.inner_text("#app"))
+    await go(pg, "#/teach/plans/tpl-ws-sampler")
     ok("workshop preview: one activity from each live category", await pg.evaluate("new Set(SE.plans.stepsOf(SE.plans.template('tpl-ws-sampler')).filter((s) => s.required).map((s) => SE.activityById[s.activityId].area)).size") == 5)
     await pg.click('[data-use="tpl-ws-sampler"]'); await pg.wait_for_timeout(700)
     copy = pg.url.split("#/teach/plans/")[1].split("/")[0]

@@ -67,7 +67,7 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - Keep the seven-stage pathway, routes, readiness statements, and mission IDs. Category browsing sits alongside them.
 - Map only reviewed content. Never show empty or draft groups as available curriculum. The candidate mappings in that file are unverified.
 - Use `CS curriculum.pptx` only as a reference. Don't copy Skill Samurai branding, prices, age bands, or certification claims.
-- Don't change AI, VR, Science & Discovery, Creative STEM, the Moxie pathway, or the five 3D Printing placeholders.
+- Don't change AI, VR, Science & Discovery, Creative STEM, the Moxie pathway, or 3D Printing as part of coding-category work.
 
 ## Brand (co-branded with STEM Coliseum)
 - STEM Coliseum and Learning Center is the parent; STEM 207, LLC is a program offered exclusively through it. Read `brand/BRAND.md` before any branding work. The parent guide and all its logo files are in `brand/coliseum/`.
@@ -125,9 +125,9 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - `SE.content` (`assets/js/content.js`) holds the rules: `isPublished` (missing `pub` = published), `version` (missing = "1"), `readiness` (ready / missing-resource / needs-review, separate from `pub`), `visibleTo`, `assignable`, and `draftsIn`.
   - Unpublished records go in `STEM.drafts`: they're in `SE.activityById`, never in `STEM.activities`.
   - The activity view sends anything not `visibleTo` the user to not-found.
-- 3D Printing is the seventh area, with `status: "coming-soon"`.
-  - Use `SE.liveAreas` (not `STEM.areas`) for filters, the buoy hero, suggestions, and teacher area tabs. The category grid shows all areas.
-  - Its five placeholders (`data/drafts-3d-printing.js`) stay generic. **Don't invent exercise content.**
+- 3D Printing is the seventh area, **live since October 22, 2026** (the user asked for real exercises), with three Tinkercad activities (see "3D Printing" below). An area with `status: "coming-soon"` is left out of `SE.liveAreas`.
+  - Use `SE.liveAreas` (not `STEM.areas`) for filters, the buoy hero, suggestions, and teacher area tabs. The category grid shows all areas. The buoy hero (`BUOYS`) and star map (`SECTORS`) have seven slots; add one before adding an eighth area.
+  - Two placeholders (`3d-printing-exercise-04`, `-05` in `data/drafts-3d-printing.js`) stay generic and hidden. Replace one only with a complete, reviewed record.
 - Optional mission fields: `alsoIn` (counted once, in the primary area), `skills` (from `STEM.skills`), and `delivery`.
   - Apply skill tags and delivery labels only after the proposals in audit section 6 are approved.
 - Import: `node tools/import_missions.js <file.json> [--write] [--new-version]` writes `data/imported.js` (generated). Test: `node tests/tools/test_import_missions.js`.
@@ -156,10 +156,33 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
   - **Add students:** paste names, one per line, with a live check (`SE.roster.checkNames(text, existing)` → `[{ name, ok, reason }]`: email/number, too long (24), already in class, listed twice). One grade band for the batch. Afterward it shows the new login cards with Print these cards (`body.modal-printing`). The inline add form is gone.
   - **Send a note:** `teacher_note { note }` (up to 200 characters) via `SE.store.teacherLog`. The student sees the newest one from the last 14 days on Home as **Just for you** (`.home-note`); all notes are on Me (`.notes-list`); `prof.notes` is newest first. No other student sees it. No SQL needed.
 - **Dashboard** (`SE.views.teach`): a greeting band (`.dash-hello`), palette KPI tiles (`.kpi--green` Checks, `.kpi--teal` Classes, `.kpi--blue` plans; `--brand-blue` only for borders and icons), class cards with Add students and Message, and a side column with **Recent activity** (last 8 sent, passed, try again, help, and note events) and Needs a check-in with a Note button.
-- **À la carte picker** in the plan editor: category tabs (`.pk-tab`, `data-pick-area`, `aria-pressed`, 3D Printing a disabled Coming soon tab) list **every** activity in the category. Search (`#pw-q`) looks across every category; grade (`#pw-fgrade`) and time (`#pw-ftime`) filter. "Your mix" (`#pw-mix`) counts activities per category. The plan list offers **Build your own** and **Start from a template**.
+- **À la carte picker** in the plan editor: category tabs (`.pk-tab`, `data-pick-area`, `aria-pressed`, 3D Printing included) list **every** activity in the category. Search (`#pw-q`) looks across every category; grade (`#pw-fgrade`) and time (`#pw-ftime`) filter. "Your mix" (`#pw-mix`) counts activities per category. The plan list offers **Build your own** and **Start from a template**.
 - **Workshops:** templates with `group: "workshop"`, `workshop: { format, sessions: [{ title, steps: [step numbers] }] }`, and `future: [text]` (content not ready yet; text only, never a step): `tpl-ws-sampler` (Maine Tech Sampler), `tpl-ws-robots` (Robots & Smart Machines), `tpl-ws-katahdin` (Coast to Katahdin Explorers). All `reviewed: false`. Copies keep `basedOn`, so a copied plan's page still shows the workshop format.
 - 2.0 depth analysis: `planning/STEM207_2.0_Analysis.md`.
 - Test: `python3 tests/site/test_educator_qa.py`.
+
+## Go deeper, Dance Party levels 5–8, 3D Printing, and teacher-only events
+- **Go deeper** (`assets/js/data/deeper.js`, loaded after `imported.js`): every activity gets `a.deeper = { challenge, links }`.
+  - The challenge is the activity's `extend` unless `CHALLENGE` overrides it. Links come from the `LINKS` library through `MAP`.
+  - **Rules:** up to two links; https; an approved provider; `verified` date; `account: none|teacher|student`; never the activity's own launch.
+  - **Fetch every new URL before adding it.** Leave out anything that won't load. Camera tools say "hands or objects, not faces".
+  - **Rendering:** `deeperSection(a, user)` in `views-library.js` replaces "Take it further". Links open through `SE.modal` (Go / Stay here), log `deeper_opened {activityId, url, provider}`, and show a welcome-back line on `visibilitychange`.
+  - The debrief's optional field is "Did you try Go deeper?" (`extensionNote`, which counts toward the Past the Breakwater patch).
+  - Test: `node tests/tools/test_deeper.js [--list]` (`--list` prints every URL for the term re-check).
+- **Robot Dance Party** (`lab-dance.js`) has chapters: Dance basics (1–4) and Go deeper (5–8, grades 4–6).
+  - A program is a list of moves or repeats `{ repeat: 2–4, body: [≤4 moves] }`. `SE.dance.expand`, `blocks` (a repeat is 1 block plus its body), and `check(level, program)` are exposed.
+  - Levels: 5 Repeat it (target plus a repeat), 6 Fix the bug (feedback names the first differing move), 7 Fewest blocks (5 or fewer), 8 Choreographer (12+ moves in 6 or fewer blocks; the win panel hands off to Loop Dance and `dance-crew.sb3`).
+  - Runs are capped at 24 moves.
+- **3D Printing:** `3d-buoy-charm`, `3d-trail-marker`, and `3d-fix-it-clip` in `activities.js`.
+  - Each is grades 4–8, `time.core` [80, 90], equipment `printer3d`, supervised, Tinkercad Classes (class code and nickname), printer-agnostic STL steps, and print settings in the teacher notes.
+  - Tinkercad facts came from school guides (October 22, 2026), so each record says to check them in Tinkercad before class.
+  - The Maine Tech Sampler and Coast to Katahdin workshops include them as optional add-on steps.
+  - Test: `python3 tests/site/test_3d_printing.py` (also covers the Go deeper punch-out).
+- **Teacher-only events** (`teacher_confirmed`, `teacher_try_again`, `teacher_note`, reviews, stage and Moxie checks) count in `game.js` only with a teacher id (`e.by`).
+  - `supabase/update-11-teacher-only-events.sql` makes `student_log` refuse them and `class_journey` count only teacher-written passes.
+  - Any new teacher-only event type goes in both lists.
+- **Sample class:** the sample teacher passes most work older than three days, so demos show real XP, ranks, and class points.
+- **Planning docs from this round:** `planning/STUDENT_EXPERIENCE_AUDIT.md` (fixed and open findings, ranked) and `planning/STEM207_Growth_Plan.md` (the lifecycle, the content engine, and the three value adds: Skill Passport, Maine STEM at Work, Know It cards, all design only).
 
 ## Classes and the Dashboard (usability Stage 3)
 - `#/teach` (`SE.views.teach`) is the **Dashboard** for every class: quick actions, Checks waiting, your classes, current Learning Plans with progress (`planProgress`), and "Needs a check-in" (`attentionFor`). There's no per-class dropdown and no 14-day chart.

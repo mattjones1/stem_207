@@ -52,8 +52,14 @@
     return Math.floor((SE.startOfDay(t) - day * SE.DAY) / (7 * SE.DAY));
   };
 
+  /* Events only a teacher may write. They count only when they carry the teacher's id (by), so a
+     student device can't pass its own work (student_log also refuses them: supabase/update-11). */
+  const TEACHER_ONLY = new Set(["teacher_confirmed", "teacher_try_again", "teacher_note", "reflection_reviewed", "ican_verified", "ican_returned",
+    "moxie_gate", "moxie_rubric", "pathway_review", "pathway_observation"]);
+  const trusted = (e) => !TEACHER_ONLY.has(e.type) || !!e.by;
+
   function profile(studentId, events) {
-    events = (events || SE.store.eventsFor(studentId)).slice().sort((a, b) => a.at - b.at);
+    events = (events || SE.store.eventsFor(studentId)).filter(trusted).sort((a, b) => a.at - b.at);
     const c = {
       missions: 0, reflections: 0, extensions: 0, collaborative: 0, confident: 0,
       sectors: new Set(), areas: {}, keywords: {}, stagesCleared: 0,
@@ -269,7 +275,7 @@
     const ids = new Set(students.map((s) => s.id));
     const assignedSet = assignedIds(classId);
     const dated = SE.store.assignmentsFor(classId).filter((a) => a.dueDate);
-    const events = SE.store.eventsForClass(classId).filter((e) => ids.has(e.studentId));
+    const events = SE.store.eventsForClass(classId).filter((e) => ids.has(e.studentId) && trusted(e));
     const sent = new Map(), passedAll = new Set(), passed = new Set();
     events.forEach((e) => {
       const a = e.data && e.data.activityId;
@@ -302,7 +308,7 @@
   /* What one student has added to the class journey. */
   function classPointsFor(studentId, classId) {
     const assignedSet = assignedIds(classId);
-    const passed = new Set(SE.store.eventsFor(studentId).filter((e) => e.type === "teacher_confirmed" && assignedSet.has(e.data.activityId)).map((e) => e.data.activityId));
+    const passed = new Set(SE.store.eventsFor(studentId).filter((e) => e.type === "teacher_confirmed" && trusted(e) && assignedSet.has(e.data.activityId)).map((e) => e.data.activityId));
     return passed.size * P.classPoints.passed;
   }
 

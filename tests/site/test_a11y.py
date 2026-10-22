@@ -144,10 +144,10 @@ async def visit(pg, h):
 
 PUBLIC = ["#/signin", "#/signin/student", "#/signin/educator", "#/signup"]
 STUDENT = ["#/", "#/activities", "#/activities/3d-printing", "#/plans", "#/base", "#/me", "#/activity/fix-the-recipe", "#/activity/noreaster-alerts",
-           "#/activity/python-turtle-bridge", "#/lab/pattern-machine/5", "#/lab/pattern-machine/6", "#/lab/robot-chef/4", "#/lab/rover/1", "#/lab/dance-party/1"]
+           "#/activity/python-turtle-bridge", "#/lab/pattern-machine/5", "#/lab/pattern-machine/6", "#/lab/robot-chef/4", "#/lab/rover/1", "#/lab/dance-party/1", "#/lab/dance-party/5", "#/lab/dance-party/6", "#/activity/3d-buoy-charm"]
 TEACHER = ["#/teach", "#/activities", "#/activities/coding",
            "#/moxie", "#/moxie/teach", "#/activity/moxie-03", "#/activity/moxie-13", "#/activity/moxie-16",
-           "#/activities/3d-printing", "#/activity/3d-printing-exercise-01", "#/activity/fix-the-recipe", "#/teach/plans", "#/teach/plans/tpl-maine-coast"]
+           "#/activities/3d-printing", "#/activity/3d-printing-exercise-04", "#/activity/3d-buoy-charm", "#/activity/fix-the-recipe", "#/teach/plans", "#/teach/plans/tpl-maine-coast"]
 # Moxie sessions are drafts, so students only see them here by publishing them in memory for the audit.
 STUDENT_MOXIE = ["#/moxie", "#/activity/moxie-03", "#/activity/moxie-11", "#/activity/moxie-13", "#/activity/moxie-14", "#/activity/moxie-15", "#/activity/moxie-16"]
 
@@ -164,6 +164,9 @@ async def main():
         for h in STUDENT: await visit(pg, h); await audit(pg, h, F)
         await pg.evaluate("STEM.moxieSessions.forEach((s) => { s.pub = 'published'; })")
         for h in STUDENT_MOXIE: await visit(pg, h); await audit(pg, h, F)
+        # Go deeper: the punch-out dialog, open.
+        await visit(pg, "#/activity/lab-dance-party"); await pg.locator("a[data-deeper]").first.click(); await pg.wait_for_timeout(250)
+        await audit(pg, "modal: go deeper", F); await pg.keyboard.press("Escape")
         await pg.evaluate("STEM.moxieSessions.forEach((s) => { s.pub = 'draft'; })")
         await pg.evaluate("SE.certificate.open({award:'Responsible AI Explorer',course:'Pattern Machine Lab',detail:'Passed with 8 of 10',name:'Ava R.',className:'Room 12'})"); await pg.wait_for_timeout(200)
         await audit(pg, "certificate", F); await pg.keyboard.press("Escape")

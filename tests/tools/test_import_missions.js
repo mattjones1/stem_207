@@ -27,7 +27,7 @@ const m = lib.activities.find((a) => a.id === "test-shoreline-sketch");
 ok("--write adds the published mission to the library at version 1", m && m.version === "1");
 ok("text is cleaned (tags removed)", m && m.mission === "Test fixture: sketch what you notice.", m && m.mission);
 ok("a draft import goes to drafts, not the library", lib.drafts.some((a) => a.id === "test-draft-only") && !lib.activities.some((a) => a.id === "test-draft-only"));
-ok("hand-written missions are untouched (53 + 1)", lib.activities.length === 54, lib.activities.length);
+ok("hand-written missions are untouched (56 + 1)", lib.activities.length === 57, lib.activities.length);
 
 r = quiet(() => run(path.join(FIX, "valid.json"), { write: true }));
 ok("importing the same file again changes nothing", r.unchanged.length === 2 && !r.added.length && !r.updated.length, JSON.stringify(r));

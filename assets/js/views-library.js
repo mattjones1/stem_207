@@ -242,9 +242,10 @@
     { x: 182, y: 270, label: "Coding", c1: "#94c93d", c2: "#012d2b" },
     { x: 290, y: 270, label: "VR", c1: "#ffffff", c2: "#94c93d" },
     { x: 398, y: 270, label: "AI", c1: "#f2c14e", c2: "#012d2b" },
-    { x: 128, y: 312, label: "Engineering", c1: "#e9603f", c2: "#ffffff" },
-    { x: 238, y: 312, label: "Science", c1: "#94c93d", c2: "#ffffff" },
-    { x: 348, y: 312, label: "Creative", c1: "#ffffff", c2: "#e9603f" }
+    { x: 112, y: 312, label: "Engineering", c1: "#e9603f", c2: "#ffffff" },
+    { x: 210, y: 312, label: "Science", c1: "#94c93d", c2: "#ffffff" },
+    { x: 300, y: 312, label: "Creative", c1: "#ffffff", c2: "#e9603f" },
+    { x: 392, y: 312, label: "3D", c1: "#f2c14e", c2: "#e9603f" }
   ];
   function coastSvg() {
     const sky = SE.rng("maine-sky");
@@ -255,7 +256,7 @@
       const h = 26 + pr() * 34;
       pines.push(`<use href="#pine207" x="${x.toFixed(1)}" y="${(252 - h).toFixed(1)}" width="${(h * 117 / 332).toFixed(1)}" height="${h.toFixed(1)}"/>`);
     }
-    const buoys = SE.liveAreas.map((a, i) => {
+    const buoys = SE.liveAreas.slice(0, BUOYS.length).map((a, i) => {
       const b = BUOYS[i];
       return `<a href="#/activities/${a.id}" aria-label="${esc(a.name)}">
         <g transform="translate(${b.x} ${b.y})">
@@ -270,7 +271,7 @@
         </g></a>`;
     }).join("");
     return `
-      <svg viewBox="0 0 440 340" role="group" aria-label="${SE.liveAreas.length === 6 ? "Six" : SE.liveAreas.length} lobster buoys float off a Maine lighthouse, one for each exploration area">
+      <svg viewBox="0 0 440 340" role="group" aria-label="${["", "One", "Two", "Three", "Four", "Five", "Six", "Seven"][SE.liveAreas.length] || SE.liveAreas.length} lobster buoys float off a Maine lighthouse, one for each exploration area">
         <defs>
           <symbol id="pine207" viewBox="1138 172 117 332"><path d="${SE.brand.PINE_D}"/></symbol>
           <linearGradient id="beamGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff9d6" stop-opacity=".75"/><stop offset="1" stop-color="#fff9d6" stop-opacity="0"/></linearGradient>
@@ -337,7 +338,7 @@
               <p>${esc(a.tagline)}</p>
               ${SE.labs && SE.labs.forArea(a.id).length ? `<span class="chip chip--lab">${icon("flask")}${SE.labs.forArea(a.id).length === 1 ? "Interactive lab" : `${SE.labs.forArea(a.id).length} interactive labs`}</span>` : ""}
               ${prof ? `<div class="mini-meter" aria-hidden="true"><span style="width:${(done / total) * 100}%"></span></div>` : ""}
-              <span class="area-card__foot">${prof ? `${done} of ${total} activities complete` : plural(total, "activity", "activities")} ${icon("arrowRight")}</span>
+              <span class="area-card__foot">${prof ? `${done} of ${total} passed` : plural(total, "activity", "activities")} ${icon("arrowRight")}</span>
             </a>`;
           }).join("")}
         </div>
@@ -445,7 +446,7 @@
           </div>
           <p class="page-top__lede">${esc(area.description)}</p>
           ${area.topics.length ? `<ul class="topic-list" aria-label="Topics in this area">${area.topics.map((t) => `<li class="chip">${esc(t)}</li>`).join("")}</ul>` : ""}
-          ${prof ? `<p class="page-top__progress"><strong>${done} of ${list.length}</strong> activities complete in this area</p>` : ""}
+          ${prof ? `<p class="page-top__progress"><strong>${done} of ${list.length}</strong> passed in this category</p>` : ""}
         </div>
       </section>
       ${labsStrip(user, id)}
@@ -469,7 +470,7 @@
         </section>` : `
       <section class="wrap section" aria-labelledby="area-acts">
         <div class="section__head">
-          <div><span class="eyebrow">Choose your next adventure</span><h2 id="area-acts">${plural(list.length, "mission", "missions")}</h2></div>
+          <div><span class="eyebrow">Choose your next adventure</span><h2 id="area-acts">${plural(list.length, "activity", "activities")}</h2></div>
         </div>
         <div class="cards">${list.map((a) => activityCard(a, prof)).join("")}</div>
       </section>`}
@@ -533,6 +534,73 @@
   SE.labsStrip = labsStrip;
 
   /* ───────── Activity ───────── */
+  /* ───────── Go deeper: a grades 4–6 stretch, plus vetted outside resources ─────────
+   * a.deeper = { challenge, links: [{ title, provider, url, grades, minutes, account, why, verified }] }.
+   * Links open through the shared modal ("You're going to …, come back and tell your teacher"),
+   * log deeper_opened for students, and a welcome-back line appears when the tab is visible again. */
+  const ACCOUNT_TEXT = { none: "No account needed", teacher: "Your teacher sets up the account", student: "Needs an account" };
+  function deeperSection(a, user) {
+    const d = a.deeper || {};
+    const challenge = d.challenge || a.extend;
+    const links = d.links || [];
+    if (!challenge && !links.length) return "";
+    const isStudent = user && user.role === "student";
+    return `
+      <section class="block block--deeper" aria-labelledby="s-deeper" id="s-deeper-wrap">
+        <span class="eyebrow">Grades 4–6 and up · optional</span>
+        <h2 id="s-deeper">${icon("rocket")}Go deeper</h2>
+        ${challenge ? `<p class="deeper__challenge"><strong>Try this:</strong> ${esc(challenge)}</p>` : ""}
+        ${links.length ? `
+        <h3 class="deeper__h">Explore more <span class="muted small">on other trusted sites</span></h3>
+        <ul class="deeper__links">${links.map((l, i) => `
+          <li><a class="deeper-card" href="${esc(l.url)}" target="_blank" rel="noopener" data-deeper="${i}" data-activity="${a.id}">
+            <span class="deeper-card__provider">${icon("external")}${esc(l.provider)}</span>
+            <strong>${esc(l.title)}</strong>
+            <span class="deeper-card__why">${esc(l.why)}</span>
+            <span class="deeper-card__meta">${l.minutes ? `${l.minutes} min · ` : ""}${esc(ACCOUNT_TEXT[l.account] || ACCOUNT_TEXT.none)}<span class="visually-hidden"> (opens in a new tab)</span></span>
+          </a></li>`).join("")}</ul>` : ""}
+        <p class="deeper__back" id="deeper-back" role="status" aria-live="polite"></p>
+        ${isStudent ? `<p class="muted small">Tried it? Tell your teacher what you found in your answer below.</p>` : ""}
+      </section>`;
+  }
+  SE.deeperSection = deeperSection;
+
+  let deeperAway = null;   // { activityId, provider } while a student is on another site
+  document.addEventListener("click", (e) => {
+    const card = e.target.closest("a[data-deeper]");
+    if (!card) return;
+    const a = SE.activityById[card.dataset.activity];
+    const l = a && a.deeper && a.deeper.links[Number(card.dataset.deeper)];
+    if (!l) return;
+    e.preventDefault();
+    SE.modal.open({
+      title: `Going to ${l.provider}`,
+      body: `
+        <p>You're leaving STEM 207 to explore <strong>${esc(l.title)}</strong> on ${esc(l.provider)}. It opens in a new tab.</p>
+        <p>${l.account && l.account !== "none" ? `${esc(ACCOUNT_TEXT[l.account])}. ` : ""}When you're done, come back to this tab and tell your teacher what you found.</p>
+        <div class="modal__actions">
+          <button type="button" class="btn btn--ghost" data-modal-close>Stay here</button>
+          <a class="btn btn--primary" id="deeper-go" href="${esc(l.url)}" target="_blank" rel="noopener">${icon("external")}Go to ${esc(l.provider)}</a>
+        </div>`,
+      onOpen(dlg) {
+        dlg.querySelector("#deeper-go").addEventListener("click", () => {
+          SE.store.log("deeper_opened", { activityId: a.id, url: l.url, provider: l.provider });
+          deeperAway = { activityId: a.id, provider: l.provider };
+          SE.modal.close();
+        });
+      }
+    });
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "visible" || !deeperAway) return;
+    const back = document.getElementById("deeper-back");
+    if (back && location.hash.startsWith(`#/activity/${deeperAway.activityId}`)) {
+      const student = (SE.store.currentUser() || {}).role === "student";
+      back.innerHTML = `${icon("check")}<span>Welcome back from ${esc(deeperAway.provider)}!${student ? ` <a href="#s-debrief" data-jump="s-debrief">Tell your teacher what you found</a>.` : ""}</span>`;
+    }
+    deeperAway = null;
+  });
+
   function launchPanel(a, id, user) {
     if (a.launch.status === "lab") {
       const lab = SE.labs.byId(a.launch.labId);
@@ -582,7 +650,7 @@
     return `<a class="btn btn--ghost" href="#s-steps" data-jump="s-steps">${icon("list")}Start with step 1</a>`;
   }
 
-  function requirementsList(a) {
+  function requirementsList(a, student) {
     const ok = (t, s) => `<li class="ok">${icon("check")}<span><strong>${esc(t)}</strong>${s ? `<small>${esc(s)}</small>` : ""}</span></li>`;
     const warn = (t, s) => `<li class="warn">${icon("alert")}<span><strong>${esc(t)}</strong>${s ? `<small>${esc(s)}</small>` : ""}</span></li>`;
     const rows = [];
@@ -592,8 +660,8 @@
     rows.push(a.access.cost === "paid" ? warn("Paid resource", "Check your program's license before class.") : ok("Free to use"));
     rows.push(a.access.hardware && a.access.hardware.length ? warn("Hardware", a.access.hardware.join(". ") + ".") : ok("No special hardware"));
     rows.push(a.access.supervision
-      ? warn("Teacher supervision", a.area === "ai" ? "Run this as a teacher-guided activity. Students don't enter personal information." : "An adult should guide or monitor this activity.")
-      : ok("Students can work with light guidance"));
+      ? warn(student ? "An adult helps with this one" : "Teacher supervision", student ? (a.area === "ai" ? "Your teacher guides it. Never type your full name or other personal details." : "Work on it with your teacher nearby.") : a.area === "ai" ? "Run this as a teacher-guided activity. Students don't enter personal information." : "An adult should guide or monitor this activity.")
+      : ok(student ? "You can do this on your own or with a partner" : "Students can work with light guidance"));
     rows.push(ok(formats[a.format].name, formats[a.format].hint));
     return `<ul class="reqs">${rows.join("")}</ul>`;
   }
@@ -714,8 +782,8 @@
             <h2 id="s-before">${icon("box")}Before you begin</h2>
             <div class="prep">
               <div><h3>Materials</h3><ul class="bullets">${a.before.materials.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul></div>
-              <div><h3>Setup</h3><ul class="bullets">${a.before.setup.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul></div>
-              <div class="prep__full"><h3>Prerequisites</h3><p>${esc(a.before.prerequisites)}</p></div>
+              ${isStudent ? "" : `<div><h3>Setup</h3><ul class="bullets">${a.before.setup.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul></div>`}
+              <div class="prep__full"><h3>${isStudent ? "Good to know first" : "Prerequisites"}</h3><p>${esc(a.before.prerequisites)}</p></div>
             </div>
           </section>
           ${a.vr ? `
@@ -746,12 +814,10 @@
           </section>` : ""}
           ${a.next && SE.activityById[a.next] ? `<p class="next-up">${icon("arrowRight")}<span><strong>Next up:</strong> <a href="#/activity/${a.next}">${esc(SE.activityById[a.next].title)}</a></span></p>` : ""}
           ${launchPanel(a, "s-launch", user)}
+          ${deeperSection(a, user)}
           ${isStudent ? SE.views.debrief(user, a, prof) : `
           <section class="block block--reflect" aria-labelledby="s-reflect">
             <h2 id="s-reflect">${icon("question")}Think about it</h2><p>${esc(a.reflect)}</p>
-          </section>
-          <section class="block block--extend" aria-labelledby="s-extend">
-            <h2 id="s-extend">${icon("rocket")}Take it further</h2><p>${esc(a.extend)}</p>
           </section>`}
           ${isStudent ? "" : `
           <details class="block teacher-notes" open>
@@ -769,14 +835,14 @@
             ${quickLaunch(a)}
           </div>
           ${user && user.role === "educator" ? SE.views.activityClassBox(user, a) : ""}
-          <div class="block"><h2>Before you launch</h2>${requirementsList(a)}</div>
+          <div class="block"><h2>Before you launch</h2>${requirementsList(a, isStudent)}</div>
         </aside>
       </div>
 
       ${related.length ? `
       <section class="wrap section" aria-labelledby="related-title">
         <div class="section__head">
-          <div><span class="eyebrow">More in ${esc(area.short)}</span><h2 id="related-title">Explore the lab</h2></div>
+          <div><span class="eyebrow">More in ${esc(area.short)}</span><h2 id="related-title">More activities like this</h2></div>
           <a class="btn btn--ghost btn--small" href="#/">${icon("arrowLeft")}Back to ${SE.homeLabel() === "Home" ? "home" : SE.homeLabel()}</a>
         </div>
         <div class="cards">${related.map((r) => activityCard(r, prof)).join("")}</div>

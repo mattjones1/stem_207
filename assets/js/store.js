@@ -213,6 +213,14 @@
             by: educator.id, isDemo: true
           });
         }
+        // The teacher has passed most older work (XP comes only from a pass); the last few days are waiting.
+        if (dayOffset > 3 && rand() < 0.8) {
+          events.push({
+            id: `ev_demo_${events.length}${sfx}`, studentId: s.id, classId: cls.id, type: "teacher_confirmed",
+            at: done.at + SE.DAY + 3600000, data: { activityId: act.id, how: ["oral", "demo", "work"][Math.floor(rand() * 3)], note: "" },
+            by: educator.id, isDemo: true
+          });
+        }
         // Pathway: claim the stage after a coding mission.
         if (act.pathwayStage && act.pathwayStage > completedStages) {
           const stage = act.pathwayStage;

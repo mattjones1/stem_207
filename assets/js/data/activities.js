@@ -2984,27 +2984,28 @@ window.STEM.activities = [
     coreLevels: 2,
     pilot: true,
     time: { prep: 5, core: [10, 15], verified: false },
-    stopAt: "You finish level 2 (Swap two steps). Levels 3 and 4 are bonus.",
+    stopAt: "You finish level 2 (Swap two steps). Levels 3 and 4 are bonus. Grades 4–6: go on to the Go deeper levels 5–8 (loops and debugging).",
     check: "Swap two steps in a program. Before you press Run, say what the robot will do differently. Then run it and explain what changed.",
     stuck: ["Read your program from the top. Step 1 happens first.", "Press Reset robot to start over. Your program stays.", "Use the ▲ and ▼ buttons to move a step. No dragging needed."],
     next: "robot-maze-mission",
     title: "Robot Dance Party",
     area: "coding",
-    summary: "Build a dance from five moves, run it, and watch a robot follow your program one step at a time. Swap two steps and the whole dance changes.",
+    summary: "Build a dance from five moves, run it, and watch a robot follow your program one step at a time. Then go deeper: loop moves with Repeat blocks, fix a buggy dance, and make a long dance with a short program.",
     level: "beginner",
     grades: ["2-3", "4-5", "6-8"],
     duration: 20,
     format: "independent",
     equipment: ["computer", "tablet"],
     source: "original",
-    keywords: ["lab", "sequence", "order", "algorithm", "robot", "dance", "predict", "debugging", "interactive", "first coding"],
+    keywords: ["lab", "sequence", "order", "algorithm", "robot", "dance", "predict", "debugging", "interactive", "first coding", "loops", "repeat", "efficiency"],
     access: { account: "none", cost: "free", supervision: false, hardware: [] },
-    launch: { status: "lab", labId: "dance-party", label: "Open Robot Dance Party", note: "Runs inside STEM 207. About 10 minutes. No outside account or website needed." },
+    launch: { status: "lab", labId: "dance-party", label: "Open Robot Dance Party", note: "Runs inside STEM 207. About 10 minutes for the basics, plus about 25 for the Go deeper levels. No outside account or website needed." },
     mission: "The robot is ready to dance, but it only does exactly what your program says, in exactly that order. Predict, run, swap, and create, then take on the challenge: jump, spin, and finish with a pose.",
     learn: [
       "Explain that a sequence is a set of instructions a computer follows in order.",
       "Predict what a program will do first and last before running it.",
-      "Show that changing the order of the same instructions changes the result."
+      "Show that changing the order of the same instructions changes the result.",
+      "Go deeper (grades 4–6): use a loop to repeat moves, find and fix the first bug in a program, and make a program shorter without changing what it does."
     ],
     before: {
       materials: ["Laptop, Chromebook, or tablet (keyboard works too)"],
@@ -3016,6 +3017,10 @@ window.STEM.activities = [
       "Level 2: Swap two instructions with the ▲ and ▼ buttons and run it again. What changed?",
       "Level 3: Make a dance with at least five instructions.",
       "Level 4: Challenge. Make the robot jump, spin, and then pose. It must finish with the pose.",
+      "Go deeper, level 5: Rebuild a target dance using a Repeat block.",
+      "Level 6: Fix a buggy program so it matches the target dance.",
+      "Level 7: Make the same 12-move dance with 5 blocks or fewer.",
+      "Level 8: Design a 12-move dance with 6 blocks or fewer, then take it to Scratch.",
       "Remember: computers follow your instructions in the order you give them."
     ],
     reflect: "You used the same three moves in Level 1 and Level 2. Why did the robot dance differently?",
@@ -3025,7 +3030,9 @@ window.STEM.activities = [
       "Common misconception: the computer \"knows\" what you meant, or does the important moves first. It doesn't. It runs step 1, then step 2, and so on, exactly as written. Students who put Strike a pose first are often surprised that the robot poses before dancing.",
       "Ask afterward: \"If two programs use exactly the same instructions, will the robot always do the same dance? Why or why not?\"",
       "The challenge is checked from the steps the robot actually ran, so students can't skip it by clicking. Feedback names what went wrong (a missing move, the wrong order, or not ending with the pose) without giving the answer. Each level has two hints that appear one at a time.",
-      "The robot never leaves the dance floor: moving past an edge makes it wiggle in place. That's a good chance to ask students to predict where it will end up."
+      "The robot never leaves the dance floor: moving past an edge makes it wiggle in place. That's a good chance to ask students to predict where it will end up.",
+      "Go deeper (levels 5–8, about 25 minutes, grades 4–6): a Repeat block runs 2–4 times and holds up to 4 moves. Level 5 checks the dance matches the target and uses a repeat. Level 6 starts from a buggy program and feedback names the first move that differs. Level 7 counts blocks the way Scratch does (a repeat is 1 block plus the moves inside). Level 8 hands off to Loop Dance Choreographers and its Dance Crew starter.",
+      "Common misconception in the Go deeper levels: the repeat count is how many moves there are. It's how many times the moves inside run. Ask: \"Repeat 3 times with 2 moves inside makes how many moves?\""
     ]
   },
   {
@@ -3368,6 +3375,210 @@ window.STEM.activities = [
       "Students' saved animations appear in their profile and on your student detail page.",
       "The keyboard works too: arrow keys move the cursor, and Space paints.",
       "Run-length encoding is a real compression method. Ask: when does it make files smaller, and when doesn't it help?"
+    ]
+  },
+  // ───── 3D Printing (Tinkercad). Tinkercad facts checked October 22, 2026 against school and district guides
+  // (Classes with a class code and nickname, the Export → .STL path, Ruler, Align). Menu names can change, so each
+  // record tells teachers to check the steps in Tinkercad before class. Steps are printer-agnostic (PLA).
+  {
+    id: "3d-buoy-charm",
+    title: "Lobster Buoy Charm",
+    area: "3d-printing",
+    summary: "Design a lobster buoy charm in Tinkercad: stack basic shapes, cut a hole for a key ring, and keep it under 40 mm so it prints fast.",
+    level: "beginner",
+    grades: ["4-5", "6-8"],
+    duration: 90,
+    time: { prep: 15, core: [80, 90], verified: false },
+    format: "independent",
+    equipment: ["computer", "printer3d"],
+    source: "original",
+    keywords: ["3d printing", "tinkercad", "design", "buoy", "lobster", "maine", "shapes", "hole", "group", "measurement", "cad"],
+    access: { account: "required", accountNote: "Students join your Tinkercad Class with a class code and nickname, so they don't need an email. You need a free Tinkercad teacher account.", cost: "free", supervision: true, hardware: ["3D printer"] },
+    launch: { status: "ready", label: "Open Tinkercad", url: "https://www.tinkercad.com/", provider: "Tinkercad (Autodesk)", note: "Free. Students join your Tinkercad Class with the class code and their nickname." },
+    stopAt: "Your buoy charm is under 40 mm tall, has a ring hole all the way through, is grouped into one part, and is exported as an STL for printing.",
+    check: "Show your design with the Ruler on it. Point to the hole and say how you made it go all the way through.",
+    stuck: [
+      "Lost a shape? Click the home button by the view cube to zoom back to the workplane.",
+      "A hole only cuts when you select the hole and the solid together and press Group.",
+      "Too big? Hold Shift and drag a corner handle to shrink it evenly."
+    ],
+    why: "Every product you own started as a 3D design on a computer. Designers build complex things from simple shapes, measure carefully, and make sure a part can actually be made.",
+    realWorld: "Engineers in Maine design boat parts, medical devices, and tools in CAD programs like Tinkercad, then print prototypes before making the real thing.",
+    vocab: [
+      { term: "CAD", def: "Computer-aided design: drawing 3D objects on a computer." },
+      { term: "Workplane", def: "The blue grid in Tinkercad where you build." },
+      { term: "Hole", def: "A shape that cuts away from a solid when you group them." },
+      { term: "STL", def: "The file type a 3D printer's software reads." }
+    ],
+    mission: "Every lobster family in Maine paints its buoys in its own colors, so everyone knows whose traps are whose. Design your own buoy as a charm you can clip to a backpack. It has to be small enough to print quickly and strong enough to hang from a ring.",
+    learn: [
+      "Build a 3D object by combining basic shapes on the workplane.",
+      "Use a hole shape and Group to cut a hole all the way through.",
+      "Measure in millimeters and keep a design inside a size limit."
+    ],
+    before: {
+      materials: ["A laptop or Chromebook with a mouse, if you have one", "A 3D printer with PLA filament", "Optional: paint markers to color the printed buoy"],
+      setup: [
+        "Create a Tinkercad Class and add each student's nickname (a list can be pasted). Share the class code.",
+        "Try the steps in Tinkercad yourself first. Menu names can change.",
+        "Plan the print queue: one charm takes about 15–25 minutes on most printers."
+      ],
+      prerequisites: "None. This is a first 3D design activity."
+    },
+    steps: [
+      "Sign in to Tinkercad with your class code and nickname, then create a new design.",
+      "Drag a cylinder onto the workplane. Make it about 12 mm wide and 25 mm tall. This is the buoy body.",
+      "Add shapes for the top and bottom, like a cone or a smaller cylinder. Raise them so they sit on the body.",
+      "Select everything and use Align so the parts line up in the middle. Then Group them into one buoy.",
+      "Make a small cylinder hole about 4 mm wide. Push it through the top of the buoy, so it goes all the way across.",
+      "Select the buoy and the hole together and press Group. Check from two sides that the hole goes all the way through.",
+      "Put the Ruler on the workplane. Is the charm under 40 mm tall? If not, shrink it evenly.",
+      "Lay the buoy on its side if your teacher asks, so it prints without supports. Press Export and choose .STL.",
+      "Hand in your STL for printing. While it prints, sketch the colors for your family's buoy."
+    ],
+    reflect: "Which basic shapes did you combine to make your buoy? If you made it again, what would you change so it prints better or looks more like a real buoy?",
+    extend: "Design a matching mini lobster trap or a buoy with your initials cut into the side. Keep it under 40 mm.",
+    teacherNotes: [
+      "Learning objective: students build an object from basic shapes, use a hole to cut away material, and work to a size limit in millimeters.",
+      "Common misconception: a hole cuts as soon as it touches the solid. It only cuts after Group. Students also think the size boxes are in inches; Tinkercad uses millimeters by default.",
+      "Print settings that work for most classroom printers: PLA, about 0.2 mm layer height, 10–15% infill, no supports if the buoy lies on its side. A 40 mm charm is roughly 15–25 minutes. Batch several charms on one plate.",
+      "Safety: only adults handle the printer. The nozzle and bed are hot.",
+      "Ask afterward: \"Why do designers use simple shapes to build complicated things?\"",
+      "Tinkercad facts (Classes, the Export → .STL path, Ruler, Align) were checked October 22, 2026 against school guides. Check them in Tinkercad before class."
+    ],
+    next: "3d-trail-marker"
+  },
+  {
+    id: "3d-trail-marker",
+    title: "Trail Blaze Marker",
+    area: "3d-printing",
+    summary: "Design a trail marker with raised letters, exactly 50 × 30 × 4 mm, and make sure it prints flat with no supports.",
+    level: "intermediate",
+    grades: ["4-5", "6-8"],
+    duration: 90,
+    time: { prep: 15, core: [80, 90], verified: false },
+    format: "independent",
+    equipment: ["computer", "printer3d"],
+    source: "original",
+    keywords: ["3d printing", "tinkercad", "measurement", "text", "trail", "katahdin", "appalachian trail", "maine", "scale", "millimeters", "supports"],
+    access: { account: "required", accountNote: "Students join your Tinkercad Class with a class code and nickname, so they don't need an email. You need a free Tinkercad teacher account.", cost: "free", supervision: true, hardware: ["3D printer"] },
+    launch: { status: "ready", label: "Open Tinkercad", url: "https://www.tinkercad.com/", provider: "Tinkercad (Autodesk)", note: "Free. Students join your Tinkercad Class with the class code and their nickname." },
+    stopAt: "Your marker measures 50 × 30 × 4 mm with the Ruler, its text is raised and readable, the bottom is flat on the workplane, and it's exported as an STL.",
+    check: "Put the Ruler on your design and read out its three measurements. Explain why the letters are raised and not floating.",
+    stuck: [
+      "Type exact numbers into the size boxes instead of dragging. Click a number to edit it.",
+      "Text that floats above the plate won't print. Use the Ruler and set its height so it sits on the marker.",
+      "Letters too thin to print? Make the text bigger or choose a bolder font."
+    ],
+    why: "Real parts have to fit exactly. Designers measure in millimeters, plan how a part will print, and check before they send it to the machine.",
+    realWorld: "Trail crews in Maine mark the Appalachian Trail all the way to Katahdin. Sign makers, machinists, and product designers all work to exact measurements.",
+    vocab: [
+      { term: "Millimeter (mm)", def: "A tenth of a centimeter. 3D design uses millimeters." },
+      { term: "Dimensions", def: "How long, wide, and tall something is." },
+      { term: "Raised (embossed) text", def: "Letters that stick up from a surface." },
+      { term: "Supports", def: "Extra plastic a printer adds under parts that hang in the air." }
+    ],
+    mission: "Hikers on Maine trails follow painted blazes and small markers, from the coast all the way to Katahdin. Design a marker for a trail near your school: exactly 50 mm long, 30 mm wide, and 4 mm thick, with raised letters that a hiker can read and a printer can print without supports.",
+    learn: [
+      "Set exact dimensions in millimeters and check them with the Ruler.",
+      "Add raised text and attach it so it prints.",
+      "Plan a design so it prints flat with no supports."
+    ],
+    before: {
+      materials: ["A laptop or Chromebook with a mouse, if you have one", "A 3D printer with PLA filament", "A ruler with millimeters, to check the printed marker"],
+      setup: [
+        "Use the same Tinkercad Class as before, or create one and share the code.",
+        "Try the steps in Tinkercad yourself first. Menu names can change.",
+        "One 50 × 30 × 4 mm marker takes about 20–30 minutes on most printers."
+      ],
+      prerequisites: "Lobster Buoy Charm, or knowing how to move, size, and group shapes."
+    },
+    steps: [
+      "Sign in with your class code and nickname and create a new design.",
+      "Add a box. Type its size: 50 mm long, 30 mm wide, 2 mm tall. This is the base.",
+      "Add a short word or trail initials with the Text shape. Make the letters 2 mm tall and at least 6 mm high, so they print clearly.",
+      "Move the text so it sits on top of the base, not floating above it. Use the Ruler to check its height.",
+      "Optional: add a blaze shape, like an arrow or a mountain, also 2 mm tall.",
+      "Select everything and Group it. Put the Ruler on it. Is it 50 × 30 × 4 mm? Fix any number that's off.",
+      "Check that the bottom is flat on the workplane, so nothing hangs in the air. Then Export as .STL.",
+      "Hand in your STL. When it's printed, measure it with a real ruler. Did it come out 50 × 30?"
+    ],
+    reflect: "Your design said 50 × 30 mm. What did the real marker measure? If the numbers were different, why do you think that happened?",
+    extend: "Design a set of three markers for a short trail at school: a start, a turn arrow, and a finish. Keep every one the same size so they match.",
+    teacherNotes: [
+      "Learning objective: students work to exact dimensions in millimeters, attach raised text so it prints, and plan for printing without supports.",
+      "Common misconception: if it looks right on screen, it will print. Floating text, very thin letters, and parts hanging in the air are the usual failures. The Ruler check catches most of them.",
+      "Print settings: PLA, about 0.2 mm layers, 10–15% infill, no supports, printed flat. About 20–30 minutes each. Real prints usually measure within about half a millimeter of the design, which makes a good discussion about tolerance.",
+      "Safety: only adults handle the printer. The nozzle and bed are hot.",
+      "Ask afterward: \"Why do designers type exact numbers instead of dragging?\"",
+      "Tinkercad facts were checked October 22, 2026 against school guides. Check the Text shape and Export menu in Tinkercad before class."
+    ],
+    next: "3d-fix-it-clip"
+  },
+  {
+    id: "3d-fix-it-clip",
+    title: "Fix It! Design a Clip",
+    area: "3d-printing",
+    summary: "Measure a real pencil or cable, design a clip with the right gap, print a quick test, and improve it until it holds.",
+    level: "intermediate",
+    grades: ["4-5", "6-8"],
+    duration: 90,
+    time: { prep: 15, core: [80, 90], verified: false },
+    format: "collaborative",
+    equipment: ["computer", "printer3d"],
+    source: "original",
+    keywords: ["3d printing", "tinkercad", "engineering design", "tolerance", "measurement", "prototype", "iteration", "test", "clip"],
+    access: { account: "required", accountNote: "Students join your Tinkercad Class with a class code and nickname, so they don't need an email. You need a free Tinkercad teacher account.", cost: "free", supervision: true, hardware: ["3D printer"] },
+    launch: { status: "ready", label: "Open Tinkercad", url: "https://www.tinkercad.com/", provider: "Tinkercad (Autodesk)", note: "Free. Students join your Tinkercad Class with the class code and their nickname." },
+    stopAt: "Your team printed a test, measured what went wrong, changed the gap, and your second version holds the pencil or cable. You wrote down both gap sizes.",
+    check: "Show both versions. Say the gap you tried first, what happened, the gap you changed it to, and why.",
+    stuck: [
+      "Measure the object across its widest part. That's the size your gap starts from.",
+      "If the clip won't snap on, make the gap a little bigger. If it falls off, make it a little smaller.",
+      "Print only the part you're testing: a small ring or C-shape prints in a few minutes."
+    ],
+    why: "Engineers rarely get a part right the first time. They measure, make a quick test, see what happened, and change one thing. That loop is how real products get good.",
+    realWorld: "Engineers call the small extra space a fit needs \"tolerance.\" Phone cases, LEGO bricks, and boat parts all depend on getting it right.",
+    vocab: [
+      { term: "Prototype", def: "An early version you build to test an idea." },
+      { term: "Tolerance", def: "The small extra space parts need so they fit together." },
+      { term: "Iterate", def: "Test, change one thing, and test again." },
+      { term: "Diameter", def: "The distance straight across a circle." }
+    ],
+    mission: "Cables get tangled and pencils roll off desks. Design a clip that solves one small problem in your classroom. The catch: you have to measure the real object, and your first print probably won't fit. Test it, figure out why, and fix it.",
+    learn: [
+      "Measure a real object and turn the measurement into a design.",
+      "Explain tolerance: why a fit needs a small gap.",
+      "Improve a design from test results, changing one thing at a time."
+    ],
+    before: {
+      materials: ["Pencils, markers, or charging cables to clip", "A ruler with millimeters (calipers if you have them)", "A 3D printer with PLA filament", "A laptop or Chromebook per team"],
+      setup: [
+        "Use your Tinkercad Class. Teams of two share one design.",
+        "Try a C-shaped clip in Tinkercad yourself first. Menu names can change.",
+        "Plan two short print rounds: a quick test (about 5–10 minutes each) and the improved clip."
+      ],
+      prerequisites: "Lobster Buoy Charm or Trail Blaze Marker, or knowing how to size and group shapes."
+    },
+    steps: [
+      "Pick a problem: a pencil that rolls, or a cable that tangles. Choose the object your clip will hold.",
+      "Measure the object across its widest part in millimeters. Write it down.",
+      "In Tinkercad, make a tube or a ring. Set the hole a little bigger than your measurement. Write down the gap you chose.",
+      "Cut an opening on one side so it becomes a C-shape that can snap on. Keep the walls at least 2 mm thick.",
+      "Add a flat base or a second C so it can stick to a desk edge or hold a second cable.",
+      "Export the STL and print a quick test. Try it on the real object. Too tight, too loose, or just right?",
+      "Change only the gap, by about half a millimeter at a time. Print version 2 and test again.",
+      "Write down both gaps and what happened. Share which change made it work."
+    ],
+    reflect: "Your first clip used a gap of ___ mm and your second used ___ mm. What happened each time, and what does that tell you about tolerance?",
+    extend: "Design a clip for a different object, using what you learned about gaps. Can you get it right on the first print?",
+    teacherNotes: [
+      "Learning objective: students measure a real object, design with a tolerance, and improve a design from test evidence.",
+      "Common misconception: if the hole is the same size as the object, it will fit. Printed holes usually come out slightly smaller, so a gap about 0.3–0.5 mm larger works on most printers. Let students discover this from their first test.",
+      "Print settings: PLA, about 0.2 mm layers, 15–20% infill, walls at least 2 mm so the C can flex without snapping. Test rings print in about 5–10 minutes.",
+      "Safety: only adults handle the printer. The nozzle and bed are hot.",
+      "Ask afterward: \"Why do engineers make quick test prints instead of printing the final part right away?\"",
+      "Tinkercad facts were checked October 22, 2026 against school guides. Check the tube and hole tools in Tinkercad before class."
     ]
   }
 ];

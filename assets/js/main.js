@@ -135,7 +135,7 @@
       if (user.role !== "educator") { location.replace("#/signin/educator"); return; }
       SE.views.moxieTeach(user); navKey = "teach"; title = "Teach Moxie · STEM 207";
     }
-    else SE.views.notFound();
+    else { SE.views.notFound(); title = "Page not found · STEM 207"; }
 
     document.title = title;
     document.body.dataset.role = user ? user.role : "none";

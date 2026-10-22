@@ -2439,3 +2439,21 @@ h1, h2, h3, h4 { letter-spacing: -.015em; }
 .pw-future ul { margin: .4rem 0; padding-left: 1.2rem; }
 .pw-ws h2, .pw-future h2 { display: flex; align-items: center; gap: .4rem; font-size: 1.05rem; }
 .pw-ws h2 svg, .pw-future h2 svg { width: 20px; height: 20px; fill: none; stroke: var(--teal); stroke-width: 2; }
+
+/* Go deeper (views-library.js deeperSection) */
+.block--deeper { border-top: 5px solid var(--brand-blue); display: grid; gap: .6rem; }
+.block--deeper h2 { margin: 0; }
+.deeper__challenge { margin: 0; padding: .7rem .9rem; border-radius: var(--radius-sm); background: var(--orange-soft); }
+.deeper__h { margin: .4rem 0 0; font-size: 1.05rem; display: flex; flex-wrap: wrap; gap: .4rem; align-items: baseline; }
+.deeper__links { list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); }
+.deeper-card { display: grid; gap: .3rem; height: 100%; padding: .85rem 1rem; border: 1.5px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--fg); text-decoration: none; }
+.deeper-card:hover { border-color: var(--brand-teal); }
+.deeper-card:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.deeper-card strong { text-decoration: underline; text-decoration-color: var(--brand-teal); text-underline-offset: 3px; }
+.deeper-card__provider { display: inline-flex; align-items: center; gap: .35rem; font-family: var(--font-display); font-weight: 700; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--teal); }
+.deeper-card__provider svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; }
+.deeper-card__why { font-size: .95rem; }
+.deeper-card__meta { font-size: .85rem; color: var(--muted); }
+.deeper__back { margin: 0; }
+.deeper__back:not(:empty) { display: flex; gap: .4rem; align-items: center; padding: .55rem .8rem; border-radius: var(--radius-sm); background: var(--teal-soft); }
+.deeper__back svg { width: 18px; height: 18px; flex: none; fill: none; stroke: var(--teal); stroke-width: 2.2; }

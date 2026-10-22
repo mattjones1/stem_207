@@ -90,6 +90,7 @@
       case "help_requested": return { icon: "question", text: `${who}asked for help on ${title}`, strong: true };
       case "mission_opened": return { icon: "eye", text: `${who}opened ${title}` };
       case "launched": return { icon: "external", text: `${who}launched ${a ? esc(a.launch.provider) : "a resource"} for ${title}` };
+      case "deeper_opened": return { icon: "rocket", text: `${who}went deeper on ${title}: opened ${esc(e.data.provider || "an outside resource")}` };
       case "step_checked": return { icon: "list", text: `${who}${e.data.checked ? "checked off" : "unchecked"} step ${e.data.step + 1} of ${title}` };
       case "mission_completed": { const tag = completionTag(e); return { icon: "check", text: `${who}sent ${title}${/submitted</.test(tag) ? "" : ` ${tag}`}`, strong: true }; }
       case "ican_claimed": return { icon: "flag", text: `${who}said “I can” for pathway stage ${e.data.stage}` };

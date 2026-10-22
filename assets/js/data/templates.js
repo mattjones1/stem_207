@@ -33,15 +33,15 @@ window.STEM = window.STEM || {};
       goal: "Try five kinds of STEM in one day, one activity from each category, and say which you'd explore next.",
       audience: { grades: ["4-5"], minutes: null, equipment: [], prior: "No experience needed." },
       workshop: { format: "Half day, about 3 hours with breaks", sessions: [
-        { title: "Code and AI", steps: [1, 3] }, { title: "Explore and build", steps: [2, 4] }, { title: "Create", steps: [5, 6] }] },
-      future: ["3D Printing: design and print a buoy or lighthouse charm to take home."],
+        { title: "Code and AI", steps: [1, 3] }, { title: "Explore and build", steps: [2, 4] }, { title: "Create", steps: [5, 6] }, { title: "Add-on: 3D printing (90 min)", steps: [7] }] },
       steps: [
         m("lab-dance-party", { label: "Coding", bridge: "Warm up: program a robot dance." }),
         m("acadia-from-above", { label: "Virtual reality", bridge: "Look closely before you guess." }),
         m("how-ai-sorts", { label: "AI", bridge: "Teach a computer to sort, then catch its mistakes." }),
         m("paper-bridge", { label: "Engineering", bridge: "Test, change one thing, test again." }),
         m("pixel-art-code", { label: "Creative", bridge: "Code a picture with pixels." }),
-        m("sink-or-float", { label: "Science", required: false, bridge: "If there's time: predict, test, explain." })
+        m("sink-or-float", { label: "Science", required: false, bridge: "If there's time: predict, test, explain." }),
+        m("3d-buoy-charm", { label: "3D Printing", required: false, bridge: "Add-on with a 3D printer: design a buoy charm to take home." })
       ]
     }),
     ids({
@@ -69,15 +69,15 @@ window.STEM = window.STEM || {};
       goal: "Observe Maine places, code a lobster boat, sort with a machine, and build a working lighthouse beam.",
       audience: { grades: ["2-3", "4-5"], minutes: null, equipment: [], prior: "No experience needed." },
       workshop: { format: "Four sessions of about 45 minutes", sessions: [
-        { title: "Observe", steps: [1] }, { title: "Code", steps: [2] }, { title: "Sort and test", steps: [3, 4] }, { title: "Build", steps: [5, 6] }] },
-      future: ["3D Printing: design and print a Maine trail marker."],
+        { title: "Observe", steps: [1] }, { title: "Code", steps: [2] }, { title: "Sort and test", steps: [3, 4] }, { title: "Build", steps: [5, 6] }, { title: "Add-on: 3D printing (90 min)", steps: [7] }] },
       steps: [
         m("lab-field-station", { label: "Session 1", bridge: "Tide pools and the North Woods. What do you notice?" }),
         m("lab-rover", { label: "Session 2", bridge: "Steer a lobster boat with code. Do the first voyage." }),
         m("blueberry-sorter", { label: "Session 3", bridge: "Help a machine sort wild blueberries." }),
         m("melting-race", { label: "Session 3", bridge: "Predict which ice melts first, then test it." }),
         m("lighthouse-beam", { label: "Session 4", bridge: "Build a beam that reaches the far shore." }),
-        m("animate-your-name", { label: "Session 4", required: false, bridge: "If there's time: make your initials move." })
+        m("animate-your-name", { label: "Session 4", required: false, bridge: "If there's time: make your initials move." }),
+        m("3d-trail-marker", { label: "3D Printing", required: false, bridge: "Add-on for grades 4–5 with a 3D printer: design a trail marker." })
       ]
     }),
     ids({
