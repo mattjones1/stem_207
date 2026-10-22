@@ -42,7 +42,8 @@ async def local(b):
     await pg.screenshot(path="/tmp/b9-today.png", full_page=True)
     # teacher posts and deletes messages, adds instructions
     await switch(pg, S, "teacher")
-    ok("Overview has Message your class", await pg.locator("#msg-form").count() == 1 and await pg.locator(".msg-list li").count() == 2)
+    await go(pg, S + "#/teach/classes/" + await pg.evaluate("SE.store.classesFor(SE.store.currentUser().id)[0].id"))
+    ok("the class page has Message your class", await pg.locator("#msg-form").count() == 1 and await pg.locator(".msg-list li").count() == 2)
     await pg.click("#msg-form button[type=submit]"); await pg.wait_for_timeout(300)
     ok("an empty message isn't posted", await pg.locator(".msg-list li").count() == 2)
     await pg.fill("#msg-body", "Bring a pencil tomorrow."); await pg.click("#msg-form button[type=submit]"); await pg.wait_for_timeout(400)

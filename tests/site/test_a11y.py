@@ -170,7 +170,8 @@ async def main():
         await sign_teacher(pg)
         sid = await pg.evaluate("SE.store.studentsIn(SE.store.classesFor(SE.store.currentUser().id)[0].id)[0].id")
         pw = await pg.evaluate("SE.store.duplicatePathway(SE.pathways.template('tpl-maine-coast')).id")
-        for h in TEACHER + [f"#/teach/student/{sid}", f"#/teach/pathways/{pw}", f"#/teach/pathways/{pw}/edit"]: await visit(pg, h); await audit(pg, h, F)
+        cid = await pg.evaluate("SE.store.classesFor(SE.store.currentUser().id)[0].id")
+        for h in TEACHER + ["#/teach/classes", f"#/teach/classes/{cid}", "#/teach/checks", f"#/teach/student/{sid}", f"#/teach/pathways/{pw}", f"#/teach/pathways/{pw}/edit"]: await visit(pg, h); await audit(pg, h, F)
         # Phase 4 pages: publish and assign, then the review grid with a portfolio open, then the student's pathway page.
         aid = await pg.evaluate(f"(() => {{ SE.store.publishPathway('{pw}'); const c = SE.store.classesFor(SE.store.currentUser().id)[0]; return SE.store.assignPathway(c.id, '{pw}').id; }})()")
         await visit(pg, f"#/teach/pathways/{pw}/review"); await pg.locator("[data-open]").first.click(); await pg.wait_for_timeout(300); await audit(pg, "pathway review", F)

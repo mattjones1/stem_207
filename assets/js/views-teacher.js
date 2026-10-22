@@ -112,30 +112,29 @@
     }
   }
 
-  /* ───────── Frame: header and demo banner (sections are in the top menu) ───────── */
+  /* ───────── Frame: page header and the sample-data banner (sections are in the top menu) ─────────
+     opts: title, eyebrow, code (show cls's sign-in code), demo (show the sample-class banner). */
   function frame(user, cls, classes, active, body, opts = {}) {
+    const demo = opts.demo != null ? opts.demo : cls && cls.isDemo;
     return `
       <section class="page-top page-top--teach">
         <div class="wrap page-top__inner">
           <div class="teach-head">
             <div>
-              <span class="eyebrow">Educator dashboard</span>
-              <h1 tabindex="-1">${opts.title || (cls ? esc(cls.name) : "Your classes")}</h1>
+              <span class="eyebrow">${esc(opts.eyebrow || "Educator")}</span>
+              <h1 tabindex="-1">${opts.title || (cls ? esc(cls.name) : "Dashboard")}</h1>
             </div>
-            ${cls ? `
+            ${cls && opts.code ? `
             <div class="teach-head__tools">
-              ${classes.length > 1 ? `
-                <label class="visually-hidden" for="class-switch">Class</label>
-                <select id="class-switch" class="select-dark">${classes.map((c) => `<option value="${c.id}" ${c.id === cls.id ? "selected" : ""}>${esc(c.name)}</option>`).join("")}</select>` : ""}
               <span class="code-chip" title="Students use this code to sign in">${icon("key")}Class code <b>${esc(cls.code)}</b></span>
             </div>` : ""}
           </div>
         </div>
       </section>
-      ${cls && cls.isDemo ? `
+      ${demo ? `
         <div class="wrap"><div class="demo-banner">
           ${icon("flag")}
-          <p><strong>Sample class.</strong> These students and their activity are made up to show how the dashboard works. ${SE.store.mode === "cloud" ? "It lives in your account so you can explore; remove it anytime by resetting it or ignore it." : "Changes you make here are saved in this browser."}</p>
+          <p><strong>Sample class.</strong> The sample class's students and their work are made up to show how things work. ${SE.store.mode === "cloud" ? "It lives in your account so you can explore; reset it or archive it anytime." : "Changes you make here are saved in this browser."}</p>
           <button type="button" class="btn btn--ghost btn--small" id="reset-demo">${icon("refresh")}Reset sample data</button>
         </div></div>` : ""}
       ${body}`;
@@ -148,8 +147,6 @@
   SE.teachNoClass = (user) => noClass(user);
 
   function bindFrame(user) {
-    const sw = document.getElementById("class-switch");
-    if (sw) sw.addEventListener("change", () => { currentClassId = sw.value; SE.route(true); });
     const rd = document.getElementById("reset-demo");
     if (rd) rd.addEventListener("click", async () => { rd.disabled = true; try { const c = await SE.store.resetDemo(); if (c) currentClassId = c.id; SE.toast("Sample data reset"); } catch (e) { SE.toast("Couldn't reset the sample class. Try again."); } SE.route(true); });
     const ad = document.getElementById("add-demo");
@@ -183,133 +180,84 @@
       e.preventDefault();
       const c = SE.store.createClass(user.id, document.getElementById("nc-name").value);
       currentClassId = c.id;
-      location.hash = "#/teach/class";
+      location.hash = `#/teach/classes/${c.id}`;
     });
   }
 
-  /* ───────── Overview ───────── */
-  SE.views.teach = function (user) {
-    const { classes, cls } = getClass(user);
-    if (!cls) return noClass(user);
-    const sum = SE.game.classSummary(cls.id);
-    const now = Date.now();
-    const weekAgo = now - 7 * SE.DAY;
-    const twoWeeksAgo = now - 14 * SE.DAY;
-    const completions = sum.events.filter((e) => e.type === "mission_completed");
-    const thisWeek = completions.filter((e) => e.at >= weekAgo).length;
-    const lastWeek = completions.filter((e) => e.at >= twoWeeksAgo && e.at < weekAgo).length;
-    const activeIds = new Set(sum.events.filter((e) => e.at >= weekAgo && !e.by).map((e) => e.studentId));
-    const waiting = pendingChecks(sum);
-
-    // Attention list
-    const attention = [];
+  /* What's worth a look in one class: never signed in, a quiet week, "still figuring it out", help requests. */
+  function attentionFor(sum) {
+    const now = Date.now(), out = [];
     sum.profiles.forEach(({ student, prof }) => {
-      if (!prof.lastActive) attention.push({ student, why: "Hasn't signed in yet", icon: "user" });
-      else if (now - prof.lastActive > 7 * SE.DAY) attention.push({ student, why: `No activity for ${Math.floor((now - prof.lastActive) / SE.DAY)} days`, icon: "clock" });
+      if (!prof.lastActive) out.push({ student, why: "Hasn't signed in yet", icon: "user" });
+      else if (now - prof.lastActive > 7 * SE.DAY) out.push({ student, why: `No activity for ${Math.floor((now - prof.lastActive) / SE.DAY)} days`, icon: "clock" });
       const recent = prof.completions.slice(-3);
       const stuck = recent.filter((c) => c.event.data.confidence === "figuring").length;
-      if (stuck >= 2) attention.push({ student, why: `Said “still figuring it out” on ${stuck} of their last ${recent.length} activities`, icon: "question" });
+      if (stuck >= 2) out.push({ student, why: `Said “still figuring it out” on ${stuck} of their last ${recent.length} activities`, icon: "question" });
       const help = SE.store.eventsFor(student.id).filter((e) => e.type === "help_requested" && now - e.at < SE.DAY).pop();
-      if (help) { const ha = SE.activityById[help.data.activityId]; attention.unshift({ student, why: `Asked for help ${SE.timeAgo(help.at)}${ha ? ` on ${ha.title}` : ""}`, icon: "message" }); }
+      if (help) { const ha = SE.activityById[help.data.activityId]; out.unshift({ student, why: `Asked for help ${SE.timeAgo(help.at)}${ha ? ` on ${ha.title}` : ""}`, icon: "message" }); }
     });
+    return out;
+  }
+  const attentionList = (items, withClass) => items.length
+    ? `<ul class="attn">${items.map((x) => `<li>${icon(x.icon)}<span><a href="#/teach/student/${x.student.id}"><strong>${esc(x.student.displayName)}</strong></a>${withClass ? ` <span class="muted">(${esc(x.c.name)})</span>` : ""}<small>${esc(x.why)}</small></span></li>`).join("")}</ul>`
+    : `<p class="muted">Everyone has been active this week and nobody is flagging trouble.</p>`;
+  /* A Learning Plan's progress in one class: students who passed every required activity. */
+  function planProgress(sum, pa) {
+    const req = pa.snapshot.steps.filter((x) => x.kind === "mission" && x.required).map((x) => SE.activityById[x.activityId]).filter(Boolean);
+    const done = sum.profiles.filter(({ prof }) => req.every((a) => prof.completedIds.has(a.id))).length;
+    return { done, total: sum.students.length, req: req.length };
+  }
 
-    // 14-day chart
-    const days = [];
-    for (let i = 13; i >= 0; i--) {
-      const start = SE.startOfDay(now - i * SE.DAY);
-      days.push({ start, n: completions.filter((e) => e.at >= start && e.at < start + SE.DAY).length });
-    }
-    const maxDay = Math.max(1, ...days.map((d) => d.n));
-    const yMax = Math.max(2, Math.ceil(maxDay / 2) * 2);
-
-    // Areas
-    const areaCounts = SE.liveAreas.map((a) => ({ a, n: completions.filter((e) => SE.activityById[e.data.activityId] && SE.activityById[e.data.activityId].area === a.id).length }));
-    const maxArea = Math.max(1, ...areaCounts.map((x) => x.n));
-
-    const delta = thisWeek - lastWeek;
+  /* ───────── Dashboard: every class at a glance ───────── */
+  SE.views.teach = function (user) {
+    const classes = SE.store.classesFor(user.id);
+    if (!classes.length) return noClass(user);
+    const rows = classes.map((c) => {
+      const sum = SE.game.classSummary(c.id);
+      return { c, sum, waiting: pendingChecks(sum).length, plans: SE.store.pathwayAssignmentsFor(c.id).filter((pa) => pa.snapshot) };
+    });
+    const waiting = rows.reduce((n, r) => n + r.waiting, 0);
+    const students = rows.reduce((n, r) => n + r.sum.students.length, 0);
+    const plans = rows.flatMap((r) => r.plans.map((pa) => ({ r, pa })));
+    const attention = rows.flatMap((r) => attentionFor(r.sum).map((x) => ({ ...x, c: r.c }))).slice(0, 8);
     const body = `
       <section class="wrap section">
+        <div class="dash-actions">
+          <a class="btn btn--primary" href="#/teach/checks">${icon("check")}Checks${waiting ? ` (${waiting})` : ""}</a>
+          <a class="btn btn--ghost" href="#/teach/plans/new">${icon("plus")}New Learning Plan</a>
+          <a class="btn btn--ghost" href="#/teach/classes">${icon("users")}Add a class</a>
+        </div>
         <div class="kpis">
-          <a class="kpi" href="#roster"><span class="kpi__label">Active this week</span><span class="kpi__value">${activeIds.size}<small> of ${sum.students.length}</small></span><span class="kpi__foot">explorers signed in or worked</span></a>
-          <div class="kpi"><span class="kpi__label">Activities this week</span><span class="kpi__value">${thisWeek}</span><span class="kpi__foot ${delta > 0 ? "is-up" : delta < 0 ? "is-down" : ""}">${delta === 0 ? "same as last week" : `${delta > 0 ? "▲" : "▼"} ${Math.abs(delta)} vs. last week`}</span></div>
-          <a class="kpi ${waiting.length ? "kpi--action" : ""}" href="#/teach/checks"><span class="kpi__label">Checks waiting</span><span class="kpi__value">${waiting.length}</span><span class="kpi__foot">${waiting.length ? "Pass or Try again" : "All caught up"}</span></a>
+          <a class="kpi ${waiting ? "kpi--action" : ""}" href="#/teach/checks"><span class="kpi__label">Checks waiting</span><span class="kpi__value">${waiting}</span><span class="kpi__foot">${waiting ? "Pass or Try again" : "All caught up"}</span></a>
+          <a class="kpi" href="#/teach/classes"><span class="kpi__label">Classes</span><span class="kpi__value">${classes.length}</span><span class="kpi__foot">${plural(students, "student", "students")}</span></a>
+          <a class="kpi" href="#/teach/plans"><span class="kpi__label">Current Learning Plans</span><span class="kpi__value">${plans.length}</span><span class="kpi__foot">assigned to your classes</span></a>
         </div>
       </section>
-      <section class="wrap section">${messageBlock(cls)}</section>
-
-      <section class="wrap section teach-grid">
-        <div class="block chart-block">
-          <div class="block__head"><h2>Activities completed</h2><span class="muted">Last 14 days</span></div>
-          <div class="colchart" role="img" aria-label="Missions completed per day over the last 14 days: ${days.map((d) => d.n).join(", ")}">
-            <div class="colchart__grid" aria-hidden="true">
-              ${[yMax, yMax / 2, 0].map((v) => `<span><b>${v}</b></span>`).join("")}
-            </div>
-            <div class="colchart__bars">
-              ${days.map((d, i) => `<div class="colchart__col ${i === days.length - 1 ? "is-today" : ""}" title="${SE.dateShort(d.start)}: ${d.n}">
-                <span class="colchart__bar" style="height:${(d.n / yMax) * 100}%">${d.n ? `<em>${d.n}</em>` : ""}</span>
-                <span class="colchart__x">${i % 2 === 1 || i === days.length - 1 ? (i === days.length - 1 ? "Today" : new Date(d.start).toLocaleDateString("en-US", { month: "numeric", day: "numeric" })) : ""}</span>
-              </div>`).join("")}
-            </div>
-          </div>
-        </div>
-        <div class="block">
-          <div class="block__head"><h2>Where they're exploring</h2><span class="muted">All time</span></div>
-          <ul class="hbars">
-            ${areaCounts.map(({ a, n }) => `<li><span class="hbars__label">${icon(a.icon)}${esc(a.short)}</span><span class="hbars__track"><span style="width:${(n / maxArea) * 100}%"></span></span><b>${n}</b></li>`).join("")}
-          </ul>
-        </div>
-        ${(() => {
-          const list = SE.store.assignmentsFor(cls.id).map((x) => ({ x, a: SE.activityById[x.activityId] })).filter((r) => r.a);
-          return `<div class="block">
-            <div class="block__head"><h2>Assigned activities</h2><a class="muted" href="#/teach/missions">${list.length ? "Manage" : "Assign activities"}</a></div>
-            ${list.length ? `<ul class="alist alist--compact">${list.map(({ x, a }) => `<li class="alist__item"><div class="alist__main"><a href="#/activity/${a.id}">${esc(a.title)}</a><small>${x.dueDate ? esc(dueText(x.dueDate)) : "No due date"}</small>${prepLine(a)}</div>${progressMarkup(classProgress(sum, a))}</li>`).join("")}</ul>`
-              : `<p class="muted">Pick activities by discipline on the <a href="#/teach/missions">Activities</a> tab. They'll show up first on every student's home screen.</p>`}
-          </div>`;
-        })()}
-        <div class="block">
-          <div class="block__head"><h2>Interactive labs</h2><span class="muted">Levels finished</span></div>
-          <table class="lab-table">
-            <thead><tr><th scope="col">Lab</th><th scope="col" class="num">Started</th><th scope="col" class="num">Avg. levels</th><th scope="col" class="num">Finished</th></tr></thead>
-            <tbody>${SE.labs.all().map((lab) => {
-              const ps = sum.profiles.map((p) => (p.prof.labLevels[lab.id] || new Set()).size);
-              const started = ps.filter((n) => n > 0);
-              const avg = started.length ? (started.reduce((a, b) => a + b, 0) / started.length).toFixed(1) : "–";
-              return `<tr><th scope="row"><a href="#/lab/${lab.id}">${esc(lab.title)}</a></th><td class="num">${started.length}/${sum.students.length}</td><td class="num">${avg} <small>of ${lab.levels.length}</small></td><td class="num">${ps.filter((n) => n === lab.levels.length).length}</td></tr>`;
-            }).join("")}</tbody>
-          </table>
-        </div>
-        <div class="block">
-          <div class="block__head"><h2>Needs a check-in</h2><span class="muted">${attention.length ? plural(attention.length, "item", "items") : ""}</span></div>
-          ${attention.length ? `<ul class="attn">${attention.map((x) => `<li>${icon(x.icon)}<span><a href="#/teach/student/${x.student.id}"><strong>${esc(x.student.displayName)}</strong></a><small>${esc(x.why)}</small></span></li>`).join("")}</ul>`
-            : `<p class="muted">Everyone has been active this week and nobody is flagging trouble.</p>`}
-        </div>
-        <div class="block">
-          <div class="block__head"><h2>Class journey</h2><span class="muted">${sum.journey.goal.next ? `Next stop: ${esc(sum.journey.goal.next.name)}` : "Katahdin reached"}</span></div>
-          ${SE.classJourneyBlock(sum.journey)}
-          <p class="muted">Only class work moves the journey: +100 each time you pass an activity you assigned or one in an assigned Learning Plan. Students see this on Home. Their own XP, ranks, and patches come from every activity you pass.</p>
-        </div>
+      <section class="wrap section" aria-labelledby="dash-classes">
+        <div class="section__head"><div><span class="eyebrow">Classes</span><h2 id="dash-classes">Your classes</h2></div>
+          <a class="btn btn--ghost btn--small" href="#/teach/classes">Manage classes ${icon("arrowRight")}</a></div>
+        <ul class="dash-classes">${rows.map((r) => `
+          <li class="block dash-class">
+            <h3><a href="#/teach/classes/${r.c.id}">${esc(r.c.name)}</a>${r.c.isDemo ? ` <span class="chip">Sample</span>` : ""}</h3>
+            <p class="muted small">Class code ${esc(r.c.code)}</p>
+            <p>${plural(r.sum.students.length, "student", "students")} · ${r.waiting ? `<a href="#/teach/checks">${plural(r.waiting, "check", "checks")} waiting</a>` : "no checks waiting"} · ${plural(r.plans.length, "Learning Plan", "Learning Plans")}</p>
+          </li>`).join("")}</ul>
       </section>
-
-      <section class="wrap section" id="roster" aria-labelledby="roster-title">
-        <div class="section__head"><div><span class="eyebrow">Roster</span><h2 id="roster-title">${plural(sum.students.length, "explorer", "explorers")}</h2></div>
-          <a class="btn btn--ghost btn--small" href="#/teach/class">${icon("plus")}Add students</a></div>
-        ${rosterTable(sum)}
+      <section class="wrap section" aria-labelledby="dash-plans">
+        <div class="section__head"><div><span class="eyebrow">Learning Plans</span><h2 id="dash-plans">Current Learning Plans</h2></div>
+          <a class="btn btn--ghost btn--small" href="#/teach/plans">All Learning Plans ${icon("arrowRight")}</a></div>
+        ${plans.length ? `<ul class="dash-plans">${plans.map(({ r, pa }) => { const p = planProgress(r.sum, pa); return `
+          <li class="block"><h3><a href="#/teach/plans/${pa.pathwayId}">${esc(pa.snapshot.title)}</a> <span class="muted small">· ${esc(r.c.name)}</span></h3>
+            <p>${p.done} of ${p.total} students passed all ${plural(p.req, "required activity", "required activities")}</p>
+            <div class="mini-meter" aria-hidden="true"><span style="width:${p.total ? (p.done / p.total) * 100 : 0}%"></span></div></li>`; }).join("")}</ul>`
+          : `<div class="empty">${icon("map")}<h3>No Learning Plans assigned yet</h3><p>A Learning Plan puts activities in order for a class.</p><a class="btn btn--primary" href="#/teach/plans">${icon("plus")}Start a Learning Plan</a></div>`}
       </section>
-
-      <section class="wrap section" aria-labelledby="feed-title">
-        <div class="section__head"><div><span class="eyebrow">Live log</span><h2 id="feed-title">Recent activity</h2></div></div>
-        <ol class="feed">
-          ${sum.events.filter((e) => !FEED_NOISE.includes(e.type)).slice(-14).reverse().map((e) => {
-            const d = describe(e, true);
-            return `<li class="${d.strong ? "is-strong" : ""}">${icon(d.icon)}<span>${d.text}</span><time datetime="${new Date(e.at).toISOString()}">${SE.timeAgo(e.at)}</time></li>`;
-          }).join("") || `<li>${icon("clock")}<span>No activity yet. Share your class code to get started.</span></li>`}
-        </ol>
+      <section class="wrap section" aria-labelledby="dash-attn">
+        <div class="section__head"><div><span class="eyebrow">Students</span><h2 id="dash-attn">Needs a check-in</h2></div></div>
+        <div class="block">${attentionList(attention, classes.length > 1)}</div>
       </section>`;
-
-    app().innerHTML = frame(user, cls, classes, "overview", body);
+    app().innerHTML = frame(user, null, classes, "teach", body, { title: "Dashboard", demo: classes.some((c) => c.isDemo) });
     bindFrame(user);
-    bindRoster(sum);
-    bindMessages(cls);
   };
 
   /* Class messages: a short note to the whole class, shown under "From your teacher" on Today. */
@@ -369,7 +317,7 @@
       return `<th scope="col" class="${num ? "num" : ""}" aria-sort="${sorted ? (rosterSort.dir === 1 ? "ascending" : "descending") : "none"}">
         <button type="button" data-sort="${key}">${label}<span aria-hidden="true">${sorted ? (rosterSort.dir === 1 ? " ▲" : " ▼") : ""}</span></button></th>`;
     };
-    if (!rows.length) return `<div class="empty">${icon("users")}<h3>No students yet</h3><p>Add students on the Class & logins tab, then hand out login cards.</p><a class="btn btn--primary" href="#/teach/class">${icon("plus")}Add students</a></div>`;
+    if (!rows.length) return `<div class="empty">${icon("users")}<h3>No students yet</h3><p>Add students on the Class & logins tab, then hand out login cards.</p><a class="btn btn--primary" href="#add-student-block" data-jump="add-student-block">${icon("plus")}Add students</a></div>`;
     return `
       <div class="table-wrap">
         <table class="roster">
@@ -417,7 +365,7 @@
 
     const body = `
       <section class="wrap section">
-        <a class="btn btn--ghost btn--small" href="#/teach">${icon("arrowLeft")}Back to class overview</a>
+        <a class="btn btn--ghost btn--small" href="#/teach/classes/${cls.id}">${icon("arrowLeft")}Back to ${esc(cls.name)}</a>
         <div class="student-head">
           ${SE.studentAvatar(student.id, 72, prof)}
           <div>
@@ -536,14 +484,139 @@
     document.getElementById("show-reviewed").addEventListener("change", (e) => { showReviewed = e.target.checked; SE.route(true); });
   };
 
-  /* ───────── Class & logins ───────── */
-  SE.views.teachClass = function (user) {
-    const { classes, cls } = getClass(user);
-    if (!cls) return noClass(user);
-    const students = SE.store.studentsIn(cls.id);
-    const pic = (id) => `<span class="pic-chip">${icon(id)}<span>${esc(SE.pictureById[id].name)}</span></span>`;
+  /* ───────── Classes ───────── */
+  SE.views.teachClasses = function (user) {
+    const classes = SE.store.classesFor(user.id), archived = SE.store.archivedClassesFor(user.id);
+    if (!classes.length && !archived.length) return noClass(user);
+    const card = (c) => {
+      const n = SE.store.studentsIn(c.id).length;
+      return `
+        <li class="block dash-class">
+          <h3><a href="#/teach/classes/${c.id}">${esc(c.name)}</a>${c.isDemo ? ` <span class="chip">Sample</span>` : ""}</h3>
+          <p class="muted small">Class code ${esc(c.code)} · ${plural(n, "student", "students")}</p>
+          ${c.archivedAt ? `<p class="small">Archived ${SE.dateShort(c.archivedAt)}. Students can't sign in.</p>
+            <button type="button" class="btn btn--ghost btn--small" data-restore="${c.id}">${icon("refresh")}Restore<span class="visually-hidden"> ${esc(c.name)}</span></button>` : ""}
+        </li>`;
+    };
     const body = `
-      <section class="wrap section teach-grid teach-grid--class">
+      <section class="wrap section" aria-labelledby="classes-title">
+        <div class="section__head"><div><span class="eyebrow">Classes</span><h2 id="classes-title">${plural(classes.length, "class", "classes")}</h2></div></div>
+        ${classes.length ? `<ul class="dash-classes">${classes.map(card).join("")}</ul>` : `<p class="muted">No active classes. Add one below, or restore an archived class.</p>`}
+      </section>
+      <section class="wrap section" id="add-class" aria-labelledby="add-class-title">
+        <div class="block">
+          <h2 id="add-class-title">Add a class</h2>
+          <p class="muted">Each class gets its own sign-in code.</p>
+          <form id="new-class" class="inline-form">
+            <label class="visually-hidden" for="nc-name">Class name</label>
+            <input id="nc-name" class="input" maxlength="80" placeholder="Class name, like Room 12">
+            <button class="btn btn--primary" type="submit">${icon("plus")}Add class</button>
+          </form>
+          ${SE.store.mode === "cloud" && !classes.concat(archived).some((c) => c.isDemo) ? `<p class="muted">Want to see it with data first? <button type="button" class="linkish" id="add-demo">Add a sample class</button></p>` : ""}
+        </div>
+      </section>
+      ${archived.length ? `
+      <section class="wrap section" aria-labelledby="archived-title">
+        <details class="block">
+          <summary><h2 id="archived-title">Archived (${archived.length})</h2></summary>
+          <ul class="dash-classes">${archived.map(card).join("")}</ul>
+        </details>
+      </section>` : ""}`;
+    app().innerHTML = frame(user, null, classes, "classes", body, { title: "Classes" });
+    bindFrame(user);
+    document.getElementById("new-class").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const c = SE.store.createClass(user.id, document.getElementById("nc-name").value);
+      currentClassId = c.id;
+      SE.toast(`Added ${c.name}. Class code ${c.code}`);
+      location.hash = `#/teach/classes/${c.id}`;
+    });
+    app().querySelectorAll("[data-restore]").forEach((b) => b.addEventListener("click", () => {
+      SE.store.archiveClass(b.dataset.restore, false);
+      SE.toast("Class restored");
+      SE.route(true);
+    }));
+  };
+
+  let deleteOpen = null;   // the class whose delete confirmation is open
+  SE.views.teachClassPage = function (user, id) {
+    const cls = SE.store.classById(id);
+    if (!cls || cls.educatorId !== user.id) return SE.views.notFound();
+    if (!cls.archivedAt) currentClassId = cls.id;
+    const sum = SE.game.classSummary(cls.id);
+    const students = SE.store.studentsIn(cls.id);
+    const waiting = pendingChecks(sum).length;
+    const activeIds = new Set(sum.events.filter((e) => e.at >= Date.now() - 7 * SE.DAY && !e.by).map((e) => e.studentId));
+    const plans = SE.store.pathwayAssignmentsFor(cls.id).filter((pa) => pa.snapshot);
+    const pic = (pid) => `<span class="pic-chip">${icon(pid)}<span>${esc(SE.pictureById[pid].name)}</span></span>`;
+    const legacy = SE.store.assignmentsFor(cls.id).map((x) => ({ x, a: SE.activityById[x.activityId] })).filter((r) => r.a);
+    const body = `
+      <section class="wrap section">
+        <div class="backbar pw-back">${SE.backLink("#/teach/classes", "Classes")}</div>
+        ${cls.archivedAt ? `<p class="pwk-banner">${icon("alert")}<span><strong>Archived.</strong> Students in this class can't sign in. Restore it to use it again.</span></p>` : ""}
+        <div class="block class-manage">
+          <form id="rename-class" class="inline-form">
+            <label for="cr-name">Class name</label>
+            <input id="cr-name" class="input" maxlength="80" value="${esc(cls.name)}">
+            <button class="btn btn--ghost btn--small" type="submit">${icon("check")}Rename</button>
+          </form>
+          <div class="class-manage__btns">
+            <button type="button" class="btn btn--ghost btn--small" id="archive-class">${icon(cls.archivedAt ? "refresh" : "box")}${cls.archivedAt ? "Restore class" : "Archive class"}</button>
+            <button type="button" class="btn btn--ghost btn--small" id="delete-open" aria-expanded="${deleteOpen === cls.id}" aria-controls="delete-zone">${icon("trash")}Delete class</button>
+          </div>
+          <div id="delete-zone" class="danger-zone" ${deleteOpen === cls.id ? "" : "hidden"}>
+            <p><strong>Deleting removes ${esc(cls.name)}, its ${plural(students.length, "student", "students")}, and all their work. This can't be undone.</strong> To keep the work, archive the class instead.</p>
+            <label for="del-confirm">Type the class name to confirm</label>
+            <input id="del-confirm" class="input" autocomplete="off" placeholder="${esc(cls.name)}">
+            <button type="button" class="btn btn--danger btn--small" id="delete-yes">${icon("trash")}Delete forever</button>
+            <p class="form__error" id="del-err" role="alert"></p>
+          </div>
+        </div>
+        <div class="kpis">
+          <a class="kpi" href="#roster"><span class="kpi__label">Students</span><span class="kpi__value">${students.length}</span><span class="kpi__foot">${activeIds.size} active this week</span></a>
+          <a class="kpi ${waiting ? "kpi--action" : ""}" href="#/teach/checks"><span class="kpi__label">Checks waiting</span><span class="kpi__value">${waiting}</span><span class="kpi__foot">${waiting ? "Pass or Try again" : "All caught up"}</span></a>
+          <a class="kpi" href="#class-plans"><span class="kpi__label">Learning Plans</span><span class="kpi__value">${plans.length}</span><span class="kpi__foot">assigned to this class</span></a>
+        </div>
+      </section>
+
+      <section class="wrap section" id="roster" aria-labelledby="roster-title">
+        <div class="section__head"><div><span class="eyebrow">Roster</span><h2 id="roster-title">${plural(students.length, "student", "students")}</h2></div>
+          <a class="btn btn--ghost btn--small" href="#add-student-block" data-jump="add-student-block">${icon("plus")}Add students</a></div>
+        ${rosterTable(sum)}
+      </section>
+
+      <section class="wrap section teach-grid">
+        <div class="block" id="class-plans">
+          <div class="block__head"><h2>Learning Plans</h2><a class="muted" href="#/teach/plans">${plans.length ? "All plans" : "Start one"}</a></div>
+          ${plans.length ? `<ul class="alist alist--compact">${plans.map((pa) => { const p = planProgress(sum, pa); return `<li class="alist__item"><div class="alist__main"><a href="#/teach/plans/${pa.pathwayId}">${esc(pa.snapshot.title)}</a><small>${p.done} of ${p.total} passed every required activity</small></div></li>`; }).join("")}</ul>`
+            : `<p class="muted">No Learning Plans assigned to this class yet.</p>`}
+          ${legacy.length ? `<h3 class="small">Earlier single assignments</h3><ul class="alist alist--compact">${legacy.map(({ x, a }) => `<li class="alist__item"><div class="alist__main"><a href="#/activity/${a.id}">${esc(a.title)}</a><small>${x.dueDate ? esc(dueText(x.dueDate)) : "No due date"}</small></div></li>`).join("")}</ul>` : ""}
+        </div>
+        <div class="block">
+          <div class="block__head"><h2>Needs a check-in</h2></div>
+          ${attentionList(attentionFor(sum), false)}
+        </div>
+        <div class="block">
+          <div class="block__head"><h2>Class journey</h2><span class="muted">${sum.journey.goal.next ? `Next stop: ${esc(sum.journey.goal.next.name)}` : "Katahdin reached"}</span></div>
+          ${SE.classJourneyBlock(sum.journey)}
+          <p class="muted">Only class work moves the journey: +100 each time you pass an activity you assigned or one in an assigned Learning Plan. Students see this on Home. Their own XP, ranks, and patches come from every activity you pass.</p>
+        </div>
+        <div class="block">
+          <div class="block__head"><h2>Interactive labs</h2><span class="muted">Levels finished</span></div>
+          <table class="lab-table">
+            <thead><tr><th scope="col">Lab</th><th scope="col" class="num">Started</th><th scope="col" class="num">Avg. levels</th><th scope="col" class="num">Finished</th></tr></thead>
+            <tbody>${SE.labs.all().map((lab) => {
+              const ps = sum.profiles.map((p) => (p.prof.labLevels[lab.id] || new Set()).size);
+              const started = ps.filter((n) => n > 0);
+              const avg = started.length ? (started.reduce((a, b) => a + b, 0) / started.length).toFixed(1) : "–";
+              return `<tr><th scope="row"><a href="#/lab/${lab.id}">${esc(lab.title)}</a></th><td class="num">${started.length}/${sum.students.length}</td><td class="num">${avg} <small>of ${lab.levels.length}</small></td><td class="num">${ps.filter((n) => n === lab.levels.length).length}</td></tr>`;
+            }).join("")}</tbody>
+          </table>
+        </div>
+      </section>
+      <section class="wrap section">${messageBlock(cls)}</section>
+
+      <section class="wrap section teach-grid teach-grid--class" id="add-student-block">
         <div class="block">
           <div class="block__head"><h2>Add a student</h2></div>
           <form id="add-student" class="form" novalidate>
@@ -567,12 +640,6 @@
             <li>Type the class code <b class="big-code">${esc(cls.code)}</b></li>
             <li>Tap their name, then their 3 secret pictures from their login card.</li>
           </ol>
-          <form id="new-class" class="inline-form">
-            <label class="visually-hidden" for="nc-name">New class name</label>
-            <input id="nc-name" class="input" placeholder="Add another class">
-            <button class="btn btn--ghost btn--small" type="submit">${icon("plus")}Create</button>
-          </form>
-          ${SE.store.mode === "cloud" && !classes.some((c) => c.isDemo) ? `<p class="muted">Want to see the dashboard with data? <button type="button" class="linkish" id="add-demo">Add a sample class</button></p>` : ""}
         </div>
       </section>
 
@@ -582,45 +649,70 @@
           <p>Cut these out and hand them to students. Each card has the class code and that student's secret pictures.</p>
         </div>
         ${students.length ? `<div class="login-cards">
-          ${students.map((s) => `
+          ${students.map((st) => `
             <article class="login-card">
-              <header><span class="login-card__brand">${SE.brandLogo(17)}</span><strong>${esc(s.displayName)}</strong></header>
+              <header><span class="login-card__brand">${SE.brandLogo(17)}</span><strong>${esc(st.displayName)}</strong></header>
               <p class="login-card__code">Class code <b>${esc(cls.code)}</b></p>
-              <div class="login-card__pics">${s.picCode.map(pic).join("")}</div>
+              <div class="login-card__pics">${st.picCode.map(pic).join("")}</div>
               <footer class="login-card__tools">
-                <label class="visually-hidden" for="g-${s.id}">Grade band for ${esc(s.displayName)}</label>
-                <select id="g-${s.id}" class="input input--small" data-grade="${s.id}">${STEM.gradeBands.map((g) => `<option value="${g.id}" ${g.id === s.gradeBand ? "selected" : ""}>${esc(g.name)}</option>`).join("")}</select>
-                <button type="button" class="btn btn--ghost btn--small" data-newpics="${s.id}">${icon("refresh")}New pictures</button>
-                ${pendingRemove === s.id
-                  ? `<span class="confirm-inline">Remove ${esc(s.displayName)} and their progress? <button type="button" class="btn btn--danger btn--small" data-remove-yes="${s.id}">Remove</button><button type="button" class="btn btn--ghost btn--small" data-remove-no>Keep</button></span>`
-                  : `<button type="button" class="btn btn--ghost btn--small" data-remove="${s.id}">${icon("trash")}Remove</button>`}
+                <label class="visually-hidden" for="g-${st.id}">Grade band for ${esc(st.displayName)}</label>
+                <select id="g-${st.id}" class="input input--small" data-grade="${st.id}">${STEM.gradeBands.map((g) => `<option value="${g.id}" ${g.id === st.gradeBand ? "selected" : ""}>${esc(g.name)}</option>`).join("")}</select>
+                <button type="button" class="btn btn--ghost btn--small" data-newpics="${st.id}">${icon("refresh")}New pictures</button>
+                ${pendingRemove === st.id
+                  ? `<span class="confirm-inline">Remove ${esc(st.displayName)} and their progress? <button type="button" class="btn btn--danger btn--small" data-remove-yes="${st.id}">Remove</button><button type="button" class="btn btn--ghost btn--small" data-remove-no>Keep</button></span>`
+                  : `<button type="button" class="btn btn--ghost btn--small" data-remove="${st.id}">${icon("trash")}Remove</button>`}
               </footer>
             </article>`).join("")}
         </div>` : `<div class="empty">${icon("users")}<h3>No students yet</h3><p>Add your first student above. Their login card appears here.</p></div>`}
+      </section>
+
+      <section class="wrap section" aria-labelledby="feed-title">
+        <div class="section__head"><div><span class="eyebrow">Live log</span><h2 id="feed-title">Recent activity</h2></div></div>
+        <ol class="feed">
+          ${sum.events.filter((e) => !FEED_NOISE.includes(e.type)).slice(-14).reverse().map((e) => {
+            const d = describe(e, true);
+            return `<li class="${d.strong ? "is-strong" : ""}">${icon(d.icon)}<span>${d.text}</span><time datetime="${new Date(e.at).toISOString()}">${SE.timeAgo(e.at)}</time></li>`;
+          }).join("") || `<li>${icon("clock")}<span>No activity yet. Share your class code to get started.</span></li>`}
+        </ol>
       </section>`;
 
-    app().innerHTML = frame(user, cls, classes, "class", body);
+    app().innerHTML = frame(user, cls, [], "classes", body, { eyebrow: "Class", code: true });
     bindFrame(user);
-
-    document.getElementById("add-student").addEventListener("submit", (e) => {
+    bindRoster(sum);
+    bindMessages(cls);
+    const $ = (sel) => document.getElementById(sel);
+    $("rename-class").addEventListener("submit", (e) => {
       e.preventDefault();
-      const res = SE.store.addStudent(cls.id, { displayName: document.getElementById("as-name").value, gradeBand: document.getElementById("as-grade").value });
+      if (SE.store.renameClass(cls.id, $("cr-name").value)) { SE.toast("Class renamed"); SE.route(true); }
+      else $("cr-name").focus();
+    });
+    $("archive-class").addEventListener("click", () => {
+      const on = !cls.archivedAt;
+      SE.store.archiveClass(cls.id, on);
+      SE.toast(on ? "Class archived. Its students can't sign in until you restore it." : "Class restored");
+      SE.route(true);
+    });
+    $("delete-open").addEventListener("click", () => { deleteOpen = deleteOpen === cls.id ? null : cls.id; SE.route(true); if (deleteOpen) $("del-confirm").focus(); });
+    $("delete-yes").addEventListener("click", () => {
+      if ($("del-confirm").value.trim() !== cls.name) { $("del-err").textContent = `Type ${cls.name} exactly to delete it.`; $("del-confirm").focus(); return; }
+      const name = cls.name;
+      SE.store.deleteClass(cls.id);
+      deleteOpen = null;
+      SE.toast(`Deleted ${name}`);
+      location.hash = "#/teach/classes";
+    });
+    $("add-student").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const res = SE.store.addStudent(cls.id, { displayName: $("as-name").value, gradeBand: $("as-grade").value });
       if (!res.ok) {
-        document.getElementById("as-err").textContent = res.error;
-        document.getElementById("as-name").setAttribute("aria-invalid", "true");
-        document.getElementById("as-name").focus();
+        $("as-err").textContent = res.error;
+        $("as-name").setAttribute("aria-invalid", "true");
+        $("as-name").focus();
         return;
       }
       SE.toast(`${res.student.displayName} added`);
       SE.route(true);
-      document.getElementById("as-name").focus();
-    });
-    document.getElementById("new-class").addEventListener("submit", (e) => {
-      e.preventDefault();
-      const c = SE.store.createClass(user.id, document.getElementById("nc-name").value);
-      currentClassId = c.id;
-      SE.toast(`Created ${c.name}. Class code ${c.code}`);
-      SE.route(true);
+      $("as-name").focus();
     });
     app().querySelectorAll("[data-grade]").forEach((sel) => sel.addEventListener("change", () => {
       SE.store.updateStudent(sel.dataset.grade, { gradeBand: sel.value });
@@ -640,7 +732,6 @@
       SE.route(true);
     }));
   };
-
 
   /* ───────── Missions: browse by discipline and assign to the class ───────── */
   const DISCIPLINES = () => [

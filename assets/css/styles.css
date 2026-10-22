@@ -2358,3 +2358,18 @@ h1, h2, h3, h4 { letter-spacing: -.015em; }
 .nav-badge { min-width: 1.4rem; height: 1.4rem; padding-inline: .35rem; border-radius: 999px; display: inline-grid; place-items: center; background: #94c93d; color: #01201e; font-size: .78rem; font-variant-numeric: tabular-nums; }
 .mx-student h4 a.small { color: var(--fg); text-decoration: underline; }
 .teacher-notes__body { overflow-wrap: anywhere; }
+
+/* Educator dashboard and classes (usability Stage 3) */
+.dash-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 1rem; }
+.dash-classes, .dash-plans { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); }
+.dash-class h3, .dash-plans h3 { margin: 0 0 .25rem; }
+.dash-class p, .dash-plans p { margin: .2rem 0; }
+.class-manage { display: grid; gap: .8rem; margin-bottom: 1rem; }
+.class-manage .inline-form { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.class-manage .inline-form label { font-weight: 700; }
+.class-manage__btns { display: flex; flex-wrap: wrap; gap: .5rem; }
+.danger-zone { display: grid; gap: .5rem; padding: .8rem 1rem; border: 2px solid var(--warn); border-radius: var(--radius-sm); background: var(--warn-soft); }
+.danger-zone p { margin: 0; }
+.danger-zone label { font-weight: 700; }
+.danger-zone .btn { justify-self: start; }
+#archived-title { display: inline; font-size: var(--step-1); }

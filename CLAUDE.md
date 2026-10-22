@@ -159,6 +159,21 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - Launching or opening a mission is never evidence. Mission status stays separate from pathway evidence.
 - A revise request needs a note. Artifact links must be https.
 
+## Classes and the Dashboard (usability Stage 3)
+- `#/teach` (`SE.views.teach`) is the **Dashboard** for every class: quick actions, Checks waiting, your classes, current Learning Plans with progress (`planProgress`), and "Needs a check-in" (`attentionFor`). There's no per-class dropdown and no 14-day chart.
+- `#/teach/classes` (`teachClasses`): class cards, Add a class, and Archived with Restore.
+- `#/teach/classes/<id>` (`teachClassPage`):
+  - rename, archive, and delete (only after typing the class name);
+  - KPIs, roster, Learning Plans, check-ins, class journey, labs, messages, add a student, sign-in steps, login cards, and the live log.
+  - The page header shows the class code (`frame(..., { code: true })`).
+- Store:
+  - `renameClass`, `archiveClass(id, on)`, and `deleteClass` (removes the students and their work).
+  - `classesFor` returns active classes only; `archivedClassesFor` returns archived ones.
+  - `classByCode`/`findClass` skip archived classes.
+  - Cloud mode needs `supabase/update-9-classes.sql` (`classes.archived_at`, and `class_roster`/`student_sign_in` skip archived classes).
+- After sign-up, a new educator lands on their class page.
+- Test: `python3 tests/site/test_classes.py`.
+
 ## Wording
 - Use these names everywhere:
   - An **Activity** is one thing a student does. Never "mission" in UI text. Internal ids, routes, and event names like `mission_completed` stay as they are.

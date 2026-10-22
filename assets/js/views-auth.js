@@ -280,7 +280,7 @@
       btn.disabled = false;
       if (!res.ok) return showError({ name: "su-name", email: "su-email", password: "su-pw" }[res.field], res.error);
       SE.toast(`Welcome, ${res.educator.name}. Your class code is ${res.cls.code}.`);
-      location.hash = "#/teach/class";
+      location.hash = `#/teach/classes/${res.cls.id}`;
       SE.route(true);
     });
   };

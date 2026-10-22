@@ -339,7 +339,7 @@
   const iso = (n) => new Date(n || Date.now()).toISOString();
   const fromRow = {
     educator: (r) => ({ id: r.id, name: r.name, email: r.email, createdAt: ms(r.created_at) }),
-    cls: (r) => ({ id: r.id, name: r.name, code: r.code, educatorId: r.educator_id, isDemo: r.is_demo, createdAt: ms(r.created_at) }),
+    cls: (r) => ({ id: r.id, name: r.name, code: r.code, educatorId: r.educator_id, isDemo: r.is_demo, createdAt: ms(r.created_at), archivedAt: r.archived_at ? ms(r.archived_at) : null }),
     student: (r) => ({ id: r.id, classId: r.class_id, displayName: r.display_name, gradeBand: r.grade_band, picCode: r.pic_code, isDemo: r.is_demo, createdAt: ms(r.created_at) }),
     event: (r) => ({ id: r.id, studentId: r.student_id, classId: r.class_id, type: r.type, at: Number(r.at), data: r.data || {}, by: r.by || undefined, isDemo: r.is_demo }),
     assignment: (r) => ({ id: r.id, classId: r.class_id, activityId: r.activity_id, assignedAt: ms(r.assigned_at), dueDate: r.due_date || null, note: r.note || null, isDemo: r.is_demo }),
@@ -625,9 +625,11 @@
     },
 
     /* Classes */
-    classesFor: (educatorId) => db.classes.filter((c) => c.educatorId === educatorId),
+    /* An educator's active classes (archived ones are hidden everywhere except the Classes page). */
+    classesFor: (educatorId) => db.classes.filter((c) => c.educatorId === educatorId && !c.archivedAt),
+    archivedClassesFor: (educatorId) => db.classes.filter((c) => c.educatorId === educatorId && c.archivedAt),
     classById: (id) => db.classes.find((c) => c.id === id),
-    classByCode: (code) => db.classes.find((c) => c.code === String(code || "").trim().toUpperCase().replace(/\s+/g, "")),
+    classByCode: (code) => db.classes.find((c) => !c.archivedAt && c.code === String(code || "").trim().toUpperCase().replace(/\s+/g, "")),
     /* Student sign-in step 1: the class and its roster (names only), or null. */
     async findClass(code) {
       if (CLOUD) {
@@ -636,6 +638,41 @@
       }
       const cls = SE.store.classByCode(code);
       return cls ? { ...cls, students: SE.store.studentsIn(cls.id).map(({ id, displayName, gradeBand }) => ({ id, displayName, gradeBand })) } : null;
+    },
+    renameClass(id, name) {
+      const c = SE.store.classById(id);
+      name = String(name || "").trim().slice(0, 80);
+      if (!c || !name) return false;
+      c.name = name;
+      if (CLOUD) send(restOp("PATCH", `/classes?id=eq.${encodeURIComponent(id)}`, { name }, "return=minimal")); else save();
+      return true;
+    },
+    /* Archive hides a class (and stops its students signing in) without deleting anything. Needs supabase/update-9-classes.sql. */
+    archiveClass(id, on = true) {
+      const c = SE.store.classById(id);
+      if (!c) return;
+      const prev = c.archivedAt;
+      c.archivedAt = on ? Date.now() : null;
+      if (CLOUD) send(restOp("PATCH", `/classes?id=eq.${encodeURIComponent(id)}`, { archived_at: on ? iso(c.archivedAt) : null }, "return=minimal", async () => {
+        c.archivedAt = prev;
+        SE.toast && SE.toast("Couldn't archive the class. Ask your admin to run supabase/update-9-classes.sql.");
+        return true;
+      }));
+      else save();
+    },
+    /* Delete removes the class with its students, their work, assignments, and messages. */
+    deleteClass(id) {
+      const c = SE.store.classById(id);
+      if (!c) return;
+      const ids = new Set(db.students.filter((s) => s.classId === id).map((s) => s.id));
+      db.classes = db.classes.filter((x) => x.id !== id);
+      db.students = db.students.filter((s) => s.classId !== id);
+      db.events = db.events.filter((e) => !ids.has(e.studentId) && e.classId !== id);
+      db.assignments = (db.assignments || []).filter((a) => a.classId !== id);
+      db.messages = (db.messages || []).filter((m) => m.classId !== id);
+      db.teams = (db.teams || []).filter((t) => t.classId !== id);
+      db.pathwayAssignments = (db.pathwayAssignments || []).filter((a) => a.classId !== id);
+      if (CLOUD) send(restOp("DELETE", `/classes?id=eq.${encodeURIComponent(id)}`, undefined, "return=minimal")); else save();
     },
     createClass(educatorId, name) {
       const cls = { id: SE.uid("cls"), name: String(name || "").trim() || "New class", code: CLOUD ? cloudCode() : newClassCode(), educatorId, createdAt: Date.now() };

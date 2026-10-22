@@ -96,7 +96,7 @@
       else if (b === "student") SE.views.teachStudent(user, c);
       else if (b === "missions") SE.views.teachMissions(user, c);
       else if (b === "checks") SE.views.teachChecks(user);
-      else if (b === "classes") SE.views.teachClass(user);
+      else if (b === "classes") (c ? SE.views.teachClassPage(user, c) : SE.views.teachClasses(user));
       else if (b === "plans") SE.views.teachPathways(user, parts.slice(2));
       else SE.views.notFound();
       title = "Educator dashboard · STEM 207";
