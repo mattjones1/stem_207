@@ -108,6 +108,10 @@
       SE.views.dashboard(user, a === "library" ? "library" : "");
       navKey = a === "library" ? "library" : "dashboard";
     }
+    else if (a === "my" && b === "pathways") {
+      if (user.role !== "student") { location.replace("#/"); return; }
+      SE.views.myPathway(user, c); navKey = "dashboard"; title = "My pathway · STEM 207";
+    }
     else if (a === "me") {
       if (user.role !== "student") { location.replace("#/"); return; }
       SE.views.me(user); navKey = "me"; title = "My profile · STEM 207";

@@ -41,6 +41,8 @@ Small tasks in dependency order. The brief is `planning/STEM207_Categories_Pathw
 
 ## Phase 4: Assignment, evidence, portfolio
 
+**Status (October 21, 2026):** E1–E4 are done, in `assets/js/views-pathway-work.js`, plus `supabase/update-7-pathway-teams.sql` (also in `schema.sql`). The Node harness passes (140 checks). The Phase 4 additions to `tests/site/test_pathways.py` (local and cloud) and the a11y pages are written but not run here. "Accept new version" uses Phase 3's "Move the class to vN".
+
 | # | Task | Depends on | Files | Done when |
 | --- | --- | --- | --- | --- |
 | E1 | Student pathway page `#/my/pathways/<assignmentId>`: goal, steps with status (`statusFor`), bridges, evidence prompts, start/resume, and the synthesis. A Today card on the class side | P5 | `views-pathways.js`, `views-student.js` | A student sees only their class's assignments, and resume lands on the first unfinished step |

@@ -134,6 +134,19 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
   - Account, cost, and supervision limits are shown, never bypassed.
 - Test: `python3 tests/site/test_pathways.py [local] [cloud|skip]`.
 
+## Pathway evidence and review (categories-pathways Phase 4)
+- Code lives in `assets/js/views-pathway-work.js`:
+  - `SE.views.myPathway` (`#/my/pathways/<assignmentId>`, students only);
+  - `SE.pathwayToday(user)` (the cards on Today's class side);
+  - `SE.views.pathwayReview` (`#/teach/pathways/<id>/review`).
+  - Pure rules: `SE.pathwayWork.stepState`, `progress`, `workFor`, and `updated`.
+- Events carry `assignmentId`, `stepId`, and `v`:
+  - Student: `pathway_evidence {mode written|show, text, missionVersion}` and `pathway_synthesis {text}`, both individual. `pathway_artifact {text, link}` is shared with teammates; it's in `TEAM_TYPES` and in `update-7-pathway-teams.sql`.
+  - Teacher: `pathway_review {decision accepted|revise, criteria, note}` and `pathway_observation {note}`.
+- Step state: none → sent → accepted or revise. A review counts only if it's newer than the latest evidence, and new evidence after a review makes the step "sent" again.
+- Launching or opening a mission is never evidence. Mission status stays separate from pathway evidence.
+- A revise request needs a note. Artifact links must be https.
+
 ## Wording
 - Home (#/) is "Today" for students, "Educator dashboard" for teachers, and "Home" for guests: use `SE.homeLabel()` (the default for `SE.backLink`). The browse page is "Missions" in the student nav and "Mission library" elsewhere. Class rewards are the "class journey" (never "class expedition").
 

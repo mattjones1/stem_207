@@ -184,6 +184,7 @@
     const p = t || SE.store.pathwayById(id);
     if (!p || (!t && p.educatorId !== user.id)) return SE.views.notFound();
     if (sub === "edit" && !t) return editView(user, p);
+    if (sub === "review" && !t) return SE.views.pathwayReview(user, p);   // views-pathway-work.js
     return detailView(user, p, !!t);
   };
 
@@ -274,6 +275,7 @@
               ${asg.version < p.version ? `<button type="button" class="btn btn--primary btn--small" id="pw-move">${icon("refresh")}Move the class to v${p.version}</button>` : ""}
               ${stale.length ? `<div class="pw-box pw-box--warn"><h3>${icon("alert")}Updated since assigned</h3><ul>${stale.map((x) => `<li>${esc(x.activity.title)}: v${esc(x.from)} → v${esc(x.to)}</li>`).join("")}</ul>
                 <p class="small">Students see the current mission with an “updated” note. To accept the new versions, publish again and move the class to it.</p></div>` : ""}
+              <a class="btn btn--primary btn--small" href="#/teach/pathways/${p.id}/review">${icon("check")}Review student work</a>
               <button type="button" class="btn btn--ghost btn--small" id="pw-unassign">Unassign</button>`
             : p.version && p.status !== "archived" ? `<button type="button" class="btn btn--primary btn--small" id="pw-assign">${icon("plus")}Assign v${p.version} to ${esc(cls.name)}</button>`
             : `<p class="muted small">Publish a version to assign it.</p>`}

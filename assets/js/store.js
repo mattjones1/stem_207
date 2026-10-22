@@ -523,8 +523,8 @@
   const assignable = (a) => SE.content.assignable(a);
 
   /* Work that Moxie partners share (one copy, read by both). Keep this list the same as
-     team_events in supabase/update-5-moxie-teams.sql. Reflections and explanations stay individual. */
-  const TEAM_TYPES = ["moxie_design", "moxie_codecheck", "moxie_buglog", "moxie_test", "moxie_feedback_got", "moxie_improve", "moxie_card"];
+     team_events in supabase/update-7-pathway-teams.sql. Reflections and explanations stay individual. */
+  const TEAM_TYPES = ["moxie_design", "moxie_codecheck", "moxie_buglog", "moxie_test", "moxie_feedback_got", "moxie_improve", "moxie_card", "pathway_artifact"];
 
   /* Pathways: a published version is a snapshot that pins each mission step to the mission's current version. */
   const clip = (v, n) => String(v == null ? "" : v).trim().slice(0, n);

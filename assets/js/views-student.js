@@ -283,6 +283,7 @@
             <ul class="class-board__list">${messages.slice(0, 3).map((m) => `<li><p>${esc(m.body)}</p><small>${SE.timeAgo(m.createdAt)}</small></li>`).join("")}</ul>
             ${messages.length > 3 ? `<details class="class-board__more"><summary>Older messages (${messages.length - 3})</summary><ul class="class-board__list">${messages.slice(3).map((m) => `<li><p>${esc(m.body)}</p><small>${SE.timeAgo(m.createdAt)}</small></li>`).join("")}</ul></details>` : ""}
           </div>` : ""}
+          ${SE.pathwayToday ? SE.pathwayToday(user) : ""}
           ${notes ? `<div class="teacher-note-banner">${icon("message")}<p><strong>Note from your teacher</strong> on <a href="#/activity/${notes.c.activity.id}">${esc(notes.c.activity.title)}</a>: “${esc(notes.r.data.note)}”</p></div>` : ""}
           ${classMain ? bigCard(classMain, classWhy, "class",
             (retry && retry.data.note ? `<p class="today-card__retry">${icon("message")}<span><strong>Your teacher says:</strong> “${esc(retry.data.note)}”</span></p>` : "")

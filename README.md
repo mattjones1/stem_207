@@ -52,7 +52,15 @@ Educators build a **pathway**: a goal-first sequence of missions from any catego
 - **Publish** saves version 1, 2, and so on, pinning each mission's version. It's blocked, with reasons, until there's a goal, a final product, and steps, and while a required step has no resource or isn't published. A mission with no resource can only be an optional step.
 - **Assign** pins a class to the published version. Later edits and new versions never change it until you choose **Move the class to vN**. If a mission changes after it was assigned, the pathway page lists it as "Updated since assigned".
 - Archive or duplicate any pathway. In cloud mode, pathways need `supabase/update-6-pathways.sql`: each educator sees only their own, and published versions can't be edited.
-- Students see assigned pathways in Phase 4 (evidence and portfolio), which is next.
+- **Students** see each assigned pathway on Today (class side) and at `#/my/pathways/<id>`.
+  - The page shows the goal, what they'll make, and each step with its bridge, the teacher's instructions, a link to the mission, and the evidence asked for.
+  - Students send evidence by writing it, or by choosing "Show or tell my teacher". The final step is a written synthesis.
+  - Partners can save one shared **team artifact** per step (a description and an optional https link). Each student's evidence stays their own.
+  - Opening or launching a mission never counts as evidence. The mission's own status is shown separately.
+- **Review** (`#/teach/pathways/<id>/review`):
+  - A grid of students by steps (Not started, Sent, Accepted, Revise), with sent and accepted counts for each step.
+  - Choose a student to see their **portfolio** for the pathway, with mission status, evidence, team artifact, your observations, and past reviews kept separate.
+  - **Accept**, or **Ask to revise** (a note is required). A revise request shows first on the student's Today and opens the step again. You can also add observations.
 
 ## Moxie: a physical computing pathway (draft)
 
@@ -163,7 +171,7 @@ STEM 207 runs in one of two modes, chosen by `assets/js/config.js`:
 ### Set up the free back end (about 10 minutes)
 
 1. Create a free account at [supabase.com](https://supabase.com) and click **New project**. Pick a region near Maine (for example US East) and save the database password somewhere safe.
-2. In the project, open **SQL Editor → New query**, paste all of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**. (Already set up before? Run the updates you haven't run yet, in order: [`supabase/update-2-assignments.sql`](supabase/update-2-assignments.sql) for assigned missions, then [`supabase/update-3-class-messages.sql`](supabase/update-3-class-messages.sql) for class messages and assignment instructions, then [`supabase/update-4-class-journey.sql`](supabase/update-4-class-journey.sql) so students see the whole class's journey, then [`supabase/update-5-moxie-teams.sql`](supabase/update-5-moxie-teams.sql) for Moxie partner teams, then [`supabase/update-6-pathways.sql`](supabase/update-6-pathways.sql) for educator pathways.) It creates the tables, the security rules, and the student sign-in functions. Running it again is safe.
+2. In the project, open **SQL Editor → New query**, paste all of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**. (Already set up before? Run the updates you haven't run yet, in order: [`supabase/update-2-assignments.sql`](supabase/update-2-assignments.sql) for assigned missions, then [`supabase/update-3-class-messages.sql`](supabase/update-3-class-messages.sql) for class messages and assignment instructions, then [`supabase/update-4-class-journey.sql`](supabase/update-4-class-journey.sql) so students see the whole class's journey, then [`supabase/update-5-moxie-teams.sql`](supabase/update-5-moxie-teams.sql) for Moxie partner teams, then [`supabase/update-6-pathways.sql`](supabase/update-6-pathways.sql) for educator pathways, then [`supabase/update-7-pathway-teams.sql`](supabase/update-7-pathway-teams.sql) so partners share pathway team artifacts.) It creates the tables, the security rules, and the student sign-in functions. Running it again is safe.
 3. Open **Authentication → Sign In / Providers → Email** and turn off **Confirm email** while you're prototyping, so new educator accounts work right away. (If you leave it on, teachers must click the link in a confirmation email first. In that case, set **Authentication → URL Configuration → Site URL** to wherever your site lives.)
 4. Open **Project Settings → API Keys**. Copy the **Project URL** and the **publishable** key (older projects call it the **anon public** key) into `assets/js/config.js`. Never use a secret or `service_role` key here.
 5. Commit and push. GitHub Pages serves the site with the back end on. To make the one-file version use it too, run `python tools/build_single_file.py` again.
