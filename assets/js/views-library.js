@@ -35,7 +35,7 @@
 
   SE.isMaine = (a) => (a.keywords || []).includes("maine");
   const maineTag = (a) => (SE.isMaine(a) ? `<span class="maine-tag">${SE.pine(14)}Made in Maine</span>` : "") + pilotTag(a);
-  /* Pilot missions are only flagged for educators; students just see a normal mission. */
+  /* Pilot activities are only flagged for educators; students just see a normal activity. */
   const pilotTag = (a) => a.pilot && ((SE.store.currentUser && SE.store.currentUser()) || {}).role === "educator" ? `<span class="pilot-tag">${icon("flag")}Pilot</span>` : "";
   function activityCard(a, prof) {
     const area = SE.areaById[a.area];
@@ -69,7 +69,7 @@
         <div><dt>Equipment</dt><dd>${esc(SE.equipmentText(a.equipment))}</dd></div>
         ${a.delivery ? `<div><dt>Delivery</dt><dd>${esc(a.delivery)}</dd></div>` : ""}
         ${a.skills && a.skills.length ? `<div><dt>Skills</dt><dd>${esc(a.skills.map((id) => (STEM.skills.find((s) => s.id === id) || { name: id }).name).join(", "))}</dd></div>` : ""}
-        ${a.alsoIn && a.alsoIn.length ? `<div><dt>Also in</dt><dd>${a.alsoIn.filter((id) => SE.areaById[id]).map((id) => `<a href="#/area/${id}">${esc(SE.areaById[id].name)}</a>`).join(", ")}</dd></div>` : ""}
+        ${a.alsoIn && a.alsoIn.length ? `<div><dt>Also in</dt><dd>${a.alsoIn.filter((id) => SE.areaById[id]).map((id) => `<a href="#/activities/${id}">${esc(SE.areaById[id].name)}</a>`).join(", ")}</dd></div>` : ""}
       </dl>`;
   }
 
@@ -82,7 +82,7 @@
   SE.sortActivities = sortActivities;
 
   /* What "home" (#/) is called for whoever is signed in: Today, Educator dashboard, or Home. */
-  SE.homeLabel = () => { const u = SE.store.currentUser(); return !u || u.role === "guest" ? "Home" : u.role === "student" ? "Today" : "Educator dashboard"; };
+  SE.homeLabel = () => { const u = SE.store.currentUser(); return !u || u.role === "guest" ? "Home" : u.role === "student" ? "Home" : "Dashboard"; };
   const backLink = (href = "#/", label) => `<a class="back-link" href="${href}">${icon("arrowLeft")}${label || SE.homeLabel()}</a>`;
   SE.backLink = backLink;
 
@@ -129,8 +129,8 @@
       <section class="section wrap" id="library" aria-labelledby="library-title">
         <div class="section__head">
           <div>
-            <span class="eyebrow">Mission library</span>
-            <h2 id="library-title" tabindex="-1">Find your next mission</h2>
+            <span class="eyebrow">Search</span>
+            <h2 id="library-title" tabindex="-1">Find an activity</h2>
           </div>
           <p>Search by name or idea, or narrow by topic, level, grade, time, and equipment.</p>
         </div>
@@ -147,8 +147,8 @@
             ${selectField("f-time", "Time", "time", "Any length", durations.map((d) => [d.id, d.name]))}
             ${selectField("f-equip", "Equipment", "equip", "Any equipment",
               Object.entries(equipment).filter(([, v]) => v.filter).map(([k, v]) => [k, v.name]))}
-            ${prof ? selectField("f-status", "My progress", "status", "All missions", [["todo", "Not done yet"], ["done", "Completed"]]) : ""}
-            ${user && user.role === "educator" ? selectField("f-pilot", "Collection", "pilot", "All missions", [["yes", "Pilot missions"]]) : ""}
+            ${prof ? selectField("f-status", "My progress", "status", "All activities", [["todo", "Not done yet"], ["done", "Completed"]]) : ""}
+            ${user && user.role === "educator" ? selectField("f-pilot", "Collection", "pilot", "All activities", [["yes", "Pilot activities"]]) : ""}
           </div>
           <div class="results-bar">
             <p class="results-bar__count" id="results-count" aria-live="polite"></p>
@@ -162,8 +162,8 @@
   function bindLibrary(prof) {
     const q = document.getElementById("f-q");
     if (!q) {
-      // No library on this page (the student expedition page): time buttons open Missions with that filter.
-      app().querySelectorAll(".time-picker button").forEach((btn) => btn.addEventListener("click", () => { filters.time = btn.dataset.time; location.hash = "#/library"; }));
+      // No library on this page (the student expedition page): time buttons open Activities with that filter.
+      app().querySelectorAll(".time-picker button").forEach((btn) => btn.addEventListener("click", () => { filters.time = btn.dataset.time; location.hash = "#/activities"; }));
       return;
     }
     q.addEventListener("input", () => { filters.q = q.value.trim(); renderResults(prof); });
@@ -257,7 +257,7 @@
     }
     const buoys = SE.liveAreas.map((a, i) => {
       const b = BUOYS[i];
-      return `<a href="#/area/${a.id}" aria-label="${esc(a.name)}">
+      return `<a href="#/activities/${a.id}" aria-label="${esc(a.name)}">
         <g transform="translate(${b.x} ${b.y})">
           <ellipse class="buoy-ring" cx="0" cy="1" rx="13" ry="3.5" fill="none" stroke="#b9e27f" stroke-opacity=".35" stroke-width="1.2"/>
           <g class="buoy">
@@ -318,26 +318,26 @@
     return `
       <section class="section wrap" aria-labelledby="explore-title">
         <div class="section__head">
-          <div><span class="eyebrow">${eyebrow}</span><h2 id="explore-title">Choose your exploration</h2></div>
-          <p>${SE.liveAreas.length === areas.length ? `${areas.length} areas to explore.` : `${SE.liveAreas.length} areas to explore, and ${areas.filter((a) => a.status === "coming-soon").map((a) => a.name).join(" and ")} coming soon.`} Each has missions for different grades, time slots, and equipment.</p>
+          <div><span class="eyebrow">${eyebrow}</span><h2 id="explore-title">Choose a category</h2></div>
+          <p>${SE.liveAreas.length === areas.length ? `${areas.length} categories.` : `${SE.liveAreas.length} categories, and ${areas.filter((a) => a.status === "coming-soon").map((a) => a.name).join(" and ")} coming soon.`} Each has activities for different grades, time slots, and equipment.</p>
         </div>
         <div class="areas">
           ${areas.map((a) => {
             if (a.status === "coming-soon") return `
-            <a class="area-card area-card--soon" href="#/area/${a.id}">
+            <a class="area-card area-card--soon" href="#/activities/${a.id}">
               <div class="area-card__top"><span class="icon-badge">${icon(a.icon)}</span><h3>${esc(a.name)}</h3></div>
               <p>${esc(a.tagline)}</p>
-              <span class="area-card__foot">Coming soon · 0 missions ${icon("arrowRight")}</span>
+              <span class="area-card__foot">Coming soon · 0 activities ${icon("arrowRight")}</span>
             </a>`;
             const total = activities.filter((x) => x.area === a.id && !SE.hiddenForUser(x)).length;
             const done = prof ? (prof.counts.areas[a.id] || 0) : null;
             return `
-            <a class="area-card" href="#/area/${a.id}">
+            <a class="area-card" href="#/activities/${a.id}">
               <div class="area-card__top"><span class="icon-badge">${icon(a.icon)}</span><h3>${esc(a.name)}</h3></div>
               <p>${esc(a.tagline)}</p>
               ${SE.labs && SE.labs.forArea(a.id).length ? `<span class="chip chip--lab">${icon("flask")}${SE.labs.forArea(a.id).length === 1 ? "Interactive lab" : `${SE.labs.forArea(a.id).length} interactive labs`}</span>` : ""}
               ${prof ? `<div class="mini-meter" aria-hidden="true"><span style="width:${(done / total) * 100}%"></span></div>` : ""}
-              <span class="area-card__foot">${prof ? `${done} of ${total} missions complete` : `Explore the lab · ${plural(total, "activity", "activities")}`} ${icon("arrowRight")}</span>
+              <span class="area-card__foot">${prof ? `${done} of ${total} activities complete` : plural(total, "activity", "activities")} ${icon("arrowRight")}</span>
             </a>`;
           }).join("")}
         </div>
@@ -350,8 +350,8 @@
     return `
       <section class="section wrap maine" aria-labelledby="maine-title">
         <div class="section__head">
-          <div><span class="eyebrow">${SE.pine(14)} Made in Maine</span><h2 id="maine-title">Missions from the coast to the County</h2></div>
-          <p>Lobster boats, tide pools, sugarhouses, and snow days. These missions start right here in the 207.</p>
+          <div><span class="eyebrow">${SE.pine(14)} Made in Maine</span><h2 id="maine-title">Activities from the coast to the County</h2></div>
+          <p>Lobster boats, tide pools, sugarhouses, and snow days. These activities start right here in the 207.</p>
         </div>
         <div class="cards cards--rail">${list.map((a) => activityCard(a, prof)).join("")}</div>
       </section>`;
@@ -383,7 +383,7 @@
     const fArea = SE.areaById[featured.area];
     return `
       <section class="section wrap" aria-labelledby="featured-title">
-        <div class="section__head"><div><span class="eyebrow">Featured classroom mission</span><h2 id="featured-title" class="visually-hidden">Featured classroom mission</h2></div></div>
+        <div class="section__head"><div><span class="eyebrow">Featured classroom activity</span><h2 id="featured-title" class="visually-hidden">Featured classroom activity</h2></div></div>
         <article class="featured">
           <div class="featured__body">
             <div class="card__area"><span class="icon-badge">${icon(fArea.icon)}</span>${esc(fArea.name)}</div>
@@ -391,13 +391,36 @@
             <p class="featured__mission">${esc(featured.mission)}</p>
             <div class="card__foot">${accessChips(featured)}</div>
             <div class="featured__actions">
-              <a class="btn btn--primary" href="#/activity/${featured.id}">${icon("rocket")}See the mission</a>
+              <a class="btn btn--primary" href="#/activity/${featured.id}">${icon("rocket")}See the activity</a>
             </div>
           </div>
           <div class="featured__side">${factsList(featured)}</div>
         </article>
       </section>`;
   }
+
+  /* ───────── Activities: the categories, then search (students and educators share this page) ───────── */
+  SE.views.activities = function (user, id) {
+    if (id) return SE.views.area(user, id);
+    const isStudent = user && user.role === "student";
+    const prof = isStudent ? SE.game.profile(user.id) : null;
+    if (filtersFor !== (user && user.id)) {
+      filters = defaultFilters();
+      if (isStudent && user.gradeBand) filters.grade = user.gradeBand;
+      filtersFor = user && user.id;
+    }
+    app().innerHTML = `
+      <section class="page-top">
+        <div class="wrap page-top__inner">
+          <div class="backbar">${backLink()}</div>
+          <h1 tabindex="-1">Activities</h1>
+          <p class="page-top__lede">${isStudent ? "Pick a category to explore, or search for something specific." : "Every activity, grouped by category. Open one to preview it, or search for something specific."}</p>
+        </div>
+      </section>
+      ${areasSection(prof, "Categories")}
+      ${librarySection(user, prof)}`;
+    bindLibrary(prof);
+  };
 
   SE.views.dashboard = function (user, mode) {
     const isStudent = user && user.role === "student";
@@ -409,9 +432,9 @@
 
     if (isStudent) {
       const prof = SE.game.profile(user.id);
-      // Students: "explore" is the expedition page (map, patches, class goal); "library" is the mission finder.
+      // Students: "explore" is the expedition page (map, patches, class goal); "library" is the activity finder.
       app().innerHTML = mode === "library"
-        ? `<section class="page-top"><div class="wrap page-top__inner"><div class="backbar">${backLink("#/", "Today")}</div><h1 tabindex="-1">Missions</h1><p class="page-top__lede">Search for a mission, or narrow by topic, grade, and time.</p></div></section>` + librarySection(user, prof)
+        ? `<section class="page-top"><div class="wrap page-top__inner"><div class="backbar">${backLink("#/", "Today")}</div><h1 tabindex="-1">Activities</h1><p class="page-top__lede">Search for an activity, or narrow by topic, grade, and time.</p></div></section>` + librarySection(user, prof)
         : SE.views.expeditionHome(user, prof) + labsStrip(user, null, "Your labs") + maineSection(prof) + areasSection(prof) + pathwayStrip(prof);
       SE.views.bindExpeditionHome && SE.views.bindExpeditionHome(user, prof);
       bindLibrary(prof);
@@ -420,7 +443,7 @@
 
     const guestBanner = user && user.role === "guest" ? `
       <div class="wrap"><div class="guest-banner">
-        ${icon("user")}<p><strong>You're exploring as a guest.</strong> Missions work, but nothing is saved. Sign in to earn XP, collect patches, and track your expedition.</p>
+        ${icon("user")}<p><strong>You're exploring as a guest.</strong> Activities work, but nothing is saved. Sign in to earn XP, collect patches, and track your expedition.</p>
         <a class="btn btn--primary btn--small" href="#/signin">Sign in</a>
       </div></div>` : "";
 
@@ -430,7 +453,7 @@
           <div>
             <span class="eyebrow">STEM 207 · Grades 2–8 · Made in Maine</span>
             <h1 id="hero-title" tabindex="-1">From the coast to Katahdin, big ideas start here.</h1>
-            <p class="hero__lede">Pick an area to explore, read your mission, and launch it. Coding, virtual field trips, AI, engineering, science, and art, built for Maine classrooms.</p>
+            <p class="hero__lede">Pick a category, read the activity, and launch it. Coding, virtual field trips, AI, engineering, science, and art, built for Maine classrooms.</p>
             ${timePicker()}
           </div>
           <div class="coast">${coastSvg()}</div>
@@ -438,12 +461,9 @@
       </section>
       ${guestBanner}
       ${user && user.role === "educator" ? SE.views.educatorStrip(user) : ""}
-      ${areasSection(null)}
+      ${areasSection(null, "Categories")}
       ${featuredSection()}
-      ${maineSection(null)}
-      ${labsStrip(user, null, "Interactive labs")}
-      ${pathwayStrip(null)}
-      ${librarySection(user, null)}`;
+      <section class="wrap section"><a class="btn btn--primary" href="#/activities">${icon("search")}Browse all activities</a></section>`;
     bindLibrary(null);
   };
   SE.views.timePicker = timePicker;
@@ -455,28 +475,28 @@
     const prof = user && user.role === "student" ? SE.game.profile(user.id) : null;
     const list = sortActivities(activities.filter((a) => a.area === id && !SE.hiddenForUser(a)));
     const done = prof ? list.filter((a) => prof.completedIds.has(a.id)).length : 0;
-    // Missions whose primary area is elsewhere but that also fit here (`alsoIn`). Each counts once, in its own area.
+    // Activities whose primary area is elsewhere but that also fit here (`alsoIn`). Each counts once, in its own area.
     const also = sortActivities(activities.filter((a) => a.area !== id && (a.alsoIn || []).includes(id) && !SE.hiddenForUser(a)));
     const drafts = user && user.role === "educator" ? SE.content.draftsIn(id).filter((a) => !a.moxie) : [];
 
     app().innerHTML = `
       <section class="page-top">
         <div class="wrap page-top__inner">
-          <div class="backbar">${backLink()}</div>
+          <div class="backbar">${backLink("#/activities", "Activities")}</div>
           <div class="page-top__head">
             <span class="icon-badge">${icon(area.icon)}</span>
-            <div><span class="eyebrow">Exploration area</span><h1 tabindex="-1">${esc(area.name)}</h1></div>
+            <div><span class="eyebrow">Activities · Category</span><h1 tabindex="-1">${esc(area.name)}</h1></div>
           </div>
           <p class="page-top__lede">${esc(area.description)}</p>
           ${area.topics.length ? `<ul class="topic-list" aria-label="Topics in this area">${area.topics.map((t) => `<li class="chip">${esc(t)}</li>`).join("")}</ul>` : ""}
-          ${prof ? `<p class="page-top__progress"><strong>${done} of ${list.length}</strong> missions complete in this area</p>` : ""}
+          ${prof ? `<p class="page-top__progress"><strong>${done} of ${list.length}</strong> activities complete in this area</p>` : ""}
         </div>
       </section>
       ${labsStrip(user, id)}
       ${id === "ai" ? `
         <section class="wrap section">
           <div class="notice notice--row">
-            <p><strong>Not sure where to start?</strong> The AI learning route puts these missions in order, from patterns to responsible use.</p>
+            <p><strong>Not sure where to start?</strong> The AI learning route puts these activities in order, from patterns to responsible use.</p>
             <a class="btn btn--primary btn--small" href="#/ai-route">See the AI learning route ${icon("arrowRight")}</a>
           </div>
         </section>` : ""}
@@ -523,7 +543,7 @@
     app().innerHTML = `
       <section class="page-top">
         <div class="wrap page-top__inner">
-          <div class="backbar">${backLink(`#/area/${area.id}`, area.name)}</div>
+          <div class="backbar">${backLink(`#/activities/${area.id}`, area.name)}</div>
           <div class="page-top__head"><span class="icon-badge">${icon(area.icon)}</span>
             <div><span class="eyebrow">${esc(area.name)} · Draft</span><h1 tabindex="-1">${esc(a.title)}</h1></div></div>
         </div>
@@ -704,7 +724,7 @@
         <div class="wrap page-top__inner">
           <div class="backbar">
             ${backLink()}
-            <nav class="crumbs" aria-label="Breadcrumb"><a href="#/area/${area.id}">${esc(area.name)}</a> / <span aria-current="page">${esc(a.title)}</span></nav>
+            <nav class="crumbs" aria-label="Breadcrumb"><a href="#/activities/${area.id}">${esc(area.name)}</a> / <span aria-current="page">${esc(a.title)}</span></nav>
           </div>
           <div class="page-top__head">
             <span class="icon-badge">${icon(area.icon)}</span>
@@ -726,7 +746,7 @@
       <div class="wrap activity-layout">
         <div class="activity-main">
           <section class="block block--mission" aria-labelledby="s-mission">
-            <h2 id="s-mission">${icon("target")}Your mission</h2>
+            <h2 id="s-mission">${icon("target")}Your activity</h2>
             <p>${esc(a.mission)}</p>
             ${a.board ? `<div class="board"><p class="board__title">${esc(a.board.title)}</p><ol class="${a.board.code ? "board--code" : ""}">${a.board.lines.map((x) => `<li>${a.board.code ? `<code>${esc(x)}</code>` : esc(x)}</li>`).join("")}</ol>${a.board.note ? `<p class="board__note">${esc(a.board.note)}</p>` : ""}</div>` : ""}
           </section>
@@ -847,7 +867,7 @@
       <details class="block cg cg--student" id="checks-guide">
         <summary><span>${icon("question")}How stage checks work</span></summary>
         <ol class="cg-flow">
-          ${step("You", "Practice the missions and lab levels in a stage.", "")}
+          ${step("You", "Practice the activities and lab levels in a stage.", "")}
           ${step("You", "When you can do the “I can” statement, tap <strong>I can do this</strong>.", "On this page")}
           ${step("Teacher", "Your teacher asks you to show it, then chooses <strong>Confirm</strong> or <strong>Not yet</strong>.", "In class")}
           ${step("You", "Confirmed: the stage is cleared and you earn " + STEM.progression.xp.stageCleared + " XP. Not yet: keep practicing and tap it again.", "On this page")}
@@ -858,13 +878,13 @@
         <summary><span>${icon("question")}How checks work</span><span class="muted cg-sub">Two kinds of check. Students ask, you decide.</span></summary>
         <div class="cg-grid">
           <section aria-labelledby="cg-m">
-            <h3 id="cg-m">${icon("rocket")}Mission checks</h3>
-            <p class="muted">Did the student do this mission? One per mission.</p>
+            <h3 id="cg-m">${icon("rocket")}Activity checks</h3>
+            <p class="muted">Did the student do this activity? One per activity.</p>
             <ol class="cg-flow">
-              ${step("Student", "Finishes the steps, then sends the <strong>Mission debrief</strong>: a written answer, or “Show or tell my teacher.”", "Mission page")}
+              ${step("Student", "Finishes the steps, then sends the <strong>Activity debrief</strong>: a written answer, or “Show or tell my teacher.”", "Mission page")}
               ${step("You", "See it in the <strong>Reflections</strong> tab (a badge shows how many are waiting) or on the student's page.", "Reflections tab · student page")}
               ${step("You", "Choose <strong>Confirm</strong> (how they showed you: said it, showed it, or their work) or <strong>Try again</strong> with a short note.", "Student page")}
-              ${step("Student", "Confirm: the mission shows as confirmed (+" + STEM.progression.xp.teacherConfirmed + " XP). Try again: it comes back on their Today page with your note until they send it again.", "Today · mission page")}
+              ${step("Student", "Confirm: the activity shows as confirmed (+" + STEM.progression.xp.teacherConfirmed + " XP). Try again: it comes back on their Today page with your note until they send it again.", "Today · activity page")}
             </ol>
           </section>
           <section aria-labelledby="cg-s">
@@ -878,7 +898,7 @@
             </ol>
           </section>
         </div>
-        <p class="cg-key">${icon("check")}<span><strong>Only your Confirm clears a stage.</strong> Missions and lab levels are practice and evidence. Finishing them never clears a stage on its own, and a student can ask for a stage check at any time.</span></p>
+        <p class="cg-key">${icon("check")}<span><strong>Only your Confirm clears a stage.</strong> Activities and lab levels are practice and evidence. Finishing them never clears a stage on its own, and a student can ask for a stage check at any time.</span></p>
       </details>`;
   };
 
@@ -916,7 +936,7 @@
           </article>`).join("")}</div>
         <p class="muted">Already coding? Skip ahead: pick the first stage below whose prerequisites you can already do. Your grade doesn't limit how far you go.</p>
         ${prof ? SE.checksGuide("student") : ""}
-        <p class="track-note ${prof && user.gradeBand === "6-8" ? "is-mine" : ""}">${icon("star")}<span><strong>Grades 6–8 track.</strong> Every stage has a mission tagged <span class="track-tag">Grades 6–8</span>. It practices the same idea, a step further: broadcasts, clones, and/or/not, lists, custom blocks with inputs, and a first taste of Python.</span></p>
+        <p class="track-note ${prof && user.gradeBand === "6-8" ? "is-mine" : ""}">${icon("star")}<span><strong>Grades 6–8 track.</strong> Every stage has an activity tagged <span class="track-tag">Grades 6–8</span>. It practices the same idea, a step further: broadcasts, clones, and/or/not, lists, custom blocks with inputs, and a first taste of Python.</span></p>
       </section>
       <ol class="wrap stages">
         ${pathway.map((s) => {
@@ -971,10 +991,10 @@
     app().innerHTML = `
       <section class="page-top">
         <div class="wrap page-top__inner">
-          <div class="backbar">${backLink("#/area/ai", "Artificial Intelligence")}</div>
+          <div class="backbar">${backLink("#/activities/ai", "Artificial Intelligence")}</div>
           <div class="page-top__head"><span class="icon-badge">${icon("ai")}</span>
             <div><span class="eyebrow">Artificial Intelligence</span><h1 tabindex="-1">The AI learning route</h1></div></div>
-          <p class="page-top__lede">Six steps, from spotting patterns to deciding when AI should be trusted. Each step uses missions you can do now. Go in order the first time.</p>
+          <p class="page-top__lede">Six steps, from spotting patterns to deciding when AI should be trusted. Each step uses activities you can do now. Go in order the first time.</p>
         </div>
       </section>
       <ol class="wrap ai-route">${(STEM.aiRoute || []).map((s) => `

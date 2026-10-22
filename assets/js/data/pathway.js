@@ -107,11 +107,11 @@ window.STEM.startHere = [
     activities: ["fix-the-recipe", "lab-dance-party", "robot-maze-mission"] },
   { band: "4-5", title: "Grades 4–5", frame: "Order, events, and debugging: the three habits every coder uses.",
     activities: ["lab-dance-party", "robot-maze-mission", "event-party"] },
-  { band: "6-8", title: "Grades 6–8 (new to coding)", frame: "These missions look playful, but the thinking is what working programmers do: write an exact sequence, predict the result, and debug the first thing that goes wrong. Move fast through them, then head to Stage 3.",
+  { band: "6-8", title: "Grades 6–8 (new to coding)", frame: "These activities look playful, but the thinking is what working programmers do: write an exact sequence, predict the result, and debug the first thing that goes wrong. Move fast through them, then head to Stage 3.",
     activities: ["lab-dance-party", "robot-maze-mission", "animate-your-name"] }
 ];
 
-/* The AI learning route: one idea builds on the next. Every step uses missions that already exist. */
+/* The AI learning route: one idea builds on the next. Every step uses activities that already exist. */
 window.STEM.aiRoute = [
   { step: 1, title: "Patterns and predictions", idea: "Computers that “guess” are finding patterns in examples. A likely answer can still be wrong.",
     activities: ["pattern-predictors"] },

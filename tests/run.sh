@@ -9,6 +9,8 @@
 # It starts the mock servers it needs (local on 8767, cloud on 8787) and stops the ones it started.
 # Failures print in full; passing tests print one line each.
 set -u
+# PYTHON overrides the interpreter (for example on Windows, where python3 may be a store stub).
+export PYTHONIOENCODING=utf-8   # test output includes symbols like →
 cd "$(dirname "$0")/.."
 LOCAL=http://localhost:8767/
 CLOUD=http://localhost:8787/
@@ -63,7 +65,7 @@ for f in "${files[@]}"; do
   name=$(basename "$f")
   args=()
   if [[ "$CLOUD_TESTS" == *" $name "* ]]; then args=("$LOCAL"); [ "$cloud" = 1 ] && args+=("$CLOUD") || args+=(skip); fi
-  if [[ "$f" == *.js ]]; then out=$(node "$f" 2>&1); else out=$(python3 "$f" "${args[@]}" 2>&1); fi
+  if [[ "$f" == *.js ]]; then out=$(node "$f" 2>&1); else out=$("${PYTHON:-python3}" "$f" "${args[@]}" 2>&1); fi
   summary=$(printf '%s\n' "$out" | grep -E '^[0-9]+/[0-9]+ passed' | tail -1)
   if [ -n "$summary" ] && ! printf '%s\n' "$out" | grep -q '^FAIL'; then
     printf '  ok   %-28s %s\n' "$name" "$summary"; pass=$((pass + 1))

@@ -31,7 +31,7 @@ For each one: launch it as a student, do the **core** to its "You're done when" 
 | Mission | Launch route works | Starter / materials ready | Core done at "You're done when" | Your time (core) | Prep time | Fallback if it fails |
 | --- | --- | --- | --- | --- | --- | --- |
 | Robot Dance Party (lab) | | Nothing | | min | min | Unplugged: students act out a 3-step dance on paper |
-| Robot Maze Mission (Blockly Games) | | Confirm Maze levels 1–3 match the steps | | min | min | Floor maze with tape (Part 1) |
+| Robot Maze (Blockly Games) | | Confirm Maze levels 1–3 match the steps | | min | min | Floor maze with tape (Part 1) |
 | Click, Tap, Go! Event Party (Scratch) | | Scratch editor opens without sign-in | | min | min | Projected teacher demo with student predictions |
 | Feed the Space Blob (lab) | | Nothing | | min | min | Whiteboard "snacks" counter acted out |
 | How Does an AI Sort? (unplugged) | | 20–24 cards printed; fruit definition chosen | | min | min | — |

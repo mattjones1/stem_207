@@ -195,7 +195,7 @@
     app().innerHTML = `
       <section class="page-top mx-top">
         <div class="wrap page-top__inner">
-          <div class="backbar">${SE.backLink("#/area/engineering", "Engineering & Robotics")}</div>
+          <div class="backbar">${SE.backLink("#/activities/engineering", "Engineering & Robotics")}</div>
           <div class="page-top__head"><span class="icon-badge">${icon("gear")}</span>
             <div><span class="eyebrow">A STEM 207 pathway · Engineering & Robotics</span><h1 tabindex="-1">${esc(M.name)}</h1></div></div>
           <p class="mx-tagline">${esc(M.tagline)}</p>
@@ -274,6 +274,8 @@
           <section class="block block--mission" aria-labelledby="s-mission">
             <h2 id="s-mission">${icon("target")}Your mission</h2>
             <p>${esc(a.mission)}</p>
+          </section>
+          <section class="block" aria-label="When you are done">
             <p class="stop-at">${icon("flag")}<span><strong>You're done when:</strong> ${esc(a.stopAt)}</span></p>
             ${gates.length ? (stu ? `<p class="mx-gates">${gates.map((x) => gateChip(x.open, x.g)).join("")}</p>` : `<p class="muted small">${icon("shield")}Teacher check in this session: ${esc(gates.map((x) => GATES[x.g]).join(", "))}. Mark it on the <a href="#/moxie/teach">Teach Moxie</a> page.</p>`) : ""}
           </section>

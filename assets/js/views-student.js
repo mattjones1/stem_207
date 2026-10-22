@@ -1,5 +1,5 @@
 /*
- * STEM 207 — student views: expedition home, mission debrief,
+ * STEM 207 — student views: expedition home, activity debrief,
  * mission-complete celebration, and the explorer profile.
  */
 (function () {
@@ -25,7 +25,7 @@
   }
   SE.rankBar = rankBar;
 
-  /* Log "mission_opened" at most once per 30 minutes per mission, so re-renders don't flood the log. */
+  /* Log "mission_opened" at most once per 30 minutes per activity, so re-renders don't flood the log. */
   SE.logOpen = (user, activityId) => {
     const evs = SE.store.eventsFor(user.id);
     const recent = evs.slice().reverse().find((e) => e.type === "mission_opened" && e.data.activityId === activityId);
@@ -49,7 +49,7 @@
       <div class="cjourney">
         <p class="cjourney__pts"><strong>${SE.num(journey.points)} class points</strong>${g.next ? ` · ${SE.num(g.next.pts - journey.points)} to ${esc(g.next.name)}` : ""}</p>
         ${SE.goalTrack(g)}
-        <p class="cjourney__how">${icon("users")}<span><strong>How the class earns points:</strong> an assigned mission sent +${cp.assignedDone} · a mission your teacher confirms +${cp.confirmed} · a coding stage your teacher confirms +${cp.stageCleared}. Missions you do on your own still earn your own XP.</span></p>
+        <p class="cjourney__how">${icon("users")}<span><strong>How the class earns points:</strong> an assigned activity sent +${cp.assignedDone} · an activity your teacher confirms +${cp.confirmed} · a coding stage your teacher confirms +${cp.stageCleared}. Activities you do on your own still earn your own XP.</span></p>
         <h3 class="cjourney__bh">Class badges <span class="muted">${earned.length} of ${journey.badges.length}</span></h3>
         <ul class="cbadges">${journey.badges.map(badge).join("")}</ul>
       </div>`;
@@ -83,7 +83,7 @@
           </div>
           <dl class="xstats">
             <div><dt>Total XP</dt><dd>${SE.num(prof.xp)}</dd></div>
-            <div><dt>Missions</dt><dd>${prof.counts.missions}</dd></div>
+            <div><dt>Activities</dt><dd>${prof.counts.missions}</dd></div>
             <div><dt>Patches</dt><dd>${prof.earnedCount}<small>/${P.patches.length}</small></dd></div>
             <div><dt>Week streak</dt><dd>${prof.streak}<small>${prof.streak === 1 ? " week" : " weeks"}</small></dd></div>
           </dl>
@@ -117,7 +117,7 @@
         return `
       <section class="section wrap" aria-labelledby="assigned-title">
         <div class="section__head">
-          <div><span class="eyebrow">From your teacher</span><h2 id="assigned-title">Your assigned missions</h2></div>
+          <div><span class="eyebrow">From your teacher</span><h2 id="assigned-title">Your assigned activities</h2></div>
           <p class="assigned-count"><b>${done}</b> of ${list.length} done</p>
         </div>
         <div class="mini-meter assigned-meter" aria-hidden="true"><span style="width:${(done / list.length) * 100}%"></span></div>
@@ -140,7 +140,7 @@
 
       <section class="section wrap" aria-labelledby="next-title">
         <div class="section__head">
-          <div><span class="eyebrow">Choose your next adventure</span><h2 id="next-title">${inProgress ? "Pick up where you left off" : "Suggested missions"}</h2></div>
+          <div><span class="eyebrow">Choose your next adventure</span><h2 id="next-title">${inProgress ? "Pick up where you left off" : "Suggested activities"}</h2></div>
           ${SE.views.timePicker().replace("time-picker", "time-picker time-picker--light")}
         </div>
         <div class="next-grid">
@@ -149,7 +149,7 @@
               <span class="next-card__tag">${icon("clock")}In progress · ${inProgress.n} of ${inProgress.a.steps.length} steps</span>
               <strong>${esc(inProgress.a.title)}</strong>
               <span>${esc(inProgress.a.summary)}</span>
-              <span class="next-card__go">Continue mission ${icon("arrowRight")}</span>
+              <span class="next-card__go">Continue activity ${icon("arrowRight")}</span>
             </a>` : ""}
           ${recs.slice(0, inProgress ? 2 : 3).map((r) => `
             <a class="next-card" href="#/activity/${r.activity.id}">
@@ -164,7 +164,7 @@
       <section class="section wrap" aria-labelledby="map-title">
         <div class="section__head">
           <div><span class="eyebrow">Expedition map</span><h2 id="map-title">Light up the Maine night sky</h2></div>
-          <p>Far from city lights, Maine's North Woods have some of the darkest skies in the East. Each star is a mission. Finish one and it lights up and joins its constellation. Glowing rings are suggested for you.</p>
+          <p>Far from city lights, Maine's North Woods have some of the darkest skies in the East. Each star is an activity. Finish one and it lights up and joins its constellation. Glowing rings are suggested for you.</p>
         </div>
         <div class="map-frame">${SE.starMap(prof, recs.map((r) => r.activity.id))}</div>
       </section>
@@ -172,7 +172,7 @@
       <section class="section wrap split" aria-labelledby="patches-title">
         <div class="split__main">
           <div class="section__head">
-            <div><span class="eyebrow">Mission patches</span><h2 id="patches-title">${prof.earnedCount ? "Your latest patches" : "Patches you can earn"}</h2></div>
+            <div><span class="eyebrow">Activity patches</span><h2 id="patches-title">${prof.earnedCount ? "Your latest patches" : "Patches you can earn"}</h2></div>
             <a class="btn btn--ghost btn--small" href="#/me">See all ${P.patches.length} patches ${icon("arrowRight")}</a>
           </div>
           <div class="patch-row">
@@ -193,7 +193,7 @@
         <aside class="split__side block" aria-labelledby="goal-title">
           <span class="eyebrow">Class journey · ${esc(user.cls ? user.cls.name : "your class")}</span>
           <h2 id="goal-title">${summary.journey.goal.next ? `Next stop: ${esc(summary.journey.goal.next.name)}` : "Destination reached!"}</h2>
-          <p class="muted">Class work moves everyone forward together: the missions your teacher assigns, and the work your teacher confirms.</p>
+          <p class="muted">Class work moves everyone forward together: the activities your teacher assigns, and the work your teacher confirms.</p>
           ${SE.classJourneyBlock(summary.journey)}
         </aside>
       </section>`;
@@ -203,7 +203,7 @@
 
   /* ───────── Today: my class, and on my own ─────────
    * Two clearly separate halves. "My class" holds everything the teacher set: class messages,
-   * try-agains, assigned missions (with the teacher's instructions), and what's waiting for a
+   * try-agains, assigned activities (with the teacher's instructions), and what's waiting for a
    * check. "On my own" holds the student's own exploring: work in progress, suggestions, and
    * the rest of the site. The help button sits on the first big card. */
   SE.views.today = function (user) {
@@ -229,7 +229,7 @@
     const waiting = statuses.filter((r) => r.st.state === "submitted").sort((p, q) => ((q.st.sub && q.st.sub.at) || 0) - ((p.st.sub && p.st.sub.at) || 0)).map((r) => ({ label: r.a.title, href: `#/activity/${r.a.id}`, what: "Mission sent" }))
       .concat(Object.entries(prof.stages).filter(([, st]) => st.status === "claimed").map(([n]) => ({ label: `Stage ${n}: ${STEM.pathway.find((p) => p.stage === Number(n)).title}`, href: `#/pathway#stage-${n}`, what: "Stage check" })));
 
-    // On my own: unassigned work in progress first, then suggestions (which already skip assigned missions).
+    // On my own: unassigned work in progress first, then suggestions (which already skip assigned activities).
     const ownInProgress = Object.entries(prof.steps).filter(([id, set]) => set.size > 0 && !prof.completedIds.has(id) && !assignedIds.has(id)).map(([id]) => SE.activityById[id]).filter(Boolean)[0];
     const recs = SE.game.recommendations(user, prof, 4).filter((r) => !ownInProgress || r.activity.id !== ownInProgress.id);
     const ownMain = ownInProgress || (recs[0] && recs[0].activity);
@@ -255,7 +255,7 @@
           ${helpOn === kind ? `<div class="help-panel" id="help-panel" hidden>
             <h3>Stuck? Try these, in order</h3>
             <ol><li>Read the step you're on again, out loud.</li>
-              ${a.stuck ? `<li>Open the mission and look at <strong>Stuck? Try these</strong>.</li>` : lab ? `<li>In the lab, press <strong>Need a hint?</strong></li>` : ""}
+              ${a.stuck ? `<li>Open the activity and look at <strong>Stuck? Try these</strong>.</li>` : lab ? `<li>In the lab, press <strong>Need a hint?</strong></li>` : ""}
               <li>Ask a partner.</li>
               <li>Still stuck? <button type="button" class="btn btn--small btn--primary" id="help-ask" data-activity="${a.id}">${icon("message")}Let my teacher know</button></li></ol>
             <p class="help-panel__status" id="help-status" role="status" aria-live="polite"></p>
@@ -290,12 +290,12 @@
             + (classNote ? `<p class="today-card__note">${icon("clipboard")}<span><strong>Instructions:</strong> ${esc(classNote)}</span></p>` : "")
             + (classMain.notice ? `<p class="today-card__note">${icon("alert")}<span><strong>Update:</strong> ${esc(classMain.notice)}</span></p>` : "")) : `
           <div class="today-empty">
-            <h3>${assigned.length ? "All your class missions are done!" : "Nothing assigned right now"}</h3>
-            <p>${assigned.length ? "Nice work. Explore on your own until your teacher adds more." : "When your teacher assigns a mission, it shows up here."}</p>
+            <h3>${assigned.length ? "All your class activities are done!" : "Nothing assigned right now"}</h3>
+            <p>${assigned.length ? "Nice work. Explore on your own until your teacher adds more." : "When your teacher assigns an activity, it shows up here."}</p>
           </div>`}
           ${open.length > (retry ? 0 : 1) || doneN ? `
           <section class="today-more" aria-labelledby="also-title">
-            <h3 id="also-title">Class missions <span class="muted">${doneN} of ${assigned.length} done</span></h3>
+            <h3 id="also-title">Class activities <span class="muted">${doneN} of ${assigned.length} done</span></h3>
             <ul class="today-list">${open.filter((r) => r.a !== classMain).map(({ x, a }) => `<li><a href="${hrefOf(a)}">${icon(SE.areaById[a.area].icon)}<span><strong>${esc(a.title)}</strong><small>${x.dueDate ? esc(SE.dueText(x.dueDate)) : "No due date"} · ${SE.timeText(a)}</small>${x.note ? `<small class="today-list__note">${icon("clipboard")}${esc(x.note)}</small>` : ""}${a.notice ? `<small class="today-list__note">${icon("alert")}Update: ${esc(a.notice)}</small>` : ""}</span></a></li>`).join("")}
               ${assigned.filter((r) => SE.game.missionDone(prof, r.a)).map(({ a }) => `<li class="is-done"><a href="#/activity/${a.id}">${icon("check")}<span><strong>${esc(a.title)}</strong><small>Done</small></span></a></li>`).join("")}</ul>
           </section>` : ""}
@@ -303,7 +303,7 @@
           <section class="today-waiting" aria-labelledby="waiting-title">
             <h3 id="waiting-title">${icon("clock")}Waiting for your teacher to check</h3>
             <ul>${waiting.filter((w) => w.what === "Stage check").concat(waiting.filter((w) => w.what !== "Stage check")).slice(0, 3).map((w) => `<li><a href="${w.href}"><strong>${esc(w.label)}</strong></a><small>${esc(w.what)}</small></li>`).join("")}</ul>
-            ${waiting.length > 3 ? `<a class="today-waiting__more" href="#/me">${waiting.length - 3} more in your mission log ${icon("arrowRight")}</a>` : ""}
+            ${waiting.length > 3 ? `<a class="today-waiting__more" href="#/me">${waiting.length - 3} more in your activity log ${icon("arrowRight")}</a>` : ""}
           </section>` : ""}
           ${user.classId ? SE.classJourneyBlock(SE.game.classJourney(user.classId), { compact: true }) : ""}
           <a class="today-col__link" href="#/explore">${icon("map")}Class badges and the full journey ${icon("arrowRight")}</a>
@@ -315,11 +315,11 @@
             <div><span class="eyebrow">On my own</span><h2 id="own-title">Explore on your own</h2></div>
           </header>
           <p class="today-col__lede">Your own picks, any time. They don't change your class list.</p>
-          ${ownMain ? bigCard(ownMain, ownWhy, "own") : `<div class="today-empty"><h3>Pick anything you like</h3><p>Search all the missions and labs.</p></div>`}
+          ${ownMain ? bigCard(ownMain, ownWhy, "own") : `<div class="today-empty"><h3>Pick anything you like</h3><p>Search all the activities and labs.</p></div>`}
           ${ownMore.length ? `<ul class="today-list today-list--own">${ownMore.map((r) => `<li><a href="${hrefOf(r.activity)}">${icon(SE.areaById[r.activity.area].icon)}<span><strong>${esc(r.activity.title)}</strong><small>${esc(r.reason)} · ${SE.timeText(r.activity)}</small></span></a></li>`).join("")}</ul>` : ""}
           <div class="myrewards" aria-labelledby="myrewards-title">
             <h3 id="myrewards-title">${icon("star")}My rewards</h3>
-            <p class="muted">Everything you do earns your own XP, class missions included.</p>
+            <p class="muted">Everything you do earns your own XP, class activities included.</p>
             <dl class="myrewards__stats">
               <div><dt>My XP</dt><dd>${SE.num(prof.xp)}</dd></div>
               <div><dt>Rank</dt><dd>${esc(prof.rank.name)}</dd></div>
@@ -329,7 +329,7 @@
           </div>
           <nav class="today-explore" aria-label="More to explore">
             <div class="today-explore__grid">
-              <a href="#/library">${icon("search")}<span><strong>All missions</strong><small>Search and pick any mission</small></span></a>
+              <a href="#/activities">${icon("search")}<span><strong>All activities</strong><small>Search and pick any activity</small></span></a>
               <a href="#/explore">${icon("map")}<span><strong>My expedition</strong><small>Star map, patches, and class journey</small></span></a>
               <a href="#/base">${icon("lighthouse")}<span><strong>My harbor</strong><small>Your explorer and boat</small></span></a>
               <a href="#/pathway">${icon("list")}<span><strong>Coding pathway</strong><small>Seven stages, step by step</small></span></a>
@@ -352,8 +352,8 @@
     });
   };
 
-  /* ───────── Mission debrief (bottom of an activity page) ───────── */
-  /* ───────── Mission debrief: show what you know ─────────
+  /* ───────── Activity debrief (bottom of an activity page) ───────── */
+  /* ───────── Activity debrief: show what you know ─────────
    * A submission needs evidence: a written answer, or "I'll show or tell my teacher" (no typing).
    * It's recorded as Submitted. A teacher can then confirm it or ask the student to try again,
    * and the student can revise and send it again at any time. */
@@ -465,7 +465,7 @@
     });
   };
 
-  /* ───────── Mission complete overlay ───────── */
+  /* ───────── Activity complete overlay ───────── */
   function celebrate(user, a, before, after) {
     const gained = after.completions[after.completions.length - 1];
     const newPatches = after.patches.filter((p) => p.earned && !before.patches.find((b) => b.patch.id === p.patch.id).earned);
@@ -484,7 +484,7 @@
         ${gained.event.data.evidence === "show" ? `<p class="celebrate__note celebrate__note--show">${icon("users")}Now show or tell your teacher what you did.</p>` : ""}
         ${gained.xp ? `<p class="celebrate__xp">+<span id="cel-xp">${reduce ? gained.xp : 0}</span> XP</p>
         <ul class="celebrate__parts">${gained.parts.map(([label, n]) => `<li><span>${esc(label)}</span><b>+${n}</b></li>`).join("")}</ul>` : `<p class="celebrate__note">Repeats are practice, so they don't add XP. Your teacher can read your new answer.</p>`}
-        ${gained.first && user.classId && SE.store.assignmentFor(user.classId, a.id) && !after.completions.slice(0, -1).some((c) => c.activity.id === a.id) ? `<p class="celebrate__class">${icon("boat")}<span><strong>+${P.classPoints.assignedDone} class points</strong> for ${esc(user.cls ? user.cls.name : "your class")}. This was a class mission, so the whole class moves forward.</span></p>` : ""}
+        ${gained.first && user.classId && SE.store.assignmentFor(user.classId, a.id) && !after.completions.slice(0, -1).some((c) => c.activity.id === a.id) ? `<p class="celebrate__class">${icon("boat")}<span><strong>+${P.classPoints.assignedDone} class points</strong> for ${esc(user.cls ? user.cls.name : "your class")}. This was a class activity, so the whole class moves forward.</span></p>` : ""}
         ${rankUp ? `<div class="celebrate__rank">${SE.insignia(after.rank, 56)}<p><strong>${esc(after.rank.name)}</strong><br>${esc(after.rank.motto)}</p></div>` : ""}
         <div class="celebrate__bar">${rankBar(after, true)}</div>
         ${SE.base.unlockStrip(SE.base.newUnlocks(before, after))}
@@ -592,7 +592,7 @@
       </section>
 
       <section class="section wrap" aria-labelledby="all-patches">
-        <div class="section__head"><div><span class="eyebrow">Mission patches</span><h2 id="all-patches">${prof.earnedCount} of ${P.patches.length} earned</h2></div></div>
+        <div class="section__head"><div><span class="eyebrow">Activity patches</span><h2 id="all-patches">${prof.earnedCount} of ${P.patches.length} earned</h2></div></div>
         <div class="patch-grid">
           ${prof.patches.map((p) => `
             <figure class="patch-tile ${p.earned ? "" : "is-locked"}">${SE.patchArt(p.patch, p.earned, 96)}
@@ -609,7 +609,7 @@
       ${SE.labsStrip(user, null, "My labs")}
 
       <section class="section wrap" aria-labelledby="log-title">
-        <div class="section__head"><div><span class="eyebrow">Mission log</span><h2 id="log-title">${log.length ? "Everything you've completed" : "Your log is empty, for now"}</h2></div></div>
+        <div class="section__head"><div><span class="eyebrow">Activity log</span><h2 id="log-title">${log.length ? "Everything you've completed" : "Your log is empty, for now"}</h2></div></div>
         ${log.length ? `<ol class="mission-log">
           ${log.map((c) => {
             const r = prof.reviewed[c.event.id];
@@ -624,7 +624,7 @@
               ${r && r.data.note ? `<p class="teacher-reply">${icon("message")}<span><strong>Teacher:</strong> ${esc(r.data.note)}</span></p>` : ""}
             </li>`;
           }).join("")}
-        </ol>` : `<div class="empty">${icon("map")}<h3>Complete a mission to start your log</h3><p>Every mission you finish is saved here, with your answers and notes from your teacher.</p><a class="btn btn--primary" href="#/">${icon("rocket")}Find a mission</a></div>`}
+        </ol>` : `<div class="empty">${icon("map")}<h3>Complete an activity to start your log</h3><p>Every activity you finish is saved here, with your answers and notes from your teacher.</p><a class="btn btn--primary" href="#/">${icon("rocket")}Find an activity</a></div>`}
       </section>`;
   };
 })();

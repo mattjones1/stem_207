@@ -42,11 +42,11 @@ async def main():
     ok("'Let my teacher know' logs a help request and confirms", n == 1 and "can see" in await pg.inner_text("#help-status"))
     # nav: library vs explore
     await pg.goto(S + "#/library"); await pg.wait_for_timeout(400)
-    ok("Missions = mission finder only", await pg.locator("#library").count() == 1 and await pg.locator(".map-frame").count() == 0)
+    ok("Activities = categories and search, no map", await pg.locator("#library").count() == 1 and await pg.locator("a.area-card").count() == 7 and await pg.locator(".map-frame").count() == 0)
     await pg.goto(S + "#/explore"); await pg.wait_for_timeout(400)
     ok("My expedition = map and patches, no library", await pg.locator(".map-frame").count() == 1 and await pg.locator("#library").count() == 0)
     nav = await pg.inner_text("#site-nav")
-    ok("nav has Today / Missions / My expedition", all(t in nav for t in ["Today", "Missions", "My expedition"]))
+    ok("nav has Home / My Learning Plans / Activities / My harbor", all(t in nav for t in ["Home", "My Learning Plans", "Activities", "My harbor"]) and "Mission" not in nav and "expedition" not in nav, nav)
     # pilot mission page (student)
     await pg.goto(S + "#/activity/event-party"); await pg.wait_for_timeout(400)
     t = await pg.inner_text("#app")

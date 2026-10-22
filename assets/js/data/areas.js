@@ -69,7 +69,7 @@ window.STEM.areas = [
   },
   {
     // status "coming-soon": shown as a category card, but left out of filters, the map, and suggestions
-    // (SE.liveAreas) until it has published missions. Its five placeholders are in data/drafts-3d-printing.js.
+    // (SE.liveAreas) until it has published activities. Its five placeholders are in data/drafts-3d-printing.js.
     id: "3d-printing",
     name: "3D Printing",
     short: "3D Printing",
@@ -81,7 +81,7 @@ window.STEM.areas = [
   }
 ];
 
-/* Skills that cross categories (optional `skills: [...]` on an activity). Tag a mission only after
+/* Skills that cross categories (optional `skills: [...]` on an activity). Tag an activity only after
    the proposed tags in planning/CATEGORIES_PATHWAYS_AUDIT.md (section 6a) are approved. */
 window.STEM.skills = [
   { id: "sequencing", name: "Sequencing and algorithms" },

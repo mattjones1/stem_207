@@ -74,8 +74,8 @@
       <section class="page-top page-top--lab">
         <div class="wrap page-top__inner">
           <div class="backbar">
-            ${SE.backLink(`#/area/${area.id}`, area.short)}
-            ${activity ? `<a class="crumbs" href="#/activity/${activity.id}">Teacher guide and mission page</a>` : ""}
+            ${SE.backLink(`#/activities/${area.id}`, area.short)}
+            ${activity ? `<a class="crumbs" href="#/activity/${activity.id}">Teacher guide and activity page</a>` : ""}
           </div>
           <div class="lab-head">
             <span class="icon-badge">${icon(area.icon)}</span>
@@ -190,7 +190,7 @@
           <div class="lab-win__actions">
             ${next !== null ? `<a class="btn btn--launch" href="#/lab/${lab.id}/${next + 1}">${icon("arrowRight")}${chapters && chapterOf(next) !== ch ? `Start ${esc(chapters[chapterOf(next)].title)}` : `Next level: ${esc(lab.levels[next].title)}`}</a>` : ""}
             <button type="button" class="btn btn--ghost" id="lab-replay">${icon("refresh")}Try this level again</button>
-            ${next === null && activity ? `<a class="btn btn--primary" href="#/activity/${activity.id}#s-debrief">${icon("flag")}Finish with the mission debrief</a>` : ""}
+            ${next === null && activity ? `<a class="btn btn--primary" href="#/activity/${activity.id}#s-debrief">${icon("flag")}Finish with the activity debrief</a>` : ""}
           </div>`;
         panel.hidden = false;
         document.getElementById("lab-replay").addEventListener("click", () => SE.route(true));

@@ -29,7 +29,7 @@ window.STEM.activities = [
     check: "Point to where the character will stop before you press Run. If it goes the wrong way, show the first block that caused it and explain your fix.",
     stuck: ["Watch the character move. Stop at the first wrong move.", "Left and right mean the character's left and right, not yours.", "Fix only one block, then run it again."],
     next: "event-party",
-    title: "Robot Maze Mission",
+    title: "Robot Maze",
     area: "coding",
     summary: "Guide a robot through a maze, first with your feet, then with code blocks.",
     level: "beginner",
@@ -472,10 +472,10 @@ window.STEM.activities = [
   },
   {
     id: "capstone-game",
-    why: "Real programmers plan, build, test with real users, and improve. This mission is the whole process, with your own idea.",
+    why: "Real programmers plan, build, test with real users, and improve. This activity is the whole process, with your own idea.",
     realWorld: "Game studios and app teams work this way: plan, build a first version, playtest, fix, and repeat.",
     vocab: [{"term": "Plan", "def": "A sketch of what you'll build and how it works."}, {"term": "Playtest", "def": "Letting someone try your project while you watch what happens."}, {"term": "Iterate", "def": "Improving something by repeating build, test, fix."}],
-    title: "Mission Capstone: Design Your Own Game",
+    title: "Capstone: Design Your Own Game",
     area: "coding",
     summary: "Plan, build, test, and present a game or app of your own idea.",
     level: "advanced",
@@ -780,7 +780,7 @@ window.STEM.activities = [
         "Make card sets, or have pairs write their own 8 numbers in a random order.",
         "Write the two algorithm names on the board: A, Find the smallest. B, Bubble."
       ],
-      "prerequisites": "Can follow and write step-by-step instructions. New to coding? Start with Robot Maze Mission."
+      "prerequisites": "Can follow and write step-by-step instructions. New to coding? Start with Robot Maze."
     },
     "steps": [
       "Shuffle your 8 cards and lay them face up in a row. Copy the starting order onto your sheet.",
@@ -1474,7 +1474,7 @@ window.STEM.activities = [
       "setup": [
         "Plan 2–3 class periods. Pair students as playtesters for each other."
       ],
-      "prerequisites": "Stages 1–6 confirmed, ideally with at least two missions from the grades 6–8 track."
+      "prerequisites": "Stages 1–6 confirmed, ideally with at least two activities from the grades 6–8 track."
     },
     "steps": [
       "Write a design doc (one page): the game's name, its goal, what the player does, how you win or lose, and which two advanced skills you'll use.",
@@ -1618,7 +1618,7 @@ window.STEM.activities = [
     "extend": "Use t.color(\"blue\") to change colors inside your pattern loop, or draw your Snowflake Studio snowflake in Python.",
     "teacherNotes": [
       "Objective: transfer. Students rewrite a familiar Scratch idea (a custom block with an input, used inside a loop) in Python.",
-      "Platform: the Raspberry Pi Foundation's free Code Editor runs Python in the browser, and its help pages list turtle as supported. Checked in October 2026: the blank Python project opens and runs this mission's turtle pattern without signing in. Saving online needs an account, and there is a download button. The editor doesn't add indents for you, so students type the spaces. Check once on your school devices before class.",
+      "Platform: the Raspberry Pi Foundation's free Code Editor runs Python in the browser, and its help pages list turtle as supported. Checked in October 2026: the blank Python project opens and runs this activity's turtle pattern without signing in. Saving online needs an account, and there is a download button. The editor doesn't add indents for you, so students type the spaces. Check once on your school devices before class.",
       "Common mistakes: a missing colon, uneven indentation, and turtle.turtle() instead of turtle.Turtle(). Have students read the error's line number aloud before asking for help.",
       "Ask afterward: “What's easier in Python than in Scratch, and what's harder?”"
     ]
@@ -1890,7 +1890,7 @@ window.STEM.activities = [
       label: "Open Teachable Machine",
       url: "https://teachablemachine.withgoogle.com/",
       provider: "Google Teachable Machine",
-      note: "Free. Get Started → Image Project → Standard image model. Full student mission, low-reading version, test table, and teacher guide are in the STEM 207 repo under missions/ai/secret-signals."
+      note: "Free. Get Started → Image Project → Standard image model. Full student activity, low-reading version, test table, and teacher guide are in the STEM 207 repo under missions/ai/secret-signals."
     },
     mission: "You're designing a contact-free control system for a space station. Can you train a computer to recognize two secret hand signals, and recognize when neither signal is present?",
     learn: [
@@ -1926,8 +1926,8 @@ window.STEM.activities = [
       "Scores are model outputs, not guarantees. The model always picks one of its classes, even for something new like a thumbs-up.",
       "Privacy (official FAQ): no account needed; samples aren't sent to servers unless saved to Drive; closing the tab without saving keeps nothing. Uploading a model publishes it to Google servers, so students should never upload or export.",
       "Not confirmed in official docs: supported browsers and devices, and age or district terms. Test on your devices and check policy first.",
-      "A perfect detector isn't required. A clear before-and-after record and one limitation complete the mission.",
-      "Full materials: missions/ai/secret-signals in the STEM 207 repo (student mission, low-reading version, teacher guide, test table, hints and extension)."
+      "A perfect detector isn't required. A clear before-and-after record and one limitation complete the activity.",
+      "Full materials: missions/ai/secret-signals in the STEM 207 repo (student activity, low-reading version, teacher guide, test table, hints and extension)."
     ]
   },
   {
@@ -2568,7 +2568,7 @@ window.STEM.activities = [
         "Make 20 lobster cards. Include lengths from 2½ to 5½ inches, a few with eggs, and a few with a V-notch.",
         "Write the classroom version of the rules on the board: a lobster can be kept only if its carapace is at least 3¼ inches and no more than 5 inches, it has no eggs, and it has no V-notch."
       ],
-      prerequisites: "None. Students who have tried Robot Maze Mission will recognize the step-by-step thinking."
+      prerequisites: "None. Students who have tried Robot Maze will recognize the step-by-step thinking."
     },
     steps: [
       "Read the rules together. Why might Maine protect small lobsters, very big lobsters, and females with eggs?",

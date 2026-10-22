@@ -21,7 +21,7 @@
   const rankIdx = (id) => P.ranks.findIndex((r) => r.id === id);
 
   /* ───────── Unlock rules ───────── */
-  // need: { rank } | { patch } | { missions } | { labLevels } | { xp } | null (always open)
+  // need: { rank } | { patch } | { activities } | { labLevels } | { xp } | null (always open)
   const need = {
     rank: (id) => ({ rank: id }), patch: (id) => ({ patch: id }), missions: (n) => ({ missions: n }), labs: (n) => ({ labLevels: n })
   };
@@ -39,7 +39,7 @@
     if (!n) return "";
     if (n.rank) return `Reach ${P.ranks[rankIdx(n.rank)].name}`;
     if (n.patch) { const p = P.patches.find((x) => x.id === n.patch); return p ? `Earn the ${p.name} patch` : "Earn a patch"; }
-    if (n.missions) return `Finish ${n.missions} missions`;
+    if (n.missions) return `Finish ${n.missions} activities`;
     if (n.labLevels) return `Finish ${n.labLevels} lab levels`;
     if (n.xp) return `Earn ${SE.num(n.xp)} XP`;
     return "";
@@ -176,7 +176,7 @@
   const ITEMS = [
     { id: "dock", name: "Your dock", about: "Every harbor starts with a dock." },
     { id: "rowboat", name: "Rowboat", about: "Your first boat. Small, but it's yours." },
-    { id: "pines", name: "Pine grove", about: "A tree grows for every mission you finish.", grows: true },
+    { id: "pines", name: "Pine grove", about: "A tree grows for every activity you finish.", grows: true },
     { id: "buoys", name: "String of traps", about: "A buoy appears for every 2 lab levels you finish, painted in your colors.", grows: true },
     { id: "lobsterboat", name: "Lobster boat", need: need.rank("tidepooler"), about: "Name it and paint it yourself." },
     { id: "loon", name: "Loon", need: need.patch("logbook"), about: "A loon swims by when you keep a good logbook." },
@@ -333,14 +333,14 @@
             <div class="base-head">
               <div class="base-head__avatar">${avatar(state.look, 132, { label: "Your explorer" })}</div>
               <div><span class="eyebrow">${esc(prof.rank.name)} · ${SE.num(prof.xp)} XP</span><h1 tabindex="-1">My harbor</h1>
-                <p class="page-top__lede">Design your explorer, paint your boat, and watch your harbor grow. Every mission, lab level, patch, and rank adds something new.</p>
+                <p class="page-top__lede">Design your explorer, paint your boat, and watch your harbor grow. Every activity, lab level, patch, and rank adds something new.</p>
                 <p class="base-head__count">${icon("star")}<b>${openCount}</b> of ${all.length} unlocks earned</p></div>
             </div>
           </div>
         </section>
         <div class="wrap base-grid">
           <section class="block base-harbor" aria-labelledby="harbor-title">
-            <div class="block__head"><h2 id="harbor-title">Your harbor</h2><span class="muted">${prof.counts.missions} missions · ${prof.counts.labLevelsDone || 0} lab levels</span></div>
+            <div class="block__head"><h2 id="harbor-title">Your harbor</h2><span class="muted">${prof.counts.missions} activities · ${prof.counts.labLevelsDone || 0} lab levels</span></div>
             <div class="harbor-frame">${harbor(prof, state, { seed: user.id, name: user.displayName.split(" ")[0] })}</div>
             <div class="boat-design">
               <h3>${icon("buoy")}Your buoy colors <small>Every Maine lobsterman paints their buoys in their own colors.</small></h3>
@@ -361,7 +361,7 @@
           </section>
         </div>
         <section class="wrap section" aria-labelledby="col-title">
-          <div class="section__head"><div><span class="eyebrow">Collection</span><h2 id="col-title">Everything you can unlock</h2></div><p>Gear and harbor items unlock as you rank up, earn patches, and finish missions and lab levels.</p></div>
+          <div class="section__head"><div><span class="eyebrow">Collection</span><h2 id="col-title">Everything you can unlock</h2></div><p>Gear and harbor items unlock as you rank up, earn patches, and finish activities and lab levels.</p></div>
           <ul class="collection">${all.slice().sort((a, b) => b.open - a.open).map((x) => `
             <li class="col-item ${x.open ? "is-open" : ""}">
               <span class="col-item__kind">${esc(x.kind)}</span>
@@ -410,7 +410,7 @@
     render();
   };
 
-  /* A small "new unlock" strip used by the mission and lab celebrations. */
+  /* A small "new unlock" strip used by the activity and lab celebrations. */
   SE.base.unlockStrip = (items) => !items.length ? "" : `
     <div class="unlock-strip">
       <span class="eyebrow">New unlock${items.length > 1 ? "s" : ""}</span>

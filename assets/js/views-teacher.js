@@ -23,7 +23,7 @@
     if (e.data.evidence === "show") return '<span class="self-rep" title="The student chose to show or tell you. Record a check when you have.">will show you</span>';
     return '<span class="self-rep" title="The student submitted this. It isn\'t confirmed until you check it.">submitted</span>';
   };
-  /* A student's status on one mission, as a small chip (word + shape, not color alone). */
+  /* A student's status on one activity, as a small chip (word + shape, not color alone). */
   const STATUS_ICON = { confirmed: "shield", tryagain: "refresh", checked: "flask", submitted: "check", started: "clock", none: "clock" };
   const statusChip = (st) => `<span class="st-chip st-chip--${st.state}">${icon(STATUS_ICON[st.state])}${esc(st.label)}</span>`;
   /* Record a teacher check: confirm the target skill (spoken, demo, or work) or ask for another try. */
@@ -111,19 +111,8 @@
     }
   }
 
-  /* ───────── Frame: header, tabs, demo banner ───────── */
+  /* ───────── Frame: header and demo banner (sections are in the top menu) ───────── */
   function frame(user, cls, classes, active, body, opts = {}) {
-    const summary = cls ? SE.game.classSummary(cls.id) : null;
-    const pendingRefl = summary ? pendingReflections(summary).length : 0;
-    const pendingClaims = summary ? pendingStageClaims(summary).length : 0;
-    const tabs = [
-      ["overview", "#/teach", "Overview", "chart", 0],
-      ["missions", "#/teach/missions", "Missions", "rocket", 0],
-      ["pathways", "#/teach/pathways", "Pathways", "map", 0],
-      ["pathway", "#/teach/pathway", "Coding pathway", "flag", pendingClaims],
-      ["reflections", "#/teach/reflections", "Reflections", "message", pendingRefl],
-      ["class", "#/teach/class", "Class & logins", "users", 0]
-    ];
     return `
       <section class="page-top page-top--teach">
         <div class="wrap page-top__inner">
@@ -140,9 +129,6 @@
               <span class="code-chip" title="Students use this code to sign in">${icon("key")}Class code <b>${esc(cls.code)}</b></span>
             </div>` : ""}
           </div>
-          ${cls ? `<nav class="tabs" aria-label="Dashboard sections">
-            ${tabs.map(([id, href, label, ic, badge]) => `<a href="${href}" class="tab" ${active === id ? 'aria-current="page"' : ""}>${icon(ic)}${label}${badge ? `<span class="tab__badge" aria-label="${badge} waiting">${badge}</span>` : ""}${id === "missions" && cls && SE.store.assignmentsFor(cls.id).length ? `<span class="tab__count" aria-label="${SE.store.assignmentsFor(cls.id).length} assigned">${SE.store.assignmentsFor(cls.id).length}</span>` : ""}</a>`).join("")}
-          </nav>` : ""}
         </div>
       </section>
       ${cls && cls.isDemo ? `
@@ -155,6 +141,8 @@
   }
 
   SE.teachFrame = (...args) => frame(...args);   // shared with views-pathways.js
+  /* Reflections waiting for a check, across all of an educator's classes (the badge on "Checks" in the top menu). */
+  SE.teachChecksWaiting = (user) => SE.store.classesFor(user.id).reduce((n, c) => n + pendingReflections(SE.game.classSummary(c.id)).length, 0);
   SE.teachBindFrame = (user) => bindFrame(user);
   SE.teachNoClass = (user) => noClass(user);
 
@@ -230,7 +218,7 @@
       else if (now - prof.lastActive > 7 * SE.DAY) attention.push({ student, why: `No activity for ${Math.floor((now - prof.lastActive) / SE.DAY)} days`, icon: "clock" });
       const recent = prof.completions.slice(-3);
       const stuck = recent.filter((c) => c.event.data.confidence === "figuring").length;
-      if (stuck >= 2) attention.push({ student, why: `Said “still figuring it out” on ${stuck} of their last ${recent.length} missions`, icon: "question" });
+      if (stuck >= 2) attention.push({ student, why: `Said “still figuring it out” on ${stuck} of their last ${recent.length} activities`, icon: "question" });
       const help = SE.store.eventsFor(student.id).filter((e) => e.type === "help_requested" && now - e.at < SE.DAY).pop();
       if (help) { const ha = SE.activityById[help.data.activityId]; attention.unshift({ student, why: `Asked for help ${SE.timeAgo(help.at)}${ha ? ` on ${ha.title}` : ""}`, icon: "message" }); }
     });
@@ -253,7 +241,7 @@
       <section class="wrap section">
         <div class="kpis">
           <a class="kpi" href="#roster"><span class="kpi__label">Active this week</span><span class="kpi__value">${activeIds.size}<small> of ${sum.students.length}</small></span><span class="kpi__foot">explorers signed in or worked</span></a>
-          <div class="kpi"><span class="kpi__label">Missions this week</span><span class="kpi__value">${thisWeek}</span><span class="kpi__foot ${delta > 0 ? "is-up" : delta < 0 ? "is-down" : ""}">${delta === 0 ? "same as last week" : `${delta > 0 ? "▲" : "▼"} ${Math.abs(delta)} vs. last week`}</span></div>
+          <div class="kpi"><span class="kpi__label">Activities this week</span><span class="kpi__value">${thisWeek}</span><span class="kpi__foot ${delta > 0 ? "is-up" : delta < 0 ? "is-down" : ""}">${delta === 0 ? "same as last week" : `${delta > 0 ? "▲" : "▼"} ${Math.abs(delta)} vs. last week`}</span></div>
           <a class="kpi ${refl.length ? "kpi--action" : ""}" href="#/teach/reflections"><span class="kpi__label">Reflections to read</span><span class="kpi__value">${refl.length}</span><span class="kpi__foot">${refl.length ? "Review answers" : "All caught up"}</span></a>
           <a class="kpi ${claims.length ? "kpi--action" : ""}" href="#/teach/pathway"><span class="kpi__label">“I can” checks</span><span class="kpi__value">${claims.length}</span><span class="kpi__foot">${claims.length ? "Waiting for you" : "None waiting"}</span></a>
         </div>
@@ -262,7 +250,7 @@
 
       <section class="wrap section teach-grid">
         <div class="block chart-block">
-          <div class="block__head"><h2>Missions completed</h2><span class="muted">Last 14 days</span></div>
+          <div class="block__head"><h2>Activities completed</h2><span class="muted">Last 14 days</span></div>
           <div class="colchart" role="img" aria-label="Missions completed per day over the last 14 days: ${days.map((d) => d.n).join(", ")}">
             <div class="colchart__grid" aria-hidden="true">
               ${[yMax, yMax / 2, 0].map((v) => `<span><b>${v}</b></span>`).join("")}
@@ -284,9 +272,9 @@
         ${(() => {
           const list = SE.store.assignmentsFor(cls.id).map((x) => ({ x, a: SE.activityById[x.activityId] })).filter((r) => r.a);
           return `<div class="block">
-            <div class="block__head"><h2>Assigned missions</h2><a class="muted" href="#/teach/missions">${list.length ? "Manage" : "Assign missions"}</a></div>
+            <div class="block__head"><h2>Assigned activities</h2><a class="muted" href="#/teach/missions">${list.length ? "Manage" : "Assign activities"}</a></div>
             ${list.length ? `<ul class="alist alist--compact">${list.map(({ x, a }) => `<li class="alist__item"><div class="alist__main"><a href="#/activity/${a.id}">${esc(a.title)}</a><small>${x.dueDate ? esc(dueText(x.dueDate)) : "No due date"}</small>${prepLine(a)}</div>${progressMarkup(classProgress(sum, a))}</li>`).join("")}</ul>`
-              : `<p class="muted">Pick missions by discipline on the <a href="#/teach/missions">Missions</a> tab. They'll show up first on every student's home screen.</p>`}
+              : `<p class="muted">Pick activities by discipline on the <a href="#/teach/missions">Activities</a> tab. They'll show up first on every student's home screen.</p>`}
           </div>`;
         })()}
         <div class="block">
@@ -309,7 +297,7 @@
         <div class="block">
           <div class="block__head"><h2>Class journey</h2><span class="muted">${sum.journey.goal.next ? `Next stop: ${esc(sum.journey.goal.next.name)}` : "Katahdin reached"}</span></div>
           ${SE.classJourneyBlock(sum.journey)}
-          <p class="muted">Only class work moves the journey: missions you assign, and missions and stages you confirm. Students see this on Today and My expedition. Their own XP, ranks, patches, and harbor still count everything they do.</p>
+          <p class="muted">Only class work moves the journey: activities you assign, and activities and stages you confirm. Students see this on Today and My expedition. Their own XP, ranks, patches, and harbor still count everything they do.</p>
         </div>
       </section>
 
@@ -450,7 +438,7 @@
           </div>
           <dl class="xstats xstats--light">
             <div><dt>XP</dt><dd>${SE.num(prof.xp)}</dd></div>
-            <div><dt>Missions</dt><dd>${prof.counts.missions}</dd></div>
+            <div><dt>Activities</dt><dd>${prof.counts.missions}</dd></div>
             <div><dt>Patches</dt><dd>${prof.earnedCount}</dd></div>
             <div><dt>Streak</dt><dd>${prof.streak}<small> wk</small></dd></div>
           </dl>
@@ -463,7 +451,7 @@
           if (!list.length) return "";
           const doneN = list.filter(({ a }) => SE.game.missionDone(prof, a)).length;
           return `<div class="block">
-            <div class="block__head"><h2>Assigned missions</h2><span class="muted">${doneN} of ${list.length} done</span></div>
+            <div class="block__head"><h2>Assigned activities</h2><span class="muted">${doneN} of ${list.length} done</span></div>
             <ul class="astatus">${list.map(({ x, a }) => { const d = SE.game.missionDone(prof, a); const late = !d && x.dueDate && new Date(`${x.dueDate}T23:59:59`).getTime() < Date.now();
               const st = SE.game.statusFor(prof, a);
               return `<li class="${d ? "is-done" : late ? "is-late" : ""}">${icon(d ? "check" : late ? "alert" : "clock")}<span class="astatus__main"><a href="#/activity/${a.id}">${esc(a.title)}</a><small>${x.dueDate ? esc(dueText(x.dueDate)) : "No due date"}</small></span>${statusChip(st)}${checkActions(student, a, st)}</li>`; }).join("")}</ul>
@@ -510,8 +498,8 @@
       </section>
 
       <section class="wrap section" aria-labelledby="slog-title">
-        <div class="section__head"><div><span class="eyebrow">Mission log</span><h2 id="slog-title">${plural(log.length, "completed mission", "completed missions")}</h2></div></div>
-        ${log.length ? `<ol class="mission-log">${log.map((c) => reflectionItem(student, prof, c, false)).join("")}</ol>` : `<p class="muted">No missions completed yet.</p>`}
+        <div class="section__head"><div><span class="eyebrow">Activity log</span><h2 id="slog-title">${plural(log.length, "completed activity", "completed activities")}</h2></div></div>
+        ${log.length ? `<ol class="mission-log">${log.map((c) => reflectionItem(student, prof, c, false)).join("")}</ol>` : `<p class="muted">No activities completed yet.</p>`}
       </section>
 
       <section class="wrap section" aria-labelledby="tl-title">
@@ -594,9 +582,9 @@
           <div><span class="eyebrow">Think about it</span><h2>${pending.length ? `${plural(pending.length, "answer", "answers")} to read` : "You're all caught up"}</h2></div>
           <label class="check-row"><input type="checkbox" id="show-reviewed" ${showReviewed ? "checked" : ""}> Show answers you've already read</label>
         </div>
-        <p class="muted section-note">Reflections show how students are thinking. A short reply, like “Great evidence,” keeps them writing. Students see your reply on their home screen and in their mission log.</p>
+        <p class="muted section-note">Reflections show how students are thinking. A short reply, like “Great evidence,” keeps them writing. Students see your reply on their home screen and in their activity log.</p>
         ${pending.length ? `<ol class="mission-log">${pending.map((x) => reflectionItem(x.student, x.prof, x.c, true)).join("")}</ol>`
-          : `<div class="empty">${icon("message")}<h3>No new reflections</h3><p>When students answer “Think about it” at the end of a mission, their answers show up here.</p></div>`}
+          : `<div class="empty">${icon("message")}<h3>No new reflections</h3><p>When students answer “Think about it” at the end of an activity, their answers show up here.</p></div>`}
         ${showReviewed ? `<h3 class="subhead">Already read</h3><ol class="mission-log">${reviewed.map((x) => reflectionItem(x.student, x.prof, x.c, true)).join("")}</ol>` : ""}
       </section>`;
     app().innerHTML = frame(user, cls, classes, "reflections", body);
@@ -660,7 +648,7 @@
               </div>
             </details>
             <div class="tstage__missions-head">
-              <h3>Missions in this stage <span class="muted">${acts.length}</span></h3>
+              <h3>Activities in this stage <span class="muted">${acts.length}</span></h3>
               ${unassigned.length ? `<button type="button" class="btn btn--ghost btn--small" data-assign-many="${unassigned.map((a) => a.id).join(",")}">${icon("plus")}Assign stage ${st.stage} (${unassigned.length})</button>` : `<span class="chip chip--done">${icon("check")}All assigned</span>`}
             </div>
             <ul class="mlist">${acts.map((a) => missionRow(a, cls, sum)).join("")}</ul>
@@ -808,7 +796,7 @@
 
   /* ───────── Missions: browse by discipline and assign to the class ───────── */
   const DISCIPLINES = () => [
-    { id: "pathway", name: "Coding pathway", short: "Pathway", icon: "list", blurb: "Seven readiness-based stages, from first instructions to independent projects. Assign a whole stage or pick missions inside it." },
+    { id: "pathway", name: "Coding pathway", short: "Pathway", icon: "list", blurb: "Seven readiness-based stages, from first instructions to independent projects. Assign a whole stage or pick activities inside it." },
     ...SE.liveAreas.map((a) => ({ id: a.id, name: a.name, short: a.short, icon: a.icon, blurb: a.description }))
   ];
   const missionFilters = { grade: "", time: "", q: "", maine: false, pilot: false };
@@ -819,7 +807,7 @@
     sum.profiles.forEach((p) => { const s = SE.game.statusFor(p.prof, a).state; if (by[s] != null) by[s]++; });
     const done = sum.profiles.filter((p) => SE.game.missionDone(p.prof, a)).length;
     const started = sum.profiles.filter((p) => !SE.game.missionDone(p.prof, a) && (p.prof.opened.has(a.id) || (a.launch.labId && (p.prof.labLevels[a.launch.labId] || new Set()).size))).length;
-    // Lab missions are checked by the lab itself; anything else is marked complete by the student.
+    // Lab activities are checked by the lab itself; anything else is marked complete by the student.
     return { done, started, total: sum.students.length, self: !a.launch.labId, by };
   }
   const progressMarkup = (pr) => {
@@ -905,7 +893,7 @@
               ${unassigned.length ? `<button type="button" class="btn btn--ghost btn--small" data-assign-many="${unassigned.map((a) => a.id).join(",")}">${icon("plus")}Assign stage ${st.stage} (${unassigned.length})</button>` : acts.length ? `<span class="chip chip--done">${icon("check")}All assigned</span>` : ""}
             </header>
             <p class="mstage__ican"><strong>I can:</strong> ${esc(st.iCan.replace(/^I can /, ""))}</p>
-            ${acts.length ? `<ul class="mlist">${acts.map((a) => missionRow(a, cls, sum)).join("")}</ul>` : `<p class="muted">No missions in this stage match your filters.</p>`}
+            ${acts.length ? `<ul class="mlist">${acts.map((a) => missionRow(a, cls, sum)).join("")}</ul>` : `<p class="muted">No activities in this stage match your filters.</p>`}
             ${labLevels.length ? `<div class="stage__lab"><span>${icon("flask")}Practice in the Harbor Code Lab</span>${labLevels.map((lv) => `<a class="lvl-chip" href="#/lab/rover/${lv}">${lv}</a>`).join("")}</div>` : ""}
           </section>`;
       }).join("");
@@ -918,7 +906,7 @@
       ["Intermediate", acts.filter((a) => a.launch.status !== "lab" && a.level === "intermediate")],
       ["Advanced", acts.filter((a) => a.launch.status !== "lab" && a.level === "advanced")]
     ].filter(([, l]) => l.length);
-    if (!acts.length) return `<div class="empty">${icon("search")}<h3>No missions match these filters</h3><p>Try a different grade band or time, or clear the search.</p><button type="button" class="btn btn--ghost" data-clear-filters>Clear filters</button></div>`;
+    if (!acts.length) return `<div class="empty">${icon("search")}<h3>No activities match these filters</h3><p>Try a different grade band or time, or clear the search.</p><button type="button" class="btn btn--ghost" data-clear-filters>Clear filters</button></div>`;
     return groups.map(([label, list]) => `
       <section class="mgroup" aria-label="${esc(label)}">
         <h3 class="mgroup__title">${esc(label)} <span class="muted">${list.length}</span></h3>
@@ -931,7 +919,7 @@
     if (!list.length) return `
       <div class="block assigned-panel assigned-panel--empty">
         <div class="block__head"><h2>Assigned to ${esc(cls.name)}</h2></div>
-        <p class="muted">Nothing assigned yet. Pick a discipline below and press <strong>Assign</strong>. Assigned missions show up first on every student's home screen, with your due dates.</p>
+        <p class="muted">Nothing assigned yet. Pick a discipline below and press <strong>Assign</strong>. Assigned activities show up first on every student's home screen, with your due dates.</p>
       </div>`;
     return `
       <div class="block assigned-panel">
@@ -967,24 +955,24 @@
     const assignedIn = (d) => SE.store.assignmentsFor(cls.id).filter((x) => { const a = SE.activityById[x.activityId]; return a && (d.id === "pathway" ? !!a.pathwayStage || STEM.pathway.some((s) => s.activities.includes(a.id)) : a.area === d.id); }).length;
     const body = `
       <section class="wrap section">${assignedPanel(cls, sum)}</section>
-      <section class="wrap section missions" aria-labelledby="disc-title">
-        <div class="section__head"><div><span class="eyebrow">Mission library by discipline</span><h2 id="disc-title">Choose missions for ${esc(cls.name)}</h2></div></div>
+      <section class="wrap section activities" aria-labelledby="disc-title">
+        <div class="section__head"><div><span class="eyebrow">Activity library by discipline</span><h2 id="disc-title">Choose activities for ${esc(cls.name)}</h2></div></div>
         <nav class="disc-tabs" aria-label="Disciplines">
           ${discs.map((d) => `<a href="#/teach/missions/${d.id}" class="disc-tab" ${d.id === disc.id ? 'aria-current="page"' : ""}>
             <span class="disc-tab__icon">${icon(d.icon)}</span><span class="disc-tab__name">${esc(d.name)}</span>
-            <span class="disc-tab__n">${countFor(d)} missions${assignedIn(d) ? ` · <b>${assignedIn(d)} assigned</b>` : ""}</span></a>`).join("")}
+            <span class="disc-tab__n">${countFor(d)} activities${assignedIn(d) ? ` · <b>${assignedIn(d)} assigned</b>` : ""}</span></a>`).join("")}
         </nav>
         <div class="disc-panel">
           <div class="disc-panel__head">
             <div><h3>${icon(disc.icon)}${esc(disc.name)}</h3><p class="muted">${esc(disc.blurb)}</p></div>
             ${disc.id === "pathway" ? `<a class="btn btn--ghost btn--small" href="#/teach/pathway">${icon("flag")}Open the coding pathway and checks</a>` : SE.labs.forArea(disc.id).length ? `<a class="btn btn--ghost btn--small" href="#/lab/${SE.labs.forArea(disc.id)[0].id}">${icon("flask")}Preview the lab</a>` : ""}
           </div>
-          <form class="mfilters" id="mfilters" role="search" aria-label="Filter missions">
+          <form class="mfilters" id="mfilters" role="search" aria-label="Filter activities">
             <label><span>Grade band</span><select class="input input--small" name="grade"><option value="">All grades</option>${STEM.gradeBands.map((g) => `<option value="${g.id}" ${missionFilters.grade === g.id ? "selected" : ""}>${esc(g.name)}</option>`).join("")}</select></label>
             <label><span>Time</span><select class="input input--small" name="time"><option value="">Any length</option>${STEM.durations.map((d) => `<option value="${d.max}" ${missionFilters.time === String(d.max) ? "selected" : ""}>${esc(d.name)}</option>`).join("")}</select></label>
             <label class="mfilters__q"><span>Search</span><input class="input input--small" name="q" type="search" value="${esc(missionFilters.q)}" placeholder="loops, tides, robots…"></label>
             <label class="check-row"><input type="checkbox" name="maine" ${missionFilters.maine ? "checked" : ""}> Made in Maine only</label>
-            <label class="check-row"><input type="checkbox" name="pilot" ${missionFilters.pilot ? "checked" : ""}> Pilot missions only</label>
+            <label class="check-row"><input type="checkbox" name="pilot" ${missionFilters.pilot ? "checked" : ""}> Pilot activities only</label>
           </form>
           <div id="disc-body">${disciplineBody(disc, cls, sum)}</div>
         </div>
@@ -1013,7 +1001,7 @@
     }));
   };
 
-  /* Assign / unassign buttons work anywhere on the page (Missions tab, activity pages). */
+  /* Assign / unassign buttons work anywhere on the page (Activities tab, activity pages). */
   document.addEventListener("click", (e) => {
     if (e.target.closest("[data-clear-filters]")) { Object.assign(missionFilters, { grade: "", time: "", q: "", maine: false, pilot: false }); SE.route(true); return; }
     const one = e.target.closest("[data-assign]");
@@ -1065,7 +1053,7 @@
     return `
       <div class="block">
         <h2>In ${esc(cls.name)}</h2>
-        <div class="class-box__assign">${assignBtn(a, asg)}${asg ? `<span class="muted small">${asg.dueDate ? esc(dueText(asg.dueDate)) : "No due date"} · <a href="#/teach/missions">Manage</a></span>` : `<span class="muted small">Assigned missions appear first on students' home screens.</span>`}</div>
+        <div class="class-box__assign">${assignBtn(a, asg)}${asg ? `<span class="muted small">${asg.dueDate ? esc(dueText(asg.dueDate)) : "No due date"} · <a href="#/teach/missions">Manage</a></span>` : `<span class="muted small">Assigned activities appear first on students' home screens.</span>`}</div>
         <p><strong>${done.length} of ${sum.students.length}</strong> completed${opened.length ? ` · ${opened.length} started` : ""}</p>
         <div class="mini-meter"><span style="width:${sum.students.length ? (done.length / sum.students.length) * 100 : 0}%"></span></div>
         ${done.length ? `<p class="muted small">${done.map((p) => esc(p.student.displayName)).join(", ")}</p>` : ""}

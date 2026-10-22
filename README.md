@@ -26,7 +26,7 @@ Some missions run on outside platforms. Their full teaching packs are Markdown f
 
 ## Classroom pilot
 
-Six missions are marked as the pilot set (teachers can filter for them): Robot Dance Party, Robot Maze Mission, Click Tap Go! Event Party, Feed the Space Blob, How Does an AI Sort?, and Pattern Predictors. Each lists student core time and teacher prep separately (pilot estimates until timed in a classroom), a "You're done when" stopping point, a "Show what you know" check that students can say, show, or write, student-visible "Stuck?" hints, and a next step. Students start on **Today**, split into **My class** (the teacher's messages, try-agains, assigned missions with the teacher's instructions, and what's waiting for a check) and **On my own** (work in progress, suggestions, and the rest of the site). Each side has one big Start or Continue card, and an "I need help" button tells the teacher. Rehearsal and observation sheets are in [`pilot/`](pilot/).
+Six missions are marked as the pilot set (teachers can filter for them): Robot Dance Party, Robot Maze, Click Tap Go! Event Party, Feed the Space Blob, How Does an AI Sort?, and Pattern Predictors. Each lists student core time and teacher prep separately (pilot estimates until timed in a classroom), a "You're done when" stopping point, a "Show what you know" check that students can say, show, or write, student-visible "Stuck?" hints, and a next step. Students start on **Today**, split into **My class** (the teacher's messages, try-agains, assigned missions with the teacher's instructions, and what's waiting for a check) and **On my own** (work in progress, suggestions, and the rest of the site). Each side has one big Start or Continue card, and an "I need help" button tells the teacher. Rehearsal and observation sheets are in [`pilot/`](pilot/).
 
 **Completion statuses.** Each mission shows one status per student: *Started*, *Submitted* (the student sent written evidence or chose "Show or tell my teacher"), *Checked in lab* (the lab's own check passed, for what it tests), *Teacher confirmed* (spoken check, watched demo, or reviewed work), or *Try again* (with the teacher's note; the student can revise and send it again). Older one-click records show as *legacy*. XP no longer depends on mission length, and repeats earn none.
 
@@ -305,7 +305,7 @@ Check every external link before adding it, and record whether it needs an accou
 
 | Resource | Used by | Notes |
 | --- | --- | --- |
-| [Blockly Games: Maze](https://blockly.games/maze) | Robot Maze Mission | Free, no account |
+| [Blockly Games: Maze](https://blockly.games/maze) | Robot Maze | Free, no account |
 | [Scratch editor](https://scratch.mit.edu/projects/editor/) | Several coding and creative activities | Free; an account is needed only to save online |
 | [Teachable Machine](https://teachablemachine.withgoogle.com/) | Train a Classroom Model | Free; teacher-run on a single computer |
 | [Code.org AI for Oceans](https://code.org/oceans) | Clean the Ocean with AI | Free; sign-in is optional |

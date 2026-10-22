@@ -34,7 +34,7 @@ async def main():
     ok("every baseline mission still resolves", await pg.evaluate(f"{json.dumps([m['id'] for m in BASE['missions']])}.every((id) => SE.activityById[id])"))
     ok("7 categories, 6 live", await pg.evaluate("STEM.areas.length === 7 && SE.liveAreas.length === 6"))
     ok("home shows 7 category cards", await pg.locator("a.area-card").count() == 7)
-    ok("3D Printing card says Coming soon · 0 missions", "Coming soon · 0 missions" in await pg.inner_text("a.area-card--soon"))
+    ok("3D Printing card says Coming soon · 0 activities", "Coming soon · 0 activities" in await pg.inner_text("a.area-card--soon"))
     ok("topic filter has no 3D Printing option", await pg.locator('#f-area option[value="3d-printing"]').count() == 0)
     ok("the buoy hero still has 6 buoys", await pg.locator(".coast .buoy").count() == 6)
 

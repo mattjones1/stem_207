@@ -14,7 +14,7 @@ async def go(pg, url):
     await pg.goto(url.split("#")[0] + "#/library"); await pg.wait_for_timeout(150); await pg.goto(url); await pg.wait_for_timeout(500)
 async def educator(pg, S):
     await pg.goto(S + "#/signin/educator"); await pg.wait_for_timeout(300); await pg.click("#fill-demo"); await pg.click("#edu-form button[type=submit]"); await pg.wait_for_timeout(900)
-def pid(pg): return pg.url.split("#/teach/pathways/")[1].split("/")[0]
+def pid(pg): return pg.url.split("#/teach/plans/")[1].split("/")[0]
 
 async def local(b):
     S = L; errs = []
@@ -23,7 +23,7 @@ async def local(b):
     await pg.goto(S); await pg.evaluate("localStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400)
     await educator(pg, S)
     await go(pg, S + "#/teach/pathways")
-    ok("Pathways tab is in the dashboard", await pg.locator('.tabs a[href="#/teach/pathways"]').count() == 1)
+    ok("Learning Plans is in the top menu", await pg.locator('#site-nav a[href="#/teach/plans"]').count() == 1)
     ok("4 templates, each with Use this template", await pg.locator("[data-use^=tpl-]").count() == 4)
     tpl = await pg.evaluate("JSON.stringify(SE.pathways.template('tpl-maine-coast'))")
 
@@ -49,7 +49,7 @@ async def local(b):
     await pg.locator('[data-add="stop-motion-studio"]').click(); await pg.wait_for_timeout(300)
     last = pg.locator(".pw-edit-step").last
     ok("a mission with no resource is added as optional", not await last.locator("input[data-f=required]").is_checked())
-    await last.locator("input[data-f=required]").check(); await pg.wait_for_timeout(300)
+    await last.locator("input[data-f=required]").click(); await pg.wait_for_timeout(300)   # the app un-ticks it, so click (check() would fail)
     ok("…and can't be switched to required", not await last.locator("input[data-f=required]").is_checked())
     await last.locator("[data-remove]").click(); await pg.wait_for_timeout(400)
 
@@ -73,7 +73,7 @@ async def local(b):
     await go(pg, S + "#/teach/pathways/new"); await pg.wait_for_timeout(300)
     blank = pid(pg)
     await go(pg, S + f"#/teach/pathways/{blank}")
-    await pg.click("#pw-publish"); await pg.wait_for_timeout(300)
+    ok("publish is marked unavailable on a blank pathway", await pg.get_attribute("#pw-publish", "aria-disabled") == "true")
     t = await pg.inner_text("#app")
     ok("a blank pathway can't publish, with reasons", "Before you can publish" in t and "Add a goal" in t and "Published v1" not in t)
 

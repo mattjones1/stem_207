@@ -5,7 +5,7 @@
   { "id": "robot-maze-mission", "title": "Test Fixture: Collides With Hand-Written", "area": "coding", "pub": "draft" },
   { "id": "test-dupe", "title": "Test Fixture: Dupe One", "area": "coding", "pub": "draft" },
   { "id": "test-dupe", "title": "Test Fixture: Dupe Two", "area": "coding", "pub": "draft" },
-  { "id": "test-title-twin", "title": "Robot Maze Mission", "area": "coding", "pub": "draft" },
+  { "id": "test-title-twin", "title": "Robot Maze", "area": "coding", "pub": "draft" },
   { "id": "test-incomplete", "title": "Test Fixture: Published But Empty", "area": "science" },
   { "id": "Bad Id!", "title": "Test Fixture: Bad Id", "area": "coding", "pub": "draft" }
 ]

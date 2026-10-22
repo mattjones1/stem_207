@@ -148,7 +148,21 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - A revise request needs a note. Artifact links must be https.
 
 ## Wording
-- Home (#/) is "Today" for students, "Educator dashboard" for teachers, and "Home" for guests: use `SE.homeLabel()` (the default for `SE.backLink`). The browse page is "Missions" in the student nav and "Mission library" elsewhere. Class rewards are the "class journey" (never "class expedition").
+- Use these names everywhere:
+  - An **Activity** is one thing a student does. Never "mission" in UI text. Internal ids, routes, and event names like `mission_completed` stay as they are.
+  - A **Learning Plan** is an ordered set of activities assigned to a whole class.
+  - A **Class** is a roster with a sign-in code.
+  - A **Category** is one of the seven areas.
+  - Never "expedition".
+- Home (`#/`) is "Home" for students and guests and "Dashboard" for educators. Use `SE.homeLabel()`, which is the default for `SE.backLink`.
+- Menus:
+  - Educators: Dashboard · Learning Plans · Activities · Classes · Checks.
+  - Students: Home · My Learning Plans · Activities · My harbor.
+  - Guests: Home · Activities.
+  - There's no Projector button.
+- `#/activities` is the shared category view, and `#/activities/<category>` is one category.
+- Old addresses redirect (`MOVED` in `main.js`): `#/library`, `#/area/<id>`, `#/explore`, `#/teach/pathways`, `#/teach/class`, and `#/teach/reflections`.
+- Class rewards are the "class journey".
 
 ## Classroom and design rules
 - Accessibility test: `python3 tests/site/test_a11y.py [--report]` checks names, labels, ARIA ids, aria-hidden focus, headings, contrast (light and dark), 24px targets, and lang/title on ~28 pages. Keep it at 0 findings. (axe-core can't be downloaded in this sandbox; this is the stand-in.)

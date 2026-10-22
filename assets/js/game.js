@@ -11,7 +11,7 @@
 
   function baseXp(act) {
     const d = act.duration <= 20 ? 20 : act.duration <= 30 ? 30 : 45;
-    // Flat base: longer missions don't earn more. (d is kept so older settings still load.)
+    // Flat base: longer activities don't earn more. (d is kept so older settings still load.)
     return (P.xp.mission || P.xp.missionByDuration[d]) + (P.xp.levelBonus[act.level] || 0);
   }
 
@@ -169,7 +169,7 @@
       }
     });
 
-    // Weekly streak: consecutive weeks (ending this week or last) with at least one mission.
+    // Weekly streak: consecutive weeks (ending this week or last) with at least one activity.
     const weeks = new Set(completions.map((x) => weekOf(x.event.at)).concat(labTimes.map(weekOf)));
     let streak = 0;
     let w = weekOf(Date.now());
@@ -207,7 +207,7 @@
   /* Suggested next missions: pathway first, then new areas, then anything in grade band. */
   function recommendations(student, prof, limit = 3) {
     const inBand = (a) => !student.gradeBand || a.grades.includes(student.gradeBand);
-    // Assigned missions get their own section on the student home, so suggestions skip them.
+    // Assigned activities get their own section on the student home, so suggestions skip them.
     const assignedIds = new Set(student.classId ? SE.store.assignmentsFor(student.classId).map((x) => x.activityId) : []);
     // Only suggest what a student can start alone: no teacher-led activities, hands-on activities
     // that need materials, or placeholders. Teachers can still assign any of these.
@@ -230,7 +230,7 @@
     while (prof.stages[nextStage] && prof.stages[nextStage].status === "cleared") nextStage++;
     const stage = STEM.pathway.find((s) => s.stage === nextStage);
     if (stage) {
-      // Prefer the student's own grade-band track (e.g. the grades 6–8 missions), then anything in band.
+      // Prefer the student's own grade-band track (e.g. the grades 6–8 activities), then anything in band.
       const acts = stage.activities.map((id) => SE.activityById[id]).filter((a) => a && notDone(a));
       const act = acts.find((a) => a.track && a.track === student.gradeBand) || acts.find(inBand);
       if (act) add(act, `Coding pathway, stage ${stage.stage}`);
@@ -263,12 +263,12 @@
   /* ───────── Class rewards ─────────
    * Counts of class work. The same rules run in supabase/update-4-class-journey.sql
    * (class_journey), which is how a student's device gets the whole class's totals.
-   *   assignedDone  distinct (student, mission) sent, for missions assigned to the class
-   *   confirmed     distinct (student, mission) a teacher confirmed
+   *   assignedDone  distinct (student, activity) sent, for activities assigned to the class
+   *   confirmed     distinct (student, activity) a teacher confirmed
    *   stages        distinct (student, stage) a teacher confirmed
-   *   withAssigned  students who sent at least one assigned mission
+   *   withAssigned  students who sent at least one assigned activity
    *   withStage1    students whose Stage 1 is confirmed
-   *   onTime        assigned missions with a due date that every student sent by the end of that day (UTC) */
+   *   onTime        assigned activities with a due date that every student sent by the end of that day (UTC) */
   const dueEnd = (d) => { const [y, m, dd] = d.split("-").map(Number); return Date.UTC(y, m - 1, dd + 1); };
   function classCounts(classId) {
     const students = SE.store.studentsIn(classId);
@@ -324,7 +324,7 @@
     return { reached, next, index: idx, progress: Math.max(0, Math.min(1, progress)), points };
   }
 
-  /* Has this student finished a mission? For lab missions, finishing every level counts too. */
+  /* Has this student finished an activity? For lab activities, finishing every level counts too. */
   function missionDone(prof, a) {
     const ms = prof.missions[a.id] || {};
     if (ms.confirmed) return true;
@@ -333,13 +333,13 @@
     const labId = a.launch && a.launch.labId;
     const lab = labId && SE.labs && SE.labs.byId(labId);
     if (!lab) return false;
-    // A lab mission is done when its core levels pass (all levels unless coreLevels is set).
+    // A lab activity is done when its core levels pass (all levels unless coreLevels is set).
     const lv = prof.labLevels[labId] || new Set();
     const core = Math.min(lab.levels.length, a.coreLevels || lab.levels.length);
     return [...Array(core).keys()].every((i) => lv.has(i));
   }
 
-  /* One status per mission for a student, strongest first:
+  /* One status per activity for a student, strongest first:
    *   confirmed  Teacher confirmed the target skill (spoken check, watched a demo, or reviewed work)
    *   tryagain   Teacher asked for more work; holds until the student submits again
    *   checked    The lab's own check passed for its core levels (only what the lab tests)
