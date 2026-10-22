@@ -1,5 +1,5 @@
 # Browser test for Batch 5: starter projects, the Score Keeper picture, lab-to-Scratch bridges,
-# "New to coding? Start here", readiness-based capstone, and the AI learning route.
+# readiness-based capstone, and the AI route (now a Learning Plan template).
 #   LOCAL_MODE=1 PORT=8767 node tests/backend/mock-supabase.js ; python3 tests/site/test_batch5.py [url]
 import asyncio, sys
 from playwright.async_api import async_playwright
@@ -31,26 +31,17 @@ async def main():
     ok("score-keeper: bridge from Feed the Space Blob", await pg.locator('.bridge a[href="#/activity/lab-space-blob"]').count() == 1)
     await pg.goto(S + "#/activity/interactive-story"); await pg.wait_for_timeout(300)
     ok("interactive-story: bridge from Moon Base Gatekeeper", await pg.locator('.bridge a[href="#/activity/lab-moon-gate"]').count() == 1)
-    await pg.goto(S + "#/pathway"); await pg.wait_for_timeout(400)
-    ok("pathway: three start-here tracks", await pg.locator(".start-here__track").count() == 3)
-    ok("pathway: student's own band highlighted", await pg.locator(".start-here__track.is-mine").count() == 1)
-    ok("pathway: grades 6–8 track framed for older beginners", "working programmers" in await pg.inner_text(".start-here"))
-    links = await pg.eval_on_selector_all(".start-here a", "els=>els.map(e=>e.getAttribute('href'))")
-    ok("start-here links all resolve", links and await pg.evaluate("(hs)=>hs.every(h=>!!SE.activityById[h.split('/').pop()])", links), links)
     # capstone: open to ready 4–5 students, but not suggested before Stage 6
     ok("capstone tagged for grades 4–8", await pg.evaluate("SE.activityById['capstone-game'].grades.includes('4-5')"))
     recs = await pg.evaluate("SE.game.recommendations(SE.store.currentUser(), SE.game.profile(SE.store.currentUser().id), 20).map(r=>r.activity.id)")
     ok("capstone not suggested before Stage 6 is reached", "capstone-game" not in recs)
-    # AI route
-    await pg.goto(S + "#/area/ai"); await pg.wait_for_timeout(400)
-    await pg.click('a[href="#/ai-route"]'); await pg.wait_for_timeout(400)
-    ok("AI route: six steps, linked from the AI area", await pg.locator(".ai-route__step").count() == 6)
-    alinks = await pg.eval_on_selector_all(".ai-route a", "els=>els.map(e=>e.getAttribute('href'))")
-    ok("AI route: every mission link resolves", alinks and await pg.evaluate("(hs)=>hs.every(h=>!!SE.activityById[h.split('/').pop()])", alinks), len(alinks))
-    await pg.screenshot(path="/tmp/ai-route.png", full_page=True)
+    # AI route: a Learning Plan template now (students no longer see a separate route page)
+    await pg.goto(S + "#/ai-route"); await pg.wait_for_timeout(400)
+    ok("AI route: a student's old link goes to My Learning Plans", pg.url.endswith("#/plans"), pg.url)
+    ok("AI route template: 8 activities, every one resolves, marked for review", await pg.evaluate("(()=>{const t=SE.pathways.template('tpl-ai-route'); return t.steps.length===8 && t.steps.every(s=>!!SE.activityById[s.activityId]) && t.reviewed===false})()"))
     # phone
     m = await ctx.new_page(); await m.set_viewport_size({"width": 390, "height": 844})
-    for h in ["#/ai-route", "#/pathway", "#/activity/score-keeper", "#/activity/debug-animation"]:
+    for h in ["#/activities/ai", "#/activity/score-keeper", "#/activity/debug-animation"]:
         await m.goto(S + h); await m.wait_for_timeout(400)
         w = await m.evaluate("document.documentElement.scrollWidth")
         ok(f"phone: {h} has no sideways scroll", w <= 390, w)

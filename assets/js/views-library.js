@@ -357,26 +357,6 @@
       </section>`;
   }
 
-  function pathwayStrip(prof) {
-    return `
-      <section class="section wrap" aria-labelledby="pathway-title">
-        <div class="section__head">
-          <div><span class="eyebrow">Coding pathway</span><h2 id="pathway-title">Seven stages, start where you're ready</h2></div>
-          <a class="btn btn--ghost btn--small" href="#/pathway">See the full pathway ${icon("arrowRight")}</a>
-        </div>
-        <ol class="track">
-          ${pathway.map((s) => {
-            const st = prof && prof.stages[s.stage];
-            const tag = st ? (st.status === "cleared" ? `<span class="track__status is-cleared">${icon("check")}Cleared</span>` : `<span class="track__status is-claimed">${icon("clock")}Teacher check</span>`) : "";
-            return `<li><a href="#/pathway#stage-${s.stage}" class="${st && st.status === "cleared" ? "is-cleared" : ""}">
-              <span class="track__num">Stage ${s.stage}</span>
-              <span class="track__title">${esc(s.title)}</span>
-              <span class="track__concepts">${esc(s.concepts)}</span>${tag}
-            </a></li>`;
-          }).join("")}
-        </ol>
-      </section>`;
-  }
 
   function featuredSection() {
     const featured = activities.find((a) => a.featured) || activities[0];
@@ -435,7 +415,7 @@
       // Students: "explore" is the expedition page (map, patches, class goal); "library" is the activity finder.
       app().innerHTML = mode === "library"
         ? `<section class="page-top"><div class="wrap page-top__inner"><div class="backbar">${backLink("#/", "Today")}</div><h1 tabindex="-1">Activities</h1><p class="page-top__lede">Search for an activity, or narrow by topic, grade, and time.</p></div></section>` + librarySection(user, prof)
-        : SE.views.expeditionHome(user, prof) + labsStrip(user, null, "Your labs") + maineSection(prof) + areasSection(prof) + pathwayStrip(prof);
+        : SE.views.expeditionHome(user, prof) + labsStrip(user, null, "Your labs") + maineSection(prof) + areasSection(prof);
       SE.views.bindExpeditionHome && SE.views.bindExpeditionHome(user, prof);
       bindLibrary(prof);
       return;
@@ -493,18 +473,11 @@
         </div>
       </section>
       ${labsStrip(user, id)}
-      ${id === "ai" ? `
+      ${user && user.role === "educator" && ({ coding: "tpl-coding-foundations", ai: "tpl-ai-route" })[id] ? `
         <section class="wrap section">
           <div class="notice notice--row">
-            <p><strong>Not sure where to start?</strong> The AI learning route puts these activities in order, from patterns to responsible use.</p>
-            <a class="btn btn--primary btn--small" href="#/ai-route">See the AI learning route ${icon("arrowRight")}</a>
-          </div>
-        </section>` : ""}
-      ${id === "coding" ? `
-        <section class="wrap section">
-          <div class="notice notice--row">
-            <p><strong>New to coding, or ready for the next step?</strong> The coding pathway shows seven stages with an “I can” check for each one.</p>
-            <a class="btn btn--primary btn--small" href="#/pathway">Open the coding pathway ${icon("arrowRight")}</a>
+            <p><strong>Want a ready-made sequence?</strong> ${id === "coding" ? "Coding Foundations puts the coding activities in seven steps, from clear instructions to a project of their own." : "The AI route puts these activities in six steps, from patterns to responsible use."}</p>
+            <a class="btn btn--primary btn--small" href="#/teach/plans/${({ coding: "tpl-coding-foundations", ai: "tpl-ai-route" })[id]}">See the Learning Plan template ${icon("arrowRight")}</a>
           </div>
         </section>` : ""}
       ${id === "engineering" && SE.moxie.pathwayVisible(user) ? `
@@ -701,7 +674,6 @@
     if (a.moxie) return SE.views.moxieSession(user, a);   // Moxie sessions have their own layout (views-moxie.js)
     if (a.placeholder) return placeholderPage(a);
     const area = SE.areaById[a.area];
-    const stage = a.pathwayStage ? pathway.find((s) => s.stage === a.pathwayStage) : null;
     const isStudent = user && user.role === "student";
     const prof = isStudent ? SE.game.profile(user.id) : null;
     const related = sortActivities(activities.filter((x) => x.area === a.area && x.id !== a.id && !SE.hiddenForUser(x))).slice(0, 3);
@@ -729,7 +701,7 @@
           <div class="page-top__head">
             <span class="icon-badge">${icon(area.icon)}</span>
             <div>
-              <span class="eyebrow">${esc(area.name)}${stage ? ` · Pathway stage ${stage.stage}` : ""}</span>
+              <span class="eyebrow">${esc(area.name)}</span>
               <h1 tabindex="-1">${esc(a.title)}</h1>
             </div>
           </div>
@@ -810,7 +782,6 @@
             <summary><h2>${icon("clipboard")}Teacher notes</h2><span class="toggle-hint" aria-hidden="true"></span></summary>
             <div class="teacher-notes__body">
               <ul class="bullets">${a.teacherNotes.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul>
-              ${stage ? `<p><strong>Pathway check (Stage ${stage.stage}):</strong> “${esc(stage.iCan)}” <a href="#/pathway#stage-${stage.stage}">See the stage</a></p>` : ""}
             </div>
           </details>`}
         </div>
@@ -856,157 +827,33 @@
     }));
   };
 
-  /* ───────── Pathway ───────── */
-  /* Harbor Code Lab levels that practice each pathway stage (from each level's `stage`). */
-  const roverLevelsFor = (stage) => (SE.roverLevels || []).map((l, i) => (l.stage === stage ? i + 1 : 0)).filter(Boolean);
-  /* "How checks work": one picture of who does what, where, and what it changes.
-     kind "teacher" shows both kinds of check; "student" shows the short stage-check version. */
+  /* "How checks work": the same check for every activity. Who does what, where, and what it earns.
+     kind "teacher" (Checks page, open) or "student" (each activity page, folded). */
   SE.checksGuide = function (kind) {
-    const step = (who, what, where) => `<li class="cg-step cg-step--${who === "You" || who === "Teacher" ? "teach" : "student"}"><span class="cg-who">${esc(who)}</span><span class="cg-what">${what}</span>${where ? `<span class="cg-where">${icon("map")}${where}</span>` : ""}</li>`;
+    const xp = STEM.progression.xp.mission;
+    const step = (who, what, where) => `<li class="cg-step cg-step--${who === "Teacher" || (who === "You" && kind === "teacher") ? "teach" : "student"}"><span class="cg-who">${esc(who)}</span><span class="cg-what">${what}</span>${where ? `<span class="cg-where">${icon("map")}${where}</span>` : ""}</li>`;
     if (kind === "student") return `
       <details class="block cg cg--student" id="checks-guide">
-        <summary><span>${icon("question")}How stage checks work</span></summary>
+        <summary><span>${icon("question")}How checks work</span></summary>
         <ol class="cg-flow">
-          ${step("You", "Practice the activities and lab levels in a stage.", "")}
-          ${step("You", "When you can do the “I can” statement, tap <strong>I can do this</strong>.", "On this page")}
-          ${step("Teacher", "Your teacher asks you to show it, then chooses <strong>Confirm</strong> or <strong>Not yet</strong>.", "In class")}
-          ${step("You", "Confirmed: the stage is cleared and you earn " + STEM.progression.xp.stageCleared + " XP. Not yet: keep practicing and tap it again.", "On this page")}
+          ${step("You", "Do the activity, then send your reflection: write it, or choose <strong>Show or tell my teacher</strong>.", "This page")}
+          ${step("Teacher", "Reads it or listens, then chooses <strong>Pass</strong> or <strong>Try again</strong>.", "In class")}
+          ${step("You", `Pass: you earn the XP (about ${xp}). Try again: read your teacher's note, fix it, and send it again.`, "Home · this page")}
         </ol>
       </details>`;
     return `
       <details class="block cg" id="checks-guide" open>
-        <summary><span>${icon("question")}How checks work</span><span class="muted cg-sub">Two kinds of check. Students ask, you decide.</span></summary>
-        <div class="cg-grid">
-          <section aria-labelledby="cg-m">
-            <h3 id="cg-m">${icon("rocket")}Activity checks</h3>
-            <p class="muted">Did the student do this activity? One per activity.</p>
-            <ol class="cg-flow">
-              ${step("Student", "Finishes the steps, then sends the <strong>Activity debrief</strong>: a written answer, or “Show or tell my teacher.”", "Mission page")}
-              ${step("You", "See it in the <strong>Reflections</strong> tab (a badge shows how many are waiting) or on the student's page.", "Reflections tab · student page")}
-              ${step("You", "Choose <strong>Confirm</strong> (how they showed you: said it, showed it, or their work) or <strong>Try again</strong> with a short note.", "Student page")}
-              ${step("Student", "Confirm: the activity shows as confirmed (+" + STEM.progression.xp.teacherConfirmed + " XP). Try again: it comes back on their Today page with your note until they send it again.", "Today · activity page")}
-            </ol>
-          </section>
-          <section aria-labelledby="cg-s">
-            <h3 id="cg-s">${icon("flag")}Stage checks</h3>
-            <p class="muted">Is the student ready for the next pathway stage? One per stage.</p>
-            <ol class="cg-flow">
-              ${step("Student", "Practices the stage, then taps <strong>I can do this</strong> on that stage.", "Coding pathway page")}
-              ${step("You", "See it under <strong>Checks waiting</strong> on this page, with a badge on the tab.", "Coding pathway tab")}
-              ${step("You", "Ask them to show the “I can” statement. Choose <strong>Confirm</strong> or <strong>Not yet</strong>.", "This page · student page")}
-              ${step("Student", "Confirm: the stage is cleared (+" + STEM.progression.xp.stageCleared + " XP) and suggestions move to the next stage. Not yet: the request goes away and they can ask again.", "Coding pathway · Today")}
-            </ol>
-          </section>
-        </div>
-        <p class="cg-key">${icon("check")}<span><strong>Only your Confirm clears a stage.</strong> Activities and lab levels are practice and evidence. Finishing them never clears a stage on its own, and a student can ask for a stage check at any time.</span></p>
+        <summary><span>${icon("question")}How checks work</span><span class="muted cg-sub">One check for every activity. Students send, you decide.</span></summary>
+        <ol class="cg-flow">
+          ${step("Student", "Does the activity, then sends a reflection: a written answer, or “Show or tell my teacher.”", "Activity page")}
+          ${step("You", "See it here under <strong>Checks</strong>. The count is in the top menu.", "Checks")}
+          ${step("You", "Choose <strong>Pass</strong> (and how you checked: they said it, showed it, or their work) or <strong>Try again</strong> with a short note.", "Checks · student page")}
+          ${step("Student", `Pass: the activity shows as Passed and they earn its XP (about ${xp}). Try again: it comes back on their Home with your note until they send it again.`, "Home · activity page")}
+        </ol>
+        <p class="cg-key">${icon("check")}<span><strong>Only your Pass earns XP.</strong> Sending, labs, and practice don't, so every point a student has is one you checked.</span></p>
       </details>`;
   };
 
-  SE.views.pathway = function (user) {
-    const isStudent = user && user.role === "student";
-    const prof = isStudent ? SE.game.profile(user.id) : null;
-    let nextStage = 1;
-    if (prof) while (prof.stages[nextStage] && prof.stages[nextStage].status === "cleared") nextStage++;
-    const smallIcon = (n) => icon(n, 'class="inline-icon"');
-
-    app().innerHTML = `
-      <section class="page-top">
-        <div class="wrap page-top__inner">
-          <div class="backbar">${backLink()}</div>
-          <div class="page-top__head">
-            <span class="icon-badge">${icon("code")}</span>
-            <div><span class="eyebrow">Coding & Computer Science</span><h1 tabindex="-1">The coding pathway</h1></div>
-          </div>
-          <p class="page-top__lede">Seven stages organized by readiness, not by grade. Suggested grades help you choose a starting point. Move on when you can show the “I can” statement, at your own pace.</p>
-          ${user && user.role === "educator" ? `<p class="preview-note">${icon("eye")}<span><strong>Student view preview.</strong> This is what students see. Their “I can do this” buttons appear once they sign in.</span> <a class="btn btn--ghost btn--small" href="#/teach/pathway">${icon("arrowLeft")}Back to your pathway</a></p>` : ""}
-          ${prof ? `<p class="page-top__progress"><strong>${prof.counts.stagesCleared} of 7</strong> stages cleared · each cleared stage is worth ${STEM.progression.xp.stageCleared} XP</p>` : ""}
-        </div>
-      </section>
-      <div class="wrap pathway-intro">
-        <div class="block"><h2>${smallIcon("flag")}Pick a starting stage</h2><p>Read the prerequisites. If you can already do them, start there. A quick review of an earlier stage never hurts.</p></div>
-        <div class="block"><h2>${smallIcon("bug")}Debug at every stage</h2><p>Every stage has its own debugging habit. Finding and fixing mistakes is part of the learning, not a detour.</p></div>
-        <div class="block"><h2>${smallIcon("check")}Check with “I can”</h2><p>${isStudent ? "When you can do the “I can” statement, tell your teacher with the button. They'll check it with you." : "Each “I can” statement is something you can watch a student do. When they can, they're ready for the next stage."}</p></div>
-      </div>
-      <section class="wrap start-here" aria-labelledby="start-here-title">
-        <h2 id="start-here-title">${smallIcon("rocket")}New to coding? Start here</h2>
-        <div class="start-here__grid">${(STEM.startHere || []).map((t) => `
-          <article class="block start-here__track ${prof && user.gradeBand === t.band ? "is-mine" : ""}">
-            <h3>${esc(t.title)}</h3><p>${esc(t.frame)}</p>
-            <ol>${t.activities.map((id) => SE.activityById[id]).filter(Boolean).map((a) => `<li><a href="#/activity/${a.id}">${esc(a.title)}</a> <span class="muted">${SE.timeText(a)}</span></li>`).join("")}</ol>
-          </article>`).join("")}</div>
-        <p class="muted">Already coding? Skip ahead: pick the first stage below whose prerequisites you can already do. Your grade doesn't limit how far you go.</p>
-        ${prof ? SE.checksGuide("student") : ""}
-        <p class="track-note ${prof && user.gradeBand === "6-8" ? "is-mine" : ""}">${icon("star")}<span><strong>Grades 6–8 track.</strong> Every stage has an activity tagged <span class="track-tag">Grades 6–8</span>. It practices the same idea, a step further: broadcasts, clones, and/or/not, lists, custom blocks with inputs, and a first taste of Python.</span></p>
-      </section>
-      <ol class="wrap stages">
-        ${pathway.map((s) => {
-          const st = prof && prof.stages[s.stage];
-          const status = !prof ? "" : st && st.status === "cleared"
-            ? `<span class="stage-status is-cleared">${icon("check")}Cleared</span>`
-            : st ? `<span class="stage-status is-claimed">${icon("clock")}Waiting for your teacher to check</span>`
-              : s.stage === nextStage ? `<span class="stage-status is-next">${icon("flag")}Your next stage</span>` : "";
-          const claimBtn = prof && !st ? `<button type="button" class="btn btn--primary btn--small" data-claim="${s.stage}">${icon("check")}I can do this</button>` : "";
-          return `
-          <li class="stage ${st && st.status === "cleared" ? "stage--cleared" : ""}" id="stage-${s.stage}">
-            <div class="stage__node" aria-hidden="true"><div><small>Stage</small><b>${s.stage}</b></div></div>
-            <article class="block stage__card" aria-labelledby="stage-title-${s.stage}">
-              <div class="stage__head">
-                <div>
-                  <h2 id="stage-title-${s.stage}"><span class="visually-hidden">Stage ${s.stage}: </span>${esc(s.title)}</h2>
-                  <p class="stage__concepts">${esc(s.concepts)}</p>
-                </div>
-                ${status}
-              </div>
-              <div class="stage__grid">
-                <div><h3>Learning goal</h3><p>${esc(s.goal)}</p></div>
-                <div><h3>Project</h3><p>${esc(s.project)}</p></div>
-                <div><h3>Prerequisite</h3><p>${esc(s.prerequisite)}</p></div>
-                <div><h3>Debugging habit</h3><p>${esc(s.debugging)}</p></div>
-                <div class="prep__full"><h3>Suggested starting point</h3><p>${esc(s.suggestedStart)}</p></div>
-              </div>
-              <div class="ican">${icon("check")}<span><span class="visually-hidden">Readiness check: </span>${esc(s.iCan)}</span>${claimBtn}</div>
-              <div class="stage__links">
-                ${roverLevelsFor(s.stage).length ? `<div class="stage__lab"><span>${icon("flask")}Harbor Code Lab levels</span>${roverLevelsFor(s.stage).map((lv) => { const d = prof && SE.labs.progressFor(prof, "rover").has(lv - 1); return `<a class="lvl-chip ${d ? "is-done" : ""}" href="#/lab/rover/${lv}" aria-label="Harbor Code Lab level ${lv}${d ? ", finished" : ""}">${d ? icon("check") : ""}${lv}</a>`; }).join("")}</div>` : ""}
-                ${s.activities.map((id) => SE.activityById[id]).filter(Boolean).map((a) => `
-                  <a class="btn btn--ghost btn--small ${prof && prof.completedIds.has(a.id) ? "is-done" : ""}" href="#/activity/${a.id}">${icon(prof && prof.completedIds.has(a.id) ? "check" : SE.areaById[a.area].icon)}${esc(a.title)} · ${SE.timeText(a)}${a.track ? ` <span class="track-tag">Grades ${esc(a.track.replace("-", "–"))}</span>` : ""}</a>`).join("")}
-              </div>
-            </article>
-          </li>`;
-        }).join("")}
-      </ol>`;
-
-    app().querySelectorAll("[data-claim]").forEach((b) => b.addEventListener("click", () => {
-      const stageN = Number(b.dataset.claim);
-      SE.store.log("ican_claimed", { stage: stageN });
-      SE.toast(`Stage ${stageN} sent to your teacher to check`);
-      SE.views.pathway(user);
-      const el = document.getElementById(`stage-${stageN}`);
-      if (el) { el.scrollIntoView({ block: "center" }); }
-    }));
-  };
-
-  /* ───────── The AI learning route ───────── */
-  SE.views.aiRoute = function (user) {
-    const prof = user && user.role === "student" ? SE.game.profile(user.id) : null;
-    app().innerHTML = `
-      <section class="page-top">
-        <div class="wrap page-top__inner">
-          <div class="backbar">${backLink("#/activities/ai", "Artificial Intelligence")}</div>
-          <div class="page-top__head"><span class="icon-badge">${icon("ai")}</span>
-            <div><span class="eyebrow">Artificial Intelligence</span><h1 tabindex="-1">The AI learning route</h1></div></div>
-          <p class="page-top__lede">Six steps, from spotting patterns to deciding when AI should be trusted. Each step uses activities you can do now. Go in order the first time.</p>
-        </div>
-      </section>
-      <ol class="wrap ai-route">${(STEM.aiRoute || []).map((s) => `
-        <li class="block ai-route__step">
-          <span class="ai-route__n" aria-hidden="true">${s.step}</span>
-          <div><h2><span class="visually-hidden">Step ${s.step}: </span>${esc(s.title)}</h2><p>${esc(s.idea)}</p>
-            <ul class="ai-route__acts">${s.activities.map((id) => SE.activityById[id]).filter((a) => a && !SE.hiddenForUser(a)).map((a) => {
-              const st = prof ? SE.game.statusFor(prof, a) : null;
-              return `<li><a href="#/activity/${a.id}">${esc(a.title)}</a> <span class="muted">${SE.timeText(a)} · ${esc(formats[a.format].name)}</span>${st && st.state !== "none" ? ` <span class="muted">· ${esc(st.label)}</span>` : ""}</li>`; }).join("")}</ul>
-            ${s.note ? `<p class="muted small">${esc(s.note)}</p>` : ""}</div>
-        </li>`).join("")}</ol>`;
-  };
 
   SE.views.notFound = function () {
     app().innerHTML = `

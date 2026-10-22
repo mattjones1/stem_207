@@ -114,7 +114,7 @@
           ${level.steps ? `<ol class="lab-steps">${level.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>` : ""}
           <div class="lab-brief__tools">
             <button type="button" class="btn btn--ghost btn--small" id="lab-hint-btn" aria-expanded="false" aria-controls="lab-hint">${icon("question")}Need a hint?</button>
-            ${done.has(idx) ? `<span class="chip chip--done">${icon("check")}You finished this level</span>` : `<span class="chip chip--xp">+${STEM.progression.xp.labLevel} XP</span>`}
+            ${done.has(idx) ? `<span class="chip chip--done">${icon("check")}You finished this level</span>` : ""}
           </div>
           ${level.hints ? `<div class="lab-hint" id="lab-hint" hidden>${level.hints.map((h, i) => `<p data-hint="${i}" ${i ? "hidden" : ""}><strong>Hint ${i + 1} of ${level.hints.length}:</strong> ${esc(h)}</p>`).join("")}</div>` : `<p class="lab-hint" id="lab-hint" hidden>${esc(level.hint)}</p>`}
         </section>
@@ -125,7 +125,7 @@
           <div class="lab-win" id="lab-win" hidden></div>
         </section>
       </div>
-      ${!user || user.role === "guest" ? `<div class="wrap"><p class="muted lab-guest">${icon("user", 'class="inline-icon"')}Exploring as a guest: your lab progress won't be saved. <a href="#/signin">Sign in</a> to earn XP.</p></div>` : ""}`;
+      ${!user || user.role === "guest" ? `<div class="wrap"><p class="muted lab-guest">${icon("user", 'class="inline-icon"')}Exploring as a guest: your lab progress won't be saved. <a href="#/signin">Sign in</a> to save your progress.</p></div>` : ""}`;
 
     const hintBtn = document.getElementById("lab-hint-btn");
     hintBtn.addEventListener("click", () => {
@@ -181,7 +181,6 @@
             <span class="lab-win__badge">${icon("check")}</span>
             <div>
               <h2 tabindex="-1" id="lab-win-title">${opts.title ? esc(opts.title) : `Level ${idx + 1} complete${allDone && next === null ? ". Lab finished!" : "!"}`}</h2>
-              ${isStudent && first ? `<p class="lab-win__xp">+${STEM.progression.xp.labLevel} XP${after.index > before.index ? ` · Promoted to ${esc(after.rank.name)}` : ""}</p>` : ""}
             </div>
           </div>
           <div class="lab-win__learned"><span class="eyebrow">What you just learned</span><p>${esc(level.learned)}</p>${level.why ? `<p class="lab-win__why"><strong>Why it matters:</strong> ${esc(level.why)}</p>` : ""}</div>

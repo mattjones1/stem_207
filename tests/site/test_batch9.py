@@ -37,8 +37,8 @@ async def local(b):
     ok("class card is an assigned mission", (await pg.inner_text("#today-class-title")) in assigned)
     ok("assignment instructions show on the class side", "Bring your flowchart" in await pg.inner_text(".today-col--class"))
     ok("one I need help button, on the class card", await pg.locator("#help-btn").count() == 1 and await pg.locator(".today-card--class #help-btn").count() == 1)
-    await pg.evaluate("SE.store.log('ican_claimed', { stage: 4 })"); await go(pg, S + "#/")
-    ok("a stage check shows under Waiting for your teacher", "Stage 4" in await pg.inner_text(".today-waiting"))
+    await pg.evaluate("SE.store.log('mission_completed', { activityId: 'paper-helicopter', evidence: 'show', reflection: '' })"); await go(pg, S + "#/")
+    ok("a sent activity shows under Waiting for your teacher", "Paper Helicopter" in await pg.inner_text(".today-waiting"))
     await pg.screenshot(path="/tmp/b9-today.png", full_page=True)
     # teacher posts and deletes messages, adds instructions
     await switch(pg, S, "teacher")

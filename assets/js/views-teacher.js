@@ -26,10 +26,11 @@
   /* A student's status on one activity, as a small chip (word + shape, not color alone). */
   const STATUS_ICON = { confirmed: "shield", tryagain: "refresh", checked: "flask", submitted: "check", started: "clock", none: "clock" };
   const statusChip = (st) => `<span class="st-chip st-chip--${st.state}">${icon(STATUS_ICON[st.state])}${esc(st.label)}</span>`;
-  /* Record a teacher check: confirm the target skill (spoken, demo, or work) or ask for another try. */
-  const checkActions = (student, a, st) => st.state === "confirmed" ? "" : `
-    <details class="check-act">
-      <summary>${icon("shield")}Record a check</summary>
+  /* The one check for every activity: Pass (how: spoken, demo, or work) or Try again (a note is required).
+     open: show the form right away (the Checks page) instead of folded (student pages). */
+  const checkActions = (student, a, st, open) => st.state === "confirmed" ? "" : `
+    <details class="check-act" ${open ? "open" : ""}>
+      <summary>${icon("shield")}Check it</summary>
       <form class="check-act__form" data-check-student="${student.id}" data-check-activity="${a.id}">
         ${a.check ? `<p class="muted small"><strong>Check:</strong> ${esc(a.check)}</p>` : ""}
         <label>How did you check? <select class="input input--small" name="how">
@@ -37,7 +38,7 @@
         <label>Note for ${esc(student.displayName.split(" ")[0])} <span class="muted">(needed for Try again)</span>
           <input class="input input--small" name="note" maxlength="200" placeholder="What to try next, or what they did well"></label>
         <div class="check-act__btns">
-          <button type="submit" class="btn btn--primary btn--small" name="act" value="confirm">${icon("check")}Confirm</button>
+          <button type="submit" class="btn btn--primary btn--small" name="act" value="confirm">${icon("check")}Pass</button>
           <button type="submit" class="btn btn--ghost btn--small" name="act" value="again">${icon("refresh")}Try again</button>
         </div>
         <p class="form__error" role="alert"></p>
@@ -58,7 +59,7 @@
       const data = { activityId: f.dataset.checkActivity, note };
       if (act === "confirm") data.how = f.how.value;
       SE.store.teacherLog(f.dataset.checkStudent, act === "confirm" ? "teacher_confirmed" : "teacher_try_again", data);
-      SE.toast(act === "confirm" ? "Confirmed" : "Sent back with your note");
+      SE.toast(act === "confirm" ? "Passed" : "Sent back with your note");
       SE.route(true);
     });
   }
@@ -142,7 +143,7 @@
 
   SE.teachFrame = (...args) => frame(...args);   // shared with views-pathways.js
   /* Reflections waiting for a check, across all of an educator's classes (the badge on "Checks" in the top menu). */
-  SE.teachChecksWaiting = (user) => SE.store.classesFor(user.id).reduce((n, c) => n + pendingReflections(SE.game.classSummary(c.id)).length, 0);
+  SE.teachChecksWaiting = (user) => SE.store.classesFor(user.id).reduce((n, c) => n + pendingChecks(SE.game.classSummary(c.id)).length, 0);
   SE.teachBindFrame = (user) => bindFrame(user);
   SE.teachNoClass = (user) => noClass(user);
 
@@ -155,28 +156,18 @@
     if (ad) ad.addEventListener("click", async () => { ad.disabled = true; ad.textContent = "Adding the sample class…"; try { const c = await SE.store.resetDemo(); if (c) currentClassId = c.id; SE.toast("Sample class added"); location.hash = "#/teach"; } catch (e) { SE.toast("Couldn't add the sample class. Try again."); } SE.route(true); });
   }
 
-  function pendingReflections(summary) {
+  /* Waiting for a check: each activity whose latest send isn't passed or sent back yet. Oldest first. */
+  function pendingChecks(summary) {
     const out = [];
     summary.profiles.forEach(({ student, prof }) => {
-      prof.completions.forEach((c) => {
-        // Waiting for you: unread written answers, and "I'll show you" submissions not yet checked.
-        // A teacher check (confirm or try again) after the submission also counts as reviewed.
-        const st = SE.game.statusFor(prof, c.activity);
-        const checkedSince = (st.confirmed && st.confirmed.at > c.event.at) || (st.tryAgain && st.tryAgain.at > c.event.at);
-        const latest = st.sub && st.sub.id === c.event.id;
-        if (checkedSince) return;
-        if ((c.event.data.reflection || "").trim() && !prof.reviewed[c.event.id]) out.push({ student, prof, c });
-        else if (latest && c.event.data.evidence === "show" && st.state === "submitted") out.push({ student, prof, c });
+      const seen = new Set();
+      prof.completions.slice().reverse().forEach((c) => {
+        if (seen.has(c.activity.id)) return;
+        seen.add(c.activity.id);
+        if (SE.game.statusFor(prof, c.activity).state === "submitted") out.push({ student, prof, c });
       });
     });
-    return out.sort((a, b) => b.c.event.at - a.c.event.at);
-  }
-  function pendingStageClaims(summary) {
-    const out = [];
-    summary.profiles.forEach(({ student, prof }) => {
-      Object.entries(prof.stages).forEach(([stage, st]) => { if (st.status === "claimed") out.push({ student, stage: Number(stage), at: st.at }); });
-    });
-    return out.sort((a, b) => a.at - b.at);
+    return out.sort((a, b) => a.c.event.at - b.c.event.at);
   }
 
   function noClass(user) {
@@ -208,8 +199,7 @@
     const thisWeek = completions.filter((e) => e.at >= weekAgo).length;
     const lastWeek = completions.filter((e) => e.at >= twoWeeksAgo && e.at < weekAgo).length;
     const activeIds = new Set(sum.events.filter((e) => e.at >= weekAgo && !e.by).map((e) => e.studentId));
-    const refl = pendingReflections(sum);
-    const claims = pendingStageClaims(sum);
+    const waiting = pendingChecks(sum);
 
     // Attention list
     const attention = [];
@@ -242,8 +232,7 @@
         <div class="kpis">
           <a class="kpi" href="#roster"><span class="kpi__label">Active this week</span><span class="kpi__value">${activeIds.size}<small> of ${sum.students.length}</small></span><span class="kpi__foot">explorers signed in or worked</span></a>
           <div class="kpi"><span class="kpi__label">Activities this week</span><span class="kpi__value">${thisWeek}</span><span class="kpi__foot ${delta > 0 ? "is-up" : delta < 0 ? "is-down" : ""}">${delta === 0 ? "same as last week" : `${delta > 0 ? "▲" : "▼"} ${Math.abs(delta)} vs. last week`}</span></div>
-          <a class="kpi ${refl.length ? "kpi--action" : ""}" href="#/teach/reflections"><span class="kpi__label">Reflections to read</span><span class="kpi__value">${refl.length}</span><span class="kpi__foot">${refl.length ? "Review answers" : "All caught up"}</span></a>
-          <a class="kpi ${claims.length ? "kpi--action" : ""}" href="#/teach/pathway"><span class="kpi__label">“I can” checks</span><span class="kpi__value">${claims.length}</span><span class="kpi__foot">${claims.length ? "Waiting for you" : "None waiting"}</span></a>
+          <a class="kpi ${waiting.length ? "kpi--action" : ""}" href="#/teach/checks"><span class="kpi__label">Checks waiting</span><span class="kpi__value">${waiting.length}</span><span class="kpi__foot">${waiting.length ? "Pass or Try again" : "All caught up"}</span></a>
         </div>
       </section>
       <section class="wrap section">${messageBlock(cls)}</section>
@@ -297,7 +286,7 @@
         <div class="block">
           <div class="block__head"><h2>Class journey</h2><span class="muted">${sum.journey.goal.next ? `Next stop: ${esc(sum.journey.goal.next.name)}` : "Katahdin reached"}</span></div>
           ${SE.classJourneyBlock(sum.journey)}
-          <p class="muted">Only class work moves the journey: activities you assign, and activities and stages you confirm. Students see this on Today and My expedition. Their own XP, ranks, patches, and harbor still count everything they do.</p>
+          <p class="muted">Only class work moves the journey: +100 each time you pass an activity you assigned or one in an assigned Learning Plan. Students see this on Home. Their own XP, ranks, and patches come from every activity you pass.</p>
         </div>
       </section>
 
@@ -359,9 +348,9 @@
 
   function rosterTable(sum) {
     const rows = sum.profiles.map(({ student, prof }) => {
-      let stage = 0;
-      while (prof.stages[stage + 1] && prof.stages[stage + 1].status === "cleared") stage++;
-      return { student, prof, stage };
+      // Reflections this student has sent that are waiting for your Pass or Try again.
+      const waiting = Object.keys(prof.missions).map((id) => SE.activityById[id]).filter((a) => a && SE.game.statusFor(prof, a).state === "submitted").length;
+      return { student, prof, waiting };
     });
     const k = rosterSort.key, d = rosterSort.dir;
     rows.sort((x, y) => {
@@ -370,7 +359,7 @@
         xp: x.prof.xp - y.prof.xp,
         missions: x.prof.counts.missions - y.prof.counts.missions,
         patches: x.prof.earnedCount - y.prof.earnedCount,
-        stage: x.stage - y.stage,
+        waiting: x.waiting - y.waiting,
         active: (x.prof.lastActive || 0) - (y.prof.lastActive || 0)
       }[k];
       return v * d;
@@ -384,9 +373,9 @@
     return `
       <div class="table-wrap">
         <table class="roster">
-          <thead><tr>${th("name", "Explorer")}<th scope="col">Rank</th>${th("xp", "XP", true)}${th("missions", "Missions", true)}${th("patches", "Patches", true)}${th("stage", "Pathway", true)}${th("active", "Last active", true)}</tr></thead>
+          <thead><tr>${th("name", "Student")}<th scope="col">Rank</th>${th("xp", "XP", true)}${th("missions", "Passed", true)}${th("patches", "Patches", true)}${th("waiting", "Waiting", true)}${th("active", "Last active", true)}</tr></thead>
           <tbody>
-            ${rows.map(({ student, prof, stage }) => {
+            ${rows.map(({ student, prof, waiting }) => {
               const stale = !prof.lastActive || Date.now() - prof.lastActive > 7 * SE.DAY;
               return `<tr>
                 <th scope="row"><a class="roster-name" href="#/teach/student/${student.id}">${SE.studentAvatar(student.id, 30, prof)}${esc(student.displayName)}</a><small>${esc(SE.gradeById[student.gradeBand] ? SE.gradeById[student.gradeBand].name : "")}</small></th>
@@ -394,7 +383,7 @@
                 <td class="num">${SE.num(prof.xp)}</td>
                 <td class="num">${prof.counts.missions}</td>
                 <td class="num">${prof.earnedCount}</td>
-                <td class="num"><span class="stage-pips" aria-label="${stage} of 7 stages cleared">${[1, 2, 3, 4, 5, 6, 7].map((n) => `<i class="${n <= stage ? "on" : prof.stages[n] ? "wait" : ""}"></i>`).join("")}</span></td>
+                <td class="num">${waiting ? `<a href="#/teach/checks">${waiting}<span class="visually-hidden"> waiting for a check</span></a>` : "0"}</td>
                 <td class="num ${stale ? "is-stale" : ""}">${prof.lastActive ? SE.timeAgo(prof.lastActive) : "Never"}${stale ? `<span class="visually-hidden"> (needs a check-in)</span>` : ""}</td>
               </tr>`;
             }).join("")}
@@ -438,7 +427,7 @@
           </div>
           <dl class="xstats xstats--light">
             <div><dt>XP</dt><dd>${SE.num(prof.xp)}</dd></div>
-            <div><dt>Activities</dt><dd>${prof.counts.missions}</dd></div>
+            <div><dt>Passed</dt><dd>${prof.counts.missions}</dd></div>
             <div><dt>Patches</dt><dd>${prof.earnedCount}</dd></div>
             <div><dt>Streak</dt><dd>${prof.streak}<small> wk</small></dd></div>
           </dl>
@@ -458,21 +447,6 @@
           </div>`;
         })()}
         <div class="block">
-          <div class="block__head"><h2>Coding pathway</h2></div>
-          <ol class="stage-list">
-            ${STEM.pathway.map((s) => {
-              const st = prof.stages[s.stage];
-              return `<li class="${st ? `is-${st.status}` : ""}">
-                <span class="stage-list__n">${s.stage}</span>
-                <span class="stage-list__t"><strong>${esc(s.title)}</strong><small>${esc(s.iCan)}</small></span>
-                ${st && st.status === "cleared" ? `<span class="chip chip--done">${icon("check")}Cleared</span>`
-                  : st ? `<span class="stage-actions"><button class="btn btn--primary btn--small" data-verify="${s.stage}">${icon("check")}Confirm</button><button class="btn btn--ghost btn--small" data-return="${s.stage}">Not yet</button></span>`
-                  : `<span class="muted">Not claimed</span>`}
-              </li>`;
-            }).join("")}
-          </ol>
-        </div>
-        <div class="block">
           <div class="block__head"><h2>Patches</h2><span class="muted">${prof.earnedCount} of ${P.patches.length}</span></div>
           <div class="patch-row patch-row--small">
             ${prof.patches.map((p) => `<figure class="patch-tile ${p.earned ? "" : "is-locked"}" title="${esc(p.patch.how)}">${SE.patchArt(p.patch, p.earned, 60)}<figcaption><strong>${esc(p.patch.name)}</strong></figcaption></figure>`).join("")}
@@ -488,7 +462,7 @@
             const st = prof.labStats[lab.id] || { runs: 0, hints: 0 };
             const la = STEM.activities.find((x) => x.launch && x.launch.labId === lab.id);
             const ls = la ? SE.game.statusFor(prof, la) : null;
-            return `<li><span><a href="#/lab/${lab.id}">${esc(lab.title)}</a><small>${n} of ${lab.levels.length} levels · ${st.runs} tests · ${st.hints} hints</small>${ls && ["checked", "confirmed", "tryagain"].includes(ls.state) ? statusChip(ls) : ""}</span><span class="meter"><span style="width:${(n / lab.levels.length) * 100}%"></span></span></li>`;
+            return `<li><span><a href="#/lab/${lab.id}">${esc(lab.title)}</a><small>${n} of ${lab.levels.length} levels · ${st.runs} tests · ${st.hints} hints</small>${ls && ["submitted", "confirmed", "tryagain"].includes(ls.state) ? statusChip(ls) : ""}</span><span class="meter"><span style="width:${(n / lab.levels.length) * 100}%"></span></span></li>`;
           }).join("")}</ul>
         </div>
         <div class="block">
@@ -498,8 +472,8 @@
       </section>
 
       <section class="wrap section" aria-labelledby="slog-title">
-        <div class="section__head"><div><span class="eyebrow">Activity log</span><h2 id="slog-title">${plural(log.length, "completed activity", "completed activities")}</h2></div></div>
-        ${log.length ? `<ol class="mission-log">${log.map((c) => reflectionItem(student, prof, c, false)).join("")}</ol>` : `<p class="muted">No activities completed yet.</p>`}
+        <div class="section__head"><div><span class="eyebrow">Reflections</span><h2 id="slog-title">${plural(log.length, "reflection sent", "reflections sent")}</h2></div></div>
+        ${log.length ? `<ol class="mission-log">${log.map((c) => reflectionItem(student, prof, c, false)).join("")}</ol>` : `<p class="muted">Nothing sent yet.</p>`}
       </section>
 
       <section class="wrap section" aria-labelledby="tl-title">
@@ -509,26 +483,11 @@
 
     app().innerHTML = frame(user, cls, classes, "", body, { title: esc(cls.name) });
     bindFrame(user);
-    bindStageButtons();
-    bindReflectionActions();
     bindCheckActions();
   };
 
-  function bindStageButtons() {
-    app().querySelectorAll("[data-verify]").forEach((b) => b.addEventListener("click", () => {
-      SE.store.teacherLog(b.dataset.student || location.hash.split("/").pop(), "ican_verified", { stage: Number(b.dataset.verify) });
-      SE.toast(`Stage ${b.dataset.verify} confirmed`);
-      SE.route(true);
-    }));
-    app().querySelectorAll("[data-return]").forEach((b) => b.addEventListener("click", () => {
-      SE.store.teacherLog(b.dataset.student || location.hash.split("/").pop(), "ican_returned", { stage: Number(b.dataset.return) });
-      SE.toast(`Stage ${b.dataset.return} marked “not yet”`);
-      SE.route(true);
-    }));
-  }
-
   /* ───────── Reflections ───────── */
-  function reflectionItem(student, prof, c, withName) {
+  function reflectionItem(student, prof, c, withName, open) {
     const r = prof.reviewed[c.event.id];
     const conf = P.confidence.find((x) => x.id === c.event.data.confidence);
     const answer = (c.event.data.reflection || "").trim();
@@ -537,155 +496,44 @@
         <div class="mission-log__head">
           <span class="icon-badge">${icon(SE.areaById[c.activity.area].icon)}</span>
           <div>
-            ${withName ? `<a href="#/teach/student/${student.id}"><strong>${esc(student.displayName)}</strong></a> · ` : ""}<a href="#/activity/${c.activity.id}">${withName ? esc(c.activity.title) : `<strong>${esc(c.activity.title)}</strong>`}</a>
+            ${withName ? `<a href="#/teach/student/${student.id}"><strong>${esc(student.displayName)}</strong></a>${withName === "class" ? ` <span class="muted">(${esc((SE.store.classById(student.classId) || {}).name || "")})</span>` : ""} · ` : ""}<a href="#/activity/${c.activity.id}">${withName ? esc(c.activity.title) : `<strong>${esc(c.activity.title)}</strong>`}</a>
             <span>${SE.dateShort(c.event.at)} · ${completionTag(c.event)} · ${c.event.data.stepsDone || 0}/${c.event.data.stepsTotal || c.activity.steps.length} steps · ${c.event.data.extension ? "tried the challenge" : "no challenge"}</span>
           </div>
           ${conf ? `<span class="conf conf--${conf.id}">${esc(conf.name)}</span>` : ""}
         </div>
-        ${(() => { const st = SE.game.statusFor(prof, c.activity); return st.sub && st.sub.id === c.event.id ? `<div class="check-row-wrap">${statusChip(st)}${checkActions(student, c.activity, st)}</div>` : ""; })()}
+        ${(() => { const st = SE.game.statusFor(prof, c.activity); return st.sub && st.sub.id === c.event.id ? `<div class="check-row-wrap">${statusChip(st)}${checkActions(student, c.activity, st, open)}</div>` : ""; })()}
         ${c.event.data.extensionNote ? `<p class="muted small"><strong>Take it further:</strong> “${esc(c.event.data.extensionNote)}”</p>` : ""}
         ${answer ? `<p class="mission-log__q">${esc(c.event.data.evidence && c.activity.check ? c.activity.check : c.activity.reflect)}</p><p class="mission-log__answer">“${esc(answer)}”</p>` : (c.event.data.evidence === "show" ? `<p class="muted">${icon("users", 'class="inline-icon"')}Chose to show or tell you instead of writing.</p>` : `<p class="muted">No answer to the reflection question.</p>`)}
-        ${r ? (r.data.note ? `<p class="teacher-reply">${icon("message")}<span><strong>You replied:</strong> ${esc(r.data.note)}</span></p>` : `<p class="muted">${icon("eye", 'class="inline-icon"')}Marked as read</p>`)
-          : answer ? `
-          <form class="reply-form" data-completion="${c.event.id}" data-student="${student.id}">
-            <label class="visually-hidden" for="reply-${c.event.id}">Reply to ${esc(student.displayName)}</label>
-            <input id="reply-${c.event.id}" class="input" maxlength="200" placeholder="Optional reply. ${esc(student.displayName.split(" ")[0])} will see it.">
-            <button type="submit" class="btn btn--primary btn--small">${icon("check")}Mark read</button>
-          </form>` : ""}
+        ${r && r.data.note ? `<p class="teacher-reply">${icon("message")}<span><strong>You replied:</strong> ${esc(r.data.note)}</span></p>` : ""}
       </li>`;
   }
 
-  function bindReflectionActions() {
-    app().querySelectorAll(".reply-form").forEach((f) => f.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const note = f.querySelector("input").value.trim();
-      SE.store.teacherLog(f.dataset.student, "reflection_reviewed", { completionId: f.dataset.completion, note });
-      SE.toast(note ? "Reply sent" : "Marked as read");
-      SE.route(true);
-    }));
-  }
-
-  SE.views.teachReflections = function (user) {
-    const { classes, cls } = getClass(user);
-    if (!cls) return noClass(user);
-    const sum = SE.game.classSummary(cls.id);
-    const pending = pendingReflections(sum);
-    const reviewed = [];
-    if (showReviewed) sum.profiles.forEach(({ student, prof }) => prof.completions.forEach((c) => {
-      if ((c.event.data.reflection || "").trim() && prof.reviewed[c.event.id]) reviewed.push({ student, prof, c });
-    }));
-    reviewed.sort((a, b) => b.c.event.at - a.c.event.at);
-
+  /* ───────── Checks: every reflection waiting, across all classes ───────── */
+  SE.views.teachChecks = function (user) {
+    const classes = SE.store.classesFor(user.id);
+    if (!classes.length) return noClass(user);
+    const pending = classes.flatMap((c) => pendingChecks(SE.game.classSummary(c.id))).sort((a, b) => a.c.event.at - b.c.event.at);
+    // Recently checked (last 14 days), newest first, when the toggle is on.
+    const recent = !showReviewed ? [] : classes.flatMap((c) => SE.game.classSummary(c.id).profiles.flatMap(({ student, prof }) =>
+      Object.values(prof.missions).map((ms) => ms.confirmed || ms.tryAgain).filter((e) => e && Date.now() - e.at < 14 * SE.DAY)
+        .map((e) => ({ student, e, a: SE.activityById[e.data.activityId] })).filter((x) => x.a))).sort((x, y) => y.e.at - x.e.at);
     const body = `
       <section class="wrap section">
+        ${SE.checksGuide("teacher")}
+      </section>
+      <section class="wrap section" aria-labelledby="checks-title">
         <div class="section__head">
-          <div><span class="eyebrow">Think about it</span><h2>${pending.length ? `${plural(pending.length, "answer", "answers")} to read` : "You're all caught up"}</h2></div>
-          <label class="check-row"><input type="checkbox" id="show-reviewed" ${showReviewed ? "checked" : ""}> Show answers you've already read</label>
+          <div><span class="eyebrow">Checks</span><h2 id="checks-title">${pending.length ? `${plural(pending.length, "reflection", "reflections")} waiting` : "You're all caught up"}</h2></div>
+          <label class="check-row"><input type="checkbox" id="show-reviewed" ${showReviewed ? "checked" : ""}> Show what you checked in the last 2 weeks</label>
         </div>
-        <p class="muted section-note">Reflections show how students are thinking. A short reply, like “Great evidence,” keeps them writing. Students see your reply on their home screen and in their activity log.</p>
-        ${pending.length ? `<ol class="mission-log">${pending.map((x) => reflectionItem(x.student, x.prof, x.c, true)).join("")}</ol>`
-          : `<div class="empty">${icon("message")}<h3>No new reflections</h3><p>When students answer “Think about it” at the end of an activity, their answers show up here.</p></div>`}
-        ${showReviewed ? `<h3 class="subhead">Already read</h3><ol class="mission-log">${reviewed.map((x) => reflectionItem(x.student, x.prof, x.c, true)).join("")}</ol>` : ""}
+        ${pending.length ? `<ol class="mission-log">${pending.map((x) => reflectionItem(x.student, x.prof, x.c, classes.length > 1 ? "class" : true, true)).join("")}</ol>`
+          : `<div class="empty">${icon("message")}<h3>Nothing waiting</h3><p>When a student sends a reflection, it shows up here for you to Pass or send back.</p></div>`}
+        ${showReviewed ? `<h3 class="subhead">Checked recently</h3><ul class="checked-list">${recent.map(({ student, e, a }) => `<li>${e.type === "teacher_confirmed" ? `${icon("check")}<strong>Passed</strong>` : `${icon("refresh")}<strong>Try again</strong>`} · <a href="#/teach/student/${student.id}">${esc(student.displayName)}</a> · <a href="#/activity/${a.id}">${esc(a.title)}</a> <span class="muted">${SE.timeAgo(e.at)}${e.data.note ? ` · “${esc(e.data.note)}”` : ""}</span></li>`).join("") || `<li class="muted">Nothing in the last 2 weeks.</li>`}</ul>` : ""}
       </section>`;
-    app().innerHTML = frame(user, cls, classes, "reflections", body);
+    app().innerHTML = frame(user, null, [], "checks", body, { title: "Checks" });
     bindFrame(user);
-    bindReflectionActions();
     bindCheckActions();
     document.getElementById("show-reviewed").addEventListener("change", (e) => { showReviewed = e.target.checked; SE.route(true); });
-  };
-
-  /* ───────── Coding pathway (educator) ─────────
-     The same seven stages students see, from the same data (STEM.pathway), plus the class's
-     status on each stage, checks waiting, what a confirm looks like, and assigning. */
-  SE.views.teachPathway = function (user) {
-    const { classes, cls } = getClass(user);
-    if (!cls) return noClass(user);
-    const sum = SE.game.classSummary(cls.id);
-    const claims = pendingStageClaims(sum);
-    const claimRow = (x, withStage) => {
-      const s = STEM.pathway.find((p) => p.stage === x.stage);
-      return `<li>
-        <div><a href="#/teach/student/${x.student.id}"><strong>${esc(x.student.displayName)}</strong></a><span>${withStage ? `Stage ${x.stage}: ${esc(s.title)} · ` : ""}asked ${SE.timeAgo(x.at)}</span>${withStage ? `<em>“${esc(s.iCan)}”</em>` : ""}</div>
-        <span class="stage-actions"><button class="btn btn--primary btn--small" data-verify="${x.stage}" data-student="${x.student.id}">${icon("check")}Confirm</button><button class="btn btn--ghost btn--small" data-return="${x.stage}" data-student="${x.student.id}">Not yet</button></span>
-      </li>`;
-    };
-    const stageCard = (st) => {
-      const acts = st.activities.map((id) => SE.activityById[id]).filter(Boolean);
-      const cleared = sum.profiles.filter((p) => p.prof.stages[st.stage] && p.prof.stages[st.stage].status === "cleared");
-      const waiting = claims.filter((c) => c.stage === st.stage);
-      const notYet = sum.students.length - cleared.length - waiting.length;
-      const unassigned = acts.filter((a) => !SE.store.assignmentFor(cls.id, a.id));
-      const labLevels = (SE.roverLevels || []).map((l, i) => (l.stage === st.stage ? i + 1 : 0)).filter(Boolean);
-      const t = st.teach || {};
-      return `
-        <li class="stage tstage" id="tstage-${st.stage}">
-          <div class="stage__node" aria-hidden="true"><div><small>Stage</small><b>${st.stage}</b></div></div>
-          <article class="block stage__card" aria-labelledby="tstage-title-${st.stage}">
-            <div class="stage__head">
-              <div>
-                <h2 id="tstage-title-${st.stage}"><span class="visually-hidden">Stage ${st.stage}: </span>${esc(st.title)}</h2>
-                <p class="stage__concepts">${esc(st.concepts)}</p>
-              </div>
-              <p class="tstage__status" aria-label="Class status for stage ${st.stage}">
-                <span class="tchip is-cleared">${icon("check")}${cleared.length} cleared</span>
-                <span class="tchip is-claimed">${icon("clock")}${waiting.length} waiting</span>
-                <span class="tchip">${notYet} not yet</span>
-              </p>
-            </div>
-            ${waiting.length ? `<div class="tstage__waiting"><h3>${icon("flag")}Waiting for your check</h3><ul class="claims claims--compact">${waiting.map((x) => claimRow(x, false)).join("")}</ul></div>` : ""}
-            <div class="ican">${icon("check")}<span><span class="visually-hidden">Readiness check: </span>${esc(st.iCan)}</span></div>
-            <div class="tstage__teach">
-              <div><h3>What a confirm looks like</h3><p>${esc(t.lookFor || "")}</p></div>
-              <div><h3>Common misconception</h3><p>${esc(t.misconception || "")}</p></div>
-            </div>
-            <details class="tstage__more"><summary>Learning goal, project, and prerequisites</summary>
-              <div class="stage__grid">
-                <div><h3>Learning goal</h3><p>${esc(st.goal)}</p></div>
-                <div><h3>Project</h3><p>${esc(st.project)}</p></div>
-                <div><h3>Prerequisite</h3><p>${esc(st.prerequisite)}</p></div>
-                <div><h3>Debugging habit</h3><p>${esc(st.debugging)}</p></div>
-                <div class="prep__full"><h3>Suggested starting point</h3><p>${esc(st.suggestedStart)}</p></div>
-              </div>
-            </details>
-            <div class="tstage__missions-head">
-              <h3>Activities in this stage <span class="muted">${acts.length}</span></h3>
-              ${unassigned.length ? `<button type="button" class="btn btn--ghost btn--small" data-assign-many="${unassigned.map((a) => a.id).join(",")}">${icon("plus")}Assign stage ${st.stage} (${unassigned.length})</button>` : `<span class="chip chip--done">${icon("check")}All assigned</span>`}
-            </div>
-            <ul class="mlist">${acts.map((a) => missionRow(a, cls, sum)).join("")}</ul>
-            ${labLevels.length ? `<div class="stage__lab"><span>${icon("flask")}Harbor Code Lab levels for this stage</span>${labLevels.map((lv) => `<a class="lvl-chip" href="#/lab/rover/${lv}">${lv}</a>`).join("")}</div>` : ""}
-          </article>
-        </li>`;
-    };
-    const body = `
-      <section class="wrap section">
-        <div class="section__head">
-          <div><span class="eyebrow">Coding pathway</span><h2>The stages your students see, with your class on each one</h2></div>
-          <span class="tpath-tools"><a class="btn btn--ghost btn--small" href="#/pathway/student">${icon("eye")}Preview the student view</a><a class="btn btn--ghost btn--small" href="#checks-guide" data-jump="checks-guide">${icon("question")}How checks work</a></span>
-        </div>
-        <div class="block tpath-queue">
-          <div class="block__head"><h2>${claims.length ? `${plural(claims.length, "check", "checks")} waiting` : "No checks waiting"}</h2></div>
-          ${claims.length ? `<p class="muted section-note">Ask each student to show you the “I can” statement. Confirm clears the stage (+${P.xp.stageCleared} XP for them). Not yet lets them keep practicing and ask again.</p><ul class="claims">${claims.map((x) => claimRow(x, true)).join("")}</ul>`
-            : `<p class="muted">When a student taps “I can do this” on a stage, it shows up here and on that stage below.</p>`}
-        </div>
-      </section>
-      <section class="wrap section">${SE.checksGuide("teacher")}</section>
-      <ol class="wrap stages tstages">${STEM.pathway.map(stageCard).join("")}</ol>
-      <section class="wrap section">
-        <div class="section__head"><div><span class="eyebrow">Readiness</span><h2>Class pathway map</h2></div></div>
-        <div class="table-wrap">
-          <table class="matrix">
-            <thead><tr><th scope="col">Explorer</th>${STEM.pathway.map((s) => `<th scope="col" title="${esc(s.title)}"><span>Stage ${s.stage}</span><small>${esc(s.title)}</small></th>`).join("")}</tr></thead>
-            <tbody>${sum.profiles.map(({ student, prof }) => `<tr><th scope="row"><a class="roster-name" href="#/teach/student/${student.id}">${SE.studentAvatar(student.id, 30, prof)}${esc(student.displayName)}</a></th>${STEM.pathway.map((s) => {
-              const st = prof.stages[s.stage];
-              return `<td class="${st ? `is-${st.status}` : ""}">${st ? (st.status === "cleared" ? `${icon("check")}<span class="visually-hidden">Cleared</span>` : `${icon("clock")}<span class="visually-hidden">Waiting for check</span>`) : `<span class="visually-hidden">Not yet</span>`}</td>`;
-            }).join("")}</tr>`).join("")}</tbody>
-          </table>
-        </div>
-        <p class="legend"><span class="legend__k is-cleared">${icon("check")}</span>Cleared <span class="legend__k is-claimed">${icon("clock")}</span>Waiting for your check <span class="legend__k"></span>Not claimed yet</p>
-      </section>`;
-    app().innerHTML = frame(user, cls, classes, "pathway", body);
-    bindFrame(user);
-    bindStageButtons();
   };
 
   /* ───────── Class & logins ───────── */
@@ -796,24 +644,22 @@
 
   /* ───────── Missions: browse by discipline and assign to the class ───────── */
   const DISCIPLINES = () => [
-    { id: "pathway", name: "Coding pathway", short: "Pathway", icon: "list", blurb: "Seven readiness-based stages, from first instructions to independent projects. Assign a whole stage or pick activities inside it." },
     ...SE.liveAreas.map((a) => ({ id: a.id, name: a.name, short: a.short, icon: a.icon, blurb: a.description }))
   ];
   const missionFilters = { grade: "", time: "", q: "", maine: false, pilot: false };
   const LEVEL_ORDER = { beginner: 0, intermediate: 1, advanced: 2 };
 
   function classProgress(sum, a) {
-    const by = { confirmed: 0, checked: 0, submitted: 0, tryagain: 0, started: 0 };
+    const by = { confirmed: 0, submitted: 0, tryagain: 0, started: 0 };
     sum.profiles.forEach((p) => { const s = SE.game.statusFor(p.prof, a).state; if (by[s] != null) by[s]++; });
     const done = sum.profiles.filter((p) => SE.game.missionDone(p.prof, a)).length;
     const started = sum.profiles.filter((p) => !SE.game.missionDone(p.prof, a) && (p.prof.opened.has(a.id) || (a.launch.labId && (p.prof.labLevels[a.launch.labId] || new Set()).size))).length;
-    // Lab activities are checked by the lab itself; anything else is marked complete by the student.
     return { done, started, total: sum.students.length, self: !a.launch.labId, by };
   }
   const progressMarkup = (pr) => {
     const b = pr.by || {};
-    const parts = [b.confirmed && `${b.confirmed} confirmed`, b.checked && `${b.checked} checked in lab`, b.submitted && `${b.submitted} submitted`, b.tryagain && `${b.tryagain} try again`, b.started && `${b.started} started`].filter(Boolean);
-    const solid = (b.confirmed || 0) + (b.checked || 0), sent = b.submitted || 0, began = (b.started || 0) + (b.tryagain || 0);
+    const parts = [b.confirmed && `${b.confirmed} passed`, b.submitted && `${b.submitted} sent`, b.tryagain && `${b.tryagain} try again`, b.started && `${b.started} in progress`].filter(Boolean);
+    const solid = b.confirmed || 0, sent = b.submitted || 0, began = (b.started || 0) + (b.tryagain || 0);
     const w = (n) => (pr.total ? (n / pr.total) * 100 : 0);
     return `
     <span class="mprog" aria-label="${pr.total} students: ${parts.join(", ") || "none started"}">
@@ -1033,12 +879,11 @@
     const { cls } = getClass(user);
     if (!cls) return "";
     const sum = SE.game.classSummary(cls.id);
-    const refl = pendingReflections(sum).length;
-    const claims = pendingStageClaims(sum).length;
+    const waiting = pendingChecks(sum).length;
     return `
       <div class="wrap"><div class="edu-strip">
         ${icon("clipboard")}
-        <p><strong>${esc(cls.name)}</strong> · ${plural(sum.students.length, "explorer", "explorers")} · ${refl} reflections and ${claims} “I can” checks waiting</p>
+        <p><strong>${esc(cls.name)}</strong> · ${plural(sum.students.length, "student", "students")} · ${plural(waiting, "check", "checks")} waiting</p>
         <a class="btn btn--primary btn--small" href="#/teach">Open educator dashboard ${icon("arrowRight")}</a>
       </div></div>`;
   };

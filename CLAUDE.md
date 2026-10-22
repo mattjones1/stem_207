@@ -41,15 +41,23 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - Student home is the **Today** view (`SE.views.today`, route `#/`). `#/explore` is the expedition page (map, patches, class goal). `#/library` is the mission finder.
 - Pilot materials are in `pilot/` (rehearsal checklist, observation sheet). Test: `python3 tests/site/test_today_pilot.py`.
 
-## Completion statuses (Batch 4)
-- `SE.game.statusFor(prof, activity)` → `confirmed` · `tryagain` · `checked` (lab core levels passed; `coreLevels` on the activity, else all) · `submitted` · `started` · `none`, plus `legacy` for old one-click records. All derived from the event log; no database change.
-- Student debrief needs evidence: `evidence: "written"` (non-empty) or `"show"` (show or tell the teacher, no typing). Repeats add no XP. Base XP is flat (`P.xp.mission`); `teacher_confirmed` adds `P.xp.teacherConfirmed` once.
-- Teachers record checks with `teacher_confirmed` `{ activityId, how: oral|demo|work, note }` or `teacher_try_again` `{ activityId, note }` (note required). Try again reopens the mission on the student's Today until they send it again.
-- Test: `python3 tests/site/test_evidence.py [local] [cloud|skip]` (cloud needs Postgres + the mock on 8787).
+## One check for every activity (usability Stage 2)
+- The student sends a reflection, which is the deliverable. The debrief needs `evidence: "written"` (non-empty) or `"show"` (show or tell the teacher). The teacher marks:
+  - **Pass**: `teacher_confirmed` `{ activityId, how: oral|demo|work, note }`.
+  - **Try again**: `teacher_try_again` `{ activityId, note }`. The note is required, and the activity reopens on the student's Home until they send it again.
+- **XP comes only from a Pass:** `baseXp(activity)` (`P.xp.mission` plus the level bonus), plus `P.xp.newSector` for the first pass in a category.
+  - Sending, lab levels, and old `ican_*` stage events earn nothing.
+  - XP is recalculated from the log, so past work counts only if it was passed.
+  - Patches count passes. Lab patches still count lab levels.
+- `SE.game.statusFor` → `confirmed` "Passed" · `tryagain` "Try again" · `submitted` "Sent" · `started` "In progress" · `none` "Not started" (plus `legacy` for old one-click records).
+  - `prof.completedIds` = passed; `prof.sentIds` = sent at least once; `prof.passes` = first passes with their XP.
+- `#/teach/checks` (`SE.views.teachChecks`) is one queue across classes with Pass / Try again inline. `SE.teachChecksWaiting(user)` drives the badge in the top menu.
+- `SE.checksGuide("teacher" | "student")` is the one "How checks work" guide: open on Checks, folded on every activity page. Keep it in step with the real flow.
+- Tests: `python3 tests/site/test_batch8.py` (the check model) and `python3 tests/site/test_evidence.py [local] [cloud|skip]`.
 
 ## Learning-route fields and pages (Batch 5)
 - `starter: { file, label, how }`: a downloadable starter project (built by `python3 tools/build_starters.py` into `assets/starters/`). `figure: "<key>"`: a drawn block picture from `FIGURES` in `views-library.js` (with a text version). `bridge: { from, text }`: "You've seen this idea before" link from a lab to a platform activity.
-- `STEM.startHere` and `STEM.aiRoute` live in `pathway.js`. Pages: the pathway's "New to coding? Start here" and `#/ai-route`. Test: `python3 tests/site/test_batch5.py`.
+- `STEM.aiRoute` in `pathway.js` builds the "AI Learning Route" Learning Plan template (`tpl-ai-route`, not yet reviewed). The separate route and "Start here" pages are retired, and `#/pathway` and `#/ai-route` redirect (to the template for educators, `#/plans` for students, the category for guests). Test: `python3 tests/site/test_batch5.py`.
 
 ## Coding categories and progression (planning)
 - Read `planning/CODING_CATEGORIES.md` before any work on coding categories, coding missions, or educator coding pathways.
@@ -80,10 +88,10 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - Starters: `tools/build_starters.py` also builds `dance-crew.sb3`. It rebuilds every starter; revert the unchanged ones (zip timestamps change).
 - Tests: `python3 tests/labs/test_robot_chef.py`, `python3 tests/site/test_batch7.py`.
 
-## Educator pathway and checks guide (Batch 8)
-- `#/teach/pathway` (tab "Coding pathway") renders `STEM.pathway` for teachers: class status per stage, inline Confirm / Not yet (`ican_verified` / `ican_returned`), `teach: { lookFor, misconception }` per stage, mission rows with assign + prep, and the readiness map. Educators opening `#/pathway` are sent there; `#/pathway/student` previews the student page.
-- `SE.checksGuide("teacher" | "student")` in `views-library.js` is the "How checks work" guide. Keep it in step with the real flow if checks change.
-- Test: `python3 tests/site/test_batch8.py`.
+## Coding pathway → Coding Foundations template
+- The seven stages in `STEM.pathway` (`pathway.js`) are data for the "Coding Foundations" Learning Plan template (`tpl-coding-foundations`). Each stage's first activity is required; the others are optional practice.
+- The stage pages and "I can" checks are gone. `pathwayStage` on activities still orders and suggests them.
+- On the Coding and AI category pages, educators get a link to the matching template.
 
 ## My class / On my own, messages, instructions (Batch 9)
 - Today (`SE.views.today`) has two sides: `.today-col--class` (messages, try-again, assigned missions with `note`, waiting checks) and `.today-col--own` (unassigned in-progress work, suggestions, links). Assigned missions never appear on the own side.
@@ -92,10 +100,14 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - Test: `python3 tests/site/test_batch9.py [local] [cloud|skip]` (cloud needs Postgres with update-3 + the mock on 8787).
 
 ## Separate rewards (Batch 10)
-- Personal: XP, ranks, patches, harbor (unchanged; everything counts). Class: `P.classPoints` (assigned mission sent 100, mission confirmed 50, stage confirmed 100), `P.classGoal` stops in `pts`, and `P.classBadges`.
-- `SE.game.classCounts(classId)` → counts; `journeyFrom(counts)` → `{ points, goal, badges }`; `classJourney(classId)` uses `SE.store.journeyCounts(classId)` (from the `class_journey(p_token)` RPC on a cloud student device) or counts locally. Keep the JS and `supabase/update-4-class-journey.sql` rules identical.
-- UI: `SE.classJourneyBlock(journey, { compact })` on Today (class side), My expedition, and the teacher Overview; "My rewards" on Today's own side; the celebration shows "+100 class points" for a first send of an assigned mission.
-- Test: `python3 tests/site/test_batch10.py [local] [cloud|skip]` (cloud needs Postgres with update-4 + the mock on 8787).
+- **Personal rewards** (XP, ranks, patches, harbor) come from passes on any activity. **Class rewards:**
+  - `P.classPoints.passed` (100) for each pass on class work: an assigned activity, or one in an assigned Learning Plan.
+  - `P.classGoal` stops are in `pts`.
+  - `P.classBadges`: First Haul is the first pass; All Hands is everyone passing class work; Pathfinders is everyone passing 3; Right on Tide is unchanged; Steady Crew is 10 passes.
+- `SE.game.classCounts(classId)` → `{ students, passed, passedAll, withPassed, withThree, onTime }`; `journeyFrom(counts)` → `{ points, goal, badges }`.
+  - `classJourney(classId)` uses `SE.store.journeyCounts(classId)` (the `class_journey(p_token)` RPC on a cloud student device) or counts locally.
+  - Keep the JS and `supabase/update-8-class-journey-passes.sql` rules identical.
+- Test: `python3 tests/site/test_batch10.py [local] [cloud|skip]` (cloud needs Postgres with update-8 + the mock on 8787).
 
 ## Moxie pathway (physical computing, draft)
 - Plan: `planning/MOXIE_PLAN.md`, `MOXIE_AUDIT.md`, `MOXIE_VALIDATION.md`. Data: `assets/js/data/moxie.js` (`STEM.moxie`, and `STEM.moxieSessions` `moxie-01`…`16`). Views and rules: `assets/js/views-moxie.js` (`#/moxie`, `#/moxie/teach`; the activity view hands `a.moxie` records to `SE.views.moxieSession`).

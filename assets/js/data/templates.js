@@ -66,6 +66,20 @@ window.STEM = window.STEM || {};
         syn("Share your revised instruction cards, and have a partner decode your picture.", null)
       ]
     }),
+    // Built from the AI learning route (STEM.aiRoute): one step per activity, each step's idea as its bridge.
+    // Not yet reviewed by an educator, so it shows "Proposed: review before teaching".
+    ids({
+      id: "tpl-ai-route", reviewed: false,
+      title: "AI Learning Route",
+      essentialQuestion: "How do computers learn from examples, and when should a person check their answers?",
+      goal: "Six steps, from spotting patterns to deciding when AI should be trusted.",
+      finalProduct: STEM.aiRoute[STEM.aiRoute.length - 1].idea,
+      audience: { grades: [], minutes: null, equipment: [], prior: "" },
+      steps: (() => {
+        const seen = new Set();
+        return STEM.aiRoute.flatMap((st) => st.activities.filter((id) => !seen.has(id) && seen.add(id)).map((id) => m(id, { label: `Step ${st.step}`, bridge: st.idea })));
+      })()
+    }),
     // Built from the seven-stage coding pathway: each stage's first mission is required, the others optional practice.
     ids({
       id: "tpl-coding-foundations", reviewed: true,

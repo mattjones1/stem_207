@@ -49,9 +49,8 @@ async def main():
     # Bug Hunt → Robot Chef
     await pg.goto(S + "#/activity/fix-the-recipe"); await pg.wait_for_timeout(300)
     ok("bug hunt: next step is Robot Chef", await pg.locator('a[href="#/activity/lab-robot-chef"]').count() >= 1)
-    # pathway
-    await pg.goto(S + "#/pathway"); await pg.wait_for_timeout(400)
-    ok("pathway: grades 6–8 note and 8 tagged missions", await pg.locator(".track-note").count() == 1 and await pg.locator(".stage__links .track-tag").count() == 8)
+    # grades 6–8 track (the coding pathway page is gone; the tags live on the activities)
+    ok("grades 6–8 track: 8 activities tagged", await pg.evaluate("STEM.activities.filter(a => a.track === '6-8').length") == 8)
     # suggestions follow the band
     recs = await pg.evaluate("""(() => { const prof = { stages: { 1: { status: 'cleared' } }, completions: [], completedIds: new Set(), counts: { sectors: new Set() } };
       return ['6-8', '4-5'].map(b => SE.game.recommendations({ gradeBand: b }, prof, 1)[0].activity.id); })()""")

@@ -10,15 +10,15 @@ window.STEM = window.STEM || {};
 window.STEM.progression = {
   /* Experience points (XP) for each kind of accomplishment. */
   xp: {
-    mission: 150,            // first submission with evidence (no extra XP for longer activities)
+    mission: 150,            // earned when the teacher passes an activity (no extra XP for longer activities)
     missionByDuration: { 20: 150, 30: 150, 45: 150 },   // kept for older code; all equal now
-    teacherConfirmed: 50,    // a teacher confirmed the target skill (once per activity)
+    teacherConfirmed: 0,     // retired: the pass itself earns the activity's XP
     levelBonus: { beginner: 0, intermediate: 50, advanced: 100 },
-    reflection: 25,          // answered "Think about it"
-    extension: 50,           // tried "Take it further"
-    newSector: 50,           // first activity in an exploration area
-    stageCleared: 100,       // teacher confirmed a pathway "I can"
-    labLevel: 30,            // finished a level in an interactive lab (first time)
+    reflection: 0,           // retired (XP comes only from a pass)
+    extension: 0,            // retired (XP comes only from a pass)
+    newSector: 50,           // first pass in a category
+    stageCleared: 0,         // retired with the coding pathway's stage checks
+    labLevel: 0,             // retired: lab levels are practice (they still count toward lab patches)
     replay: 0                // repeating an activity is practice: no new XP
   },
 
@@ -44,33 +44,33 @@ window.STEM.progression = {
    */
   patches: [
     { id: "first-launch", name: "Cast Off", icon: "boat", ring: "orange", rule: "missions", n: 1,
-      how: "Complete your first activity." },
+      how: "Pass your first activity." },
     { id: "logbook", name: "Logbook Keeper", icon: "clipboard", ring: "teal", rule: "reflections", n: 5,
-      how: "Answer 5 \"Think about it\" questions." },
+      how: "Pass 5 activities with a written reflection." },
     { id: "further", name: "Past the Breakwater", icon: "flag", ring: "navy", rule: "extensions", n: 3,
-      how: "Try 3 \"Take it further\" challenges." },
+      how: "Pass 3 activities where you tried \"Take it further.\"" },
     { id: "wide-horizon", name: "Down East", icon: "compass", ring: "orange", rule: "sectors", n: 4,
-      how: "Complete activities in 4 different exploration areas." },
+      how: "Pass activities in 4 different categories." },
     { id: "crew", name: "Sternman", icon: "users", ring: "teal", rule: "collaborative", n: 3,
-      how: "Complete 3 team activities." },
+      how: "Pass 3 team activities." },
     { id: "bug-hunter", name: "Bug Hunter", icon: "bug", ring: "navy", rule: "keyword", keyword: "debugging", n: 2,
-      how: "Complete 2 debugging activities." },
+      how: "Pass 2 debugging activities." },
     { id: "sector-coding", name: "Code Sector", icon: "code", ring: "teal", rule: "area", area: "coding", n: 3,
-      how: "Complete 3 Coding activities." },
+      how: "Pass 3 Coding activities." },
     { id: "sector-vr", name: "Far Sight", icon: "vr", ring: "navy", rule: "area", area: "vr", n: 2,
-      how: "Complete 2 Virtual Reality activities." },
+      how: "Pass 2 Virtual Reality activities." },
     { id: "sector-ai", name: "Pattern Finder", icon: "ai", ring: "orange", rule: "area", area: "ai", n: 2,
-      how: "Complete 2 AI activities." },
+      how: "Pass 2 AI activities." },
     { id: "sector-engineering", name: "Builder", icon: "gear", ring: "teal", rule: "area", area: "engineering", n: 2,
-      how: "Complete 2 Engineering activities." },
+      how: "Pass 2 Engineering activities." },
     { id: "sector-science", name: "Field Scientist", icon: "flask", ring: "navy", rule: "area", area: "science", n: 2,
-      how: "Complete 2 Science activities." },
+      how: "Pass 2 Science activities." },
     { id: "sector-creative", name: "Maker", icon: "palette", ring: "orange", rule: "area", area: "creative", n: 2,
-      how: "Complete 2 Creative activities." },
-    { id: "pathway-3", name: "Trail Blazes", icon: "pine", ring: "teal", rule: "stages", n: 3,
-      how: "Clear 3 coding pathway stages." },
-    { id: "pathway-7", name: "Summit Katahdin", icon: "mountain", ring: "orange", rule: "stages", n: 7,
-      how: "Clear all 7 coding pathway stages." },
+      how: "Pass 2 Creative activities." },
+    { id: "pathway-3", name: "Trail Blazes", icon: "pine", ring: "teal", rule: "missions", n: 10,
+      how: "Pass 10 activities." },
+    { id: "pathway-7", name: "Summit Katahdin", icon: "mountain", ring: "orange", rule: "missions", n: 25,
+      how: "Pass 25 activities." },
     { id: "lab-explorer", name: "Lab Explorer", icon: "flask", ring: "teal", rule: "labs", n: 3,
       how: "Finish a level in 3 different interactive labs." },
     { id: "lab-master", name: "Lab Master", icon: "star", ring: "orange", rule: "labFull", n: 1,
@@ -78,14 +78,14 @@ window.STEM.progression = {
     { id: "lab-legend", name: "Lab Legend", icon: "lighthouse", ring: "navy", rule: "labLevels", n: 30,
       how: "Finish 30 lab levels." },
     { id: "teacher-level", name: "Could Teach It", icon: "bulb", ring: "navy", rule: "confident", n: 3,
-      how: "Finish 3 activities feeling ready to teach someone else." }
+      how: "Pass 3 activities feeling ready to teach someone else." }
   ],
 
   /* Class rewards (Batch 10) are separate from personal XP. Only class work moves the class:
      an activity the teacher assigned and the student sent, an activity the teacher confirmed, and a
      pathway stage the teacher confirmed. Personal XP, ranks, patches, and the harbor still count
      everything a student does. */
-  classPoints: { assignedDone: 100, confirmed: 50, stageCleared: 100 },
+  classPoints: { passed: 100 },   // per assigned activity (or activity in an assigned Learning Plan) a teacher passes
 
   /* The class journey: the class travels Maine together, from the state line to the summit. */
   classGoal: [
@@ -99,11 +99,11 @@ window.STEM.progression = {
 
   /* Badges the whole class earns together. */
   classBadges: [
-    { id: "first-haul", name: "First Haul", icon: "boat", how: "Your teacher confirms the class's first activity." },
-    { id: "all-hands", name: "All Hands on Deck", icon: "users", how: "Every student sends at least one class activity." },
-    { id: "pathfinders", name: "Pathfinders", icon: "compass", how: "Every student clears Stage 1 of the coding pathway." },
+    { id: "first-haul", name: "First Haul", icon: "boat", how: "Your teacher passes the class's first activity." },
+    { id: "all-hands", name: "All Hands on Deck", icon: "users", how: "Every student passes at least one class activity." },
+    { id: "pathfinders", name: "Pathfinders", icon: "compass", how: "Every student passes 3 activities." },
     { id: "right-on-tide", name: "Right on Tide", icon: "wave", how: "Everyone sends an assigned activity by its due date." },
-    { id: "steady-crew", name: "Steady Crew", icon: "lighthouse", how: "Your teacher confirms 10 activities across the class." }
+    { id: "steady-crew", name: "Steady Crew", icon: "lighthouse", how: "Your teacher passes 10 activities across the class." }
   ],
 
   /* How a student felt at the end of an activity. Shown to teachers. */

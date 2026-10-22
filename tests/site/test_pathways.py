@@ -24,7 +24,7 @@ async def local(b):
     await educator(pg, S)
     await go(pg, S + "#/teach/pathways")
     ok("Learning Plans is in the top menu", await pg.locator('#site-nav a[href="#/teach/plans"]').count() == 1)
-    ok("4 templates, each with Use this template", await pg.locator("[data-use^=tpl-]").count() == 4)
+    ok("5 templates, each with Use this template", await pg.locator("[data-use^=tpl-]").count() == 5)
     tpl = await pg.evaluate("JSON.stringify(SE.pathways.template('tpl-maine-coast'))")
 
     # Use a template: an editable copy; the template doesn't change.

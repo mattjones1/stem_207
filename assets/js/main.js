@@ -78,6 +78,12 @@
     const moved = MOVED[`${a}/${b}`] || (!b && MOVED[a]);
     if (moved) { location.replace(moved + (a === "teach" && b === "pathways" && c ? `/${parts.slice(2).join("/")}` : "")); return; }
     if (a === "area" && b) { location.replace(`#/activities/${b}`); return; }
+    // The coding pathway and the AI route are Learning Plan templates now.
+    const tpl = { pathway: "tpl-coding-foundations", "ai-route": "tpl-ai-route" }[a === "teach" && b === "pathway" ? "pathway" : a];
+    if (tpl && (a !== "teach" || b === "pathway")) {
+      location.replace(user.role === "educator" ? `#/teach/plans/${tpl}` : user.role === "student" ? "#/plans" : `#/activities/${tpl === "tpl-ai-route" ? "ai" : "coding"}`);
+      return;
+    }
 
     if (a === "signin" && !b) { SE.views.signin(); title = "Sign in · STEM 207"; }
     else if (a === "signin" && b === "student") { SE.views.signinStudent(); title = "Student sign in · STEM 207"; }
@@ -88,9 +94,8 @@
       navKey = { plans: "plans", classes: "classes", checks: "checks" }[b] || "teach";
       if (!b) SE.views.teach(user);
       else if (b === "student") SE.views.teachStudent(user, c);
-      else if (b === "pathway") SE.views.teachPathway(user);
       else if (b === "missions") SE.views.teachMissions(user, c);
-      else if (b === "checks") SE.views.teachReflections(user);
+      else if (b === "checks") SE.views.teachChecks(user);
       else if (b === "classes") SE.views.teachClass(user);
       else if (b === "plans") SE.views.teachPathways(user, parts.slice(2));
       else SE.views.notFound();
@@ -127,16 +132,10 @@
       const lab = SE.labs.byId(b);
       title = `${lab ? lab.title : "Lab"} · STEM 207`;
     }
-    else if (a === "ai-route") { SE.views.aiRoute(user); navKey = "activities"; title = "AI learning route · STEM 207"; }
     else if (a === "moxie" && !b) { SE.views.moxie(user); navKey = "activities"; title = "Moxie · STEM 207"; }
     else if (a === "moxie" && b === "teach") {
       if (user.role !== "educator") { location.replace("#/signin/educator"); return; }
       SE.views.moxieTeach(user); navKey = "teach"; title = "Teach Moxie · STEM 207";
-    }
-    else if (a === "pathway") {
-      // Educators get their own pathway (in sync with the student one); #/pathway/student previews the student view.
-      if (user.role === "educator" && b !== "student") { location.replace("#/teach/pathway"); return; }
-      SE.views.pathway(user); navKey = "pathway"; title = "Coding pathway · STEM 207";
     }
     else SE.views.notFound();
 

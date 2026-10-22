@@ -49,7 +49,7 @@
       <div class="cjourney">
         <p class="cjourney__pts"><strong>${SE.num(journey.points)} class points</strong>${g.next ? ` · ${SE.num(g.next.pts - journey.points)} to ${esc(g.next.name)}` : ""}</p>
         ${SE.goalTrack(g)}
-        <p class="cjourney__how">${icon("users")}<span><strong>How the class earns points:</strong> an assigned activity sent +${cp.assignedDone} · an activity your teacher confirms +${cp.confirmed} · a coding stage your teacher confirms +${cp.stageCleared}. Activities you do on your own still earn your own XP.</span></p>
+        <p class="cjourney__how">${icon("users")}<span><strong>How the class earns points:</strong> +${cp.passed} each time your teacher passes an activity from your class work (an assigned activity, or one in a class Learning Plan). Activities you choose on your own earn your own XP when they pass.</span></p>
         <h3 class="cjourney__bh">Class badges <span class="muted">${earned.length} of ${journey.badges.length}</span></h3>
         <ul class="cbadges">${journey.badges.map(badge).join("")}</ul>
       </div>`;
@@ -226,8 +226,7 @@
     if (classMain) { const asg = assigned.find((r) => r.a.id === classMain.id); classNote = asg && asg.x.note; }
     const messages = user.classId ? SE.store.messagesFor(user.classId) : [];
     const notes = prof.completions.map((c) => ({ c, r: prof.reviewed[c.event.id] })).filter((x) => x.r && x.r.data.note && Date.now() - x.r.at < 14 * SE.DAY).slice(-1)[0];
-    const waiting = statuses.filter((r) => r.st.state === "submitted").sort((p, q) => ((q.st.sub && q.st.sub.at) || 0) - ((p.st.sub && p.st.sub.at) || 0)).map((r) => ({ label: r.a.title, href: `#/activity/${r.a.id}`, what: "Mission sent" }))
-      .concat(Object.entries(prof.stages).filter(([, st]) => st.status === "claimed").map(([n]) => ({ label: `Stage ${n}: ${STEM.pathway.find((p) => p.stage === Number(n)).title}`, href: `#/pathway#stage-${n}`, what: "Stage check" })));
+    const waiting = statuses.filter((r) => r.st.state === "submitted").sort((p, q) => ((q.st.sub && q.st.sub.at) || 0) - ((p.st.sub && p.st.sub.at) || 0)).map((r) => ({ label: r.a.title, href: `#/activity/${r.a.id}`, what: "Sent" }));
 
     // On my own: unassigned work in progress first, then suggestions (which already skip assigned activities).
     const ownInProgress = Object.entries(prof.steps).filter(([id, set]) => set.size > 0 && !prof.completedIds.has(id) && !assignedIds.has(id)).map(([id]) => SE.activityById[id]).filter(Boolean)[0];
@@ -332,7 +331,6 @@
               <a href="#/activities">${icon("search")}<span><strong>All activities</strong><small>Search and pick any activity</small></span></a>
               <a href="#/explore">${icon("map")}<span><strong>My expedition</strong><small>Star map, patches, and class journey</small></span></a>
               <a href="#/base">${icon("lighthouse")}<span><strong>My harbor</strong><small>Your explorer and boat</small></span></a>
-              <a href="#/pathway">${icon("list")}<span><strong>Coding pathway</strong><small>Seven stages, step by step</small></span></a>
             </div>
           </nav>
         </section>
@@ -352,15 +350,13 @@
     });
   };
 
-  /* ───────── Activity debrief (bottom of an activity page) ───────── */
-  /* ───────── Activity debrief: show what you know ─────────
-   * A submission needs evidence: a written answer, or "I'll show or tell my teacher" (no typing).
-   * It's recorded as Submitted. A teacher can then confirm it or ask the student to try again,
-   * and the student can revise and send it again at any time. */
+  /* ───────── Activity debrief: the reflection is the deliverable ─────────
+   * Every activity works the same way: the student sends a reflection (written, or "I'll show or
+   * tell my teacher"), and the teacher marks it Pass (the XP is earned) or Try again (it reopens,
+   * with the teacher's note). The student can revise and send again at any time. */
   const STATUS_TEXT = {
-    submitted: "Submitted. Your teacher will check it.",
-    checked: "Checked in the lab. Your teacher may still ask you to show it.",
-    confirmed: "Your teacher confirmed it. Nice work!",
+    submitted: "Sent. Your teacher will check it.",
+    confirmed: "Your teacher passed it. Nice work!",
     tryagain: "Your teacher asked you to try again."
   };
   SE.views.debrief = function (user, a, prof) {
@@ -371,15 +367,14 @@
     const base = SE.game.baseXp(a);
     const first = !last;
     const prompt = a.check || a.reflect;
-    const xpLine = first
-      ? `Worth <strong>${base} XP</strong>${!prof.counts.sectors.has(a.area) ? ` + ${P.xp.newSector} for a new area` : ""} when you send it.`
+    const xpLine = st.state === "confirmed" ? "You already passed this one. Sending again is practice: your teacher can read your new answer."
       : st.state === "tryagain" ? "Fix it up and send it again. Your teacher will look at your new answer."
-      : "Sending it again is practice: it doesn't add XP, but your teacher can read your new answer.";
+      : `Worth <strong>${base} XP</strong>${!prof.counts.sectors.has(a.area) ? ` + ${P.xp.newSector} for your first pass in ${esc(SE.areaById[a.area].short)}` : ""} when your teacher passes it.`;
     const how = (st.confirmed && st.confirmed.data.how) ? ` (${esc({ oral: "spoken check", demo: "watched you show it", work: "reviewed your work" }[st.confirmed.data.how] || st.confirmed.data.how)})` : "";
     return `
       ${last || st.confirmed ? `
       <section class="block block--complete status--${st.state}" aria-labelledby="s-done">
-        <h2 id="s-done">${icon(st.state === "tryagain" ? "refresh" : "check")}${esc(st.label === "Legacy" ? "Marked complete" : st.label)}</h2>
+        <h2 id="s-done">${icon(st.state === "tryagain" ? "refresh" : "check")}${esc(st.label)}</h2>
         <p>${esc(STATUS_TEXT[st.state] || "")}${how}${last ? ` You sent it on ${SE.dateShort(last.event.at)}.` : ""}</p>
         ${st.state === "tryagain" && st.tryAgain.data.note ? `<p class="teacher-reply">${icon("message")}<span><strong>Your teacher wrote:</strong> ${esc(st.tryAgain.data.note)}</span></p>` : ""}
         ${st.state === "confirmed" && st.confirmed.data.note ? `<p class="teacher-reply">${icon("message")}<span><strong>Your teacher wrote:</strong> ${esc(st.confirmed.data.note)}</span></p>` : ""}
@@ -387,6 +382,7 @@
         ${review && review.data.note ? `<p class="teacher-reply">${icon("message")}<span><strong>Your teacher wrote:</strong> ${esc(review.data.note)}</span></p>` : ""}
       </section>` : ""}
 
+      ${SE.checksGuide("student")}
       <section class="block block--debrief" aria-labelledby="s-debrief">
         <h2 id="s-debrief">${icon("flag")}${first ? "Show what you know" : st.state === "tryagain" ? "Try it again" : "Send a new answer"}</h2>
         <p class="block__hint">${xpLine}</p>
@@ -478,13 +474,13 @@
     wrap.className = "overlay";
     wrap.innerHTML = `
       <div class="celebrate" role="dialog" aria-modal="true" aria-labelledby="cel-title">
-        <div class="celebrate__stamp">${SE.patchArt({ name: "Mission complete", icon: SE.areaById[a.area].icon, ring: "orange" }, true, 120)}</div>
-        <h2 id="cel-title" tabindex="-1">${rankUp ? `Promoted to ${esc(after.rank.name)}!` : gained.first ? (gained.event.data.evidence === "show" ? "Sent! Now show your teacher." : "Sent to your teacher!") : "Practice saved"}</h2>
+        <div class="celebrate__stamp">${SE.patchArt({ name: "Sent", icon: SE.areaById[a.area].icon, ring: "orange" }, true, 120)}</div>
+        <h2 id="cel-title" tabindex="-1">${gained.event.data.evidence === "show" ? "Sent! Now show your teacher." : "Sent to your teacher!"}</h2>
         <p class="celebrate__sub">${esc(a.title)}</p>
         ${gained.event.data.evidence === "show" ? `<p class="celebrate__note celebrate__note--show">${icon("users")}Now show or tell your teacher what you did.</p>` : ""}
-        ${gained.xp ? `<p class="celebrate__xp">+<span id="cel-xp">${reduce ? gained.xp : 0}</span> XP</p>
-        <ul class="celebrate__parts">${gained.parts.map(([label, n]) => `<li><span>${esc(label)}</span><b>+${n}</b></li>`).join("")}</ul>` : `<p class="celebrate__note">Repeats are practice, so they don't add XP. Your teacher can read your new answer.</p>`}
-        ${gained.first && user.classId && SE.store.assignmentFor(user.classId, a.id) && !after.completions.slice(0, -1).some((c) => c.activity.id === a.id) ? `<p class="celebrate__class">${icon("boat")}<span><strong>+${P.classPoints.assignedDone} class points</strong> for ${esc(user.cls ? user.cls.name : "your class")}. This was a class activity, so the whole class moves forward.</span></p>` : ""}
+        <p class="celebrate__note">${after.missions[a.id] && after.missions[a.id].confirmed
+          ? "You already passed this one, so this is practice. Your teacher can read your new answer."
+          : `Your teacher will check it. When they pass it, you earn <strong>${SE.game.baseXp(a)} XP</strong>. If they ask you to try again, you'll see their note on Home.`}</p>
         ${rankUp ? `<div class="celebrate__rank">${SE.insignia(after.rank, 56)}<p><strong>${esc(after.rank.name)}</strong><br>${esc(after.rank.motto)}</p></div>` : ""}
         <div class="celebrate__bar">${rankBar(after, true)}</div>
         ${SE.base.unlockStrip(SE.base.newUnlocks(before, after))}
@@ -497,7 +493,7 @@
           </div>` : ""}
         <div class="celebrate__actions">
           ${next ? `<a class="btn btn--launch" href="#/activity/${next.activity.id}" data-close>${icon("rocket")}Next: ${esc(next.activity.title)}</a>` : ""}
-          <a class="btn btn--ghost" href="#/" data-close>${icon("map")}Back to Today</a>
+          <a class="btn btn--ghost" href="#/" data-close>${icon("map")}Back to Home</a>
         </div>
       </div>`;
     document.body.appendChild(wrap);
@@ -505,16 +501,6 @@
     const title = wrap.querySelector("#cel-title");
     title.focus();
 
-    if (!reduce && gained.xp) {
-      const el = wrap.querySelector("#cel-xp");
-      const t0 = performance.now();
-      const step = (t) => {
-        const k = Math.min(1, (t - t0) / 900);
-        el.textContent = Math.round(gained.xp * (1 - Math.pow(1 - k, 3)));
-        if (k < 1) requestAnimationFrame(step);
-      };
-      requestAnimationFrame(step);
-    }
 
     const close = () => {
       wrap.remove();
