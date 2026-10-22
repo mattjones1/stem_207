@@ -104,12 +104,12 @@
     else if (!a && user.role === "student") { SE.views.today(user); navKey = "dashboard"; title = "Home · STEM 207"; }
     else if (a === "plans") {
       if (user.role !== "student") { location.replace("#/teach/plans"); return; }
-      if (b) SE.views.myPlan(user, b); else SE.views.dashboard(user, "explore");
+      if (b) SE.views.myPlan(user, b); else SE.views.myPlans(user);
       navKey = "plans"; title = "My Learning Plans · STEM 207";
     }
     else if (!a) {
       if (user.role === "educator") { location.replace("#/teach"); return; }
-      SE.views.dashboard(user, ""); navKey = "dashboard";
+      SE.views.dashboard(user); navKey = "dashboard";
     }
     else if (a === "activities") {
       SE.views.activities(user, b); navKey = "activities";

@@ -38,7 +38,7 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - `pilot: true` puts it in the teacher "Pilot missions" filters.
 - `time: { prep, core: [min, max], verified }`: shown as student time and teacher prep, and used by the time filters. Keep `duration` (20/30/45) for XP. Set `verified: true` only after classroom timing.
 - `stopAt` ("You're done when"), `check` (the "Show what you know" prompt; spoken, shown, or written), `stuck` (student-visible hints), `next` (activity id).
-- Student home is the **Today** view (`SE.views.today`, route `#/`). `#/explore` is the expedition page (map, patches, class goal). `#/library` is the mission finder.
+- Student home is **Home** (`SE.views.today`, route `#/`); see "Student Home and My Learning Plans" below.
 - Pilot materials are in `pilot/` (rehearsal checklist, observation sheet). Test: `python3 tests/site/test_today_pilot.py`.
 
 ## One check for every activity (usability Stage 2)
@@ -93,11 +93,14 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - The stage pages and "I can" checks are gone. `pathwayStage` on activities still orders and suggests them.
 - On the Coding and AI category pages, educators get a link to the matching template.
 
-## My class / On my own, messages, instructions (Batch 9)
-- Today (`SE.views.today`) has two sides: `.today-col--class` (messages, try-again, assigned missions with `note`, waiting checks) and `.today-col--own` (unassigned in-progress work, suggestions, links). Assigned missions never appear on the own side.
-- `SE.store.messagesFor / postMessage / deleteMessage` (table `class_messages`) and `SE.store.setAssignmentNote` (`assignments.note`). Students get both through `student_state`. Needs `supabase/update-3-class-messages.sql`; before it runs, the app still works and posting a message shows a toast.
+## Student Home and My Learning Plans (usability Stage 5)
+- Home (`SE.views.today`, `#/`) is one column: greeting and rank chip (`.home-rank` → `#/me`), exactly one **Up next** card (`.upnext`, `#upnext-title`, with `#help-btn`), one "Waiting for your teacher" line (`.home-waiting`), the newest message (`.home-msg`, older ones in `details`), one class journey line (`SE.classJourneyLine`), and two buttons (`.home-actions`).
+- `SE.home.upNext(user, prof)` picks the card: a Try again, then the next activity in a current plan (`SE.plans.progress`), then an older single assignment, then the student's own work in progress, then a suggestion. Its `kind` is `tryagain | plan | assigned | own | suggested`.
+- My Learning Plans (`SE.views.myPlans`, `#/plans`, in `views-plans.js`): Current / All (`SE.store.planFinished`), plan cards, and an "Earlier assignments" card for old single assignments. `#/explore` redirects here; the expedition page and star map on it are gone.
+- Me (`#/me`) has the rank ladder, patches, the full class journey with badges (`#class-journey`), creations, labs, and the log of what was sent (`#log-title`) with status chips.
+- Messages: `SE.store.messagesFor / postMessage / deleteMessage` (table `class_messages`, `update-3`). Old assignment notes (`setAssignmentNote`) still show on the Up next card for an older single assignment.
 - In cloud mode, students only load their own events; class totals come from `class_journey` (Batch 10).
-- Test: `python3 tests/site/test_batch9.py [local] [cloud|skip]` (cloud needs Postgres with update-3 + the mock on 8787).
+- Tests: `python3 tests/site/test_today_pilot.py`, `python3 tests/site/test_batch9.py [local] [cloud|skip]`, and `test_plans.py`.
 
 ## Separate rewards (Batch 10)
 - **Personal rewards** (XP, ranks, patches, harbor) come from passes on any activity. **Class rewards:**
@@ -123,7 +126,7 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
   - Unpublished records go in `STEM.drafts`: they're in `SE.activityById`, never in `STEM.activities`.
   - The activity view sends anything not `visibleTo` the user to not-found.
 - 3D Printing is the seventh area, with `status: "coming-soon"`.
-  - Use `SE.liveAreas` (not `STEM.areas`) for filters, the buoy hero, the expedition map, suggestions, and teacher area tabs. The category grid shows all areas.
+  - Use `SE.liveAreas` (not `STEM.areas`) for filters, the buoy hero, suggestions, and teacher area tabs. The category grid shows all areas.
   - Its five placeholders (`data/drafts-3d-printing.js`) stay generic. **Don't invent exercise content.**
 - Optional mission fields: `alsoIn` (counted once, in the primary area), `skills` (from `STEM.skills`), and `delivery`.
   - Apply skill tags and delivery labels only after the proposals in audit section 6 are approved.
@@ -138,7 +141,7 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
   - `#/teach/plans/new[/<activityId>]`, `/<templateId>` (preview + Use this template), `/<id>[/students|checks]` (tabs Activities, Students, Checks), and `/<id>/edit`.
   - Plan page actions: Edit, Assign to a class, **Update for students** (`SE.store.updatePlanForStudents`: publishes and moves every assigned class), Duplicate, Finish/Reopen (`archivePathway`).
   - `SE.planPicker(user, a)` ("Add to a Learning Plan") on educator activity pages. There's no per-activity assign anymore; `#/teach/missions` redirects to `#/teach/plans`.
-  - Students: `SE.views.myPlan` (`#/plans/<assignmentId>`; `#/my/pathways/<id>` redirects) and `SE.pathwayToday(user)` (plan cards on Home).
+  - Students: `SE.views.myPlan` (`#/plans/<assignmentId>`; `#/my/pathways/<id>` redirects) and `SE.views.myPlans` (`#/plans`). Home's Up next card reads plans through `SE.plans.progress`.
   - Pure rules: `SE.plans.stepsOf`, `totals`, `warnings` (advice only), `blockers`, `unpublished`, `progress` (passed of required, and the next activity), `template`.
 - Step shape: `{ id, kind: "mission", activityId, required, note }`. `stepsOf` drops old synthesis steps and reads an old `bridge` as the note.
 - Status: `SE.store.planStatus(p)` → draft · current (assigned) · finished (archived). `SE.store.planFinished(asg)` uses `asg.finished` from `student_state` (`supabase/update-10-plan-status.sql`) or the plan in local mode.
@@ -190,7 +193,7 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - Local mode: `LOCAL_MODE=1 PORT=8767 node tests/backend/mock-supabase.js`, then open http://localhost:8767. The sample class code is `MOOSE7` (Ava R.: pine, lighthouse, moon). For an educator, use "Fill demo" on `#/signin/educator`.
 - Cloud mock: Postgres plus `node tests/backend/mock-supabase.js` on port 8787 (see `tests/backend/README.md`).
 - Lab tests (Playwright, Chromium preinstalled): `python3 tests/labs/test_<lab>.py [url]`. A test must not revisit the same `#/lab/...` hash without navigating away first, or the lab won't re-mount.
-- **Test runner:** `tests/run.sh` (quick: Dance Party + Today + rewards), `tests/run.sh all` (every test, plus cloud checks when the test Postgres exists), `tests/run.sh local`, or `tests/run.sh <files>`. It starts and stops the mock servers and prints one line per test. Use it instead of hand-written loops.
+- **Test runner:** `tests/run.sh` (quick: Dance Party + Home + rewards), `tests/run.sh all` (every test, plus cloud checks when the test Postgres exists), `tests/run.sh local`, or `tests/run.sh <files>`. It starts and stops the mock servers and prints one line per test. Use it instead of hand-written loops.
 - Effort guide: use a quick smoke check for drafts. Before pushing, run the tests the change touches plus the quick set.
 - Single-file build: `python3 tools/build_single_file.py` writes `dist/STEM 207.html`. Run it before committing.
 

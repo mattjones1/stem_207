@@ -329,7 +329,7 @@
       app().innerHTML = `
         <section class="page-top page-top--base">
           <div class="wrap page-top__inner">
-            <div class="backbar">${SE.backLink("#/", "Today")}</div>
+            <div class="backbar">${SE.backLink("#/")}</div>
             <div class="base-head">
               <div class="base-head__avatar">${avatar(state.look, 132, { label: "Your explorer" })}</div>
               <div><span class="eyebrow">${esc(prof.rank.name)} · ${SE.num(prof.xp)} XP</span><h1 tabindex="-1">My harbor</h1>

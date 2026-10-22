@@ -10,6 +10,7 @@
  *   #/teach/plans/<templateId>           a template preview with "Use this template"
  *   #/teach/plans/<id>[/students|checks] a plan: Activities, Students, Checks
  *   #/teach/plans/<id>/edit              the editor
+ *   #/plans                              My Learning Plans, Current / All (students)
  *   #/plans/<assignmentId>               a student's plan (students)
  *
  * Plans are stored as pathways (store.js, supabase/update-6). "Update for students" publishes the
@@ -630,19 +631,52 @@
   /* Status in words with a shape, so color is never the only signal (students). */
   SE.studentStatusChip = (st) => `<span class="pwk-state pwk-state--${{ confirmed: "accepted", tryagain: "revise", submitted: "sent", started: "sent", none: "none" }[st.state] || "none"}">${icon({ confirmed: "check", tryagain: "refresh", submitted: "clock", started: "list" }[st.state] || "list")}${esc(st.label)}</span>`;
 
-  /* Home: one card per current plan (Stage 5 replaces Home with a calmer page). */
-  SE.pathwayToday = function (user) {
-    if (!user || user.role !== "student" || !user.classId) return "";
+  /* My Learning Plans (#/plans): Current (not finished) or All. Activities assigned one at a time
+     (before Learning Plans) show as one "Earlier assignments" card until the teacher moves them. */
+  let myMode = "current";
+  SE.views.myPlans = function (user) {
     const prof = SE.game.profile(user.id);
-    return studentPlans(user).filter((a) => !SE.store.planFinished(a)).map((asg) => {
-      const pr = progress(prof, asg.snapshot);
+    const all = studentPlans(user).slice().reverse();
+    const list = myMode === "all" ? all : all.filter((a) => !SE.store.planFinished(a));
+    const old = (user.classId ? SE.store.assignmentsFor(user.classId) : []).map((x) => SE.activityById[x.activityId]).filter((a) => a && !SE.hiddenForUser(a));
+    const card = (asg) => {
+      const pr = progress(prof, asg.snapshot), done = SE.store.planFinished(asg);
       return `
-        <article class="pwk-today" aria-labelledby="pl-t-${asg.id}">
-          <span class="today-card__why">${icon("map")}Learning Plan</span>
-          <h3 id="pl-t-${asg.id}">${esc(asg.snapshot.title)}</h3>
-          <p>${pr.passed} of ${pr.required} required activities passed${pr.next ? ` · Next: ${esc(pr.next.a.title)}` : ""}</p>
-          <a class="btn btn--launch" href="#/plans/${asg.id}">${icon("arrowRight")}Open the plan<span class="visually-hidden">: ${esc(asg.snapshot.title)}</span></a>
-        </article>`;
-    }).join("");
+        <li class="block myplan ${done ? "myplan--done" : ""}">
+          <div class="myplan__head"><h2 id="mp-${asg.id}">${esc(asg.snapshot.title)}</h2>${done ? `<span class="chip">Finished</span>` : ""}</div>
+          ${asg.snapshot.goal ? `<p>${esc(asg.snapshot.goal)}</p>` : ""}
+          <p class="myplan__progress"><strong>${pr.passed} of ${pr.required}</strong> required activities passed</p>
+          <div class="mini-meter" aria-hidden="true"><span style="width:${pr.required ? (pr.passed / pr.required) * 100 : 0}%"></span></div>
+          ${pr.next && !done ? `<p class="muted">Next: ${esc(pr.next.a.title)}</p>` : ""}
+          <a class="btn ${done ? "btn--ghost" : "btn--primary"}" href="#/plans/${asg.id}" aria-describedby="mp-${asg.id}">${icon("arrowRight")}Open the plan</a>
+        </li>`;
+    };
+    app().innerHTML = `
+      <section class="page-top">
+        <div class="wrap page-top__inner">
+          <div class="backbar">${SE.backLink()}</div>
+          <div class="page-top__head"><span class="icon-badge">${icon("map")}</span>
+            <div><span class="eyebrow">From your teacher</span><h1 tabindex="-1">My Learning Plans</h1></div></div>
+          <p class="page-top__lede">Each plan is a set of activities, in order. Your teacher checks each one.</p>
+        </div>
+      </section>
+      <section class="wrap section">
+        <div class="seg" role="group" aria-label="Show">
+          <button type="button" class="seg__btn" data-mymode="current" aria-pressed="${myMode === "current"}">Current</button>
+          <button type="button" class="seg__btn" data-mymode="all" aria-pressed="${myMode === "all"}">All (${all.length})</button>
+        </div>
+        ${list.length ? `<ul class="myplans">${list.map(card).join("")}</ul>` : `<div class="empty">${icon("map")}<h2>${myMode === "all" ? "No Learning Plans yet" : "No current Learning Plans"}</h2><p>When your teacher gives your class a Learning Plan, it shows up here.${all.length && myMode === "current" ? " Finished plans are under All." : ""}</p></div>`}
+        ${old.length ? `
+        <section class="block myplan myplan--old" aria-labelledby="mp-old">
+          <h2 id="mp-old">Earlier assignments</h2>
+          <ul class="today-list">${old.map((a) => `<li><a href="#/activity/${a.id}">${icon(SE.areaById[a.area].icon)}<span><strong>${esc(a.title)}</strong><small>${SE.timeText(a)}</small></span></a>${SE.studentStatusChip(SE.game.statusFor(prof, a))}</li>`).join("")}</ul>
+        </section>` : ""}
+      </section>`;
+    app().querySelectorAll("[data-mymode]").forEach((b) => b.addEventListener("click", () => {
+      myMode = b.dataset.mymode;
+      SE.route(true);
+      const again = document.querySelector(`[data-mymode="${myMode}"]`);
+      if (again) again.focus();
+    }));
   };
 })();

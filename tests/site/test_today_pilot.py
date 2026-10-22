@@ -26,25 +26,28 @@ async def main():
     await student(pg)
     # Today
     h = await pg.evaluate("document.documentElement.scrollHeight")
-    ok("Today is short (under 2,500 px; was ~12,400)", h < 2500, h)
+    ok("Home is short (under 1,800 px; was ~12,400)", h < 1800, h)
+    ok("Home has exactly one Up next card", await pg.locator(".upnext").count() == 1)
     first = await pg.evaluate("""(()=>{const u=SE.store.currentUser(), prof=SE.game.profile(u.id);
       const open=SE.store.assignmentsFor(u.classId).map(x=>({x,a:SE.activityById[x.activityId]})).filter(r=>r.a&&!SE.game.missionDone(prof,r.a)).sort((p,q)=>(p.x.dueDate||'9999').localeCompare(q.x.dueDate||'9999'));
       return open[0].a.title})()""")
-    ok("Today leads with the earliest-due unfinished assignment", (await pg.inner_text("#today-class-title")) == first, first)
-    act = await pg.inner_text(".today-card--class .today-card__actions .btn--launch")
-    ok("big Start/Continue button", act.strip() in ("Start", "Continue"), act)
-    ok("map, patches, and full library are not on Today", await pg.locator(".map-frame, .patch-row, #library").count() == 0)
+    ok("with no plan, Up next is the earliest-due unfinished assignment", (await pg.inner_text("#upnext-title")) == first, first)
+    act = await pg.inner_text(".upnext .today-card__actions .btn--launch")
+    ok("big Start/Continue button", act.split(":")[0].strip() in ("Start", "Continue"), act)
+    ok("map, patches, and full library are not on Home", await pg.locator(".map-frame, .patch-row, #library").count() == 0)
+    ok("two ways onward: My Learning Plans and Explore activities", await pg.locator('.home-actions a[href="#/plans"]').count() == 1 and await pg.locator('.home-actions a[href="#/activities"]').count() == 1)
+    ok("Home's main action is above the fold", await pg.evaluate("document.querySelector('.upnext .btn--launch').getBoundingClientRect().bottom") <= 900)
     await pg.screenshot(path=O + "today.png", full_page=True)
     await pg.click("#help-btn")
     ok("help panel opens", await pg.is_visible("#help-panel") and await pg.get_attribute("#help-btn", "aria-expanded") == "true")
     await pg.click("#help-ask"); await pg.wait_for_timeout(200)
     n = await pg.evaluate("SE.store.eventsFor(SE.store.currentUser().id).filter(e=>e.type==='help_requested').length")
     ok("'Let my teacher know' logs a help request and confirms", n == 1 and "can see" in await pg.inner_text("#help-status"))
-    # nav: library vs explore
+    # nav: Activities and My Learning Plans
     await pg.goto(S + "#/library"); await pg.wait_for_timeout(400)
     ok("Activities = categories and search, no map", await pg.locator("#library").count() == 1 and await pg.locator("a.area-card").count() == 7 and await pg.locator(".map-frame").count() == 0)
     await pg.goto(S + "#/explore"); await pg.wait_for_timeout(400)
-    ok("My expedition = map and patches, no library", await pg.locator(".map-frame").count() == 1 and await pg.locator("#library").count() == 0)
+    ok("#/explore now opens My Learning Plans", pg.url.endswith("#/plans") and await pg.locator(".map-frame").count() == 0 and await pg.locator("[data-mymode]").count() == 2)
     nav = await pg.inner_text("#site-nav")
     ok("nav has Home / My Learning Plans / Activities / My harbor", all(t in nav for t in ["Home", "My Learning Plans", "Activities", "My harbor"]) and "Mission" not in nav and "expedition" not in nav, nav)
     # pilot mission page (student)
@@ -59,8 +62,8 @@ async def main():
     # no assignment -> one eligible next step
     await pg.evaluate("(()=>{const c=SE.store.currentUser().classId; SE.store.assignmentsFor(c).map(x=>x.activityId).forEach(id=>SE.store.unassign(c,[id]))})()")
     await pg.goto(S + "#/library"); await pg.wait_for_timeout(150); await pg.goto(S + "#/"); await pg.wait_for_timeout(500)
-    why = await pg.inner_text(".today-card--own .today-card__why") if await pg.locator(".today-card--own .today-card__why").count() else ""
-    ok("no assignment: class side says nothing assigned, own side offers one next step", await pg.locator(".today-card--class").count() == 0 and await pg.locator(".today-card--own").count() == 1 and "teacher" not in why.lower(), why)
+    why = await pg.inner_text(".upnext .today-card__why") if await pg.locator(".upnext .today-card__why").count() else ""
+    ok("no assignment: still one Up next card, from the student's own work", await pg.locator(".upnext").count() == 1 and await pg.locator(".upnext--own, .upnext--suggested").count() == 1 and "teacher" not in why.lower(), why)
     # teacher views
     t2 = await ctx.new_page(); watch(t2)
     await educator(t2)
@@ -77,7 +80,8 @@ async def main():
     # phone
     m = await b.new_page(viewport={"width": 390, "height": 844}); watch(m)
     await m.goto(S); await m.evaluate("localStorage.clear()"); await m.reload(); await m.wait_for_timeout(300); await student(m)
-    ok("phone: Today has no sideways scroll", await m.evaluate("document.documentElement.scrollWidth") <= 390)
+    ok("phone: Home has no sideways scroll", await m.evaluate("document.documentElement.scrollWidth") <= 390)
+    ok("phone: the main action is above the fold (390×844)", await m.evaluate("document.querySelector('.upnext .btn--launch').getBoundingClientRect().bottom") <= 844)
     await m.screenshot(path=O + "today-m.png", full_page=True)
     ok("no page errors", not errs, errs)
     print(f"\n{sum(R)}/{len(R)} passed"); await b.close()

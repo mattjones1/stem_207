@@ -1,6 +1,6 @@
 /*
  * STEM 207 — drawn elements: rank insignia, activity patches,
- * the expedition star map, and the class goal track.
+ * the star map, and the class goal track.
  */
 (function () {
   "use strict";
@@ -59,7 +59,7 @@
     </svg>`;
   };
 
-  /* Expedition map: each exploration area is a constellation; each activity a star. */
+  /* Star map: each exploration area is a constellation; each activity a star. */
   const SECTORS = [[170, 125], [480, 95], [800, 130], [250, 315], [570, 320], [860, 310]];
   SE.starMap = (prof, recIds = [], opts = {}) => {
     const parts = [];
@@ -111,7 +111,7 @@
       const h = 24 + pr() * 44;
       pines.push(`<use href="#mapPine" x="${x.toFixed(1)}" y="${(492 - h).toFixed(1)}" width="${(h * 117 / 332).toFixed(1)}" height="${h.toFixed(1)}"/>`);
     }
-    return `<svg class="starmap" viewBox="0 0 960 500" role="group" aria-label="Expedition map of the Maine night sky. Each star is an activity; completed activities light up.">
+    return `<svg class="starmap" viewBox="0 0 960 500" role="group" aria-label="Star map of the Maine night sky. Each star is an activity; completed activities light up.">
       <defs><symbol id="mapPine" viewBox="1138 172 117 332"><path d="${SE.brand.PINE_D}"/></symbol>
         <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.navyDeep}"/><stop offset=".8" stop-color="${C.navy}"/><stop offset="1" stop-color="#0a6f6a"/></linearGradient></defs>
       <rect width="960" height="500" fill="url(#skyGrad)"/>

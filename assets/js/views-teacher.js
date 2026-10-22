@@ -261,12 +261,12 @@
     bindFrame(user);
   };
 
-  /* Class messages: a short note to the whole class, shown under "From your teacher" on Today. */
+  /* Class messages: a short note to the whole class, shown under "From your teacher" on the student Home. */
   function messageBlock(cls) {
     const list = SE.store.messagesFor(cls.id);
     return `
       <div class="block msg-block" id="class-messages">
-        <div class="block__head"><h2>${icon("message")}Message your class</h2><span class="muted">Students see the newest 3 on their Today page</span></div>
+        <div class="block__head"><h2>${icon("message")}Message your class</h2><span class="muted">Students see the newest one on Home</span></div>
         <form class="msg-form" id="msg-form">
           <label for="msg-body" class="visually-hidden">Message to ${esc(cls.name)}</label>
           <textarea id="msg-body" class="input" rows="2" maxlength="500" placeholder="Example: Finish Lobster Trap Logic by Thursday. Bring your flowchart." aria-describedby="msg-help"></textarea>

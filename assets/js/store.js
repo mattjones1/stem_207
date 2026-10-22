@@ -710,7 +710,7 @@
       if (CLOUD) send(restOp("PATCH", `/assignments?id=eq.${encodeURIComponent(a.id)}`, { due_date: a.dueDate }, "return=minimal")); else save();
     },
 
-    /* Instructions a teacher adds to one assigned mission (shown on the student's Today). */
+    /* Instructions a teacher adds to one assigned mission (shown on the student's Home). */
     setAssignmentNote(classId, activityId, note) {
       const a = SE.store.assignmentFor(classId, activityId);
       if (!a) return;

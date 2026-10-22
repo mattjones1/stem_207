@@ -9,7 +9,7 @@
  *                            needs-review (`resourceReview: "needed"`, e.g. a link someone reported).
  *
  * Unpublished records live in STEM.drafts: found by id (SE.activityById), never in STEM.activities,
- * so library lists, counts, suggestions, and the expedition map skip them with no extra filters.
+ * so library lists, counts, and suggestions skip them with no extra filters.
  * Educators see every draft (they are the content editors). Students see a "pilot" record only when
  * their class has it assigned. Placeholders are never assignable.
  */

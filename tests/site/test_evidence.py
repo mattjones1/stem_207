@@ -69,7 +69,7 @@ async def local(b):
     ok("Try again needs a note", "Add a short note" in await f.locator(".form__error").inner_text())
     await f.locator("input[name=note]").fill("Show me which block you changed."); await f.locator("button[value=again]").click(); await t.wait_for_timeout(500)
     await as_student(pg, S); await go(pg, S + "#/")
-    ok("5. student sees Try again with the note on Today", "try again" in (await pg.inner_text(".today-card--class .today-card__why")).lower() and "which block you changed" in await pg.inner_text(".today-card--class"))
+    ok("5. student sees Try again with the note on Home", "try again" in (await pg.inner_text(".upnext .today-card__why")).lower() and "which block you changed" in await pg.inner_text(".upnext"))
     ok("   status is tryagain", await st(pg, aid) == "tryagain")
     await go(pg, S + f"#/activity/{aid}")
     await pg.fill("#d-reflect", "I changed the turn left block to turn right."); await pg.click("#debrief-form button[type=submit]"); await pg.wait_for_timeout(400); await pg.keyboard.press("Escape")

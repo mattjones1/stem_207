@@ -1,6 +1,6 @@
 /*
- * STEM 207 — student views: expedition home, activity debrief,
- * mission-complete celebration, and the explorer profile.
+ * STEM 207 — student views: Home, the activity debrief,
+ * the celebration after sending, and the explorer profile (Me).
  */
 (function () {
   "use strict";
@@ -32,7 +32,7 @@
     if (!recent || Date.now() - recent.at > 30 * 60000) SE.store.log("mission_opened", { activityId });
   };
 
-  /* ───────── Expedition home (top of the student dashboard) ───────── */
+  /* ───────── Class journey ───────── */
   /* Class journey: points and badges the class earns together (separate from personal XP). */
   SE.classJourneyBlock = function (journey, opts = {}) {
     const g = journey.goal, cp = P.classPoints;
@@ -55,285 +55,103 @@
       </div>`;
   };
 
-  SE.views.expeditionHome = function (user, prof) {
-    const recs = SE.game.recommendations(user, prof, 3);
-    const summary = SE.game.classSummary(user.classId);
-    const nextPatches = prof.patches.filter((p) => !p.earned).sort((a, b) => (b.progress / b.target) - (a.progress / a.target)).slice(0, 3);
-    const recent = prof.patches.filter((p) => p.earned).sort((a, b) => b.earnedAt - a.earnedAt).slice(0, 4);
-    const inProgress = Object.entries(prof.steps)
-      .filter(([id, set]) => set.size > 0 && !prof.completedIds.has(id))
-      .map(([id, set]) => ({ a: SE.activityById[id], n: set.size }))
-      .filter((x) => x.a)[0];
-    const notes = prof.completions
-      .map((c) => ({ c, r: prof.reviewed[c.event.id] }))
-      .filter((x) => x.r && x.r.data.note && Date.now() - x.r.at < 14 * SE.DAY)
-      .slice(-1)[0];
-    const firstName = user.displayName.split(" ")[0];
-
-    return `
-      <section class="xhero ridge" aria-labelledby="xhero-title">
-        <div class="wrap xhero__inner">
-          <div class="xhero__id">
-            <a class="xhero__avatar" href="#/base" title="Customize your explorer">${SE.ownAvatar(user.id, 76, "Your explorer")}<span class="xhero__badge">${SE.insignia(prof.rank, 30)}</span></a>
-            <div class="xhero__who">
-              <span class="eyebrow">${esc(user.cls ? user.cls.name : "Explorer")}</span>
-              <h1 id="xhero-title" tabindex="-1">Welcome back, ${esc(firstName)}.</h1>
-              <p class="xhero__motto">${esc(prof.rank.motto)}</p>
-            </div>
-          </div>
-          <dl class="xstats">
-            <div><dt>Total XP</dt><dd>${SE.num(prof.xp)}</dd></div>
-            <div><dt>Activities</dt><dd>${prof.counts.missions}</dd></div>
-            <div><dt>Patches</dt><dd>${prof.earnedCount}<small>/${P.patches.length}</small></dd></div>
-            <div><dt>Week streak</dt><dd>${prof.streak}<small>${prof.streak === 1 ? " week" : " weeks"}</small></dd></div>
-          </dl>
-          <div class="xhero__rank">${rankBar(prof)}</div>
-        </div>
-      </section>
-
-      ${(() => {
-        const ul = SE.base.unlocks(prof);
-        const nextUp = ul.filter((x) => !x.open && x.prog).sort((x, y) => (y.prog.have / y.prog.want) - (x.prog.have / x.prog.want))[0];
-        return `<div class="wrap"><a class="harbor-teaser" href="#/base">
-          <div class="harbor-teaser__art">${SE.base.harbor(prof, SE.base.customFor(user.id), { seed: user.id })}</div>
-          <div class="harbor-teaser__text"><span class="eyebrow">My harbor</span>
-            <strong>${ul.filter((x) => x.open).length} of ${ul.length} unlocks earned</strong>
-            ${nextUp ? `<span>Next up: <b>${esc(nextUp.name)}</b> · ${esc(nextUp.how)}</span>` : "<span>Everything unlocked. Wicked good!</span>"}
-            <span class="harbor-teaser__go">Design your explorer and boat ${icon("arrowRight")}</span></div>
-        </a></div>`;
-      })()}
-
-      ${notes ? `
-      <div class="wrap"><div class="teacher-note-banner">
-        ${icon("message")}
-        <p><strong>Note from your teacher</strong> on <a href="#/activity/${notes.c.activity.id}">${esc(notes.c.activity.title)}</a>: “${esc(notes.r.data.note)}”</p>
-      </div></div>` : ""}
-
-      ${(() => {
-        const list = SE.store.assignmentsFor(user.classId).map((x) => ({ x, a: SE.activityById[x.activityId] })).filter((r) => r.a);
-        if (!list.length) return "";
-        const done = list.filter(({ a }) => SE.game.missionDone(prof, a)).length;
-        const order = list.slice().sort((p, q) => SE.game.missionDone(prof, p.a) - SE.game.missionDone(prof, q.a) || (p.x.dueDate || "9999").localeCompare(q.x.dueDate || "9999"));
-        return `
-      <section class="section wrap" aria-labelledby="assigned-title">
-        <div class="section__head">
-          <div><span class="eyebrow">From your teacher</span><h2 id="assigned-title">Your assigned activities</h2></div>
-          <p class="assigned-count"><b>${done}</b> of ${list.length} done</p>
-        </div>
-        <div class="mini-meter assigned-meter" aria-hidden="true"><span style="width:${(done / list.length) * 100}%"></span></div>
-        <div class="next-grid next-grid--assigned">
-          ${order.map(({ x, a }) => {
-            const d = SE.game.missionDone(prof, a);
-            const late = !d && x.dueDate && new Date(`${x.dueDate}T23:59:59`).getTime() < Date.now();
-            const lab = a.launch.status === "lab" && SE.labs.byId(a.launch.labId);
-            const lv = lab ? (prof.labLevels[lab.id] || new Set()).size : 0;
-            return `<a class="next-card next-card--assigned ${d ? "is-done" : ""} ${late ? "is-late" : ""}" href="${lab && !d ? `#/lab/${lab.id}` : `#/activity/${a.id}`}">
-              <span class="next-card__tag">${icon(d ? "check" : SE.areaById[a.area].icon)}${d ? "Done" : x.dueDate ? esc(SE.dueText(x.dueDate)) : "Assigned"}</span>
-              <strong>${esc(a.title)}</strong>
-              <span>${esc(a.summary)}</span>
-              <span class="next-card__meta">${lab ? `${lv} of ${lab.levels.length} lab levels` : `${SE.timeText(a)} · +${SE.game.baseXp(a)} XP`}</span>
-            </a>`;
-          }).join("")}
-        </div>
-      </section>`;
-      })()}
-
-      <section class="section wrap" aria-labelledby="next-title">
-        <div class="section__head">
-          <div><span class="eyebrow">Choose your next adventure</span><h2 id="next-title">${inProgress ? "Pick up where you left off" : "Suggested activities"}</h2></div>
-          ${SE.views.timePicker().replace("time-picker", "time-picker time-picker--light")}
-        </div>
-        <div class="next-grid">
-          ${inProgress ? `
-            <a class="next-card next-card--resume" href="#/activity/${inProgress.a.id}">
-              <span class="next-card__tag">${icon("clock")}In progress · ${inProgress.n} of ${inProgress.a.steps.length} steps</span>
-              <strong>${esc(inProgress.a.title)}</strong>
-              <span>${esc(inProgress.a.summary)}</span>
-              <span class="next-card__go">Continue activity ${icon("arrowRight")}</span>
-            </a>` : ""}
-          ${recs.slice(0, inProgress ? 2 : 3).map((r) => `
-            <a class="next-card" href="#/activity/${r.activity.id}">
-              <span class="next-card__tag">${icon(SE.areaById[r.activity.area].icon)}${esc(r.reason)}</span>
-              <strong>${esc(r.activity.title)}</strong>
-              <span>${esc(r.activity.summary)}</span>
-              <span class="next-card__meta">${SE.timeText(r.activity)} · +${SE.game.baseXp(r.activity)} XP</span>
-            </a>`).join("")}
-        </div>
-      </section>
-
-      <section class="section wrap" aria-labelledby="map-title">
-        <div class="section__head">
-          <div><span class="eyebrow">Expedition map</span><h2 id="map-title">Light up the Maine night sky</h2></div>
-          <p>Far from city lights, Maine's North Woods have some of the darkest skies in the East. Each star is an activity. Finish one and it lights up and joins its constellation. Glowing rings are suggested for you.</p>
-        </div>
-        <div class="map-frame">${SE.starMap(prof, recs.map((r) => r.activity.id))}</div>
-      </section>
-
-      <section class="section wrap split" aria-labelledby="patches-title">
-        <div class="split__main">
-          <div class="section__head">
-            <div><span class="eyebrow">Activity patches</span><h2 id="patches-title">${prof.earnedCount ? "Your latest patches" : "Patches you can earn"}</h2></div>
-            <a class="btn btn--ghost btn--small" href="#/me">See all ${P.patches.length} patches ${icon("arrowRight")}</a>
-          </div>
-          <div class="patch-row">
-            ${(recent.length ? recent : nextPatches).map((p) => `
-              <figure class="patch-tile">${SE.patchArt(p.patch, p.earned, 88)}
-                <figcaption><strong>${esc(p.patch.name)}</strong><span>${p.earned ? `Earned ${SE.dateShort(p.earnedAt)}` : `${p.progress} of ${p.target}`}</span></figcaption>
-              </figure>`).join("")}
-          </div>
-          ${recent.length && nextPatches.length ? `
-          <h3 class="subhead">Closest to earning</h3>
-          <ul class="near-list">
-            ${nextPatches.map((p) => `
-              <li><span class="near-list__name">${esc(p.patch.name)}</span><span class="near-list__how">${esc(p.patch.how)}</span>
-                <span class="mini-meter" aria-label="${p.progress} of ${p.target}"><span style="width:${(p.progress / p.target) * 100}%"></span></span>
-                <span class="near-list__n">${p.progress}/${p.target}</span></li>`).join("")}
-          </ul>` : ""}
-        </div>
-        <aside class="split__side block" aria-labelledby="goal-title">
-          <span class="eyebrow">Class journey · ${esc(user.cls ? user.cls.name : "your class")}</span>
-          <h2 id="goal-title">${summary.journey.goal.next ? `Next stop: ${esc(summary.journey.goal.next.name)}` : "Destination reached!"}</h2>
-          <p class="muted">Class work moves everyone forward together: the activities your teacher assigns, and the work your teacher confirms.</p>
-          ${SE.classJourneyBlock(summary.journey)}
-        </aside>
-      </section>`;
+  /* One line for Home: the class's points and the next stop. Badges and the full track are on Me. */
+  SE.classJourneyLine = function (journey) {
+    const g = journey.goal;
+    return `<p class="home-line home-journey">${icon("boat")}<span><strong>Class journey:</strong> ${SE.num(journey.points)} class points${g.next ? ` · ${SE.num(g.next.pts - journey.points)} to ${esc(g.next.name)}` : " · Katahdin reached!"}</span> <a href="#/me#class-journey">See class badges</a></p>`;
   };
 
-  SE.views.bindExpeditionHome = function () {};
+  /* ───────── Home: one calm column ─────────
+   * A greeting, then exactly one "Up next" card: a Try again first (it's direction from the teacher),
+   * then the next activity in a current Learning Plan, then an older single assignment, then the
+   * student's own work in progress, then a suggestion. Below it: one line for what's waiting, the
+   * newest message, one line for the class journey, and two ways onward. */
+  SE.home = {};
+  SE.home.upNext = function (user, prof) {
+    const statuses = Object.values(SE.activityById).filter((a) => !SE.hiddenForUser(a)).map((a) => ({ a, st: SE.game.statusFor(prof, a) }));
+    const retry = statuses.filter((r) => r.st.state === "tryagain").sort((p, q) => q.st.tryAgain.at - p.st.tryAgain.at)[0];
+    if (retry) return { a: retry.a, kind: "tryagain", why: "Your teacher asked you to try again", note: retry.st.tryAgain.data.note || null, noteLabel: "Your teacher says" };
+    const plans = user.classId ? SE.store.pathwayAssignmentsFor(user.classId).filter((x) => x.snapshot && !SE.store.planFinished(x)) : [];
+    for (const asg of plans) {
+      const pr = SE.plans.progress(prof, asg.snapshot);
+      if (pr.next) return { a: pr.next.a, kind: "plan", why: `Next in ${asg.snapshot.title}`, note: pr.next.step.note, noteLabel: "From your teacher", plan: asg };
+    }
+    const due = (x) => x.dueDate || "9999";
+    const old = (user.classId ? SE.store.assignmentsFor(user.classId) : []).map((x) => ({ x, a: SE.activityById[x.activityId] }))
+      .filter((r) => r.a && !SE.hiddenForUser(r.a) && !SE.game.missionDone(prof, r.a)).sort((p, q) => due(p.x).localeCompare(due(q.x)))[0];
+    if (old) return { a: old.a, kind: "assigned", why: old.x.dueDate ? `Assigned · ${SE.dueText(old.x.dueDate)}` : "Assigned by your teacher", note: old.x.note || null, noteLabel: "Instructions" };
+    const mine = statuses.find((r) => r.st.state === "started");
+    if (mine) return { a: mine.a, kind: "own", why: "Pick up where you left off" };
+    const rec = SE.game.recommendations(user, prof, 1)[0];
+    if (rec) return { a: rec.activity, kind: "suggested", why: rec.reason === "Ready for you" ? "A good next step" : rec.reason };
+    return null;
+  };
 
-  /* ───────── Today: my class, and on my own ─────────
-   * Two clearly separate halves. "My class" holds everything the teacher set: class messages,
-   * try-agains, assigned activities (with the teacher's instructions), and what's waiting for a
-   * check. "On my own" holds the student's own exploring: work in progress, suggestions, and
-   * the rest of the site. The help button sits on the first big card. */
   SE.views.today = function (user) {
     const prof = SE.game.profile(user.id);
-    const due = (r) => r.x.dueDate || "9999";
-    const assigned = SE.store.assignmentsFor(user.classId).map((x) => ({ x, a: SE.activityById[x.activityId] })).filter((r) => r.a && !SE.hiddenForUser(r.a));
-    const assignedIds = new Set(assigned.map((r) => r.a.id));
-    const open = assigned.filter((r) => !SE.game.missionDone(prof, r.a)).sort((p, q) => due(p).localeCompare(due(q)));
-    const doneN = assigned.length - open.length;
+    const next = SE.home.upNext(user, prof);
     const labOf = (a) => a.launch.status === "lab" && SE.labs.byId(a.launch.labId);
-    const hrefOf = (a) => (labOf(a) ? `#/lab/${a.launch.labId}` : `#/activity/${a.id}`);
-    const startedOn = (a) => prof.opened.has(a.id) || (prof.steps[a.id] && prof.steps[a.id].size > 0) || (labOf(a) && (prof.labLevels[a.launch.labId] || new Set()).size > 0);
-    const statuses = Object.values(SE.activityById).map((a) => ({ a, st: SE.game.statusFor(prof, a) }));
-
-    // My class: a try-again comes first (it's direction from the teacher), then the earliest-due assignment.
-    let classMain = null, classWhy = "", retry = null, classNote = null;
-    const retryA = statuses.filter((r) => r.st.state === "tryagain").sort((p, q) => q.st.tryAgain.at - p.st.tryAgain.at)[0];
-    if (retryA) { classMain = retryA.a; retry = retryA.st.tryAgain; classWhy = "Your teacher asked you to try again"; }
-    else if (open.length) { classMain = open[0].a; classWhy = open[0].x.dueDate ? `Assigned · ${SE.dueText(open[0].x.dueDate)}` : "Assigned by your teacher"; }
-    if (classMain) { const asg = assigned.find((r) => r.a.id === classMain.id); classNote = asg && asg.x.note; }
+    const waiting = Object.values(SE.activityById).filter((a) => SE.game.statusFor(prof, a).state === "submitted").length;
     const messages = user.classId ? SE.store.messagesFor(user.classId) : [];
-    const notes = prof.completions.map((c) => ({ c, r: prof.reviewed[c.event.id] })).filter((x) => x.r && x.r.data.note && Date.now() - x.r.at < 14 * SE.DAY).slice(-1)[0];
-    const waiting = statuses.filter((r) => r.st.state === "submitted").sort((p, q) => ((q.st.sub && q.st.sub.at) || 0) - ((p.st.sub && p.st.sub.at) || 0)).map((r) => ({ label: r.a.title, href: `#/activity/${r.a.id}`, what: "Sent" }));
-
-    // On my own: unassigned work in progress first, then suggestions (which already skip assigned activities).
-    const ownInProgress = Object.entries(prof.steps).filter(([id, set]) => set.size > 0 && !prof.completedIds.has(id) && !assignedIds.has(id)).map(([id]) => SE.activityById[id]).filter(Boolean)[0];
-    const recs = SE.game.recommendations(user, prof, 4).filter((r) => !ownInProgress || r.activity.id !== ownInProgress.id);
-    const ownMain = ownInProgress || (recs[0] && recs[0].activity);
-    const ownWhy = ownInProgress ? "Pick up where you left off" : recs[0] ? (recs[0].reason === "Ready for you" ? "A good next step" : recs[0].reason) : "";
-    const ownMore = recs.filter((r) => r.activity !== ownMain).slice(0, 2);
     const first = user.displayName.split(" ")[0];
-    const helpOn = classMain ? "class" : "own";
+    const msg = (m) => `<li><p>${esc(m.body)}</p><small>${SE.timeAgo(m.createdAt)}</small></li>`;
 
-    const bigCard = (a, why, kind, extra = "") => {
-      const lab = labOf(a), started = startedOn(a);
-      return `
-        <article class="today-card today-card--${kind}" aria-labelledby="today-${kind}-title">
-          <span class="today-card__why">${icon(SE.areaById[a.area].icon)}${esc(why)}</span>
-          <h3 id="today-${kind}-title" class="today-card__title">${esc(a.title)}</h3>
-          ${extra}
+    let card;
+    if (next) {
+      const a = next.a, lab = labOf(a);
+      const started = SE.game.statusFor(prof, a).state !== "none";
+      const verb = next.kind === "tryagain" ? "Try again" : started ? "Continue" : "Start";
+      card = `
+        <article class="today-card upnext upnext--${next.kind}" id="upnext" aria-labelledby="upnext-title">
+          <span class="today-card__why">${icon(next.kind === "tryagain" ? "refresh" : next.kind === "plan" ? "map" : SE.areaById[a.area].icon)}${esc(next.why)}</span>
+          <h2 id="upnext-title" class="today-card__title">${esc(a.title)}</h2>
+          ${next.note ? `<p class="today-card__note">${icon("message")}<span><strong>${esc(next.noteLabel)}:</strong> “${esc(next.note)}”</span></p>` : ""}
+          ${a.notice ? `<p class="today-card__note">${icon("alert")}<span><strong>Update:</strong> ${esc(a.notice)}</span></p>` : ""}
           <p class="today-card__what">${esc(a.summary)}</p>
           <p class="today-card__meta">${icon("clock")}${SE.timeText(a)}${lab ? ` · ${(prof.labLevels[lab.id] || new Set()).size} of ${lab.levels.length} levels done` : ""}</p>
           ${a.stopAt ? `<p class="today-card__stop">${icon("flag")}<span><strong>You're done when:</strong> ${esc(a.stopAt)}</span></p>` : ""}
           <div class="today-card__actions">
-            <a class="btn btn--launch btn--big" href="${hrefOf(a)}">${icon(started ? "arrowRight" : "rocket")}${started ? "Continue" : "Start"}</a>
-            ${helpOn === kind ? `<button type="button" class="btn btn--ghost btn--big" id="help-btn" aria-expanded="false" aria-controls="help-panel">${icon("question")}I need help</button>` : ""}
+            <a class="btn btn--launch btn--big" href="${lab ? `#/lab/${lab.id}` : `#/activity/${a.id}`}">${icon(started ? "arrowRight" : "rocket")}${verb}<span class="visually-hidden">: ${esc(a.title)}</span></a>
+            <button type="button" class="btn btn--ghost btn--big" id="help-btn" aria-expanded="false" aria-controls="help-panel">${icon("question")}I need help</button>
           </div>
-          ${helpOn === kind ? `<div class="help-panel" id="help-panel" hidden>
+          <div class="help-panel" id="help-panel" hidden>
             <h3>Stuck? Try these, in order</h3>
             <ol><li>Read the step you're on again, out loud.</li>
               ${a.stuck ? `<li>Open the activity and look at <strong>Stuck? Try these</strong>.</li>` : lab ? `<li>In the lab, press <strong>Need a hint?</strong></li>` : ""}
               <li>Ask a partner.</li>
               <li>Still stuck? <button type="button" class="btn btn--small btn--primary" id="help-ask" data-activity="${a.id}">${icon("message")}Let my teacher know</button></li></ol>
             <p class="help-panel__status" id="help-status" role="status" aria-live="polite"></p>
-          </div>` : ""}
+          </div>
         </article>`;
-    };
+    } else card = `
+        <article class="today-card upnext upnext--empty" id="upnext" aria-labelledby="upnext-title">
+          <h2 id="upnext-title" class="today-card__title">You're all caught up</h2>
+          <p class="today-card__what">Nothing new from your teacher right now. Explore an activity you like.</p>
+        </article>`;
 
     app().innerHTML = `
-      <section class="today-top ridge" aria-labelledby="today-title">
+      <section class="today-top ridge" aria-labelledby="home-title">
         <div class="wrap today-top__inner">
           <a class="today-top__avatar" href="#/base" title="My harbor">${SE.ownAvatar(user.id, 56, "Your explorer")}</a>
           <div><span class="eyebrow">${esc(user.cls ? user.cls.name : "Explorer")}</span>
-            <h1 id="today-title" tabindex="-1">Hi, ${esc(first)}. Here's today.</h1></div>
+            <h1 id="home-title" tabindex="-1">Hi, ${esc(first)}.</h1></div>
+          <a class="home-rank" href="#/me">${SE.insignia(prof.rank, 26)}<span><strong>${esc(prof.rank.name)}</strong><small>${SE.num(prof.xp)} XP</small></span></a>
         </div>
       </section>
-      <div class="wrap today today--split">
-        <section class="today-col today-col--class" aria-labelledby="class-title">
-          <header class="today-col__head">
-            <span class="today-col__icon">${icon("users")}</span>
-            <div><span class="eyebrow">My class${user.cls ? ` · ${esc(user.cls.name)}` : ""}</span><h2 id="class-title">With your class</h2></div>
-          </header>
-          ${messages.length ? `
-          <div class="class-board" aria-labelledby="board-title">
-            <h3 id="board-title">${icon("message")}From your teacher</h3>
-            <ul class="class-board__list">${messages.slice(0, 3).map((m) => `<li><p>${esc(m.body)}</p><small>${SE.timeAgo(m.createdAt)}</small></li>`).join("")}</ul>
-            ${messages.length > 3 ? `<details class="class-board__more"><summary>Older messages (${messages.length - 3})</summary><ul class="class-board__list">${messages.slice(3).map((m) => `<li><p>${esc(m.body)}</p><small>${SE.timeAgo(m.createdAt)}</small></li>`).join("")}</ul></details>` : ""}
-          </div>` : ""}
-          ${SE.pathwayToday ? SE.pathwayToday(user) : ""}
-          ${notes ? `<div class="teacher-note-banner">${icon("message")}<p><strong>Note from your teacher</strong> on <a href="#/activity/${notes.c.activity.id}">${esc(notes.c.activity.title)}</a>: “${esc(notes.r.data.note)}”</p></div>` : ""}
-          ${classMain ? bigCard(classMain, classWhy, "class",
-            (retry && retry.data.note ? `<p class="today-card__retry">${icon("message")}<span><strong>Your teacher says:</strong> “${esc(retry.data.note)}”</span></p>` : "")
-            + (classNote ? `<p class="today-card__note">${icon("clipboard")}<span><strong>Instructions:</strong> ${esc(classNote)}</span></p>` : "")
-            + (classMain.notice ? `<p class="today-card__note">${icon("alert")}<span><strong>Update:</strong> ${esc(classMain.notice)}</span></p>` : "")) : `
-          <div class="today-empty">
-            <h3>${assigned.length ? "All your class activities are done!" : "Nothing assigned right now"}</h3>
-            <p>${assigned.length ? "Nice work. Explore on your own until your teacher adds more." : "When your teacher assigns an activity, it shows up here."}</p>
-          </div>`}
-          ${open.length > (retry ? 0 : 1) || doneN ? `
-          <section class="today-more" aria-labelledby="also-title">
-            <h3 id="also-title">Class activities <span class="muted">${doneN} of ${assigned.length} done</span></h3>
-            <ul class="today-list">${open.filter((r) => r.a !== classMain).map(({ x, a }) => `<li><a href="${hrefOf(a)}">${icon(SE.areaById[a.area].icon)}<span><strong>${esc(a.title)}</strong><small>${x.dueDate ? esc(SE.dueText(x.dueDate)) : "No due date"} · ${SE.timeText(a)}</small>${x.note ? `<small class="today-list__note">${icon("clipboard")}${esc(x.note)}</small>` : ""}${a.notice ? `<small class="today-list__note">${icon("alert")}Update: ${esc(a.notice)}</small>` : ""}</span></a></li>`).join("")}
-              ${assigned.filter((r) => SE.game.missionDone(prof, r.a)).map(({ a }) => `<li class="is-done"><a href="#/activity/${a.id}">${icon("check")}<span><strong>${esc(a.title)}</strong><small>Done</small></span></a></li>`).join("")}</ul>
-          </section>` : ""}
-          ${waiting.length ? `
-          <section class="today-waiting" aria-labelledby="waiting-title">
-            <h3 id="waiting-title">${icon("clock")}Waiting for your teacher to check</h3>
-            <ul>${waiting.filter((w) => w.what === "Stage check").concat(waiting.filter((w) => w.what !== "Stage check")).slice(0, 3).map((w) => `<li><a href="${w.href}"><strong>${esc(w.label)}</strong></a><small>${esc(w.what)}</small></li>`).join("")}</ul>
-            ${waiting.length > 3 ? `<a class="today-waiting__more" href="#/me">${waiting.length - 3} more in your activity log ${icon("arrowRight")}</a>` : ""}
-          </section>` : ""}
-          ${user.classId ? SE.classJourneyBlock(SE.game.classJourney(user.classId), { compact: true }) : ""}
-          <a class="today-col__link" href="#/explore">${icon("map")}Class badges and the full journey ${icon("arrowRight")}</a>
-        </section>
-
-        <section class="today-col today-col--own" aria-labelledby="own-title">
-          <header class="today-col__head">
-            <span class="today-col__icon">${icon("compass")}</span>
-            <div><span class="eyebrow">On my own</span><h2 id="own-title">Explore on your own</h2></div>
-          </header>
-          <p class="today-col__lede">Your own picks, any time. They don't change your class list.</p>
-          ${ownMain ? bigCard(ownMain, ownWhy, "own") : `<div class="today-empty"><h3>Pick anything you like</h3><p>Search all the activities and labs.</p></div>`}
-          ${ownMore.length ? `<ul class="today-list today-list--own">${ownMore.map((r) => `<li><a href="${hrefOf(r.activity)}">${icon(SE.areaById[r.activity.area].icon)}<span><strong>${esc(r.activity.title)}</strong><small>${esc(r.reason)} · ${SE.timeText(r.activity)}</small></span></a></li>`).join("")}</ul>` : ""}
-          <div class="myrewards" aria-labelledby="myrewards-title">
-            <h3 id="myrewards-title">${icon("star")}My rewards</h3>
-            <p class="muted">Everything you do earns your own XP, class activities included.</p>
-            <dl class="myrewards__stats">
-              <div><dt>My XP</dt><dd>${SE.num(prof.xp)}</dd></div>
-              <div><dt>Rank</dt><dd>${esc(prof.rank.name)}</dd></div>
-              <div><dt>Patches</dt><dd>${prof.earnedCount}<small> of ${P.patches.length}</small></dd></div>
-              <div><dt>Harbor</dt><dd>${SE.base.unlocks(prof).filter((x) => x.open).length}<small> unlocks</small></dd></div>
-            </dl>
-          </div>
-          <nav class="today-explore" aria-label="More to explore">
-            <div class="today-explore__grid">
-              <a href="#/activities">${icon("search")}<span><strong>All activities</strong><small>Search and pick any activity</small></span></a>
-              <a href="#/explore">${icon("map")}<span><strong>My expedition</strong><small>Star map, patches, and class journey</small></span></a>
-              <a href="#/base">${icon("lighthouse")}<span><strong>My harbor</strong><small>Your explorer and boat</small></span></a>
-            </div>
-          </nav>
-        </section>
+      <div class="wrap home">
+        ${card}
+        ${waiting ? `<p class="home-line home-waiting">${icon("clock")}<span><strong>Waiting for your teacher:</strong> ${waiting}</span> <a href="#/me#log-title">See what you sent</a></p>` : ""}
+        ${messages.length ? `
+        <section class="home-msg" aria-labelledby="msg-title">
+          <h2 id="msg-title">${icon("message")}From your teacher</h2>
+          <ul class="home-msg__list">${msg(messages[0])}</ul>
+          ${messages.length > 1 ? `<details class="home-msg__more"><summary>Older messages (${messages.length - 1})</summary><ul class="home-msg__list">${messages.slice(1).map(msg).join("")}</ul></details>` : ""}
+        </section>` : ""}
+        ${user.classId ? SE.classJourneyLine(SE.game.classJourney(user.classId)) : ""}
+        <nav class="home-actions" aria-label="More">
+          <a class="btn btn--primary btn--big" href="#/plans">${icon("map")}My Learning Plans</a>
+          <a class="btn btn--ghost btn--big" href="#/activities">${icon("search")}Explore activities</a>
+        </nav>
       </div>`;
 
     const btn = document.getElementById("help-btn");
@@ -559,7 +377,7 @@
             <a class="xhero__avatar" href="#/base" title="Customize your explorer">${SE.ownAvatar(user.id, 72, "Your explorer")}<span class="xhero__badge">${SE.insignia(prof.rank, 28)}</span></a>
             <div><span class="eyebrow">Explorer profile</span><h1 tabindex="-1">${esc(user.displayName)}</h1><a class="btn btn--ghost btn--small" href="#/base">${icon("lighthouse")}Visit my harbor</a></div>
           </div>
-          <p class="page-top__lede">${esc(prof.rank.name)} · ${SE.num(prof.xp)} XP · ${plural(prof.counts.missions, "mission", "missions")} · ${prof.earnedCount} of ${P.patches.length} patches</p>
+          <p class="page-top__lede">${esc(prof.rank.name)} · ${SE.num(prof.xp)} XP · ${plural(prof.completedIds.size, "activity", "activities")} passed · ${prof.earnedCount} of ${P.patches.length} patches</p>
           <div class="page-top__rank">${rankBar(prof)}</div>
         </div>
       </section>
@@ -591,11 +409,17 @@
         </div>
       </section>
 
+      ${user.classId ? `
+      <section class="section wrap" aria-labelledby="class-journey">
+        <div class="section__head"><div><span class="eyebrow">Together with ${esc(user.cls ? user.cls.name : "your class")}</span><h2 id="class-journey" tabindex="-1">Class journey</h2></div></div>
+        ${SE.classJourneyBlock(SE.game.classJourney(user.classId))}
+      </section>` : ""}
+
       ${SE.views.creationsGallery(prof) ? `<section class="section wrap" aria-labelledby="gal-title"><div class="section__head"><div><span class="eyebrow">Gallery</span><h2 id="gal-title">My creations</h2></div></div>${SE.views.creationsGallery(prof)}</section>` : ""}
       ${SE.labsStrip(user, null, "My labs")}
 
       <section class="section wrap" aria-labelledby="log-title">
-        <div class="section__head"><div><span class="eyebrow">Activity log</span><h2 id="log-title">${log.length ? "Everything you've completed" : "Your log is empty, for now"}</h2></div></div>
+        <div class="section__head"><div><span class="eyebrow">Activity log</span><h2 id="log-title" tabindex="-1">${log.length ? "Everything you've sent" : "Your log is empty, for now"}</h2></div></div>
         ${log.length ? `<ol class="mission-log">
           ${log.map((c) => {
             const r = prof.reviewed[c.event.id];
@@ -604,13 +428,13 @@
               <div class="mission-log__head">
                 <span class="icon-badge">${icon(SE.areaById[c.activity.area].icon)}</span>
                 <div><a href="#/activity/${c.activity.id}"><strong>${esc(c.activity.title)}</strong></a><span>${SE.dateShort(c.event.at)} · ${esc((P.confidence.find((x) => x.id === c.event.data.confidence) || {}).name || "")}</span></div>
-                <b class="mission-log__xp">+${c.xp} XP</b>
+                ${SE.studentStatusChip(SE.game.statusFor(prof, c.activity))}
               </div>
               ${c.event.data.reflection ? `<p class="mission-log__answer">“${esc(c.event.data.reflection)}”</p>` : ""}
               ${r && r.data.note ? `<p class="teacher-reply">${icon("message")}<span><strong>Teacher:</strong> ${esc(r.data.note)}</span></p>` : ""}
             </li>`;
           }).join("")}
-        </ol>` : `<div class="empty">${icon("map")}<h3>Complete an activity to start your log</h3><p>Every activity you finish is saved here, with your answers and notes from your teacher.</p><a class="btn btn--primary" href="#/">${icon("rocket")}Find an activity</a></div>`}
+        </ol>` : `<div class="empty">${icon("map")}<h3>Send an activity to start your log</h3><p>Every reflection you send is saved here, with notes from your teacher.</p><a class="btn btn--primary" href="#/">${icon("rocket")}Find an activity</a></div>`}
       </section>`;
   };
 })();

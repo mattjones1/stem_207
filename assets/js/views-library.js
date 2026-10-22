@@ -81,7 +81,7 @@
       x.duration - y.duration);
   SE.sortActivities = sortActivities;
 
-  /* What "home" (#/) is called for whoever is signed in: Today, Educator dashboard, or Home. */
+  /* What "home" (#/) is called for whoever is signed in: Home, or Dashboard for educators. */
   SE.homeLabel = () => { const u = SE.store.currentUser(); return !u || u.role === "guest" ? "Home" : u.role === "student" ? "Home" : "Dashboard"; };
   const backLink = (href = "#/", label) => `<a class="back-link" href="${href}">${icon("arrowLeft")}${label || SE.homeLabel()}</a>`;
   SE.backLink = backLink;
@@ -162,7 +162,7 @@
   function bindLibrary(prof) {
     const q = document.getElementById("f-q");
     if (!q) {
-      // No library on this page (the student expedition page): time buttons open Activities with that filter.
+      // No library on this page (the guest home): time buttons open Activities with that filter.
       app().querySelectorAll(".time-picker button").forEach((btn) => btn.addEventListener("click", () => { filters.time = btn.dataset.time; location.hash = "#/activities"; }));
       return;
     }
@@ -344,20 +344,6 @@
       </section>`;
   }
 
-  /* Made in Maine: activities and labs rooted in Maine places, work, and wildlife. */
-  function maineSection(prof) {
-    const list = activities.filter((a) => SE.isMaine(a) && !a.launch.labId && !SE.hiddenForUser(a));
-    return `
-      <section class="section wrap maine" aria-labelledby="maine-title">
-        <div class="section__head">
-          <div><span class="eyebrow">${SE.pine(14)} Made in Maine</span><h2 id="maine-title">Activities from the coast to the County</h2></div>
-          <p>Lobster boats, tide pools, sugarhouses, and snow days. These activities start right here in the 207.</p>
-        </div>
-        <div class="cards cards--rail">${list.map((a) => activityCard(a, prof)).join("")}</div>
-      </section>`;
-  }
-
-
   function featuredSection() {
     const featured = activities.find((a) => a.featured) || activities[0];
     const fArea = SE.areaById[featured.area];
@@ -402,7 +388,8 @@
     bindLibrary(prof);
   };
 
-  SE.views.dashboard = function (user, mode) {
+  /* Home for guests (students have SE.views.today, educators the Dashboard). */
+  SE.views.dashboard = function (user) {
     const isStudent = user && user.role === "student";
     if (filtersFor !== (user && user.id)) {
       filters = defaultFilters();
@@ -410,20 +397,9 @@
       filtersFor = user && user.id;
     }
 
-    if (isStudent) {
-      const prof = SE.game.profile(user.id);
-      // Students: "explore" is the expedition page (map, patches, class goal); "library" is the activity finder.
-      app().innerHTML = mode === "library"
-        ? `<section class="page-top"><div class="wrap page-top__inner"><div class="backbar">${backLink("#/", "Today")}</div><h1 tabindex="-1">Activities</h1><p class="page-top__lede">Search for an activity, or narrow by topic, grade, and time.</p></div></section>` + librarySection(user, prof)
-        : SE.views.expeditionHome(user, prof) + labsStrip(user, null, "Your labs") + maineSection(prof) + areasSection(prof);
-      SE.views.bindExpeditionHome && SE.views.bindExpeditionHome(user, prof);
-      bindLibrary(prof);
-      return;
-    }
-
     const guestBanner = user && user.role === "guest" ? `
       <div class="wrap"><div class="guest-banner">
-        ${icon("user")}<p><strong>You're exploring as a guest.</strong> Activities work, but nothing is saved. Sign in to earn XP, collect patches, and track your expedition.</p>
+        ${icon("user")}<p><strong>You're exploring as a guest.</strong> Activities work, but nothing is saved. Sign in to save your work, earn XP, and collect patches.</p>
         <a class="btn btn--primary btn--small" href="#/signin">Sign in</a>
       </div></div>` : "";
 

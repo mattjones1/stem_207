@@ -4,63 +4,59 @@
 
 **Live site:** https://mattjones1.github.io/stem_207/
 
-**Maine's STEM explorer for grades 2–8.** Teachers and students choose an exploration area, find an activity that fits their time and equipment, read the mission, and launch it. The content is rooted in Maine: lobster boats and tide pools, the North Woods and Katahdin, sugarhouses, nor'easters, and fall fairs.
+**Maine's STEM explorer for grades 2–8.** Teachers and students choose a category, find an activity that fits their time and equipment, read it, and launch it. The content is rooted in Maine: lobster boats and tide pools, the North Woods and Katahdin, sugarhouses, nor'easters, and fall fairs.
 
-**Choose an exploration area → Select an activity → Understand the mission → Launch the experience.**
+**Choose a category → Select an activity → Do it → Send what you learned for a check.**
 
 ## What's included
 
-- **Home** (guests) and **My expedition** (students) with the exploration areas (six with missions, plus **3D Printing, coming soon**), a featured classroom mission, a coding pathway overview, and a searchable mission library. Signed-in students start on **Today**.
-- **Quick time picker**: "How much time do you have?" with 20, 30, and 45 minutes.
-- **Library filters**: topic, experience level, grade band, time, and equipment, plus search, a live result count, an empty state, and Reset filters.
-- **Activity pages** with Your mission, What you'll learn, Before you begin, Your steps, Launch activity, Think about it, Take it further, and Teacher notes. VR activities also include setup notes and a way to take part without a headset.
-- **Coding pathway** with seven readiness-based stages. Each stage has a prerequisite, learning goal, project, debugging habit, and an "I can" statement.
-- **Projector mode** to enlarge everything for a shared screen. This setting is remembered only on that device.
+- **Activities** (`#/activities`) in seven categories: Coding & Computer Science, Virtual Reality, Artificial Intelligence, Engineering & Robotics, Science & Discovery, Creative STEM, and **3D Printing (coming soon)**. Each category lists its activities with filters for topic, level, grade band, time, and equipment, plus search. Students, educators, and guests share this view.
+- **Activity pages** with Your mission, What you'll learn, Before you begin, Your steps, Launch activity, and Teacher notes, plus the **Show what you know** reflection students send for a check. VR activities also include setup notes and a way to take part without a headset.
+- **Learning Plans**: an educator puts activities in order and assigns the plan to a whole class. Five templates are ready to copy, including **Coding Foundations** (the seven-stage coding pathway) and the **AI Learning Route**.
+- **One check for every activity**: the student sends a reflection, and the teacher marks **Pass** or **Try again**. XP comes only from a Pass.
+- **Interactive labs** that run inside the site (see below).
 
+**Names used everywhere:** an **Activity** is one thing a student does. A **Learning Plan** is an ordered set of activities for a class. A **Class** is a roster with a sign-in code. A **Category** is one of the seven areas.
 
-## Ready-to-teach missions (outside tools)
+## Ready-to-teach activities (outside tools)
 
-Some missions run on outside platforms. Their full teaching packs are Markdown files in `missions/`:
+Some activities run on outside platforms. Their full teaching packs are Markdown files in `missions/`:
 
-- **Teach the Computer Your Secret Signals** (AI, grades 2–8, Google Teachable Machine): [`missions/ai/secret-signals/`](missions/ai/secret-signals/). Includes a student mission, a low-reading version, a teacher guide, a before-and-after test table, and hints with an extension.
+- **Teach the Computer Your Secret Signals** (AI, grades 2–8, Google Teachable Machine): [`missions/ai/secret-signals/`](missions/ai/secret-signals/). Includes a student version, a low-reading version, a teacher guide, a before-and-after test table, and hints with an extension.
 
 ## Classroom pilot
 
-Six missions are marked as the pilot set (teachers can filter for them): Robot Dance Party, Robot Maze, Click Tap Go! Event Party, Feed the Space Blob, How Does an AI Sort?, and Pattern Predictors. Each lists student core time and teacher prep separately (pilot estimates until timed in a classroom), a "You're done when" stopping point, a "Show what you know" check that students can say, show, or write, student-visible "Stuck?" hints, and a next step. Students start on **Today**, split into **My class** (the teacher's messages, try-agains, assigned missions with the teacher's instructions, and what's waiting for a check) and **On my own** (work in progress, suggestions, and the rest of the site). Each side has one big Start or Continue card, and an "I need help" button tells the teacher. Rehearsal and observation sheets are in [`pilot/`](pilot/).
+Six activities are marked as the pilot set (teachers can filter for them): Robot Dance Party, Robot Maze, Click Tap Go! Event Party, Feed the Space Blob, How Does an AI Sort?, and Pattern Predictors. Each lists student core time and teacher prep separately (pilot estimates until timed in a classroom), a "You're done when" stopping point, a "Show what you know" check that students can say, show, or write, student-visible "Stuck?" hints, and a next step. Rehearsal and observation sheets are in [`pilot/`](pilot/).
 
-**Completion statuses.** Each mission shows one status per student: *Started*, *Submitted* (the student sent written evidence or chose "Show or tell my teacher"), *Checked in lab* (the lab's own check passed, for what it tests), *Teacher confirmed* (spoken check, watched demo, or reviewed work), or *Try again* (with the teacher's note; the student can revise and send it again). Older one-click records show as *legacy*. XP no longer depends on mission length, and repeats earn none.
+**Teaching the why.** Every lab level opens with "What you'll learn" and "Why it matters," and the level-complete panel repeats why it matters. The coding activities add a "Why it matters" section with a real-world connection and key words. Pattern Machine Lab explains Glims and Norps (Level 3) and teaches confidence scores and thresholds with a diagram (Level 5). Level 6 has 10 cases: students score their decisions, 7 of 10 passes, and passing earns a printable STEM 207 certificate ("Responsible AI Explorer") with their display name and class. Bug Hunt shows students the robot chef's buggy algorithm and gives teachers a robot chef script.
 
-**Teaching the why.** Every lab level opens with "What you'll learn" and "Why it matters," and the level-complete panel repeats why it matters. The coding missions add a "Why it matters" section with a real-world connection and key words. Pattern Machine Lab explains Glims and Norps (Level 3) and teaches confidence scores and thresholds with a diagram (Level 5). Level 6 has 10 cases: students score their decisions, 7 of 10 passes, and passing earns a printable STEM 207 certificate ("Responsible AI Explorer") with their display name and class. Bug Hunt shows students the robot chef's buggy algorithm and gives teachers a robot chef script.
+**Grades 6–8 coding track.** Every coding stage has an activity written for grades 6–8, and suggestions for 6–8 students pick it first: Sort the Catch (compare two sorting algorithms by counting comparisons), Lighthouse Network (broadcast messages), Snowstorm Simulator (clones and repeat until), Nor'easter Alert Station (and/or/not with a test table), Catch Log (lists, totals, averages), Snowflake Studio (custom blocks with several inputs that use each other), and Capstone Studio (design doc, two playtests, release notes). From Blocks to Python rewrites a Scratch custom block as a Python function with turtle drawing in the Raspberry Pi Foundation's free Code Editor. Loop Dance Choreographers finishes in Scratch with a Dance Crew starter (the 16-move dance written out long, to shorten with loops).
 
-**Grades 6–8 coding track.** Every pathway stage has a mission written for grades 6–8 (tagged on the pathway page), and suggestions for 6–8 students pick it first: Sort the Catch (compare two sorting algorithms by counting comparisons), Lighthouse Network (broadcast messages), Snowstorm Simulator (clones and repeat until), Nor'easter Alert Station (and/or/not with a test table), Catch Log (lists, totals, averages), Snowflake Studio (custom blocks with several inputs that use each other), and Capstone Studio (design doc, two playtests, release notes). From Blocks to Python rewrites a Scratch custom block as a Python function with turtle drawing in the Raspberry Pi Foundation's free Code Editor. Loop Dance Choreographers now finishes in Scratch with a Dance Crew starter (the 16-move dance written out long, to shorten with loops).
+**Learning routes.** Scratch activities that build on a lab say so ("You've seen this idea before") and link back to it. Debug the Broken Animation and Pattern Studio with My Blocks have downloadable starter projects (`assets/starters/`, rebuilt with `tools/build_starters.py`), and Score Keeper shows a picture of where its blocks go.
 
-**Learning routes.** Scratch missions that build on a lab say so ("You've seen this idea before") and link back to it. Debug the Broken Animation and Pattern Studio with My Blocks have downloadable starter projects (`assets/starters/`, rebuilt with `tools/build_starters.py`), and Score Keeper shows a picture of where its blocks go. The coding pathway opens with "New to coding? Start here" tracks for grades 2–3, 4–5, and older beginners, and the Mission Capstone is open to any student whose Stage 6 is confirmed. The [AI learning route](https://mattjones1.github.io/stem_207/#/ai-route) puts the AI missions in six steps, from patterns to responsible use.
+## Checks: one way for every activity
 
-## Educator pathways
+1. The student does the activity and sends a reflection from **Show what you know**: written, or "I'll show or tell my teacher".
+2. The teacher opens **Checks** (`#/teach/checks`, with a count in the top menu), or a Learning Plan's Checks tab.
+3. The teacher marks **Pass** (how they checked: the student said it, showed it, or the teacher reviewed the work) or **Try again** (a note is required).
+4. A Pass earns the student's XP. A Try again reopens the activity at the top of the student's Home, with the note.
 
-Educators build a **pathway**: a goal-first sequence of missions from any category that ends in a final product. It's on the **Pathways** tab of the educator dashboard (`#/teach/pathways`).
+Each activity shows one status per student, in words: *Not started*, *In progress*, *Sent*, *Passed*, or *Try again*. XP is recalculated from the activity log, so past work counts only once it's passed. Sending, lab levels, and repeats earn no XP. The same "How checks work" guide is open on Checks and folded on every activity page.
 
-- **Start from a template, or from scratch.** There are four templates (`assets/js/data/templates.js`): Maine Coast Explorers, How Machines Make Decisions, From Instructions to Invention, and Coding Foundations (built from the seven coding stages). "Use this template" makes the educator's own copy; the template never changes.
-- **Goal first.** Set the goal, the final product, the grades, minutes per session, and prior skills. Then add missions found by search or category, plus your own synthesis steps.
-- **Shape each step.** Mark it required or optional, and add a bridge (why it follows the last step), evidence to collect (or keep the mission's own check), and your own adaptation. Adaptations never change the mission.
-- **Reorder** with Move up and Move down (keyboard), or by dragging. Changes save automatically.
-- **Preview** shows:
-  - student time (required steps, with optional steps listed separately);
-  - teacher prep, or "not recorded";
-  - the categories and equipment the pathway uses;
-  - advice: grade fit, accounts and supervision, full labs, more-than-one-session missions, and coding-stage order.
-- **Publish** saves version 1, 2, and so on, pinning each mission's version. It's blocked, with reasons, until there's a goal, a final product, and steps, and while a required step has no resource or isn't published. A mission with no resource can only be an optional step.
-- **Assign** pins a class to the published version. Later edits and new versions never change it until you choose **Move the class to vN**. If a mission changes after it was assigned, the pathway page lists it as "Updated since assigned".
-- Archive or duplicate any pathway. In cloud mode, pathways need `supabase/update-6-pathways.sql`: each educator sees only their own, and published versions can't be edited.
-- **Students** see each assigned pathway on Today (class side) and at `#/my/pathways/<id>`.
-  - The page shows the goal, what they'll make, and each step with its bridge, the teacher's instructions, a link to the mission, and the evidence asked for.
-  - Students send evidence by writing it, or by choosing "Show or tell my teacher". The final step is a written synthesis.
-  - Partners can save one shared **team artifact** per step (a description and an optional https link). Each student's evidence stays their own.
-  - Opening or launching a mission never counts as evidence. The mission's own status is shown separately.
-- **Review** (`#/teach/pathways/<id>/review`):
-  - A grid of students by steps (Not started, Sent, Accepted, Revise), with sent and accepted counts for each step.
-  - Choose a student to see their **portfolio** for the pathway, with mission status, evidence, team artifact, your observations, and past reviews kept separate.
-  - **Accept**, or **Ask to revise** (a note is required). A revise request shows first on the student's Today and opens the step again. You can also add observations.
+## Learning Plans
+
+A **Learning Plan** is an ordered set of activities from any category, assigned to a whole class. Educators find them under **Learning Plans** (`#/teach/plans`), with a **Current / Finished** toggle, drafts, and templates.
+
+- **Start from a template, or from scratch.** The templates are in `assets/js/data/templates.js`: Maine Coast Explorers, How Machines Make Decisions, From Instructions to Invention, AI Learning Route (proposed, review before teaching), and Coding Foundations (built from the seven coding stages). "Use this template" makes the educator's own copy; the template never changes.
+- **Edit** the title, goal, grades, and the activities. Each activity is required or optional and can have a note to students. Reorder with Move up and Move down (keyboard) or by dragging, and add activities by search or category. Changes save automatically.
+- **At a glance**: student time (optional activities listed separately), teacher prep or "not recorded", categories, equipment, and advice on grade fit, accounts, cost, supervision, full labs, multi-session activities, and coding-stage order.
+- **Assign to a class.** Every student in the class sees it. A required activity must be published and have a resource; one with no resource can only be optional.
+- **Update for students** appears after you edit an assigned plan, and sends the changes to every class that has it. Underneath, each class stays on the version it was given until you update.
+- **The plan page** has three tabs: **Activities**, **Students** (each student's status on each activity, and how many required activities they've passed), and **Checks** (this plan's waiting reflections, with Pass and Try again right there).
+- **Duplicate** a plan, or **Finish** it when the class is done. Finished plans move to the Finished list, and students see them under All.
+- **Add to a Learning Plan** is on every activity page for educators: pick a plan, or start a new one with that activity.
+- **Old single assignments.** A class that still has activities assigned one at a time gets a banner on Learning Plans that moves them into one plan.
+- In cloud mode, plans need `supabase/update-6-pathways.sql` (each educator sees only their own, and given versions can't be edited) and `supabase/update-10-plan-status.sql` (students can tell current plans from finished ones).
 
 ## Moxie: a physical computing pathway (draft)
 
@@ -93,7 +89,7 @@ Partner teams in cloud mode need [`supabase/update-5-moxie-teams.sql`](supabase/
 
 ## Interactive labs
 
-Each exploration area has its own leveled, interactive lab that runs inside STEM 207, with no outside account or website. Every level teaches one idea, gives a hint on request, checks the student's work, and ends with "What you just learned." Signed-in students earn XP for each level (+30), and lab work counts toward patches and the weekly streak.
+Each exploration area has its own leveled, interactive lab that runs inside STEM 207, with no outside account or website. Every level teaches one idea, gives a hint on request, checks the student's work, and ends with "What you just learned." Lab work counts toward lab patches and the weekly streak; XP comes when the teacher passes the lab activity.
 
 | Area | Lab | Levels | What students learn |
 | --- | --- | --- | --- |
@@ -130,30 +126,37 @@ The sample class has eight made-up students with two and a half weeks of made-up
 
 ### What students get
 
-- **My expedition** home: rank, XP, mission count, patches, weekly streak, suggested next missions, a note from their teacher, and a class goal.
-- **Expedition map**: the Maine night sky over a North Woods treeline. Every mission is a star in its area's constellation. Finishing a mission lights its star and connects it to the constellation.
-- **Mission checklist**: steps can be checked off, and the page remembers where they stopped.
-- **Mission debrief**: answer "Think about it," mark "Take it further" as tried, and say how it went. Then a Mission complete screen shows XP earned, any promotion, and new patches.
+Top menu: **Home · My Learning Plans · Activities · My harbor**.
+
+- **Home** (`#/`) is one calm column:
+  - a greeting with their rank;
+  - one **Up next** card: a Try again first, then the next activity in a current Learning Plan, then an older single assignment, then their own work in progress or a suggestion. It has a big Start or Continue button and an **I need help** button that tells the teacher;
+  - one line for what's waiting for the teacher;
+  - the newest message from the teacher (older ones fold away);
+  - one line for the class journey;
+  - two buttons: **My Learning Plans** and **Explore activities**.
+- **My Learning Plans** (`#/plans`) with a **Current / All** toggle. Each plan shows its goal, "3 of 6 passed", and the next activity. A plan page (`#/plans/<id>`) lists its activities in order, each with its status, the teacher's note, and a Start, Continue, or Try again button.
+- **Activities**: the same category view educators use. Activities students choose on their own use the same reflection and check.
+- **Me** (`#/me`): rank ladder, the 18 patches, the class journey with class badges, saved creations, labs, and everything they've sent, with each status and the teacher's notes.
 - **Ranks**: Deckhand → Tidepooler → Trail Scout → Lighthouse Keeper → Harbor Pilot → Ridge Runner → Katahdin Guide, each with a chevron insignia.
-- **18 mission patches** for things like first mission, reflections, team missions, debugging, each area, pathway stages, and interactive labs.
-- **Two kinds of rewards.** *Personal:* XP, ranks, patches, and the harbor count everything a student does, class missions included. *Class:* the **class journey** across Maine (Kittery, Portland Head, Penobscot Bay, Acadia, Moosehead, Katahdin) moves only with class work: +100 when a student sends an assigned mission, +50 when the teacher confirms a mission, and +100 when the teacher confirms a coding stage. The class also earns five **class badges** together (First Haul, All Hands on Deck, Pathfinders, Right on Tide, Steady Crew). It's cooperative, so there's no leaderboard. On a student's device in cloud mode, the class totals come from `class_journey` (counts only, no names), added in `supabase/update-4-class-journey.sql`.
-- **Coding pathway**: an "I can do this" button sends a stage to the teacher to check.
-- **My harbor** (`#/base`): each student designs an illustrated explorer (skin tone, hair, hats, jackets, gear, background) and a home harbor that grows as they learn. A pine grows for every mission and a buoy for every 2 lab levels, in the student's own buoy colors. Ranks and patches unlock 31 items: a lobster boat they name and paint at Tidepooler, a camp cabin, a lighthouse, a sailboat, puffins, a loon, a moose, the northern lights, and Katahdin. New unlocks show up on the Mission complete and lab level screens. Avatars appear in the header, on the home screen, and in the teacher's roster.
-- **No personal info in avatars**: avatars are drawings built from preset parts, and boat names are picked from two word lists, so students never type free text or upload photos. Choices are saved as `profile_custom` events in the activity log, so they work in local and cloud mode with no database change.
+- **Two kinds of rewards.** *Personal:* XP, ranks, patches, and the harbor come from passes on any activity. *Class:* the **class journey** across Maine (Kittery, Portland Head, Penobscot Bay, Acadia, Moosehead, Katahdin) moves +100 each time the teacher passes class work (an assigned activity, or one in an assigned Learning Plan). The class also earns five **class badges** together. It's cooperative, so there's no leaderboard. On a student's device in cloud mode, the class totals come from `class_journey` (counts only, no names).
+- **My harbor** (`#/base`): each student designs an illustrated explorer (skin tone, hair, hats, jackets, gear, background) and a home harbor that grows as they learn. Ranks and patches unlock 31 items: a lobster boat they name and paint at Tidepooler, a camp cabin, a lighthouse, a sailboat, puffins, a loon, a moose, the northern lights, and Katahdin.
+- **No personal info in avatars**: avatars are drawings built from preset parts, and boat names are picked from two word lists, so students never type free text or upload photos. Choices are saved as `profile_custom` events in the activity log.
 
-### What educators get (`#/teach`)
+### What educators get
 
-- **Missions**: the whole library organized by discipline (Coding pathway, Coding, Virtual Reality, AI, Engineering, Science, Creative). Filter by grade band, time, or Made in Maine; see how many students have finished each mission; and **Assign** missions to the class, one at a time or a whole pathway stage at once. Add due dates in the Assigned list. Assigned missions show first on every student's home screen and are tagged on the mission page. You can also assign from any mission page.
-- **Overview**: active students this week, missions this week compared with last week, reflections and "I can" checks waiting, a 14-day chart, which areas the class is exploring, a "needs a check-in" list (inactive for a week, or "still figuring it out" on recent missions), the class goal, a sortable roster, and a live activity log.
-- **Student detail**: rank, XP, patches, pathway with Confirm / Not yet, every completed mission with answers and confidence, and a full activity timeline.
-- **Message your class** (Overview): post short notes that students see under "From your teacher" on Today, newest three first, and delete them anytime. In the Missions tab, each assigned mission takes **instructions for students**, shown on that mission on Today.
-- **Coding pathway**: the same seven stages students see, from the same data, with the class on each stage (cleared, waiting, not yet), checks waiting with Confirm and Not yet right on the stage, what a confirm looks like and a common misconception for each stage, every mission with student time and teacher prep, Assign buttons, and the class-by-stage readiness map. "Preview the student view" opens the student page. A "How checks work" guide shows who does what, where, for mission checks and stage checks, and that only the teacher's Confirm clears a stage. Students get a short version on their pathway page.
-- **Reflections**: unread answers with a one-line reply that students see on their home screen.
-- **Class & logins**: add students, change grade bands, issue new pictures, remove students, create more classes, and print login cards.
+Top menu: **Dashboard · Learning Plans · Activities · Classes · Checks**.
+
+- **Dashboard** (`#/teach`) across all classes: checks waiting, your classes, current Learning Plans with class progress, a "needs a check-in" list, and quick actions (New Learning Plan, Add a class).
+- **Learning Plans** (`#/teach/plans`): see above.
+- **Activities** (`#/activities`): every activity by category, with **Add to a Learning Plan** on each activity page.
+- **Classes** (`#/teach/classes`): a card per class with Add a class, and Archived classes with Restore. A class page has rename, archive, and delete (type the class name to confirm, since it removes the students and their work), the roster, Learning Plans, the class journey, labs, **messages** to the class, adding students, sign-in steps, printable login cards, and a live activity log.
+- **Checks** (`#/teach/checks`): one queue of every sent reflection across classes, with Pass and Try again, and "Show what you checked in the last 2 weeks".
+- **Student detail**: rank, XP, patches, every activity with its status and reflections, and a full activity timeline.
 
 ### What gets recorded
 
-Each student action is saved as an event: signed in, opened a mission, checked a step, launched a resource, completed a mission (with answer, challenge, and confidence), claimed a pathway stage. Teacher actions are also events: confirmed a stage, said not yet, read or replied to a reflection. XP, ranks, and patches are calculated from the events using the rules in `assets/js/data/progression.js`, so changing a rule updates everyone.
+Each student action is saved as an event: signed in, opened an activity, checked a step, launched a resource, sent a reflection (`mission_completed`, with the answer and confidence), asked for help. Teacher actions are also events: passed (`teacher_confirmed`) or try again (`teacher_try_again`). XP, ranks, and patches are calculated from the events using the rules in `assets/js/data/progression.js`, so changing a rule updates everyone.
 
 ## Back end (Supabase, free)
 
@@ -224,7 +227,8 @@ index.html                    Page shell: header, footer, script tags
 assets/css/styles.css         All styles. Color and type tokens are at the top.
 assets/js/data/areas.js       Exploration areas, levels, grade bands, durations, formats, equipment
 assets/js/data/activities.js  The activity library
-assets/js/data/pathway.js     The seven coding pathway stages
+assets/js/data/pathway.js     The seven coding stages and the AI route (data for two templates)
+assets/js/data/templates.js   Learning Plan templates
 assets/js/data/moxie.js       The Moxie pathway: units, kit, capstone, and the 16 session records
 assets/js/data/drafts-3d-printing.js  The five 3D Printing placeholders (drafts)
 assets/js/data/imported.js    Missions added with tools/import_missions.js (generated)
@@ -236,10 +240,10 @@ assets/js/cloud.js            Small Supabase client (Auth, REST, RPC)
 assets/js/store.js            Accounts, sessions, activity log, sample class, cloud sync
 supabase/schema.sql           Database tables, security rules, and student sign-in functions
 tests/backend/                Supabase stand-in for testing cloud mode on plain Postgres
-assets/js/game.js             Turns the activity log into XP, rank, patches, and pathway status
-assets/js/art.js              Insignia, patches, expedition map, class goal track
+assets/js/game.js             Turns the activity log into statuses, XP, rank, patches, and the class journey
+assets/js/art.js              Insignia, patches, star map, class goal track
 assets/js/base.js             Student avatars, the "My harbor" scene, and gear/harbor unlocks
-assets/js/views-*.js          Library, student, sign-in, educator, and Moxie views
+assets/js/views-*.js          Activities, student (Home, Me), sign-in, educator, Learning Plans, and Moxie views
 assets/js/main.js             Router and header
 ```
 

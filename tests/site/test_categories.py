@@ -47,8 +47,8 @@ async def main():
     await pg.evaluate("SE.store.signOut()"); await student(pg)
     await go(pg, "#/activity/3d-printing-exercise-02")
     ok("student: a placeholder is not found", NOT_FOUND in await pg.inner_text("#app"))
-    await go(pg, "#/explore")
-    ok("student: expedition map still renders", await pg.locator("#app svg").count() > 0)
+    await go(pg, "#/activities")
+    ok("student: Activities shows 3D Printing as coming soon", "3D Printing" in await pg.inner_text("#app"))
 
     # Educators see the five drafts, labeled, and can't assign them.
     await educator(pg)
