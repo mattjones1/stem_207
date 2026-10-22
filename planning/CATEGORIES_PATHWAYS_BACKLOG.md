@@ -14,6 +14,8 @@ Small tasks in dependency order. The brief is `planning/STEM207_Categories_Pathw
 
 ## Phase 2: Content foundation
 
+**Status (October 21, 2026):** C1–C4, C6, and C7 are done. C5 is done as display support only (fields, chips, facts, and the "Also fits here" listing): no skill tags or delivery labels are applied yet, pending approval of audit 6a and 6c. Checks: the import tool tests pass (18 of 18), and so does a Node harness that loads the app with a fake page (88 checks, or 90 with an imported mission). `tests/site/test_categories.py` and the a11y pages are written but not run here (no Python or Playwright on this machine).
+
 | # | Task | Depends on | Files | Done when |
 | --- | --- | --- | --- | --- |
 | C1 | `SE.content`: `isPublished` (missing `pub` = published), `version` (missing = "1"), `readiness` (ready / missing-resource / needs-review), `visibleTo(a, user)`, `assignable(a)`. `STEM.drafts` collects unpublished records. Move Moxie onto it | — | new `assets/js/content.js`, `core.js`, `store.js`, `data/moxie.js`, `views-moxie.js`, `index.html` | All 53 missions are published at v1. The Moxie harness checks still pass. `SE.store.assignable` uses `SE.content` |
@@ -25,6 +27,8 @@ Small tasks in dependency order. The brief is `planning/STEM207_Categories_Pathw
 | C7 | Tests for the content layer: harness checks, plus `tests/site/test_categories.py` (local) and a11y pages `#/area/3d-printing` | C1–C6 | tests | The harness passes. The Playwright tests are written to repo conventions and run on a machine that has Python |
 
 ## Phase 3: Pathway builder
+
+**Status (October 21, 2026):** P1–P6 are done. The template prompts were approved on October 21, 2026: Maine Coast Explorers uses the brief's wording, and the other templates use each mission's own check plus the brief's goal and final product. The Node harness passes (119 checks). `tests/site/test_pathways.py` (local and cloud) and the a11y pages are written but not run here. `update-6-pathways.sql` hasn't been run on a real database yet. Students see assigned pathways in Phase 4.
 
 | # | Task | Depends on | Files | Done when |
 | --- | --- | --- | --- | --- |

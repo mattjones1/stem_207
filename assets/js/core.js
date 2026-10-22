@@ -9,10 +9,12 @@
 
   /* ───────── Lookups ───────── */
   SE.areaById = Object.fromEntries(STEM.areas.map((a) => [a.id, a]));
+  // Areas with published missions. A "coming-soon" area shows as a card only (no filters, map, or suggestions).
+  SE.liveAreas = STEM.areas.filter((a) => a.status !== "coming-soon");
   SE.levelById = Object.fromEntries(STEM.levels.map((l) => [l.id, l]));
   SE.gradeById = Object.fromEntries(STEM.gradeBands.map((g) => [g.id, g]));
-  // Moxie sessions are looked up by id in every publication state; only published ones are in STEM.activities.
-  SE.activityById = Object.fromEntries(STEM.activities.concat(STEM.moxieSessions || []).map((a) => [a.id, a]));
+  // Drafts (STEM.drafts) are looked up by id in every publication state; only published records are in STEM.activities.
+  SE.activityById = Object.fromEntries(STEM.activities.concat(STEM.drafts || []).map((a) => [a.id, a]));
   SE.levelOrder = Object.fromEntries(STEM.levels.map((l, i) => [l.id, i]));
   SE.patchById = Object.fromEntries(STEM.progression.patches.map((p) => [p.id, p]));
   SE.pictureById = Object.fromEntries(STEM.progression.pictures.map((p) => [p.id, p]));
@@ -73,6 +75,7 @@
     boat: '<path d="M2.5 15h19l-2.6 5H5.2z"/><path d="M6.5 15v-5h7l2.5 5"/><path d="M9 10V5.5M9 5.5h3"/>',
     snowflake: '<path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7"/><path d="M9.5 3.6 12 6l2.5-2.4M9.5 20.4 12 18l2.5 2.4"/>',
     buoy: '<rect x="9" y="6" width="6" height="12" rx="3"/><path d="M9 11h6M12 6V2.5M5 21c2.3-1.4 4.7 1.4 7 0s4.7 1.4 7 0"/>',
+    cube: '<path d="M12 2.8 20.5 7.5v9L12 21.2 3.5 16.5v-9z"/><path d="M3.5 7.5 12 12.2l8.5-4.7M12 12.2v9"/>',
     lighthouse: '<path d="M9 21l1.2-12h3.6L15 21z"/><path d="M8.5 9h7M10 6h4l-.5 3h-3z"/><path d="M12 3v3M4 6l4 1.5M20 6l-4 1.5M6 21h12"/>'
   };
   SE.icon = (name, extra = "") =>

@@ -66,8 +66,43 @@ window.STEM.areas = [
     description:
       "Digital art, animation, storytelling, and projects that combine creativity with technology. Decode a lighthouse in pixels and make an animated postcard from your favorite Maine place.",
     topics: ["Digital art", "Animation", "Storytelling", "Creative technology"]
+  },
+  {
+    // status "coming-soon": shown as a category card, but left out of filters, the map, and suggestions
+    // (SE.liveAreas) until it has published missions. Its five placeholders are in data/drafts-3d-printing.js.
+    id: "3d-printing",
+    name: "3D Printing",
+    short: "3D Printing",
+    icon: "cube",
+    status: "coming-soon",
+    tagline: "Coming soon. No exercises yet.",
+    description: "Coming soon. 3D Printing exercises are being prepared and aren't ready to teach yet.",
+    topics: []
   }
 ];
+
+/* Skills that cross categories (optional `skills: [...]` on an activity). Tag a mission only after
+   the proposed tags in planning/CATEGORIES_PATHWAYS_AUDIT.md (section 6a) are approved. */
+window.STEM.skills = [
+  { id: "sequencing", name: "Sequencing and algorithms" },
+  { id: "debugging", name: "Debugging" },
+  { id: "events", name: "Events and messages" },
+  { id: "loops", name: "Loops" },
+  { id: "logic", name: "Conditions and logic" },
+  { id: "data", name: "Variables and data" },
+  { id: "functions", name: "Functions and decomposition" },
+  { id: "observation", name: "Observation" },
+  { id: "fair-testing", name: "Prediction and fair testing" },
+  { id: "design-iteration", name: "Design and iteration" },
+  { id: "training-data", name: "Training data and patterns" },
+  { id: "responsible-use", name: "Responsible use" },
+  { id: "encoding-art", name: "Pixels, encoding, and animation" },
+  { id: "communication", name: "Communicating ideas" }
+];
+
+/* Every unpublished record (Moxie sessions, 3D Printing placeholders, imported drafts) is added here.
+   Drafts are found by id (SE.activityById) but never listed, counted, suggested, or assigned. */
+window.STEM.drafts = window.STEM.drafts || [];
 
 /* Experience levels. `pips` drives the 1–3 dot meter so level is never shown by color alone. */
 window.STEM.levels = [

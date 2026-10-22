@@ -45,12 +45,13 @@ trap cleanup EXIT
 
 LABS=(tests/labs/test_*.py)
 SITE=(tests/site/test_*.py)
-CLOUD_TESTS=" test_evidence.py test_batch9.py test_batch10.py test_moxie.py "
+TOOLS=(tests/tools/test_*.js)   # Node tests: no browser or Python needed
+CLOUD_TESTS=" test_evidence.py test_batch9.py test_batch10.py test_moxie.py test_pathways.py "
 mode=${1:-quick}
 case "$mode" in
   quick) files=(tests/labs/test_dance_party.py tests/site/test_today_pilot.py tests/site/test_batch10.py); cloud=0 ;;
-  all)   files=("${LABS[@]}" "${SITE[@]}"); cloud=1 ;;
-  local) files=("${LABS[@]}" "${SITE[@]}"); cloud=0 ;;
+  all)   files=("${TOOLS[@]}" "${LABS[@]}" "${SITE[@]}"); cloud=1 ;;
+  local) files=("${TOOLS[@]}" "${LABS[@]}" "${SITE[@]}"); cloud=0 ;;
   *)     files=("$@"); cloud=1 ;;
 esac
 
@@ -62,7 +63,7 @@ for f in "${files[@]}"; do
   name=$(basename "$f")
   args=()
   if [[ "$CLOUD_TESTS" == *" $name "* ]]; then args=("$LOCAL"); [ "$cloud" = 1 ] && args+=("$CLOUD") || args+=(skip); fi
-  out=$(python3 "$f" "${args[@]}" 2>&1)
+  if [[ "$f" == *.js ]]; then out=$(node "$f" 2>&1); else out=$(python3 "$f" "${args[@]}" 2>&1); fi
   summary=$(printf '%s\n' "$out" | grep -E '^[0-9]+/[0-9]+ passed' | tail -1)
   if [ -n "$summary" ] && ! printf '%s\n' "$out" | grep -q '^FAIL'; then
     printf '  ok   %-28s %s\n' "$name" "$summary"; pass=$((pass + 1))

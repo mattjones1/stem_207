@@ -10,7 +10,7 @@
 
 ## What's included
 
-- **Home** (guests) and **My expedition** (students) with the six exploration areas, a featured classroom mission, a coding pathway overview, and a searchable mission library. Signed-in students start on **Today**.
+- **Home** (guests) and **My expedition** (students) with the exploration areas (six with missions, plus **3D Printing, coming soon**), a featured classroom mission, a coding pathway overview, and a searchable mission library. Signed-in students start on **Today**.
 - **Quick time picker**: "How much time do you have?" with 20, 30, and 45 minutes.
 - **Library filters**: topic, experience level, grade band, time, and equipment, plus search, a live result count, an empty state, and Reset filters.
 - **Activity pages** with Your mission, What you'll learn, Before you begin, Your steps, Launch activity, Think about it, Take it further, and Teacher notes. VR activities also include setup notes and a way to take part without a headset.
@@ -35,6 +35,24 @@ Six missions are marked as the pilot set (teachers can filter for them): Robot D
 **Grades 6–8 coding track.** Every pathway stage has a mission written for grades 6–8 (tagged on the pathway page), and suggestions for 6–8 students pick it first: Sort the Catch (compare two sorting algorithms by counting comparisons), Lighthouse Network (broadcast messages), Snowstorm Simulator (clones and repeat until), Nor'easter Alert Station (and/or/not with a test table), Catch Log (lists, totals, averages), Snowflake Studio (custom blocks with several inputs that use each other), and Capstone Studio (design doc, two playtests, release notes). From Blocks to Python rewrites a Scratch custom block as a Python function with turtle drawing in the Raspberry Pi Foundation's free Code Editor. Loop Dance Choreographers now finishes in Scratch with a Dance Crew starter (the 16-move dance written out long, to shorten with loops).
 
 **Learning routes.** Scratch missions that build on a lab say so ("You've seen this idea before") and link back to it. Debug the Broken Animation and Pattern Studio with My Blocks have downloadable starter projects (`assets/starters/`, rebuilt with `tools/build_starters.py`), and Score Keeper shows a picture of where its blocks go. The coding pathway opens with "New to coding? Start here" tracks for grades 2–3, 4–5, and older beginners, and the Mission Capstone is open to any student whose Stage 6 is confirmed. The [AI learning route](https://mattjones1.github.io/stem_207/#/ai-route) puts the AI missions in six steps, from patterns to responsible use.
+
+## Educator pathways
+
+Educators build a **pathway**: a goal-first sequence of missions from any category that ends in a final product. It's on the **Pathways** tab of the educator dashboard (`#/teach/pathways`).
+
+- **Start from a template, or from scratch.** There are four templates (`assets/js/data/templates.js`): Maine Coast Explorers, How Machines Make Decisions, From Instructions to Invention, and Coding Foundations (built from the seven coding stages). "Use this template" makes the educator's own copy; the template never changes.
+- **Goal first.** Set the goal, the final product, the grades, minutes per session, and prior skills. Then add missions found by search or category, plus your own synthesis steps.
+- **Shape each step.** Mark it required or optional, and add a bridge (why it follows the last step), evidence to collect (or keep the mission's own check), and your own adaptation. Adaptations never change the mission.
+- **Reorder** with Move up and Move down (keyboard), or by dragging. Changes save automatically.
+- **Preview** shows:
+  - student time (required steps, with optional steps listed separately);
+  - teacher prep, or "not recorded";
+  - the categories and equipment the pathway uses;
+  - advice: grade fit, accounts and supervision, full labs, more-than-one-session missions, and coding-stage order.
+- **Publish** saves version 1, 2, and so on, pinning each mission's version. It's blocked, with reasons, until there's a goal, a final product, and steps, and while a required step has no resource or isn't published. A mission with no resource can only be an optional step.
+- **Assign** pins a class to the published version. Later edits and new versions never change it until you choose **Move the class to vN**. If a mission changes after it was assigned, the pathway page lists it as "Updated since assigned".
+- Archive or duplicate any pathway. In cloud mode, pathways need `supabase/update-6-pathways.sql`: each educator sees only their own, and published versions can't be edited.
+- Students see assigned pathways in Phase 4 (evidence and portfolio), which is next.
 
 ## Moxie: a physical computing pathway (draft)
 
@@ -145,7 +163,7 @@ STEM 207 runs in one of two modes, chosen by `assets/js/config.js`:
 ### Set up the free back end (about 10 minutes)
 
 1. Create a free account at [supabase.com](https://supabase.com) and click **New project**. Pick a region near Maine (for example US East) and save the database password somewhere safe.
-2. In the project, open **SQL Editor → New query**, paste all of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**. (Already set up before? Run the updates you haven't run yet, in order: [`supabase/update-2-assignments.sql`](supabase/update-2-assignments.sql) for assigned missions, then [`supabase/update-3-class-messages.sql`](supabase/update-3-class-messages.sql) for class messages and assignment instructions, then [`supabase/update-4-class-journey.sql`](supabase/update-4-class-journey.sql) so students see the whole class's journey, then [`supabase/update-5-moxie-teams.sql`](supabase/update-5-moxie-teams.sql) for Moxie partner teams.) It creates the tables, the security rules, and the student sign-in functions. Running it again is safe.
+2. In the project, open **SQL Editor → New query**, paste all of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**. (Already set up before? Run the updates you haven't run yet, in order: [`supabase/update-2-assignments.sql`](supabase/update-2-assignments.sql) for assigned missions, then [`supabase/update-3-class-messages.sql`](supabase/update-3-class-messages.sql) for class messages and assignment instructions, then [`supabase/update-4-class-journey.sql`](supabase/update-4-class-journey.sql) so students see the whole class's journey, then [`supabase/update-5-moxie-teams.sql`](supabase/update-5-moxie-teams.sql) for Moxie partner teams, then [`supabase/update-6-pathways.sql`](supabase/update-6-pathways.sql) for educator pathways.) It creates the tables, the security rules, and the student sign-in functions. Running it again is safe.
 3. Open **Authentication → Sign In / Providers → Email** and turn off **Confirm email** while you're prototyping, so new educator accounts work right away. (If you leave it on, teachers must click the link in a confirmation email first. In that case, set **Authentication → URL Configuration → Site URL** to wherever your site lives.)
 4. Open **Project Settings → API Keys**. Copy the **Project URL** and the **publishable** key (older projects call it the **anon public** key) into `assets/js/config.js`. Never use a secret or `service_role` key here.
 5. Commit and push. GitHub Pages serves the site with the back end on. To make the one-file version use it too, run `python tools/build_single_file.py` again.
@@ -200,8 +218,11 @@ assets/js/data/areas.js       Exploration areas, levels, grade bands, durations,
 assets/js/data/activities.js  The activity library
 assets/js/data/pathway.js     The seven coding pathway stages
 assets/js/data/moxie.js       The Moxie pathway: units, kit, capstone, and the 16 session records
+assets/js/data/drafts-3d-printing.js  The five 3D Printing placeholders (drafts)
+assets/js/data/imported.js    Missions added with tools/import_missions.js (generated)
 assets/js/data/progression.js XP rules, ranks, patches, class goal, picture codes
 assets/js/core.js             Shared helpers and icons
+assets/js/content.js          Content status: published or draft, version, readiness, who can see or assign it
 assets/js/config.js           Back-end settings: empty = local mode, Supabase URL + key = cloud mode
 assets/js/cloud.js            Small Supabase client (Auth, REST, RPC)
 assets/js/store.js            Accounts, sessions, activity log, sample class, cloud sync
@@ -222,7 +243,7 @@ Copy any entry in `assets/js/data/activities.js`, give it a new `id`, and fill i
 | --- | --- |
 | `id` | Unique, lowercase, hyphenated. Used in the URL: `#/activity/<id>` |
 | `title`, `summary` | The summary is one student-friendly sentence for the card |
-| `area` | One of `coding`, `vr`, `ai`, `engineering`, `science`, `creative` |
+| `area` | One of `coding`, `vr`, `ai`, `engineering`, `science`, `creative`, `3d-printing` (coming soon) |
 | `level` | `beginner`, `intermediate`, or `advanced` |
 | `grades` | Any of `"2-3"`, `"4-5"`, `"6-8"` |
 | `duration` | Minutes. Used by the 20/30/45 time filter |
@@ -237,6 +258,32 @@ Copy any entry in `assets/js/data/activities.js`, give it a new `id`, and fill i
 | `launch` | See below |
 | `mission`, `learn`, `before`, `steps`, `reflect`, `extend`, `teacherNotes` | Activity page content. `before` has `materials`, `setup`, `prerequisites` |
 | `vr` | VR only: `setup` (teacher notes) and `nonHeadset` (how to take part without a headset) |
+| `pub`, `version` | Optional. Leave both off for a normal published mission (version 1). `pub` is `draft`, `review`, `hardware`, `pilot`, or `published`. Unpublished records go in `STEM.drafts`: only educators see them, and they aren't listed, counted, suggested, or assigned (pilot records can be assigned) |
+| `alsoIn` | Optional. Other areas where the mission also fits. It's listed under "Also fits here" there, but counted once, in its own area |
+| `skills` | Optional. Ids from `STEM.skills` in `areas.js` |
+| `delivery` | Optional. How it's actually delivered when that differs from the area, for example "Browser 360° (not headset VR)". Shown as a chip and in the facts |
+
+### Importing missions
+
+To add missions from another source without editing `activities.js`, put them in a JSON file (an array, or `{ "missions": [...] }`) and use the import tool:
+
+```
+node tools/import_missions.js missions.json                 # dry run: check and report, save nothing
+node tools/import_missions.js missions.json --write         # save the accepted missions
+node tools/import_missions.js missions.json --write --new-version   # also allow changes to a published import
+```
+
+- Records use the fields above. Accepted ones are saved to `assets/js/data/imported.js` (generated; don't edit by hand) and appear in the library with no new page code.
+- A published mission needs every field the mission page shows. A draft (`"pub": "draft"`) needs only `id`, `title`, and `area`. Labs can't be imported, because they need code.
+- The tool rejects:
+  - a badly formed id, or the same id twice in one file;
+  - an id that belongs to a hand-written record;
+  - a title another record already uses;
+  - an unknown area, skill, or equipment key;
+  - a launch link that isn't https.
+- A published import is never overwritten silently. Changing one needs `--new-version`, which bumps its version.
+- Text is cleaned (HTML tags and control characters are removed). Attribution in `source` is kept.
+- Tests: `node tests/tools/test_import_missions.js` (fixtures in `tests/fixtures/import/`).
 
 ### Launch links
 

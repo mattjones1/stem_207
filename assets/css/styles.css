@@ -2266,3 +2266,68 @@ h1, h2, h3, h4 { letter-spacing: -.015em; }
 .cert__parent { display: flex; align-items: center; justify-content: center; gap: .45rem; margin: -.1rem 0 0; font-size: .78rem; color: #555555; }
 .cert__parent img { width: 132px; height: auto; }
 .site-footer__tag { font-family: var(--font-display); font-weight: 700; font-size: .78rem; letter-spacing: .12em; color: #b7dd7a; }
+
+/* Categories: a coming-soon area card, and the educator-only drafts list on an area page */
+.area-card--soon { border-style: dashed; background: var(--surface); }
+.area-card--soon .area-card__foot { color: var(--muted); }
+.draft-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+.draft-list li { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; padding: .6rem .8rem; border: 1.5px dashed var(--line); border-radius: var(--radius-sm); background: var(--surface); }
+.draft-list a { font-weight: 700; min-height: 24px; display: inline-flex; align-items: center; }
+
+/* Educator pathways (views-pathways.js) */
+.pw-cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+.pw-card { display: grid; gap: .4rem; align-content: start; padding: 1rem 1.1rem; border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.pw-card h3 { margin: 0; }
+.pw-card p { margin: 0; }
+.pw-card__meta { display: flex; flex-wrap: wrap; gap: .4rem; }
+.pw-card__actions, .pw-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .3rem; }
+.pw-archived { margin-top: 1rem; }
+.pw-archived > summary { cursor: pointer; font-weight: 700; min-height: 24px; }
+.pw-back { margin-bottom: .6rem; }
+.pw-back .back-link { color: var(--teal); }
+.pw-layout { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); align-items: start; padding-bottom: 2rem; }
+@media (min-width: 960px) { .pw-layout { grid-template-columns: minmax(0, 1fr) 340px; } }
+.pw-main { display: grid; gap: 1.25rem; min-width: 0; }
+.pw-summary { display: grid; gap: .5rem; margin: 0; }
+.pw-summary div { display: grid; grid-template-columns: minmax(8rem, 11rem) minmax(0, 1fr); gap: .6rem; }
+.pw-summary dt { font-weight: 700; }
+.pw-summary dd { margin: 0; }
+.pw-steps, .pw-edit-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: .7rem; }
+.pw-step { display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: .7rem; padding: .7rem .8rem; border: 1.5px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
+.pw-step--optional { border-style: dashed; }
+.pw-step p { margin: .2rem 0 0; }
+.pw-step__head { display: flex; flex-wrap: wrap; gap: .35rem .6rem; align-items: center; margin: 0; }
+.pw-step__n { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; background: var(--navy); color: var(--on-dark); font-family: var(--font-display); font-weight: 800; }
+.pw-step__label { font-family: var(--font-display); font-weight: 700; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.pw-step__bridge { display: flex; gap: .4rem; align-items: flex-start; color: var(--muted); font-style: italic; }
+.pw-step__bridge svg, .pw-box h3 svg { width: 1rem; height: 1rem; flex: none; fill: none; stroke: currentColor; stroke-width: 2; margin-top: .2rem; }
+.pw-area { display: inline-flex; gap: .25rem; align-items: center; padding: .05rem .5rem; border-radius: 999px; background: var(--teal-soft); color: var(--fg); font-size: .82rem; font-weight: 700; }
+.pw-area svg { width: .9rem; height: .9rem; fill: none; stroke: currentColor; stroke-width: 2; }
+.pw-totals { grid-template-columns: 1fr; }
+.pw-totals small { display: block; color: var(--muted); font-weight: 400; }
+.pw-box { margin-top: 1rem; padding: .8rem 1rem; border-radius: var(--radius-sm); background: var(--surface-2); }
+.pw-box h3 { display: flex; gap: .4rem; margin: 0 0 .4rem; font-size: 1rem; }
+.pw-box ul { margin: 0; padding-left: 1.2rem; display: grid; gap: .3rem; }
+.pw-box--block { background: var(--warn-soft); border-left: 5px solid var(--warn); }
+.pw-box--warn { border-left: 5px solid var(--line); }
+.pw-versions { margin: 0; padding-left: 1.2rem; }
+.pw-saved { margin: 0; font-weight: 700; color: var(--muted); }
+.pw-form { display: grid; gap: .8rem; }
+.pw-group { border: 1.5px solid var(--line); border-radius: var(--radius-sm); margin: 0; padding: .7rem .9rem; display: grid; gap: .6rem; min-width: 0; }
+.pw-group legend { padding: 0 .3rem; font-weight: 700; }
+.pw-checks { display: flex; flex-wrap: wrap; gap: .5rem; }
+.pw-check { display: inline-flex; gap: .4rem; align-items: center; min-height: 44px; padding: .3rem .7rem; border: 1.5px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); cursor: pointer; }
+.pw-check input { width: 20px; height: 20px; accent-color: var(--teal); }
+.pw-check:has(input:checked) { border-color: var(--teal); background: var(--teal-soft); font-weight: 700; }
+.pw-edit-step { padding: .8rem; border: 1.5px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
+.pw-edit-step__head { display: flex; flex-wrap: wrap; gap: .5rem .8rem; align-items: center; }
+.pw-edit-step__head h3 { flex: 1 1 200px; margin: 0; font-size: 1.02rem; display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+.pw-edit-step__tools { display: flex; flex-wrap: wrap; gap: .4rem; }
+.pw-edit-step__fields { display: grid; gap: .6rem; margin-top: .7rem; }
+.pw-edit-step[draggable="true"] { cursor: grab; }
+.pw-mins { display: flex; flex-wrap: wrap; gap: .8rem; }
+.pw-search { display: grid; gap: .8rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+.pw-results { list-style: none; margin: .8rem 0 0; padding: 0; display: grid; gap: .45rem; }
+.pw-results li { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; justify-content: space-between; padding: .5rem .7rem; border-radius: var(--radius-sm); background: var(--bg); }
+@media (max-width: 520px) { .pw-summary div { grid-template-columns: 1fr; gap: .1rem; } }
+@media (prefers-reduced-motion: reduce) { .pw-check { transition: none; } }

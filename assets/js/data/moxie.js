@@ -212,6 +212,6 @@ window.STEM.moxie = {
         "Part of this session is still build time. Keep the showcase private to the class unless you decide otherwise."] })
   ];
 
-  // Only published sessions join the shared library. Drafts are reached through the Moxie pages.
-  STEM.activities.push(...STEM.moxieSessions.filter((s) => s.pub === "published"));
+  // Only published sessions join the shared library. The rest are drafts (STEM.drafts), reached through the Moxie pages.
+  STEM.moxieSessions.forEach((s) => (s.pub === "published" ? STEM.activities : STEM.drafts).push(s));
 })();

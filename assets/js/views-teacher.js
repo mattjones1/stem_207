@@ -119,6 +119,7 @@
     const tabs = [
       ["overview", "#/teach", "Overview", "chart", 0],
       ["missions", "#/teach/missions", "Missions", "rocket", 0],
+      ["pathways", "#/teach/pathways", "Pathways", "map", 0],
       ["pathway", "#/teach/pathway", "Coding pathway", "flag", pendingClaims],
       ["reflections", "#/teach/reflections", "Reflections", "message", pendingRefl],
       ["class", "#/teach/class", "Class & logins", "users", 0]
@@ -152,6 +153,10 @@
         </div></div>` : ""}
       ${body}`;
   }
+
+  SE.teachFrame = (...args) => frame(...args);   // shared with views-pathways.js
+  SE.teachBindFrame = (user) => bindFrame(user);
+  SE.teachNoClass = (user) => noClass(user);
 
   function bindFrame(user) {
     const sw = document.getElementById("class-switch");
@@ -240,7 +245,7 @@
     const yMax = Math.max(2, Math.ceil(maxDay / 2) * 2);
 
     // Areas
-    const areaCounts = STEM.areas.map((a) => ({ a, n: completions.filter((e) => SE.activityById[e.data.activityId] && SE.activityById[e.data.activityId].area === a.id).length }));
+    const areaCounts = SE.liveAreas.map((a) => ({ a, n: completions.filter((e) => SE.activityById[e.data.activityId] && SE.activityById[e.data.activityId].area === a.id).length }));
     const maxArea = Math.max(1, ...areaCounts.map((x) => x.n));
 
     const delta = thisWeek - lastWeek;
@@ -804,7 +809,7 @@
   /* ───────── Missions: browse by discipline and assign to the class ───────── */
   const DISCIPLINES = () => [
     { id: "pathway", name: "Coding pathway", short: "Pathway", icon: "list", blurb: "Seven readiness-based stages, from first instructions to independent projects. Assign a whole stage or pick missions inside it." },
-    ...STEM.areas.map((a) => ({ id: a.id, name: a.name, short: a.short, icon: a.icon, blurb: a.description }))
+    ...SE.liveAreas.map((a) => ({ id: a.id, name: a.name, short: a.short, icon: a.icon, blurb: a.description }))
   ];
   const missionFilters = { grade: "", time: "", q: "", maine: false, pilot: false };
   const LEVEL_ORDER = { beginner: 0, intermediate: 1, advanced: 2 };

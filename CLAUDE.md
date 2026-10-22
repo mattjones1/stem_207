@@ -105,6 +105,35 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - Teams: `SE.store.teamsFor / teamOf / teammates / teamEvents / saveTeam / deleteTeam`. In cloud mode, `class_teams` plus `team_events(p_token)` come from `supabase/update-5-moxie-teams.sql`, and its type list must match `TEAM_TYPES`.
 - Test: `python3 tests/site/test_moxie.py [local] [cloud|skip]`.
 
+## Categories, content status, and import (categories-pathways Phase 2)
+- Plan: `planning/STEM207_Categories_Pathways_Claude_Build_Plan.md` (the brief), `CATEGORIES_PATHWAYS_AUDIT.md`, and `CATEGORIES_PATHWAYS_BACKLOG.md`. Phases 3–5 (pathway builder, evidence, public story) are next.
+- `SE.content` (`assets/js/content.js`) holds the rules: `isPublished` (missing `pub` = published), `version` (missing = "1"), `readiness` (ready / missing-resource / needs-review, separate from `pub`), `visibleTo`, `assignable`, and `draftsIn`.
+  - Unpublished records go in `STEM.drafts`: they're in `SE.activityById`, never in `STEM.activities`.
+  - The activity view sends anything not `visibleTo` the user to not-found.
+- 3D Printing is the seventh area, with `status: "coming-soon"`.
+  - Use `SE.liveAreas` (not `STEM.areas`) for filters, the buoy hero, the expedition map, suggestions, and teacher area tabs. The category grid shows all areas.
+  - Its five placeholders (`data/drafts-3d-printing.js`) stay generic. **Don't invent exercise content.**
+- Optional mission fields: `alsoIn` (counted once, in the primary area), `skills` (from `STEM.skills`), and `delivery`.
+  - Apply skill tags and delivery labels only after the proposals in audit section 6 are approved.
+- Import: `node tools/import_missions.js <file.json> [--write] [--new-version]` writes `data/imported.js` (generated). Test: `node tests/tools/test_import_missions.js`.
+  - `tests/run.sh` runs `.js` tests with Node.
+- Baseline: `tests/fixtures/catalog-baseline.json`. Test: `python3 tests/site/test_categories.py`.
+
+## Educator pathways (categories-pathways Phase 3)
+- Views and rules live in `assets/js/views-pathways.js`, on the routes `#/teach/pathways`, `/new`, `/<id>`, and `/<id>/edit` (the Pathways tab).
+  - Pure rules: `SE.pathways.totals`, `warnings` (advice only), `publishBlockers`, `staleSteps`, `unpublished`, and `template`.
+  - It reuses the teacher frame through `SE.teachFrame`, `SE.teachBindFrame`, and `SE.teachClass`.
+- Templates are in `assets/js/data/templates.js`, with `reviewed: true` (prompts approved October 21, 2026). Copies are the educator's own; never edit a template through a copy.
+- Step shape: `{ id, kind: mission|synthesis, activityId, required, label, bridge, evidence (null = the mission's check), prompt, minutes, adaptation }`.
+- Store (local and cloud):
+  - `createPathway`, `savePathway`, `publishPathway` (an immutable snapshot that pins `missionVersion`), `archivePathway`, `duplicatePathway`;
+  - `assignPathway` (pins the version; called again, it moves the class to the latest), `unassignPathway`, and `pathwayAssignmentsFor` (each comes with its `snapshot`).
+- Supabase: `supabase/update-6-pathways.sql` (`pathways`, `pathway_versions`, `pathway_assignments`; `student_state` returns `pathways`). It's also folded into `schema.sql`.
+- Rules that must hold:
+  - A required step must be published and have a resource. Grade fit is advice only.
+  - Account, cost, and supervision limits are shown, never bypassed.
+- Test: `python3 tests/site/test_pathways.py [local] [cloud|skip]`.
+
 ## Wording
 - Home (#/) is "Today" for students, "Educator dashboard" for teachers, and "Home" for guests: use `SE.homeLabel()` (the default for `SE.backLink`). The browse page is "Missions" in the student nav and "Mission library" elsewhere. Class rewards are the "class journey" (never "class expedition").
 

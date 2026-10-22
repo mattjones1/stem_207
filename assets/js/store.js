@@ -326,6 +326,10 @@
       db.teams = db.classes.some((c) => c.id === d.cls.id) ? d.teams : [];
       save();
     }
+    if (!db.pathways) { // added with educator pathways
+      Object.assign(db, { pathways: [], pathwayVersions: [], pathwayAssignments: [] });
+      save();
+    }
     return ensureDemoHash();
   }
 
@@ -340,7 +344,11 @@
     event: (r) => ({ id: r.id, studentId: r.student_id, classId: r.class_id, type: r.type, at: Number(r.at), data: r.data || {}, by: r.by || undefined, isDemo: r.is_demo }),
     assignment: (r) => ({ id: r.id, classId: r.class_id, activityId: r.activity_id, assignedAt: ms(r.assigned_at), dueDate: r.due_date || null, note: r.note || null, isDemo: r.is_demo }),
     message: (r) => ({ id: r.id, classId: r.class_id, body: r.body, createdAt: ms(r.created_at), isDemo: r.is_demo }),
-    team: (r) => ({ id: r.id, classId: r.class_id, studentIds: r.student_ids || [], createdAt: ms(r.created_at), isDemo: r.is_demo })
+    team: (r) => ({ id: r.id, classId: r.class_id, studentIds: r.student_ids || [], createdAt: ms(r.created_at), isDemo: r.is_demo }),
+    pathway: (r) => ({ id: r.id, educatorId: r.educator_id, title: r.title, essentialQuestion: r.essential_question || "", goal: r.goal || "", finalProduct: r.final_product || "",
+      audience: r.audience || {}, status: r.status, version: r.version, steps: r.steps || [], basedOn: r.based_on || null, isDemo: r.is_demo, createdAt: ms(r.created_at), updatedAt: ms(r.updated_at) }),
+    pathwayVersion: (r) => ({ pathwayId: r.pathway_id, version: r.version, snapshot: r.snapshot, publishedAt: ms(r.published_at) }),
+    pathwayAssignment: (r) => ({ id: r.id, classId: r.class_id, pathwayId: r.pathway_id, version: r.version, assignedAt: ms(r.assigned_at), dueDate: r.due_date || null, note: r.note || null, isDemo: r.is_demo })
   };
   const toRow = {
     cls: (c) => ({ id: c.id, educator_id: c.educatorId, name: c.name, code: c.code, is_demo: !!c.isDemo, created_at: iso(c.createdAt) }),
@@ -349,14 +357,20 @@
     // note is sent only when set, so assigning still works before supabase/update-3 is run.
     assignment: (a) => ({ id: a.id, class_id: a.classId, activity_id: a.activityId, assigned_at: iso(a.assignedAt), due_date: a.dueDate || null, is_demo: !!a.isDemo, ...(a.note ? { note: a.note } : {}) }),
     message: (m) => ({ id: m.id, class_id: m.classId, body: m.body, created_at: iso(m.createdAt), is_demo: !!m.isDemo }),
-    team: (t) => ({ id: t.id, class_id: t.classId, student_ids: t.studentIds, created_at: iso(t.createdAt), is_demo: !!t.isDemo })
+    team: (t) => ({ id: t.id, class_id: t.classId, student_ids: t.studentIds, created_at: iso(t.createdAt), is_demo: !!t.isDemo }),
+    pathway: (p) => ({ id: p.id, educator_id: p.educatorId, title: p.title, essential_question: p.essentialQuestion || null, goal: p.goal || null, final_product: p.finalProduct || null,
+      audience: p.audience || {}, status: p.status, version: p.version, steps: p.steps, based_on: p.basedOn || null, is_demo: !!p.isDemo, created_at: iso(p.createdAt), updated_at: iso(p.updatedAt) }),
+    pathwayVersion: (v) => ({ pathway_id: v.pathwayId, version: v.version, snapshot: v.snapshot, published_at: iso(v.publishedAt) }),
+    pathwayAssignment: (a) => ({ id: a.id, class_id: a.classId, pathway_id: a.pathwayId, version: a.version, assigned_at: iso(a.assignedAt), due_date: a.dueDate || null, note: a.note || null, is_demo: !!a.isDemo })
   };
-  const emptyDb = () => ({ version: 7, educators: [], classes: [], students: [], events: [], assignments: [], messages: [], teams: [] });
+  const emptyDb = () => ({ version: 7, educators: [], classes: [], students: [], events: [], assignments: [], messages: [], teams: [], pathways: [], pathwayVersions: [], pathwayAssignments: [] });
   const cloudCode = () => `${CODE_WORDS[Math.floor(Math.random() * CODE_WORDS.length)]}${Math.floor(Math.random() * 900 + 100)}`;
 
   async function loadEducator(user) {
     journey = null;
-    const [eds, classes, students, events, assignments, messages, teams] = await Promise.all([
+    // Educator pathways arrive with supabase/update-6-pathways.sql; until then there are none.
+    const missing6 = (e) => { if (e.offline) throw e; console.warn("STEM 207: pathway tables missing (run supabase/update-6-pathways.sql)", e); return []; };
+    const [eds, classes, students, events, assignments, messages, teams, pathways, pathwayVersions, pathwayAssignments] = await Promise.all([
       SE.cloud.selectAll("educators", `id=eq.${user.id}`),
       SE.cloud.selectAll("classes", "order=created_at.asc"),
       SE.cloud.selectAll("students", "order=created_at.asc"),
@@ -366,7 +380,10 @@
       // Class messages arrive with supabase/update-3-class-messages.sql; until then there are none.
       SE.cloud.selectAll("class_messages", "order=created_at.asc").catch((e) => { if (e.offline) throw e; console.warn("STEM 207: class_messages table missing (run supabase/update-3-class-messages.sql)", e); return []; }),
       // Partner teams arrive with supabase/update-5-moxie-teams.sql; until then there are none.
-      SE.cloud.selectAll("class_teams", "order=created_at.asc").catch((e) => { if (e.offline) throw e; console.warn("STEM 207: class_teams table missing (run supabase/update-5-moxie-teams.sql)", e); return []; })
+      SE.cloud.selectAll("class_teams", "order=created_at.asc").catch((e) => { if (e.offline) throw e; console.warn("STEM 207: class_teams table missing (run supabase/update-5-moxie-teams.sql)", e); return []; }),
+      SE.cloud.selectAll("pathways", "order=created_at.asc").catch(missing6),
+      SE.cloud.selectAll("pathway_versions", "order=published_at.asc").catch(missing6),
+      SE.cloud.selectAll("pathway_assignments", "order=assigned_at.asc").catch(missing6)
     ]);
     if (!eds.length) {
       // The sign-up trigger normally creates this row; make it here if it's missing.
@@ -374,7 +391,8 @@
       await SE.cloud.rest("POST", "/educators", row, "resolution=ignore-duplicates");
       eds.push(row);
     }
-    db = { version: 7, educators: eds.map(fromRow.educator), classes: classes.map(fromRow.cls), students: students.map(fromRow.student), events: events.map(fromRow.event), assignments: assignments.map(fromRow.assignment), messages: messages.map(fromRow.message), teams: teams.map(fromRow.team) };
+    db = { version: 7, educators: eds.map(fromRow.educator), classes: classes.map(fromRow.cls), students: students.map(fromRow.student), events: events.map(fromRow.event), assignments: assignments.map(fromRow.assignment), messages: messages.map(fromRow.message), teams: teams.map(fromRow.team),
+      pathways: pathways.map(fromRow.pathway), pathwayVersions: pathwayVersions.map(fromRow.pathwayVersion), pathwayAssignments: pathwayAssignments.map(fromRow.pathwayAssignment) };
   }
   /* A student's partner team and their teammates' shared work, on a student's device in cloud mode
      (supabase/update-5-moxie-teams.sql). Null until loaded, or if the function isn't there yet. */
@@ -400,6 +418,8 @@
     db.events = (state.events || []).map((e) => ({ ...e, at: Number(e.at), data: e.data || {} }));
     db.assignments = (state.assignments || []).map((a) => ({ ...a, classId: state.class.id, assignedAt: Number(a.assignedAt) || Date.now(), note: a.note || null }));
     db.messages = (state.messages || []).map((m) => ({ ...m, classId: state.class.id, createdAt: Number(m.createdAt) || Date.now() }));
+    // Assigned pathways come with their pinned snapshot (update-6); none before that update is run.
+    db.pathwayAssignments = (state.pathways || []).map((p) => ({ ...p, classId: state.class.id, assignedAt: Number(p.assignedAt) || Date.now(), dueDate: p.dueDate || null, note: p.note || null }));
   }
 
   /* Outbox: writes go to the server one at a time, in order, retrying when offline. */
@@ -499,12 +519,20 @@
     return { field: "email", error: e.message || "Something went wrong. Try again." };
   };
 
-  /* Draft Moxie sessions can't be assigned; pilot and published ones can (see assets/js/data/moxie.js). */
-  const assignable = (a) => !!a && (!a.pub || a.pub === "pilot" || a.pub === "published");
+  /* Drafts and placeholders can't be assigned; pilot and published records can (assets/js/content.js). */
+  const assignable = (a) => SE.content.assignable(a);
 
   /* Work that Moxie partners share (one copy, read by both). Keep this list the same as
      team_events in supabase/update-5-moxie-teams.sql. Reflections and explanations stay individual. */
   const TEAM_TYPES = ["moxie_design", "moxie_codecheck", "moxie_buglog", "moxie_test", "moxie_feedback_got", "moxie_improve", "moxie_card"];
+
+  /* Pathways: a published version is a snapshot that pins each mission step to the mission's current version. */
+  const clip = (v, n) => String(v == null ? "" : v).trim().slice(0, n);
+  const snapshotOf = (p) => ({
+    title: p.title, essentialQuestion: p.essentialQuestion, goal: p.goal, finalProduct: p.finalProduct, audience: p.audience,
+    steps: p.steps.map((s) => (s.kind === "mission" ? { ...s, missionVersion: SE.content.version(SE.activityById[s.activityId]) } : { ...s }))
+  });
+  const needs6 = (undo) => async () => { undo(); SE.toast && SE.toast("Couldn't save the pathway. Ask your admin to run supabase/update-6-pathways.sql."); return true; };
 
   /* ───────── Public API ───────── */
   SE.store = {
@@ -814,6 +842,97 @@
       else save();
       return { ok: true, team };
     },
+    /* Educator pathways. The pathway row is the working copy; publishing adds an immutable version;
+       assigning pins a class to one version, so later edits never change an assigned class's work. */
+    pathwaysFor: (educatorId) => (db.pathways || []).filter((p) => p.educatorId === educatorId).sort((a, b) => b.updatedAt - a.updatedAt),
+    pathwayById: (id) => (db.pathways || []).find((p) => p.id === id) || null,
+    pathwayVersionsOf: (id) => (db.pathwayVersions || []).filter((v) => v.pathwayId === id).sort((a, b) => a.version - b.version),
+    pathwayVersion: (id, version) => ((db.pathwayVersions || []).find((v) => v.pathwayId === id && v.version === version) || {}).snapshot || null,
+    createPathway(fields = {}) {
+      const s = readSession();
+      if (!s || s.role !== "educator") return null;
+      const now = Date.now();
+      const p = {
+        id: SE.uid("pw"), educatorId: s.id, title: clip(fields.title, 120) || "Untitled pathway",
+        essentialQuestion: clip(fields.essentialQuestion, 300), goal: clip(fields.goal, 600), finalProduct: clip(fields.finalProduct, 600),
+        audience: Object.assign({ grades: [], minutes: null, equipment: [], prior: "" }, fields.audience || {}),
+        status: "draft", version: 0, steps: (fields.steps || []).map((st) => ({ ...st, id: SE.uid("st") })),
+        basedOn: fields.basedOn || null, createdAt: now, updatedAt: now
+      };
+      db.pathways = db.pathways || [];
+      db.pathways.push(p);
+      if (CLOUD) send(restOp("POST", "/pathways", toRow.pathway(p), "return=minimal", needs6(() => { db.pathways = db.pathways.filter((x) => x.id !== p.id); })));
+      else save();
+      return p;
+    },
+    savePathway(id, patch) {
+      const p = SE.store.pathwayById(id);
+      if (!p) return null;
+      const f = {};
+      ["title", "essentialQuestion", "goal", "finalProduct"].forEach((k) => { if (k in patch) f[k] = clip(patch[k], k === "title" ? 120 : k === "essentialQuestion" ? 300 : 600); });
+      if ("title" in f && !f.title) f.title = "Untitled pathway";
+      if (patch.audience) f.audience = patch.audience;
+      if (patch.steps) f.steps = patch.steps;
+      Object.assign(p, f, { updatedAt: Date.now() });
+      if (CLOUD) { const row = toRow.pathway(p); ["id", "educator_id", "created_at", "is_demo"].forEach((k) => delete row[k]); send(restOp("PATCH", `/pathways?id=eq.${encodeURIComponent(id)}`, row, "return=minimal")); }
+      else save();
+      return p;
+    },
+    publishPathway(id) {
+      const p = SE.store.pathwayById(id);
+      if (!p) return null;
+      const now = Date.now();
+      const v = { pathwayId: id, version: p.version + 1, snapshot: snapshotOf(p), publishedAt: now };
+      db.pathwayVersions = db.pathwayVersions || [];
+      db.pathwayVersions.push(v);
+      Object.assign(p, { version: v.version, status: "published", updatedAt: now });
+      if (CLOUD) {
+        send(restOp("POST", "/pathway_versions", toRow.pathwayVersion(v), "return=minimal", needs6(() => { db.pathwayVersions = db.pathwayVersions.filter((x) => x !== v); p.version -= 1; })));
+        send(restOp("PATCH", `/pathways?id=eq.${encodeURIComponent(id)}`, { version: p.version, status: p.status, updated_at: iso(now) }, "return=minimal"));
+      } else save();
+      return v;
+    },
+    archivePathway(id, archived = true) {
+      const p = SE.store.pathwayById(id);
+      if (!p) return;
+      p.status = archived ? "archived" : p.version ? "published" : "draft";
+      p.updatedAt = Date.now();
+      if (CLOUD) send(restOp("PATCH", `/pathways?id=eq.${encodeURIComponent(id)}`, { status: p.status, updated_at: iso(p.updatedAt) }, "return=minimal")); else save();
+    },
+    /* A new draft copied from a template or another pathway. The source never changes. */
+    duplicatePathway(source, opts = {}) {
+      return SE.store.createPathway({
+        title: opts.title || source.title, essentialQuestion: source.essentialQuestion, goal: source.goal, finalProduct: source.finalProduct,
+        audience: JSON.parse(JSON.stringify(source.audience || {})), steps: JSON.parse(JSON.stringify(source.steps || [])), basedOn: source.id
+      });
+    },
+    pathwayAssignmentsFor: (classId) => (db.pathwayAssignments || []).filter((a) => a.classId === classId).sort((a, b) => a.assignedAt - b.assignedAt)
+      .map((a) => ({ ...a, snapshot: a.snapshot || SE.store.pathwayVersion(a.pathwayId, a.version) })),
+    pathwayAssignmentFor: (classId, pathwayId) => (db.pathwayAssignments || []).find((a) => a.classId === classId && a.pathwayId === pathwayId) || null,
+    /* Assign the latest published version (or move an assigned class up to it). */
+    assignPathway(classId, pathwayId) {
+      const p = SE.store.pathwayById(pathwayId);
+      if (!p || !p.version || p.status === "archived") return null;
+      db.pathwayAssignments = db.pathwayAssignments || [];
+      const old = SE.store.pathwayAssignmentFor(classId, pathwayId);
+      if (old) {
+        const prev = old.version;
+        old.version = p.version;
+        if (CLOUD) send(restOp("PATCH", `/pathway_assignments?id=eq.${encodeURIComponent(old.id)}`, { version: p.version }, "return=minimal", needs6(() => { old.version = prev; }))); else save();
+        return old;
+      }
+      const a = { id: SE.uid("pasg"), classId, pathwayId, version: p.version, assignedAt: Date.now(), dueDate: null, note: null };
+      db.pathwayAssignments.push(a);
+      if (CLOUD) send(restOp("POST", "/pathway_assignments", toRow.pathwayAssignment(a), "return=minimal", needs6(() => { db.pathwayAssignments = db.pathwayAssignments.filter((x) => x !== a); }))); else save();
+      return a;
+    },
+    unassignPathway(classId, pathwayId) {
+      const a = SE.store.pathwayAssignmentFor(classId, pathwayId);
+      if (!a) return;
+      db.pathwayAssignments = db.pathwayAssignments.filter((x) => x !== a);
+      if (CLOUD) send(restOp("DELETE", `/pathway_assignments?id=eq.${encodeURIComponent(a.id)}`, undefined, "return=minimal")); else save();
+    },
+
     deleteTeam(id) {
       db.teams = (db.teams || []).filter((t) => t.id !== id);
       if (CLOUD) send(restOp("DELETE", `/class_teams?id=eq.${encodeURIComponent(id)}`, undefined, "return=minimal")); else save();

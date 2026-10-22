@@ -1,0 +1,33 @@
+{
+  "missions": [
+    {
+      "id": "test-shoreline-sketch",
+      "title": "Test Fixture: Shoreline Sketch",
+      "area": "science",
+      "summary": "A test fixture mission. Not real curriculum.",
+      "level": "beginner",
+      "grades": ["2-3", "4-5"],
+      "duration": 20,
+      "format": "collaborative",
+      "equipment": ["unplugged"],
+      "source": "original",
+      "keywords": ["test", "fixture"],
+      "access": { "account": "none", "cost": "free", "supervision": false, "hardware": [] },
+      "launch": { "status": "none" },
+      "mission": "Test fixture: sketch what you <b>notice</b>.",
+      "learn": ["Test fixture goal."],
+      "before": { "materials": ["Paper"], "setup": ["None"], "prerequisites": "None." },
+      "steps": ["Look.", "Sketch."],
+      "reflect": "What did you notice?",
+      "extend": "Sketch it again later.",
+      "teacherNotes": ["Test fixture only."],
+      "skills": ["observation"]
+    },
+    {
+      "id": "test-draft-only",
+      "title": "Test Fixture: Draft Only",
+      "area": "3d-printing",
+      "pub": "draft"
+    }
+  ]
+}

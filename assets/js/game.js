@@ -236,7 +236,7 @@
       if (act) add(act, `Coding pathway, stage ${stage.stage}`);
     }
     // An area they haven't visited yet
-    STEM.areas.forEach((area) => {
+    SE.liveAreas.forEach((area) => {
       if (prof.counts.sectors.has(area.id)) return;
       const act = STEM.activities.filter((a) => a.area === area.id && inBand(a) && notDone(a))
         .sort((x, y) => SE.levelOrder[x.level] - SE.levelOrder[y.level])[0];

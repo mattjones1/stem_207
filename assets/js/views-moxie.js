@@ -42,11 +42,7 @@
   /* ───────── Rules (pure, for tests) ───────── */
   /* Who can open a session: published for everyone, every state for educators,
      and pilot sessions for students whose class has them assigned. */
-  function visible(a, user) {
-    if (!a || !a.moxie || a.pub === "published") return true;
-    if (isEdu(user)) return true;
-    return a.pub === "pilot" && isStu(user) && !!SE.store.assignmentFor(user.classId, a.id);
-  }
+  const visible = (a, user) => !a || !a.moxie || SE.content.visibleTo(a, user);
   const pathwayVisible = (user) => M.pub === "published" || isEdu(user) || sessions().some((s) => visible(s, user));
 
   /* What a session still needs before it can go to a pilot or be published. */

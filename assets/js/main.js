@@ -94,6 +94,7 @@
       else if (b === "missions") SE.views.teachMissions(user, c);
       else if (b === "reflections") SE.views.teachReflections(user);
       else if (b === "class") SE.views.teachClass(user);
+      else if (b === "pathways") { SE.views.teachPathways(user, parts.slice(2)); navKey = "teach"; }
       else SE.views.notFound();
       title = "Educator dashboard · STEM 207";
     }

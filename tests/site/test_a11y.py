@@ -143,10 +143,11 @@ async def visit(pg, h):
     await pg.goto(S + "#/library"); await pg.wait_for_timeout(100); await pg.goto(S + h); await pg.wait_for_timeout(450)
 
 PUBLIC = ["#/signin", "#/signin/student", "#/signin/educator", "#/signup"]
-STUDENT = ["#/", "#/library", "#/explore", "#/pathway", "#/base", "#/me", "#/activity/fix-the-recipe", "#/activity/noreaster-alerts",
+STUDENT = ["#/", "#/area/3d-printing", "#/library", "#/explore", "#/pathway", "#/base", "#/me", "#/activity/fix-the-recipe", "#/activity/noreaster-alerts",
            "#/activity/python-turtle-bridge", "#/lab/pattern-machine/5", "#/lab/pattern-machine/6", "#/lab/robot-chef/4", "#/lab/rover/1", "#/lab/dance-party/1", "#/ai-route"]
 TEACHER = ["#/teach", "#/teach/missions", "#/teach/missions/pathway", "#/teach/pathway", "#/teach/reflections", "#/teach/class", "#/pathway/student",
-           "#/moxie", "#/moxie/teach", "#/activity/moxie-03", "#/activity/moxie-13", "#/activity/moxie-16"]
+           "#/moxie", "#/moxie/teach", "#/activity/moxie-03", "#/activity/moxie-13", "#/activity/moxie-16",
+           "#/area/3d-printing", "#/activity/3d-printing-exercise-01", "#/teach/pathways", "#/teach/pathways/tpl-maine-coast"]
 # Moxie sessions are drafts, so students only see them here by publishing them in memory for the audit.
 STUDENT_MOXIE = ["#/moxie", "#/activity/moxie-03", "#/activity/moxie-11", "#/activity/moxie-13", "#/activity/moxie-14", "#/activity/moxie-15", "#/activity/moxie-16"]
 
@@ -168,7 +169,8 @@ async def main():
         await audit(pg, "certificate", F); await pg.keyboard.press("Escape")
         await sign_teacher(pg)
         sid = await pg.evaluate("SE.store.studentsIn(SE.store.classesFor(SE.store.currentUser().id)[0].id)[0].id")
-        for h in TEACHER + [f"#/teach/student/{sid}"]: await visit(pg, h); await audit(pg, h, F)
+        pw = await pg.evaluate("SE.store.duplicatePathway(SE.pathways.template('tpl-maine-coast')).id")
+        for h in TEACHER + [f"#/teach/student/{sid}", f"#/teach/pathways/{pw}", f"#/teach/pathways/{pw}/edit"]: await visit(pg, h); await audit(pg, h, F)
         await ctx.close()
         by = {}
         for f in F: by.setdefault(f["rule"], []).append(f)

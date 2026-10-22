@@ -237,7 +237,7 @@ The tags below come from each mission's own keywords, with obvious misreads corr
 | From Instructions to Invention (grades 2–5) | `fix-the-recipe` → `sense-think-act` → `pixel-art-code` → synthesis (revised instruction cards, a peer-decoded picture) | 60 min plus synthesis | Unplugged; no coding prerequisites or headset |
 | Coding Foundations | The 7 stages of `STEM.pathway` (24 mission slots) | — | Seeded from the existing pathway. `#/pathway` and stage checks stay as they are |
 
-**The evidence prompts and bridges for each step are new pathway design**, so an educator must approve them first. Until then, templates show "Proposed: review before teaching".
+**Approved on October 21, 2026.** Maine Coast Explorers uses the brief's evidence wording. The other templates use each mission's own check plus the brief's goal and final product. Templates are marked `reviewed: true` in `assets/js/data/templates.js`.
 
 ### 6c. Other decisions
 - The delivery labels in section 2.

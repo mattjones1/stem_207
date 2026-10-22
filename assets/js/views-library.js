@@ -27,7 +27,8 @@
     if (a.access.account === "required") chips.push(`<span class="chip chip--warn">${icon("key")}Account required</span>`);
     if (a.access.account === "optional") chips.push(`<span class="chip">${icon("key")}Account optional</span>`);
     if (a.access.cost === "paid") chips.push(`<span class="chip chip--warn">${icon("coin")}Paid resource</span>`);
-    if (a.equipment.includes("vr")) chips.push(`<span class="chip chip--warn">${icon("headset")}VR headset optional</span>`);
+    if (a.delivery) chips.push(`<span class="chip">${icon("eye")}${esc(a.delivery)}</span>`);   // how it's actually delivered (category isn't delivery mode)
+    else if (a.equipment.includes("vr")) chips.push(`<span class="chip chip--warn">${icon("headset")}VR headset optional</span>`);
     if (a.access.supervision) chips.push(`<span class="chip chip--warn">${icon("shield")}Teacher supervision</span>`);
     return chips.join("");
   }
@@ -66,6 +67,9 @@
         <div><dt>Teacher prep</dt><dd>${a.time.prep ? `About ${a.time.prep} min` : "None"}</dd></div>` : `<div><dt>Time</dt><dd>About ${a.duration} minutes</dd></div>`}
         <div><dt>Format</dt><dd>${esc(formats[a.format].name)}</dd></div>
         <div><dt>Equipment</dt><dd>${esc(SE.equipmentText(a.equipment))}</dd></div>
+        ${a.delivery ? `<div><dt>Delivery</dt><dd>${esc(a.delivery)}</dd></div>` : ""}
+        ${a.skills && a.skills.length ? `<div><dt>Skills</dt><dd>${esc(a.skills.map((id) => (STEM.skills.find((s) => s.id === id) || { name: id }).name).join(", "))}</dd></div>` : ""}
+        ${a.alsoIn && a.alsoIn.length ? `<div><dt>Also in</dt><dd>${a.alsoIn.filter((id) => SE.areaById[id]).map((id) => `<a href="#/area/${id}">${esc(SE.areaById[id].name)}</a>`).join(", ")}</dd></div>` : ""}
       </dl>`;
   }
 
@@ -137,7 +141,7 @@
             <input id="f-q" type="search" placeholder="Search activities, like maze, loops, or bridge" autocomplete="off" value="${esc(filters.q)}">
           </div>
           <div class="filters ${prof ? "filters--six" : ""}">
-            ${selectField("f-area", "Topic", "area", "All topics", areas.map((a) => [a.id, a.name]))}
+            ${selectField("f-area", "Topic", "area", "All topics", SE.liveAreas.map((a) => [a.id, a.name]))}
             ${selectField("f-level", "Experience", "level", "Any level", levels.map((l) => [l.id, l.name]))}
             ${selectField("f-grade", "Grade band", "grade", "Any grade", gradeBands.map((g) => [g.id, g.name]))}
             ${selectField("f-time", "Time", "time", "Any length", durations.map((d) => [d.id, d.name]))}
@@ -251,7 +255,7 @@
       const h = 26 + pr() * 34;
       pines.push(`<use href="#pine207" x="${x.toFixed(1)}" y="${(252 - h).toFixed(1)}" width="${(h * 117 / 332).toFixed(1)}" height="${h.toFixed(1)}"/>`);
     }
-    const buoys = areas.map((a, i) => {
+    const buoys = SE.liveAreas.map((a, i) => {
       const b = BUOYS[i];
       return `<a href="#/area/${a.id}" aria-label="${esc(a.name)}">
         <g transform="translate(${b.x} ${b.y})">
@@ -266,7 +270,7 @@
         </g></a>`;
     }).join("");
     return `
-      <svg viewBox="0 0 440 340" role="group" aria-label="Six lobster buoys float off a Maine lighthouse, one for each exploration area">
+      <svg viewBox="0 0 440 340" role="group" aria-label="${SE.liveAreas.length === 6 ? "Six" : SE.liveAreas.length} lobster buoys float off a Maine lighthouse, one for each exploration area">
         <defs>
           <symbol id="pine207" viewBox="1138 172 117 332"><path d="${SE.brand.PINE_D}"/></symbol>
           <linearGradient id="beamGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff9d6" stop-opacity=".75"/><stop offset="1" stop-color="#fff9d6" stop-opacity="0"/></linearGradient>
@@ -315,10 +319,16 @@
       <section class="section wrap" aria-labelledby="explore-title">
         <div class="section__head">
           <div><span class="eyebrow">${eyebrow}</span><h2 id="explore-title">Choose your exploration</h2></div>
-          <p>Six areas to explore. Each has missions for different grades, time slots, and equipment.</p>
+          <p>${SE.liveAreas.length === areas.length ? `${areas.length} areas to explore.` : `${SE.liveAreas.length} areas to explore, and ${areas.filter((a) => a.status === "coming-soon").map((a) => a.name).join(" and ")} coming soon.`} Each has missions for different grades, time slots, and equipment.</p>
         </div>
         <div class="areas">
           ${areas.map((a) => {
+            if (a.status === "coming-soon") return `
+            <a class="area-card area-card--soon" href="#/area/${a.id}">
+              <div class="area-card__top"><span class="icon-badge">${icon(a.icon)}</span><h3>${esc(a.name)}</h3></div>
+              <p>${esc(a.tagline)}</p>
+              <span class="area-card__foot">Coming soon · 0 missions ${icon("arrowRight")}</span>
+            </a>`;
             const total = activities.filter((x) => x.area === a.id && !SE.hiddenForUser(x)).length;
             const done = prof ? (prof.counts.areas[a.id] || 0) : null;
             return `
@@ -445,6 +455,9 @@
     const prof = user && user.role === "student" ? SE.game.profile(user.id) : null;
     const list = sortActivities(activities.filter((a) => a.area === id && !SE.hiddenForUser(a)));
     const done = prof ? list.filter((a) => prof.completedIds.has(a.id)).length : 0;
+    // Missions whose primary area is elsewhere but that also fit here (`alsoIn`). Each counts once, in its own area.
+    const also = sortActivities(activities.filter((a) => a.area !== id && (a.alsoIn || []).includes(id) && !SE.hiddenForUser(a)));
+    const drafts = user && user.role === "educator" ? SE.content.draftsIn(id).filter((a) => !a.moxie) : [];
 
     app().innerHTML = `
       <section class="page-top">
@@ -455,7 +468,7 @@
             <div><span class="eyebrow">Exploration area</span><h1 tabindex="-1">${esc(area.name)}</h1></div>
           </div>
           <p class="page-top__lede">${esc(area.description)}</p>
-          <ul class="topic-list" aria-label="Topics in this area">${area.topics.map((t) => `<li class="chip">${esc(t)}</li>`).join("")}</ul>
+          ${area.topics.length ? `<ul class="topic-list" aria-label="Topics in this area">${area.topics.map((t) => `<li class="chip">${esc(t)}</li>`).join("")}</ul>` : ""}
           ${prof ? `<p class="page-top__progress"><strong>${done} of ${list.length}</strong> missions complete in this area</p>` : ""}
         </div>
       </section>
@@ -481,13 +494,44 @@
             <a class="btn btn--primary btn--small" href="#/moxie">Open Moxie ${icon("arrowRight")}</a>
           </div>
         </section>` : ""}
+      ${area.status === "coming-soon" ? `
+        <section class="wrap section">
+          <div class="notice"><p><strong>Coming soon.</strong> There are no ${esc(area.name)} exercises to teach yet. They'll appear here once they're ready.</p></div>
+        </section>` : `
       <section class="wrap section" aria-labelledby="area-acts">
         <div class="section__head">
           <div><span class="eyebrow">Choose your next adventure</span><h2 id="area-acts">${plural(list.length, "mission", "missions")}</h2></div>
         </div>
         <div class="cards">${list.map((a) => activityCard(a, prof)).join("")}</div>
-      </section>`;
+      </section>`}
+      ${also.length ? `
+      <section class="wrap section" aria-labelledby="area-also">
+        <div class="section__head"><div><span class="eyebrow">From other areas</span><h2 id="area-also">Also fits here</h2></div></div>
+        <div class="cards">${also.map((a) => activityCard(a, prof)).join("")}</div>
+      </section>` : ""}
+      ${drafts.length ? `
+      <section class="wrap section" aria-labelledby="area-drafts">
+        <div class="section__head"><div><span class="eyebrow">Educators only</span><h2 id="area-drafts">Drafts (${drafts.length})</h2></div>
+          <p>Not published. Students and guests can't see these, and they can't be assigned.</p></div>
+        <ul class="draft-list">${drafts.map((a) => `<li><a href="#/activity/${a.id}">${esc(a.title)}</a> <span class="chip chip--soon">${a.placeholder ? "Placeholder" : esc(SE.moxie.PUB[a.pub] || "Draft")}</span></li>`).join("")}</ul>
+      </section>` : ""}`;
   };
+
+  /* A placeholder record (educators only): a title and nothing to teach yet. */
+  function placeholderPage(a) {
+    const area = SE.areaById[a.area];
+    app().innerHTML = `
+      <section class="page-top">
+        <div class="wrap page-top__inner">
+          <div class="backbar">${backLink(`#/area/${area.id}`, area.name)}</div>
+          <div class="page-top__head"><span class="icon-badge">${icon(area.icon)}</span>
+            <div><span class="eyebrow">${esc(area.name)} · Draft</span><h1 tabindex="-1">${esc(a.title)}</h1></div></div>
+        </div>
+      </section>
+      <section class="wrap section">
+        <div class="notice"><p><strong>Placeholder.</strong> This exercise has no content yet. Students and guests can't see it, it can't be assigned, and it isn't counted in the library.</p></div>
+      </section>`;
+  }
 
   /* Interactive labs for an area (or all areas), with this user's progress */
   function labsStrip(user, areaId, title) {
@@ -633,8 +677,9 @@
 
   SE.views.activity = function (user, id) {
     const a = SE.activityById[id];
-    if (!a) return SE.views.notFound();
+    if (!a || !SE.content.visibleTo(a, user)) return SE.views.notFound();
     if (a.moxie) return SE.views.moxieSession(user, a);   // Moxie sessions have their own layout (views-moxie.js)
+    if (a.placeholder) return placeholderPage(a);
     const area = SE.areaById[a.area];
     const stage = a.pathwayStage ? pathway.find((s) => s.stage === a.pathwayStage) : null;
     const isStudent = user && user.role === "student";
