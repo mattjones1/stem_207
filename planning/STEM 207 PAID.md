@@ -13,6 +13,9 @@ STEM 207 is built out: 56 published activities in 7 categories (11 in-site labs 
   - 3 of the 11 labs in full, and level 1 of the others;
   - the read-only sample class.
   - Every title stays visible; paid items show as locked previews.
+- **Pricing (decided October 23, 2026):** one **subscription to the whole site**, never per activity. **$20 a month** or **$200 a year** (two months free). A subscription unlocks every paid activity, lab, Learning Plan template, and Moxie session.
+  - Stripe: one Product ("STEM 207"), two Prices (monthly $20, yearly $200). `create-checkout-session` accepts only `monthly` or `yearly`.
+  - There's no per-activity purchase anywhere in the UI. A locked item's only call to action is "Subscribe" (or "Ask your teacher" for students).
 - **Protection:** a **private repo plus server delivery**. Paid content is served only to accounts with access.
 
 **What exploration found (this shapes everything):**
@@ -160,7 +163,7 @@ Stripe ─► Edge Function `stripe-webhook` ─► subscriptions / organization
 
 ## 6. Business and legal before charging (flagged; these are your decisions, not code)
 - **STEM Coliseum:** STEM 207 is offered exclusively through Coliseum. Who is the merchant of record, whose Stripe account is used, what's the revenue split, and does the Odoo store also sell it?
-- **Prices:** the individual plan price, school seat tiers, and trial length.
+- **Prices:** individual pricing is decided ($20/month, $200/year). Still open: school and district pricing (per teacher at the same rates, or a volume discount), and the trial length.
 - **Policies:** Terms of Service, privacy policy, refund policy, COPPA (school consent), FERPA, Maine student-privacy agreements (SDPC/NDPA), with Stripe and Supabase listed as subprocessors.
 - **Tax:** Stripe Tax registration and nexus, and school tax-exempt certificates.
 - **Content rights:**
@@ -175,7 +178,7 @@ Stripe ─► Edge Function `stripe-webhook` ─► subscriptions / organization
 ## 8. Phases
 | Phase | Ships | Paywall real? |
 |---|---|---|
-| 0 Decide | Coliseum/merchant terms, prices, policies, content-rights check, LICENSE, GitHub Pro, the free list in `tiers.js` (draft for your review) | — |
+| 0 Decide | Coliseum/merchant terms, school pricing and trial length, policies, content-rights check, LICENSE, GitHub Pro, the free list in `tiers.js` (draft for your review) | — |
 | 1 Look | `access.js`, catalog stubs, locked cards and pages, pricing page. Behind a flag, everyone is treated as entitled. | No |
 | 2 Enforce | `build_bundles.js`, Actions deploy, private bucket, the `content` function, update-13 (grants plus `content_items`), lab lazy-loading and `SE.labs.extend`, founding grants, **repo goes private** | **Yes** |
 | 3 Sell to teachers | Checkout, portal, webhook, trial, grace, `#/account` | Yes |
