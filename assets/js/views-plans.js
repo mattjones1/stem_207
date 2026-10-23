@@ -29,20 +29,23 @@
   const stepsOf = (p) => (p.steps || []).filter((s) => s.kind === "mission" && s.activityId)
     .map((s) => ({ id: s.id, kind: "mission", activityId: s.activityId, required: s.required !== false, note: s.note || s.bridge || null, missionVersion: s.missionVersion }));
   const actOf = (s) => SE.activityById[s.activityId] || null;
-  const range = (a) => (a.time && a.time.core ? a.time.core : [a.duration, a.duration]);
+  /* Student minutes [low, high], or null when the activity has no time yet (Moxie, until its pilot). */
+  const range = (a) => (a.time && a.time.core ? a.time.core : a.duration ? [a.duration, a.duration] : null);
 
   function totals(steps) {
-    const t = { min: 0, max: 0, optMin: 0, optMax: 0, prep: 0, prepMissing: 0, equipment: [], areas: [] };
+    const t = { min: 0, max: 0, optMin: 0, optMax: 0, pending: 0, prep: 0, prepMissing: 0, equipment: [], areas: [] };
     const equip = new Set(), areas = new Set();
     steps.forEach((s) => {
       const a = actOf(s);
       if (!a || a.placeholder) return;
-      const [lo, hi] = range(a);
-      if (s.required) { t.min += lo; t.max += hi; } else { t.optMin += lo; t.optMax += hi; }
+      const r = range(a);
+      if (!r) t.pending++;
+      else if (s.required) { t.min += r[0]; t.max += r[1]; } else { t.optMin += r[0]; t.optMax += r[1]; }
       if (a.time && a.time.prep != null) t.prep += a.time.prep; else t.prepMissing++;
       (a.equipment || []).forEach((e) => equip.add(e));
       areas.add(a.area);
     });
+    if (equip.size > 1) equip.delete("unplugged");   // "No devices needed" only when nothing else is
     t.equipment = [...equip];
     t.areas = [...areas];
     return t;
@@ -63,7 +66,8 @@
       if (a.access && a.access.cost === "paid") out.push(`${a.title} is a paid resource.`);
       if (a.access && a.access.supervision) out.push(`${a.title} needs an adult to guide or monitor it.`);
       if (a.launch.status === "lab") out.push(`${a.title} is a full lab. Tell students which levels to do.`);
-      if (range(a)[1] > 60) out.push(`${a.title} takes ${range(a)[0]}–${range(a)[1]} minutes. Plan more than one session.`);
+      const r = range(a);
+      if (r && r[1] > 60) out.push(`${a.title} takes ${r[0]}–${r[1]} minutes. Plan more than one session.`);
       if (a.pathwayStage) {
         if (a.pathwayStage < lastStage) out.push(`${a.title} (coding step ${a.pathwayStage}) comes after ${lastTitle} (step ${lastStage}). Check that students are ready.`);
         if (a.pathwayStage >= lastStage) { lastStage = a.pathwayStage; lastTitle = a.title; }
@@ -113,6 +117,8 @@
   const STATUS = { draft: ["Draft", "chip--soon"], current: ["Current", "chip--ok"], finished: ["Finished", ""] };
   const statusChip = (p) => { const [t, c] = STATUS[SE.store.planStatus(p)]; return `<span class="chip ${c}">${t}</span>`; };
   const timeText = (lo, hi) => (lo === hi ? `${lo} min` : `${lo}–${hi} min`);
+  /* A plan's required time, noting activities whose time isn't set yet. */
+  const planTime = (t) => !t.pending ? timeText(t.min, t.max) : t.max ? `${timeText(t.min, t.max)} + ${t.pending} pending` : "Time pending";
   const areaChip = (a) => `<span class="pw-area">${icon(SE.areaById[a.area].icon)}${esc(SE.areaById[a.area].short)}</span>`;
   const listBox = (cls, title, items, ic) => items.length ? `<div class="pw-box ${cls}"><h3>${icon(ic)}${esc(title)}</h3><ul>${items.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>` : "";
   const classNames = (p) => SE.store.planAssignmentsOf(p.id).map((x) => (SE.store.classById(x.classId) || {}).name).filter(Boolean);
@@ -121,7 +127,7 @@
     const t = totals(stepsOf(p));
     return `
       <dl class="facts pw-totals">
-        <div><dt>Student time</dt><dd>${timeText(t.min, t.max)}${t.optMax ? `<small>Optional activities: ${timeText(t.optMin, t.optMax)} more</small>` : ""}</dd></div>
+        <div><dt>Student time</dt><dd>${planTime(t)}${t.optMax ? `<small>Optional activities: ${timeText(t.optMin, t.optMax)} more</small>` : ""}</dd></div>
         <div><dt>Teacher prep</dt><dd>${t.prep ? `About ${t.prep} min` : "—"}${t.prepMissing ? `<small>Not recorded for ${plural(t.prepMissing, "activity", "activities")}</small>` : ""}</dd></div>
         <div><dt>Categories</dt><dd>${t.areas.length ? esc(t.areas.map((id) => SE.areaById[id].short).join(", ")) : "—"}</dd></div>
         <div><dt>Equipment</dt><dd>${t.equipment.length ? esc(SE.equipmentText(t.equipment)) : "—"}</dd></div>
@@ -145,8 +151,12 @@
     }).join("")}</ol>`;
   }
 
-  function page(user, active, body, title) {
-    app().innerHTML = SE.teachFrame(user, null, [], active, body, { title: title || "Learning Plans" });
+  /* A plan, template, or editor page uses its own title as the page heading (h1), with an id so
+     actions can return focus to it. */
+  function page(user, active, body, title, eyebrow, h1Id) {
+    app().innerHTML = SE.teachFrame(user, null, [], active, body, title ? { title: esc(title), eyebrow } : { title: "Learning Plans" });
+    const h1 = h1Id && document.querySelector("#app h1");
+    if (h1) h1.id = h1Id;
     SE.teachBindFrame(user);
   }
   function rerender(focusSel, msg) {
@@ -159,13 +169,19 @@
   }
 
   /* ───────── Router entry (educators) ───────── */
+  /* "New Learning Plan" makes a draft right away so the editor can save as you type. If the educator
+     already has a blank one (untitled, no activities, never edited), it opens that instead of making
+     another, so visiting New again never piles up empty drafts. */
+  const isBlank = (p) => !p.version && p.status === "draft" && p.title === "Untitled Learning Plan" && !(p.steps || []).length && p.updatedAt === p.createdAt;
+
   SE.views.teachPlans = function (user, rest) {
     flushSave();
     const [id, sub] = rest || [];
     if (!id) return listView(user);
     if (id === "new") {
       const a = sub && SE.activityById[sub];
-      const p = SE.store.createPathway(a ? { title: `New plan with ${a.title}`, steps: [{ kind: "mission", activityId: a.id, required: true, note: null }] } : {});
+      const blank = !a && SE.store.pathwaysFor(user.id).find(isBlank);
+      const p = blank || SE.store.createPathway(a ? { title: `New plan with ${a.title}`, steps: [{ kind: "mission", activityId: a.id, required: true, note: null }] } : {});
       return location.replace(`#/teach/plans/${p.id}/edit`);
     }
     const t = template(id);
@@ -194,7 +210,7 @@
           <p class="pw-card__meta">${isTpl ? `<span class="chip chip--ok">${p.reviewed ? "Reviewed template" : "Proposed: review before teaching"}</span>` : statusChip(p)}${!isTpl && SE.store.planStatus(p) === "current" && unpublished(p) ? ` <span class="chip chip--warn">Changes not sent to students</span>` : ""}</p>
           <p>${esc(p.goal || "No goal yet")}</p>
           ${isTpl && p.workshop ? `<p class="small pw-card__ws">${icon("clock")}${esc(p.workshop.format)}</p>` : ""}
-          <p class="muted small">${plural(stepsOf(p).length, "activity", "activities")} · ${plural(t.areas.length, "category", "categories")} · ${timeText(t.min, t.max)}${names.length ? ` · ${esc(names.join(", "))}` : ""}</p>
+          <p class="muted small">${plural(stepsOf(p).length, "activity", "activities")} · ${plural(t.areas.length, "category", "categories")} · ${planTime(t)}${names.length ? ` · ${esc(names.join(", "))}` : ""}</p>
           <div class="pw-card__actions">
             ${isTpl ? `<a class="btn btn--ghost btn--small" href="#/teach/plans/${p.id}">${icon("eye")}Preview<span class="visually-hidden"> ${esc(p.title)}</span></a>
               <button type="button" class="btn btn--primary btn--small" data-use="${p.id}">${icon("plus")}Use this template<span class="visually-hidden">: ${esc(p.title)}</span></button>`
@@ -229,10 +245,12 @@
       <section class="wrap section" aria-labelledby="pw-tpl">
         <div class="section__head"><div><span class="eyebrow">Ready to adapt</span><h2 id="pw-tpl" tabindex="-1">Templates</h2></div>
           <p>Using a template makes your own copy. The template never changes.</p></div>
+        <h3 class="pw-group-h">${icon("tools")}Courses</h3>
+        <ul class="pw-cards">${(STEM.pathwayTemplates || []).filter((t) => t.group === "course").map((t) => card(t, true)).join("")}</ul>
         <h3 class="pw-group-h">${icon("star")}STEM 207 workshops</h3>
         <ul class="pw-cards">${(STEM.pathwayTemplates || []).filter((t) => t.group === "workshop").map((t) => card(t, true)).join("")}</ul>
         <h3 class="pw-group-h">${icon("list")}Classroom templates</h3>
-        <ul class="pw-cards">${(STEM.pathwayTemplates || []).filter((t) => t.group !== "workshop").map((t) => card(t, true)).join("")}</ul>
+        <ul class="pw-cards">${(STEM.pathwayTemplates || []).filter((t) => !t.group).map((t) => card(t, true)).join("")}</ul>
       </section>`);
     app().querySelectorAll("[data-mode]").forEach((b) => b.addEventListener("click", () => { listMode = b.dataset.mode; rerender(`[data-mode="${listMode}"]`); }));
     app().querySelectorAll("[data-migrate]").forEach((b) => b.addEventListener("click", () => {
@@ -285,8 +303,7 @@
       <section class="wrap section">
         <div class="backbar pw-back">${SE.backLink("#/teach/plans", "Learning Plans")}</div>
         <div class="section__head">
-          <div><span class="eyebrow">Template</span><h2 id="pw-title" tabindex="-1">${esc(t.title)}</h2>
-            <p class="pw-card__meta"><span class="chip chip--ok">${t.reviewed ? "Reviewed template" : "Proposed: review before teaching"}</span></p></div>
+          <div><p class="pw-card__meta"><span class="chip chip--ok">${t.reviewed ? "Reviewed template" : "Proposed: review before teaching"}</span></p></div>
           <button type="button" class="btn btn--primary" data-use="${t.id}">${icon("plus")}Use this template</button>
         </div>
       </section>
@@ -301,7 +318,7 @@
           ${workshopBoxes(t, stepsOf(t))}
           ${listBox("pw-box--warn", "Check before teaching", warnings(t), "alert")}
         </aside>
-      </div>`, "Learning Plans");
+      </div>`, t.title, "Template", "pw-title");
     bindUse();
   }
 
@@ -336,8 +353,7 @@
       <section class="wrap section">
         <div class="backbar pw-back">${SE.backLink("#/teach/plans", "Learning Plans")}</div>
         <div class="section__head">
-          <div><span class="eyebrow">Learning Plan</span><h2 id="pw-title" tabindex="-1">${esc(p.title)}</h2>
-            <p class="pw-card__meta">${statusChip(p)}${assignedClasses.length ? ` <span class="muted small">${esc(assignedClasses.map((c) => c.name).join(", "))}</span>` : ""}</p></div>
+          <div><p class="pw-card__meta">${statusChip(p)}${assignedClasses.length ? ` <span class="muted small">${esc(assignedClasses.map((c) => c.name).join(", "))}</span>` : ""}</p></div>
           <div class="pw-actions">
             ${status !== "finished" ? `<a class="btn btn--ghost" href="#/teach/plans/${p.id}/edit">${icon("tools")}Edit</a>` : ""}
             ${changed ? `<button type="button" class="btn btn--primary" id="pl-update" ${block.length ? 'aria-disabled="true"' : ""}>${icon("refresh")}Update for students</button>` : ""}
@@ -356,7 +372,7 @@
         </form>` : ""}
         <nav class="plan-tabs" aria-label="Plan sections">${tabs.map(([k, label]) => `<a href="#/teach/plans/${p.id}/${k}" ${tab === k ? 'aria-current="page"' : ""}>${label}</a>`).join("")}</nav>
       </section>
-      ${main}`, "Learning Plans");
+      ${main}`, p.title, "Learning Plan", "pw-title");
     const on = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener(el.tagName === "FORM" ? "submit" : "click", (e) => { e.preventDefault(); fn(); }); };
     on("pl-update", () => {
       if (block.length) return SE.toast("Fix the items listed first.");
@@ -413,8 +429,8 @@
     const aud = Object.assign({ grades: [] }, p.audience);
     page(user, "plans", `
       <section class="wrap section">
-        <div class="backbar pw-back">${SE.backLink(`#/teach/plans/${p.id}`, "Back to the plan")}</div>
-        <div class="section__head"><div><span class="eyebrow">Editing</span><h2 id="pw-edit-title" tabindex="-1">${esc(p.title)}</h2></div>
+        <div class="backbar pw-back">${isBlank(p) ? SE.backLink("#/teach/plans", "Back to Learning Plans") : SE.backLink(`#/teach/plans/${p.id}`, "Back to the plan")}</div>
+        <div class="section__head"><div></div>
           <p class="pw-saved" id="pw-saved" role="status" aria-live="polite">Changes save automatically.</p></div>
       </section>
       <div class="wrap pw-layout">
@@ -456,7 +472,7 @@
           <div class="block"><h2>Preview</h2><div id="pw-preview"></div>
             <a class="btn btn--primary" href="#/teach/plans/${p.id}">${icon("check")}Done</a></div>
         </aside>
-      </div>`, "Learning Plans");
+      </div>`, p.title, "Editing", "pw-edit-title");
     renderSteps();
     renderResults();
     bindEditor();
@@ -528,7 +544,7 @@
     const n = {};
     ed.steps.forEach((s) => { const a = actOf(s); if (a) n[a.area] = (n[a.area] || 0) + 1; });
     const t = totals(ed.steps);
-    return `<p class="pk-mix" id="pw-mix"><span class="pk-mix__label">Your mix</span>${Object.entries(n).map(([id, k]) => `<span class="pw-area">${icon(SE.areaById[id].icon)}${esc(SE.areaById[id].short)} · ${k}</span>`).join("")}<span class="muted small">${timeText(t.min, t.max)} required${t.optMax ? `, plus ${timeText(t.optMin, t.optMax)} optional` : ""}</span></p>`;
+    return `<p class="pk-mix" id="pw-mix"><span class="pk-mix__label">Your mix</span>${Object.entries(n).map(([id, k]) => `<span class="pw-area">${icon(SE.areaById[id].icon)}${esc(SE.areaById[id].short)} · ${k}</span>`).join("")}<span class="muted small">${planTime(t)} required${t.optMax ? `, plus ${timeText(t.optMin, t.optMax)} optional` : ""}</span></p>`;
   }
   function save() {
     const out = document.getElementById("pw-saved");
@@ -709,7 +725,7 @@
         <div class="wrap page-top__inner">
           <div class="backbar">${SE.backLink()}</div>
           <div class="page-top__head"><span class="icon-badge">${icon("map")}</span>
-            <div><span class="eyebrow">From your teacher</span><h1 tabindex="-1">My Learning Plans</h1></div></div>
+            <div><h1 tabindex="-1">My Learning Plans</h1></div></div>
           <p class="page-top__lede">Each plan is a set of activities, in order. Your teacher checks each one.</p>
         </div>
       </section>
@@ -718,7 +734,7 @@
           <button type="button" class="seg__btn" data-mymode="current" aria-pressed="${myMode === "current"}">Current</button>
           <button type="button" class="seg__btn" data-mymode="all" aria-pressed="${myMode === "all"}">All (${all.length})</button>
         </div>
-        ${list.length ? `<ul class="myplans">${list.map(card).join("")}</ul>` : `<div class="empty">${icon("map")}<h2>${myMode === "all" ? "No Learning Plans yet" : "No current Learning Plans"}</h2><p>When your teacher gives your class a Learning Plan, it shows up here.${all.length && myMode === "current" ? " Finished plans are under All." : ""}</p></div>`}
+        ${list.length ? `<ul class="myplans">${list.map(card).join("")}</ul>` : !all.length && old.length ? `<p class="myplans-note">${icon("list")}<span>Your teacher gave you single activities instead of a plan. They're below.</span></p>` : `<div class="empty">${icon("map")}<h2>${myMode === "all" ? "No Learning Plans yet" : "No current Learning Plans"}</h2><p>When your teacher gives your class a Learning Plan, it shows up here.${all.length && myMode === "current" ? " Finished plans are under All." : ""}</p></div>`}
         ${old.length ? `
         <section class="block myplan myplan--old" aria-labelledby="mp-old">
           <h2 id="mp-old">Earlier assignments</h2>

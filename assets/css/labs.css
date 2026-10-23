@@ -811,6 +811,8 @@
   .lab-chapter { padding-block: .35rem; }
   .lab-body { padding-block: .6rem 0; gap: 1rem; }
   .lab-brief { position: sticky; top: 60px; max-height: calc(100vh - 72px); overflow-y: auto; overscroll-behavior: contain; }
+  .lab-brief > .lab-steps { order: 1; }   /* the goal and Need a hint? come first; steps, then learn/why, sit below */
+  .lab-brief > .lab-objective { order: 2; }
   .lab-stage { gap: .6rem; }
   /* Robot Chef, Pumpkin Launcher, Sled Hill, and Moon Gate are the tallest stages. */
   #rc-scene { max-height: 150px; }

@@ -7,7 +7,7 @@
  * Step: { id, kind: "mission", activityId, required, note }
  *   note   what students see next to the activity (optional). Each activity's own reflection is the
  *          deliverable, checked with Pass / Try again, so steps carry no separate evidence or synthesis.
- * group: "workshop" marks a packaged STEM 207 workshop; workshop: { format, sessions: [{ title, steps: [step numbers] }] };
+ * group: "course" marks a multi-session course (Moxie); "workshop" marks a packaged STEM 207 workshop. Both can carry workshop: { format, sessions: [{ title, steps: [step numbers] }] };
  * future: [text] names content that isn't ready yet (shown as text, never as a step).
  * reviewed: true once an educator approved the wording (October 21, 2026). Maine Coast Explorers' notes
  * come from the brief's table; Coding Foundations is built from STEM.pathway; the AI route isn't reviewed.
@@ -26,7 +26,7 @@ window.STEM = window.STEM || {};
   STEM.pathwayTemplates = [
     // ───── Moxie: the 16-session ESP32 course (pilot). Each step is one session sheet; the units are the sessions groups.
     ids({
-      id: "tpl-moxie", group: "workshop", reviewed: false,
+      id: "tpl-moxie", group: "course", reviewed: false,
       title: "Moxie: ESP32 Physical Computing",
       essentialQuestion: "What could we build that helps someone?",
       goal: "Start with a blinking light and finish with a working device, built with a partner, that solves a real problem for someone.",
@@ -42,7 +42,7 @@ window.STEM = window.STEM || {};
       id: "tpl-ws-sampler", group: "workshop", reviewed: false,
       title: "Maine Tech Sampler",
       essentialQuestion: "What can you make with code, AI, virtual reality, and engineering?",
-      goal: "Try five kinds of STEM in one day, one activity from each category, and say which you'd explore next.",
+      goal: "Try a different kind of STEM in each activity, one from every category, and say which you'd explore next.",
       audience: { grades: ["4-5"], minutes: null, equipment: [], prior: "No experience needed." },
       workshop: { format: "Half day, about 3 hours with breaks", sessions: [
         { title: "Code and AI", steps: [1, 3] }, { title: "Explore and build", steps: [2, 4] }, { title: "Create", steps: [5, 6] }, { title: "Add-on: 3D printing (90 min)", steps: [7] }] },

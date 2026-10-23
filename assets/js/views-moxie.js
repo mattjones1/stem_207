@@ -207,9 +207,15 @@
     else if (msg) SE.toast(msg);
   }
 
+  /* Moxie isn't open to this person yet: say so (students wait for their teacher; guests see who it's for). */
+  const closed = (user) => SE.views.notOpen(isStu(user)
+    ? { title: "Moxie isn't open yet", text: "Your teacher will open Moxie for your class.", href: "#/activities", label: "See other activities" }
+    : { title: "Moxie: build with an ESP32", text: "Moxie is a 16-session course where students wire and code a real microcontroller. Teachers can sign in to see it.", href: "#/signin/educator", label: "Educator sign in" });
+  SE.moxieClosed = closed;
+
   /* ───────── Overview: #/moxie ───────── */
   SE.views.moxie = function (user) {
-    if (!pathwayVisible(user)) return SE.views.notFound();
+    if (!pathwayVisible(user)) return closed(user);
     const prof = isStu(user) ? SE.game.profile(user.id) : null;
     const open = sessions().filter((s) => visible(s, user));
     const next = prof ? open.find((s) => statusOf(prof, s).state !== "confirmed") : null;
@@ -230,7 +236,7 @@
         <div class="wrap page-top__inner">
           <div class="backbar">${SE.backLink("#/activities/engineering", "Engineering & Robotics")}</div>
           <div class="page-top__head"><span class="icon-badge">${icon("gear")}</span>
-            <div><span class="eyebrow">A STEM 207 pathway · Engineering & Robotics</span><h1 tabindex="-1">${esc(M.name)}</h1></div></div>
+            <div><span class="eyebrow">A STEM 207 course · Engineering & Robotics</span><h1 tabindex="-1">${esc(M.name)}</h1></div></div>
           <p class="mx-tagline">${esc(M.tagline)}</p>
           <p class="page-top__lede">${esc(M.intro)}</p>
           ${next ? `<a class="btn btn--launch" href="#/activity/${next.id}">${icon(statusOf(prof, next).state === "none" ? "rocket" : "arrowRight")}${statusOf(prof, next).state === "none" ? "Start" : "Continue"}: ${esc(next.title)}</a>` : ""}
@@ -238,7 +244,7 @@
         </div>
       </section>
       <div class="wrap section">
-        ${isEdu(user) ? pubBanner(M.pub, "the Moxie pathway") : ""}
+        ${isEdu(user) ? pubBanner(M.pub, "the Moxie course") : ""}
         <dl class="facts mx-facts">
           <div><dt>Sessions</dt><dd>16, in 4 units</dd></div>
           <div><dt>Grades</dt><dd>${esc(M.pending.grades.replace(/^Grade range: /, ""))}</dd></div>
@@ -357,7 +363,7 @@
           <div class="block launch-mini">
             <h2>At a glance</h2>
             <dl class="facts">
-              <div><dt>Pathway</dt><dd><a href="#/moxie">Moxie</a>, ${num(a)} of 16</dd></div>
+              <div><dt>Course</dt><dd><a href="#/moxie">Moxie</a>, ${num(a)} of 16</dd></div>
               <div><dt>Unit</dt><dd>${u.n}: ${esc(u.title)}</dd></div>
               <div><dt>Grades</dt><dd>${a.grades.length ? SE.gradesText(a.grades) : "Pending a pilot"}</dd></div>
               <div><dt>Time</dt><dd>${a.duration || a.time ? SE.timeText(a) : "Pending a pilot"}</dd></div>
@@ -429,7 +435,7 @@
     const savedPlan = (plan && plan.data.lines) || [];
     let blankNo = 0;
     return `
-      ${sec("s-mission", "target", "Your mission", `<p>${esc(a.mission)}</p>`, "block--mission")}
+      ${sec("s-mission", "target", "What you’ll do", `<p>${esc(a.mission)}</p>`, "block--mission")}
       ${sec("s-need", "box", "What you need", bullets(a.before.materials))}
       ${sec("s-before", "shield", m.setupTitle || "Before you wire", `${bullets(a.before.setup)}
         ${wiringGate ? `<p class="mx-stop">${icon("alert")}<span><strong>Stop and check:</strong> your teacher checks your wiring before you power this circuit.${stu ? ` ${gateOpen(evs, a.id, "wiring") ? "Your wiring is checked. You can power it on." : "Not checked yet."}` : ""}</span></p>` : ""}`)}
@@ -505,7 +511,7 @@
         ${d.device ? `<div><dt>Our device will</dt><dd>${esc(d.device)}</dd></div>` : ""}
         <div><dt>Criteria</dt><dd><ol>${(d.criteria || []).filter(clean).map((c, i) => `<li>${esc(c)}${(d.tests || [])[i] ? ` <span class="muted">(test: ${esc(d.tests[i])})</span>` : ""}</li>`).join("")}</ol></dd></div>
       </dl>` : `<p>No design saved yet. Start in <a href="#/activity/moxie-13">Session 13: Define & Design</a>.</p>`;
-    const mission = sec("s-mission", "target", "Your mission", `<p>${esc(a.mission)}</p>`, "block--mission");
+    const mission = sec("s-mission", "target", "What you’ll do", `<p>${esc(a.mission)}</p>`, "block--mission");
     const cardsBox = (session) => feedbackCardsSection(user, a, session, lock);
 
     if (a.moxie.kind === "design") {
@@ -748,7 +754,7 @@
     return `
       <header class="mx-phead"><p>${esc(m.unitLabel || `SESSION ${m.session}`)}</p><h1>${esc(a.title)}</h1>${m.based ? `<p>${esc(m.based)}</p>` : ""}
         <p class="mx-pnames">Name: ${line} Partner: ${line} ${m.kind === "build" ? "Kit #:" : "Project:"} ${line}</p></header>
-      ${h("Your mission")}<p>${esc(a.mission)}</p>
+      ${h("What you’ll do")}<p>${esc(a.mission)}</p>
       ${m.kind === "build" ? `
         ${h("What you need")}${list(a.before.materials)}
         ${h(m.setupTitle || "Before you wire")}${list(a.before.setup)}
@@ -924,7 +930,7 @@
           <p class="page-top__lede">Prepare the kit, pair students, and review the capstone. Sessions: ${Object.entries(counts).map(([p, n]) => `${n} ${esc(PUB[p].toLowerCase())}`).join(", ")}.</p>
         </div>
       </section>
-      <div class="wrap section">${pubBanner(M.pub, "the Moxie pathway")}</div>
+      <div class="wrap section">${pubBanner(M.pub, "the Moxie course")}</div>
 
       <section class="wrap section" aria-labelledby="mx-prep">
         <div class="section__head"><div><span class="eyebrow">Before you teach</span><h2 id="mx-prep">Preparation</h2></div></div>

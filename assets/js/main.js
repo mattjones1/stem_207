@@ -87,12 +87,17 @@
       return;
     }
 
+    /* A page for another role: send the person somewhere useful and say why (never to another role's sign-in
+       while they're signed in, which also hid the menu). */
+    const elsewhere = (to, why) => { location.replace(to); if (why && SE.toast) SE.toast(why); };
+    const teachersOnly = () => user.role === "student" ? elsewhere("#/", "That page is for teachers.") : elsewhere("#/signin/educator");
+
     if (a === "signin" && !b) { SE.views.signin(); title = "Sign in · STEM 207"; }
     else if (a === "signin" && b === "student") { SE.views.signinStudent(); title = "Student sign in · STEM 207"; }
     else if (a === "signin" && b === "educator") { SE.views.signinEducator(); title = "Educator sign in · STEM 207"; }
     else if (a === "signup") { SE.views.signup(); title = "Create account · STEM 207"; }
     else if (a === "teach") {
-      if (user.role !== "educator") { location.replace("#/signin/educator"); return; }
+      if (user.role !== "educator") { teachersOnly(); return; }
       navKey = { plans: "plans", classes: "classes", checks: "checks" }[b] || "teach";
       if (!b) SE.views.teach(user);
       else if (b === "student") SE.views.teachStudent(user, c);
@@ -100,11 +105,13 @@
       else if (b === "classes") (c ? SE.views.teachClassPage(user, c) : SE.views.teachClasses(user));
       else if (b === "plans") SE.views.teachPlans(user, parts.slice(2));
       else SE.views.notFound();
-      title = "Educator dashboard · STEM 207";
+      const cls = b === "classes" && c && SE.store.classById(c), stu = b === "student" && c && SE.store.studentById && SE.store.studentById(c);
+      title = `${cls ? cls.name : stu ? stu.displayName : { plans: "Learning Plans", classes: "Classes", checks: "Checks", student: "Student" }[b] || "Dashboard"} · STEM 207`;
     }
     else if (!a && user.role === "student") { SE.views.today(user); navKey = "dashboard"; title = "Home · STEM 207"; }
     else if (a === "plans") {
-      if (user.role !== "student") { location.replace("#/teach/plans"); return; }
+      if (user.role === "educator") { location.replace("#/teach/plans"); return; }
+      if (user.role !== "student") { elsewhere("#/signin/student", "Sign in to see your Learning Plans."); return; }
       if (b) SE.views.myPlan(user, b); else SE.views.myPlans(user);
       navKey = "plans"; title = "My Learning Plans · STEM 207";
     }
@@ -117,11 +124,11 @@
       title = `${b && SE.areaById[b] ? SE.areaById[b].name : "Activities"} · STEM 207`;
     }
     else if (a === "me") {
-      if (user.role !== "student") { location.replace("#/"); return; }
+      if (user.role !== "student") { elsewhere("#/", user.role === "guest" ? "Sign in as a student to see your profile." : ""); return; }
       SE.views.me(user); navKey = "me"; title = "My profile · STEM 207";
     }
     else if (a === "base") {
-      if (user.role !== "student") { location.replace("#/"); return; }
+      if (user.role !== "student") { elsewhere("#/", user.role === "guest" ? "Sign in as a student to see your harbor." : ""); return; }
       SE.views.base(user); navKey = "base"; title = "My harbor · STEM 207";
     }
     else if (a === "activity") { SE.views.activity(user, b); title = `${SE.activityById[b] ? SE.activityById[b].title : "Not found"} · STEM 207`; }
@@ -132,7 +139,7 @@
     }
     else if (a === "moxie" && !b) { SE.views.moxie(user); navKey = "activities"; title = "Moxie · STEM 207"; }
     else if (a === "moxie" && b === "teach") {
-      if (user.role !== "educator") { location.replace("#/signin/educator"); return; }
+      if (user.role !== "educator") { teachersOnly(); return; }
       SE.views.moxieTeach(user); navKey = "teach"; title = "Teach Moxie · STEM 207";
     }
     else { SE.views.notFound(); title = "Page not found · STEM 207"; }

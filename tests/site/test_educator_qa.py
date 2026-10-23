@@ -102,7 +102,7 @@ async def main():
     ok("the à la carte plan is assigned", await pg.evaluate(f"SE.store.planStatus(SE.store.pathwayById('{pid}'))") == "current")
 
     # Workshops
-    tpls = await pg.evaluate("JSON.stringify(STEM.pathwayTemplates.filter((t) => t.group === 'workshop').map((t) => ({ id: t.id, n: t.steps.length, ok: t.steps.every((s) => !!SE.activityById[s.activityId]), fmt: !!(t.workshop && t.workshop.format), fut: (t.future || []).length, sess: t.workshop.sessions.every((x) => x.steps.every((k) => k >= 1 && k <= t.steps.length)) })))")
+    tpls = await pg.evaluate("JSON.stringify(STEM.pathwayTemplates.filter((t) => t.workshop).map((t) => ({ id: t.id, n: t.steps.length, ok: t.steps.every((s) => !!SE.activityById[s.activityId]), fmt: !!(t.workshop && t.workshop.format), fut: (t.future || []).length, sess: t.workshop.sessions.every((x) => x.steps.every((k) => k >= 1 && k <= t.steps.length)) })))")
     ok("workshops (3 plus the Moxie course): every step resolves, format, valid sessions", tpls.count('"ok":true') == 4 and tpls.count('"fmt":true') == 4 and tpls.count('"sess":true') == 4, tpls)
     ok("workshops: 3D Printing is an optional add-on step now; Moxie is still future text", await pg.evaluate("['tpl-ws-sampler', 'tpl-ws-katahdin'].every((id) => SE.plans.stepsOf(SE.plans.template(id)).some((s) => SE.activityById[s.activityId].area === '3d-printing' && !s.required)) && SE.plans.template('tpl-ws-robots').future.length === 1"))
     ok("workshops: future content is never a step", await pg.evaluate("STEM.pathwayTemplates.every((t) => t.steps.every((s) => !(SE.activityById[s.activityId] || {}).placeholder))"))

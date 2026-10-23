@@ -25,7 +25,7 @@ async def main():
     ok("no 14-day chart", await pg.locator(".colchart").count() == 0)
     ok("Dashboard lists the classes, current plans, and check-ins", all([await pg.locator(sel).count() == 1 for sel in ["#dash-classes", "#dash-plans", "#dash-attn"]]))
     acts = await pg.inner_text(".dash-actions")
-    ok("quick actions: Checks, New Learning Plan, Add a class", all(t in acts for t in ["Checks", "New Learning Plan", "Add a class"]))
+    ok("quick actions: New Learning Plan, Add a class; Checks is its tile", all(t in acts for t in ["New Learning Plan", "Add a class"]) and "Checks" not in acts and await pg.locator('.kpis a[href="#/teach/checks"]').count() == 1)
 
     # Classes page: add a class, then open it. (The old #/teach/class address lands here.)
     await go(pg, "#/teach/class")
