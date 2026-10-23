@@ -1424,7 +1424,7 @@ a.kpi:hover { border-color: var(--teal); }
 .feed a { color: var(--fg); }
 
 .student-head { margin-top: 1rem; display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr); gap: 1.25rem; align-items: center; padding: 1.5rem; background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius); }
-.student-head h2 { font-size: var(--step-3); }
+.student-head__name { font-family: var(--font-display, inherit); font-weight: 800; font-size: var(--step-2); margin: 0; }
 .student-head > div { display: grid; gap: .5rem; min-width: 0; }
 .stage-list { list-style: none; display: grid; gap: .4rem; }
 .stage-list li { display: grid; grid-template-columns: 2rem minmax(0, 1fr) auto; gap: .7rem; align-items: center; padding: .55rem .7rem; border-radius: var(--radius-sm); background: var(--bg); }
@@ -2568,3 +2568,5 @@ h1, h2, h3, h4 { letter-spacing: -.015em; }
 .site-footer { content-visibility: auto; contain-intrinsic-size: auto 320px; }
 .mx-cb-note { display: flex; gap: .5rem; align-items: flex-start; padding: .6rem .8rem; border-radius: var(--radius-sm); background: var(--teal-soft); }
 .mx-cb-note svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; margin-top: .2rem; }
+.myplans-note { display: flex; gap: .6rem; align-items: center; padding: .8rem 1rem; border-radius: var(--radius-sm); background: var(--teal-soft); margin: 0 0 1rem; }
+.myplans-note svg { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; }

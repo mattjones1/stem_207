@@ -53,6 +53,8 @@ async def main():
       await go(pg, "#/lab/" + l, 800)
       m = await pg.evaluate(LAB)
       ok(f"lab {l}: stage and '{m['btn']}' on screen", m["stageTop"] is not None and m["stageTop"] >= 0 and m["btnBottom"] is not None and m["btnBottom"] <= m["vh"], m)
+      hint = await pg.evaluate("Math.round(document.querySelector('#lab-hint-btn').getBoundingClientRect().bottom)")
+      ok(f"lab {l}: Need a hint? on screen", hint <= H, hint)
 
     # Activity page (student): sections fold after the first visit, and the bar jumps to the debrief.
     await go(pg, "#/activity/sort-the-catch")

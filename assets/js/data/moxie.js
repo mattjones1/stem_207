@@ -65,7 +65,7 @@ window.STEM.moxie = {
   // The source rubric describes only "Meets" (3 of 4). Give feedback per dimension; no scores until the other levels are written.
   rubric: ["Function", "Code & comments", "Circuit", "Design process", "Communication", "Teamwork"],
   pending: {
-    grades: "Grade range: pending validation.",
+    grades: "Grade range: pending a pilot.",
     minutes: "Minutes per session: pending a classroom pilot.",
     board: "Supported board: pending. Session 1 assumes a USB-C ESP32 Dev Module with a built-in LED on pin 2.",
     software: "Software: pending a tested Arduino IDE, ESP32 board package, and library set."

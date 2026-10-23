@@ -90,7 +90,7 @@
   SE.plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
   SE.num = (n) => Math.round(n).toLocaleString("en-US");
   /* Student time for an activity: the pilot core range when set (time.core), else its duration. */
-  SE.timeText = (a) => a.time && a.time.core ? `${a.time.core[0]}–${a.time.core[1]} min` : `${a.duration} min`;
+  SE.timeText = (a) => a.time && a.time.core ? `${a.time.core[0]}–${a.time.core[1]} min` : a.duration ? `${a.duration} min` : "Time pending";   // Moxie sets time after its pilot
   SE.timeMax = (a) => a.time && a.time.core ? a.time.core[1] : a.duration;
 
   SE.gradesText = (ids) => {

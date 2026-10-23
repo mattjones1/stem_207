@@ -29,13 +29,13 @@ window.STEM.progression = {
   /* Explorer ranks, Maine-style: from the dock to the top of Katahdin.
      Insignia are drawn from `chevrons` and `stars`. */
   ranks: [
-    { id: "deckhand", name: "Deckhand", xp: 0, chevrons: 0, stars: 0, motto: "Every expedition starts at the dock." },
+    { id: "deckhand", name: "Deckhand", xp: 0, chevrons: 0, stars: 0, motto: "Every voyage starts at the dock." },
     { id: "tidepooler", name: "Tidepooler", xp: 300, chevrons: 1, stars: 0, motto: "You know how to look closely." },
     { id: "trail-scout", name: "Trail Scout", xp: 800, chevrons: 2, stars: 0, motto: "You can find your own way through the woods." },
     { id: "keeper", name: "Lighthouse Keeper", xp: 1600, chevrons: 3, stars: 0, motto: "Others steer by the light you keep." },
     { id: "harbor-pilot", name: "Harbor Pilot", xp: 2800, chevrons: 3, stars: 1, motto: "You can guide a boat home through fog." },
     { id: "ridge-runner", name: "Ridge Runner", xp: 4500, chevrons: 3, stars: 2, motto: "Long climbs don't scare you." },
-    { id: "katahdin", name: "Katahdin Guide", xp: 7000, chevrons: 3, stars: 3, motto: "You can lead an expedition all the way to the summit." }
+    { id: "katahdin", name: "Katahdin Guide", xp: 7000, chevrons: 3, stars: 3, motto: "You can lead a whole crew all the way to the summit." }
   ],
 
   /*
@@ -55,7 +55,7 @@ window.STEM.progression = {
       how: "Pass 3 team activities." },
     { id: "bug-hunter", name: "Bug Hunter", icon: "bug", ring: "navy", rule: "keyword", keyword: "debugging", n: 2,
       how: "Pass 2 debugging activities." },
-    { id: "sector-coding", name: "Code Sector", icon: "code", ring: "teal", rule: "area", area: "coding", n: 3,
+    { id: "sector-coding", name: "Coder", icon: "code", ring: "teal", rule: "area", area: "coding", n: 3,
       how: "Pass 3 Coding activities." },
     { id: "sector-vr", name: "Far Sight", icon: "vr", ring: "navy", rule: "area", area: "vr", n: 2,
       how: "Pass 2 Virtual Reality activities." },

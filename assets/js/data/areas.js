@@ -14,7 +14,7 @@ window.STEM.areas = [
     icon: "code",
     tagline: "Give clear instructions and build things that respond.",
     description:
-      "Algorithms, sequences, loops, conditionals, variables, debugging, and creative programming. Steer a lobster boat around the harbor in the Harbor Code Lab, sort the day's catch with if–else rules, and move along the coding pathway when you're ready.",
+      "Algorithms, sequences, loops, conditionals, variables, debugging, and creative programming. Steer a lobster boat around the harbor in the Harbor Code Lab, sort the day's catch with if–else rules, and try more coding activities when you're ready.",
     topics: ["Algorithms", "Sequences", "Loops", "Conditionals", "Variables", "Debugging", "Creative programming"]
   },
   {

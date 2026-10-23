@@ -470,7 +470,7 @@
         </section>` : `
       <section class="wrap section" aria-labelledby="area-acts">
         <div class="section__head">
-          <div><span class="eyebrow">Choose your next adventure</span><h2 id="area-acts">${plural(list.length, "activity", "activities")}</h2></div>
+          <div><span class="eyebrow">${user && user.role === "educator" ? "All activities" : "Choose your next adventure"}</span><h2 id="area-acts">${plural(list.length, "activity", "activities")}</h2></div>
         </div>
         <div class="cards">${list.map((a) => activityCard(a, prof)).join("")}</div>
       </section>`}
@@ -723,6 +723,7 @@
 
   SE.views.activity = function (user, id) {
     const a = SE.activityById[id];
+    if (a && a.moxie && !SE.content.visibleTo(a, user) && SE.moxieClosed) return SE.moxieClosed(user);
     if (!a || !SE.content.visibleTo(a, user)) return SE.views.notFound();
     if (a.moxie) return SE.views.moxieSession(user, a);   // Moxie sessions have their own layout (views-moxie.js)
     if (a.placeholder) return placeholderPage(a);
@@ -823,7 +824,7 @@
           <section class="block block--reflect" aria-labelledby="s-reflect">
             <h2 id="s-reflect">${icon("question")}Think about it</h2><p>${esc(a.reflect)}</p>
           </section>`}
-          ${isStudent ? "" : `
+          ${!user || user.role !== "educator" ? "" : `
           <details class="block teacher-notes" open>
             <summary><h2>${icon("clipboard")}Teacher notes</h2><span class="toggle-hint" aria-hidden="true"></span></summary>
             <div class="teacher-notes__body">
@@ -895,8 +896,11 @@
           ${step("You", `Pass: you earn the XP (about ${xp}). Try again: read your teacher's note, fix it, and send it again.`, "Home · this page")}
         </ol>
       </details>`;
+    // Open the first time a teacher sees it, folded after that (so the queue comes first on a Chromebook).
+    let first = true;
+    try { first = !localStorage.getItem("stem207.seen.checks-guide"); localStorage.setItem("stem207.seen.checks-guide", "1"); } catch (e) { /* private mode: open */ }
     return `
-      <details class="block cg" id="checks-guide" open>
+      <details class="block cg" id="checks-guide" ${first ? "open" : ""}>
         <summary><span>${icon("question")}How checks work</span><span class="muted cg-sub">One check for every activity. Students send, you decide.</span></summary>
         <ol class="cg-flow">
           ${step("Student", "Does the activity, then sends a reflection: a written answer, or “Show or tell my teacher.”", "Activity page")}
@@ -917,6 +921,20 @@
           <h1 tabindex="-1" class="empty__title">We couldn’t find that page</h1>
           <p>The page may have moved, or the link may be mistyped.</p>
           <a class="btn btn--primary" href="#/">${icon("arrowLeft")}Back to ${SE.homeLabel() === "Home" ? "home" : SE.homeLabel()}</a>
+        </div>
+      </section>`;
+  };
+
+  /* A page that exists but isn't open to this person yet (for example Moxie before a teacher assigns it).
+     Says why and where to go instead of "not found". */
+  SE.views.notOpen = function ({ title, text, href = "#/", label = `Back to ${SE.homeLabel() === "Home" ? "home" : SE.homeLabel()}`, ic = "lock" }) {
+    app().innerHTML = `
+      <section class="wrap section">
+        <div class="empty">
+          ${icon(ic)}
+          <h1 tabindex="-1" class="empty__title">${esc(title)}</h1>
+          <p>${esc(text)}</p>
+          <a class="btn btn--primary" href="${href}">${icon("arrowLeft")}${esc(label)}</a>
         </div>
       </section>`;
   };

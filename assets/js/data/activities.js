@@ -83,7 +83,7 @@ window.STEM.activities = [
       "Pilot core: Maze levels 1–3. Play levels 1–3 once on a student device before class to confirm they match these steps.",
       "Model one round of the floor maze with a volunteer before pairs begin.",
       "Ask \"Which step went wrong first?\" rather than \"What's wrong?\" to build debugging habits.",
-      "Younger students can stop after levels 1–3 of the online maze. Levels 4+ introduce loops and conditionals and connect to later pathway stages.",
+      "Younger students can stop after levels 1–3 of the online maze. Levels 4+ introduce loops and conditionals and connect to later Coding Foundations steps.",
       "For students with limited mobility, run Part 1 as a tabletop maze with a game piece."
     ]
   },
@@ -1791,12 +1791,12 @@ window.STEM.activities = [
       prerequisites: "None."
     },
     steps: [
-      "Give each team the training pile with labels. Teams look for a rule: \"Fruit is sweet,\" \"Fruit is round.\"",
-      "Teams write down their rule. That's their \"model.\"",
-      "Show one test card at a time. Teams use only their rule to predict: Fruit or Not fruit?",
-      "Reveal the answer. Keep score of correct predictions.",
-      "Talk about the misses: Why did the tomato fool most teams?",
-      "Add the tricky cards to the training pile and let teams update their rule."
+      "Look at the training pile with your team. Each card is labeled. Find a rule, like \"Fruit is sweet\" or \"Fruit is round.\"",
+      "Write down your rule. That's your \"model.\"",
+      "Look at one test card at a time. Use only your rule to predict: Fruit or Not fruit?",
+      "Check the answer. Keep score of how many you got right.",
+      "Talk about the misses: why did the tomato fool your rule?",
+      "Add the tricky cards to your training pile. Change your rule to fit them."
     ],
     reflect: "How did adding more examples change your rule? What does that tell you about how AI learns?",
     extend: "Design a test card that you think would trick every team's model. Explain why.",
@@ -2067,12 +2067,12 @@ window.STEM.activities = [
       prerequisites: "None."
     },
     steps: [
-      "Show the first pattern. Students write or call out their prediction.",
-      "Ask: How sure are you? Show with fingers, 1 (guessing) to 5 (certain).",
-      "Repeat for each pattern.",
-      "On \"Once upon a ___,\" collect several answers. Most will say \"time.\" Why?",
-      "Explain: AI tools that suggest words do this too. They predict what usually comes next, based on lots of examples.",
-      "Try a pattern with two good answers, like \"I like to eat ___.\" Is any prediction wrong?"
+      "Look at the first pattern. Say or write what comes next.",
+      "How sure are you? Show it with your fingers: 1 (guessing) to 5 (certain).",
+      "Do the same for each pattern.",
+      "Finish \"Once upon a ___.\" Most people say \"time.\" Why do you think that is?",
+      "AI tools that suggest words do this too. They predict what usually comes next, from lots of examples.",
+      "Try a pattern with two good answers, like \"I like to eat ___.\" Is either prediction wrong?"
     ],
     reflect: "When a computer finishes your sentence, is it guessing what you mean or what most people would say?",
     extend: "Make up a pattern that looks like it goes one way but actually goes another. Can you fool the class?",
@@ -2172,7 +2172,7 @@ window.STEM.activities = [
     teacherNotes: [
       "Use this as a warm-up before any robotics kit lesson.",
       "Students who prefer not to move can be the \"programmers\" who write new rules.",
-      "Connect to conditionals in the coding pathway (Stage 4)."
+      "Connect to conditionals in Coding Foundations (step 4)."
     ]
   },
   {
@@ -2411,7 +2411,7 @@ window.STEM.activities = [
     teacherNotes: [
       "The shorter code in the extension is called run-length encoding, a real compression idea.",
       "Add a third letter for a second color to increase the challenge.",
-      "Connects to the coding pathway's focus on precise instructions (Stage 1)."
+      "Connects to Coding Foundations' focus on precise instructions (step 1)."
     ]
   },
   {
@@ -2958,7 +2958,7 @@ window.STEM.activities = [
     before: {
       materials: ["Laptop, Chromebook, or tablet"],
       setup: ["Students can sign in to save progress, or explore as guests.", "The lab has three voyages of 12 levels. Every voyage starts with beginner sequences and builds to functions and a free build, so students who finish Voyage 1 can keep practicing at the same level in Voyages 2 and 3.", "Within a voyage, levels 1–3 suit any beginner. Levels 8–12 suit students ready for conditionals, variables, and functions."],
-      prerequisites: "None. The lab starts at the very beginning and climbs the coding pathway."
+      prerequisites: "None. The lab starts at the very beginning and climbs through Coding Foundations."
     },
     steps: [
       "Open the lab and read the goal for the level.",
@@ -2971,7 +2971,7 @@ window.STEM.activities = [
     reflect: "Which level made you change how you were thinking about the problem? What did you do differently?",
     extend: "On each voyage's free build, solve the level, then try to beat par by using loops and conditionals to make your program shorter.",
     teacherNotes: [
-      "Each voyage follows the same map to the coding pathway: levels 1–3 sequencing and debugging (Stage 1), 4–6 loops (Stage 3), 7–9 actions and conditionals (Stages 2 and 4), 10 variables (Stage 5), 11 functions (Stage 6), 12 independent creation (Stage 7). The coding pathway page links to every matching level.",
+      "Each voyage follows the Coding Foundations Learning Plan: levels 1–3 sequencing and debugging (step 1), 4–6 loops (step 3), 7–9 actions and conditionals (steps 2 and 4), 10 variables (step 5), 11 functions (step 6), 12 independent creation (step 7).",
       "Voyage 2 (Penobscot Bay) adds Set trap and If at a dashed spot. Voyage 3 (Down East) adds a simple rule: you can only set a trap you have already hauled. Both are actions and conditionals at the same skill level as Voyage 1.",
       "Debug levels vary the kind of bug: a wrong turn, an extra block, a wrong turn inside a loop, and a loop that repeats too few times.",
       "Block limits on later levels are intentional. They push students to find the pattern instead of brute-forcing with many Forward blocks.",
@@ -3064,7 +3064,7 @@ window.STEM.activities = [
     ],
     before: {
       materials: ["Laptop, Chromebook, or tablet"],
-      setup: ["Best after students know sequences and click events (Robot Dance Party and coding pathway stage 2).", "Plan about 15 minutes. Students can sign in to save progress or explore as guests."],
+      setup: ["Best after students know sequences and click events (Robot Dance Party and Coding Foundations step 2).", "Plan about 15 minutes. Students can sign in to save progress or explore as guests."],
       prerequisites: "Understands sequences and that a click can start code (events)."
     },
     steps: [
@@ -3281,7 +3281,7 @@ window.STEM.activities = [
     before: {
       materials: ["Laptop, Chromebook, or tablet"],
       setup: ["Run Sense–Think–Act: Human Robot Game first for younger groups."],
-      prerequisites: "Comfortable with if–then ideas (coding pathway Stage 4 is a good match)."
+      prerequisites: "Comfortable with if–then ideas (Coding Foundations step 4 is a good match)."
     },
     steps: [
       "Choose an action for each thing the robot can sense.",

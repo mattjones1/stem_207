@@ -283,7 +283,7 @@
       note: activityId === "lobster-trap-logic" ? "Work with your table group. Bring your flowchart to Thursday's class." : null
     }));
     const messages = [
-      { id: `msg_demo_1${sfx}`, classId: cls.id, isDemo: true, createdAt: now - 3 * SE.DAY, body: "Welcome to STEM 207! Start with your assigned missions. When you finish, explore anything you like." },
+      { id: `msg_demo_1${sfx}`, classId: cls.id, isDemo: true, createdAt: now - 3 * SE.DAY, body: "Welcome to STEM 207! Start with your assigned activities. When you finish, explore anything you like." },
       { id: `msg_demo_2${sfx}`, classId: cls.id, isDemo: true, createdAt: now - 6 * 3600000, body: "This week we're working on loops and if–else. Tomorrow we'll share our lobster trap flowcharts." }
     ];
     // One sample partner team (Moxie partners share capstone work).

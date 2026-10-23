@@ -690,7 +690,7 @@
         setStatus("Stuck in a loop");
         api.say("The boat got stuck going in circles forever. Make sure something inside the loop moves the boat closer to the wharf.", "warn");
       } else if (atGoal && (!L.needGems || allGems) && (!L.needDrops || allSpots)) {
-        setStatus("Mission complete");
+        setStatus("Level complete");
         const n = countBlocks(program);
         api.say(L.par ? `You did it in ${n} blocks${n <= L.par ? ". That's at or under par!" : `. Par is ${L.par}. Can you find a shorter program?`}` : "The boat made it home to the wharf!", "good");
         api.win({ blocks: n, program: summarize(program) });

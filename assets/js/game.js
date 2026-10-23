@@ -227,7 +227,7 @@
       // Prefer the student's own grade-band track (e.g. the grades 6–8 activities), then anything in band.
       const acts = stage.activities.map((id) => SE.activityById[id]).filter((a) => a && notDone(a));
       const act = acts.find((a) => a.track && a.track === student.gradeBand) || acts.find(inBand);
-      if (act) add(act, `Coding pathway, stage ${stage.stage}`);
+      if (act) add(act, `Coding Foundations, step ${stage.stage}`);
     }
     // An area they haven't visited yet
     SE.liveAreas.forEach((area) => {

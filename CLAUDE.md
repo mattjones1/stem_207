@@ -170,6 +170,7 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - Rules: a required activity must be published and have a resource (`blockers`). Grade fit, accounts, cost, and supervision are shown as advice, never bypassed.
 - Templates are in `assets/js/data/templates.js`. Copies are the educator's own; never edit a template through a copy.
 - The Phase 4 step-evidence events (`pathway_*`) stay in the log but aren't shown or counted.
+- "New Learning Plan" reopens the educator's blank draft (untitled, no activities, never edited) instead of making another (`isBlank`), so drafts never pile up. Plan, template, and editor pages use the plan's title as the h1. An activity with no time yet (Moxie) shows "Time pending" and is left out of plan totals.
 - Test: `python3 tests/site/test_plans.py`.
 
 ## Educator QA round: modal, à la carte plans, workshops, dashboard, notes
@@ -179,7 +180,7 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
   - **Send a note:** `teacher_note { note }` (up to 200 characters) via `SE.store.teacherLog`. The student sees the newest one from the last 14 days on Home as **Just for you** (`.home-note`); all notes are on Me (`.notes-list`); `prof.notes` is newest first. No other student sees it. No SQL needed.
 - **Dashboard** (`SE.views.teach`): a greeting band (`.dash-hello`), palette KPI tiles (`.kpi--green` Checks, `.kpi--teal` Classes, `.kpi--blue` plans; `--brand-blue` only for borders and icons), class cards with Add students and Message, and a side column with **Recent activity** (last 8 sent, passed, try again, help, and note events) and Needs a check-in with a Note button.
 - **À la carte picker** in the plan editor: category tabs (`.pk-tab`, `data-pick-area`, `aria-pressed`, 3D Printing included) list **every** activity in the category. Search (`#pw-q`) looks across every category; grade (`#pw-fgrade`) and time (`#pw-ftime`) filter. "Your mix" (`#pw-mix`) counts activities per category. The plan list offers **Build your own** and **Start from a template**.
-- **Workshops:** templates with `group: "workshop"`, `workshop: { format, sessions: [{ title, steps: [step numbers] }] }`, and `future: [text]` (content not ready yet; text only, never a step): `tpl-ws-sampler` (Maine Tech Sampler), `tpl-ws-robots` (Robots & Smart Machines), `tpl-ws-katahdin` (Coast to Katahdin Explorers). All `reviewed: false`. Copies keep `basedOn`, so a copied plan's page still shows the workshop format.
+- **Courses and workshops:** `group: "course"` (Moxie, listed first under Courses) or `group: "workshop"`, with `workshop: { format, sessions: [{ title, steps: [step numbers] }] }`, and `future: [text]` (content not ready yet; text only, never a step): `tpl-ws-sampler` (Maine Tech Sampler), `tpl-ws-robots` (Robots & Smart Machines), `tpl-ws-katahdin` (Coast to Katahdin Explorers). All `reviewed: false`. Copies keep `basedOn`, so a copied plan's page still shows the workshop format.
 - 2.0 depth analysis: `planning/STEM207_2.0_Analysis.md`.
 - Test: `python3 tests/site/test_educator_qa.py`.
 
@@ -236,6 +237,9 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
   - There's no Projector button.
 - `#/activities` is the shared category view, and `#/activities/<category>` is one category.
 - Old addresses redirect (`MOVED` in `main.js`): `#/library`, `#/area/<id>`, `#/explore`, `#/teach/pathways`, `#/teach/class`, `#/teach/reflections`, `#/teach/missions`, and `#/my/pathways/<id>`.
+- A page for another role never sends a signed-in person to another role's sign-in. Students at teacher pages go Home with "That page is for teachers."; guests at `#/plans` go to the student sign-in, and at `#/me` / `#/base` go Home, each with a toast saying why. A page that exists but isn't open yet uses `SE.views.notOpen({ title, text, href, label })` (Moxie for students and guests), not "not found".
+- Teacher notes show only to educators (not guests). Every `#/teach/*` page has its own tab title.
+- Test: `node tests/tools/test_wording.js` (activity, category, rank, patch, and view text never says mission, expedition, or pathway; student steps aren't written to the teacher) and `python3 tests/site/test_roles.py`.
 - Class rewards are the "class journey".
 
 ## Classroom and design rules
@@ -248,7 +252,7 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 ## Chromebook target
 - The target device is a school Chromebook at 1366×768, 100% scaling: about **1366×650** of page. Design and test there; other sizes must not break.
 - Short-screen mode is `@media (max-height: 760px) and (min-width: 1000px)` in `styles.css` and `labs.css` (compact brand row, see `brand/BRAND.md`; tighter page tops; 5-column sign-in pictures; compact lab header and a sticky, scrolling brief). `SE.labs.shortScreen()` is the same test in JS.
-- **Every lab:** at 1366×650 the stage and its main button (Run / Test / Check) are visible on load without scrolling. On short screens the lab shell scrolls the lab body under the menu after the route renders, through the one-time `SE.afterRoute({ fresh })` hook in `main.js`. Trim a tall stage with a `max-height` in the short-screen block.
+- **Every lab:** at 1366×650 the stage and its main button (Run / Test / Check) are visible on load without scrolling. On short screens the lab shell scrolls the lab body under the menu after the route renders, through the one-time `SE.afterRoute({ fresh })` hook in `main.js`. Trim a tall stage with a `max-height` in the short-screen block. In short mode the brief shows the goal and **Need a hint?** first, then the steps, then What you'll learn / Why it matters (CSS `order`), so the hint button is on screen too.
 - **Activity pages (students):** What you'll learn, Why it matters, and Before you begin are folded `<details>` after the first visit (`stem207.seen.<id>`), and a sticky `.act-bar` jumps to the launch or steps and to the debrief. Moxie sessions have the same bar.
 - Route scrolls use `behavior: "instant"` (CSS smooth scrolling would animate them).
 - Moxie on ChromeOS: the Cloud Editor doesn't list ESP32 boards, so students use Copy my code / Download .ino and the teacher uploads (validation item 16).

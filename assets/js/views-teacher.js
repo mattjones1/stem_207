@@ -93,7 +93,7 @@
       case "deeper_opened": return { icon: "rocket", text: `${who}went deeper on ${title}: opened ${esc(e.data.provider || "an outside resource")}` };
       case "step_checked": return { icon: "list", text: `${who}${e.data.checked ? "checked off" : "unchecked"} step ${e.data.step + 1} of ${title}` };
       case "mission_completed": { const tag = completionTag(e); return { icon: "check", text: `${who}sent ${title}${/submitted</.test(tag) ? "" : ` ${tag}`}`, strong: true }; }
-      case "ican_claimed": return { icon: "flag", text: `${who}said “I can” for pathway stage ${e.data.stage}` };
+      case "ican_claimed": return { icon: "flag", text: `${who}said “I can” for Coding Foundations step ${e.data.stage}` };
       case "ican_verified": return { icon: "shield", text: `${withName ? who : ""}Stage ${e.data.stage} confirmed by teacher` };
       case "ican_returned": return { icon: "refresh", text: `${withName ? who : ""}Stage ${e.data.stage}: teacher said “not yet”` };
       case "lab_level_completed": {
@@ -232,8 +232,7 @@
       <section class="wrap section dash">
         <p class="dash-hello">${icon("compass")}<span><strong>${hello}, ${esc(user.name || "educator")}.</strong> ${new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</span></p>
         <div class="dash-actions">
-          <a class="btn btn--primary" href="#/teach/checks">${icon("check")}Checks${waiting ? ` (${waiting})` : ""}</a>
-          <a class="btn btn--ghost" href="#/teach/plans/new">${icon("plus")}New Learning Plan</a>
+          <a class="btn btn--primary" href="#/teach/plans/new">${icon("plus")}New Learning Plan</a>
           <button type="button" class="btn btn--ghost" data-message-class="">${icon("message")}Message a class</button>
           <a class="btn btn--ghost" href="#/teach/classes">${icon("users")}Add a class</a>
         </div>
@@ -396,7 +395,7 @@
         <div class="student-head">
           ${SE.studentAvatar(student.id, 72, prof)}
           <div>
-            <h2>${esc(student.displayName)}</h2>
+            <p class="student-head__name">${esc(student.displayName)}</p>
             <p class="muted">${esc(prof.rank.name)} · ${esc(SE.gradeById[student.gradeBand] ? SE.gradeById[student.gradeBand].name : "")} · last active ${prof.lastActive ? SE.timeAgo(prof.lastActive) : "never"}</p>
             ${SE.rankBar(prof, true)}
             <button type="button" class="btn btn--ghost btn--small" data-note-student="${student.id}">${icon("message")}Send a note</button>
@@ -438,7 +437,7 @@
             const st = prof.labStats[lab.id] || { runs: 0, hints: 0 };
             const la = STEM.activities.find((x) => x.launch && x.launch.labId === lab.id);
             const ls = la ? SE.game.statusFor(prof, la) : null;
-            return `<li><span><a href="#/lab/${lab.id}">${esc(lab.title)}</a><small>${n} of ${lab.levels.length} levels · ${st.runs} tests · ${st.hints} hints</small>${ls && ["submitted", "confirmed", "tryagain"].includes(ls.state) ? statusChip(ls) : ""}</span><span class="meter"><span style="width:${(n / lab.levels.length) * 100}%"></span></span></li>`;
+            return `<li><span><a href="#/lab/${lab.id}">${esc(lab.title)}</a><small>${n} of ${lab.levels.length} levels · ${SE.plural(st.runs, "test", "tests")} · ${SE.plural(st.hints, "hint", "hints")}</small>${ls && ["submitted", "confirmed", "tryagain"].includes(ls.state) ? statusChip(ls) : ""}</span><span class="meter"><span style="width:${(n / lab.levels.length) * 100}%"></span></span></li>`;
           }).join("")}</ul>
         </div>
         <div class="block">
@@ -457,7 +456,7 @@
         <ol class="feed">${events.filter((e) => !TIMELINE_NOISE.includes(e.type)).slice(0, 60).map((e) => { const d = describe(e, false); return `<li class="${d.strong ? "is-strong" : ""}">${icon(d.icon)}<span>${d.text}</span><time datetime="${new Date(e.at).toISOString()}">${SE.timeAgo(e.at)}</time></li>`; }).join("")}</ol>
       </section>`;
 
-    app().innerHTML = frame(user, cls, classes, "", body, { title: esc(cls.name) });
+    app().innerHTML = frame(user, cls, classes, "", body, { title: esc(student.displayName), eyebrow: cls.name });
     bindFrame(user);
     bindCheckActions();
   };
@@ -473,7 +472,7 @@
           <span class="icon-badge">${icon(SE.areaById[c.activity.area].icon)}</span>
           <div>
             ${withName ? `<a href="#/teach/student/${student.id}"><strong>${esc(student.displayName)}</strong></a>${withName === "class" ? ` <span class="muted">(${esc((SE.store.classById(student.classId) || {}).name || "")})</span>` : ""} · ` : ""}<a href="#/activity/${c.activity.id}">${withName ? esc(c.activity.title) : `<strong>${esc(c.activity.title)}</strong>`}</a>
-            <span>${SE.dateShort(c.event.at)} · ${completionTag(c.event)} · ${c.event.data.stepsDone || 0}/${c.event.data.stepsTotal || c.activity.steps.length} steps · ${c.event.data.extension ? "tried the challenge" : "no challenge"}</span>
+            <span>${SE.dateShort(c.event.at)} · ${completionTag(c.event)} · ${c.event.data.stepsDone || 0}/${c.event.data.stepsTotal || c.activity.steps.length} steps · ${c.event.data.extension ? "tried Go deeper" : "didn’t try Go deeper"}</span>
           </div>
           ${conf ? `<span class="conf conf--${conf.id}">${esc(conf.name)}</span>` : ""}
         </div>

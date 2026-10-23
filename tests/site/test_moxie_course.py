@@ -51,7 +51,7 @@ async def main():
     # A student sees nothing until the course is assigned.
     await student(pg)
     await go(pg, "#/activity/moxie-01")
-    ok("student: Session 1 isn't open before the course is assigned", NOT_FOUND in await pg.inner_text("#app"))
+    ok("student: Session 1 isn't open before the course is assigned", "Your teacher will open Moxie" in await pg.inner_text("#app"))
     await educator(pg)
     ok("the Moxie course template has 16 sessions in 4 units", await pg.evaluate("(() => { const t = SE.plans.template('tpl-moxie'); return t.steps.length === 16 && t.workshop.sessions.length === 4; })()"))
     await go(pg, "#/teach/plans/tpl-moxie")
