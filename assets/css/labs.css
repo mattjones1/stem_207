@@ -799,3 +799,38 @@
 .dp-handoff__btns { display: flex; flex-wrap: wrap; gap: .5rem; }
 @media (max-width: 420px) { .dp-rep__body { margin-left: .4rem; } .dp-rep__into { margin-left: .4rem; } }
 .dp-rep__count { display: inline-flex; align-items: center; gap: .35rem; white-space: nowrap; }
+
+/* ───────── Short screens (Chromebooks): the stage and its main button fit one screen ─────────
+   lab-shell.js scrolls the work area under the pinned menu when a level loads. The brief scrolls on its own,
+   the lab header is compact, and the tallest stages give up some height. Test: tests/site/test_chromebook.py. */
+@media (max-height: 760px) and (min-width: 1000px) {
+  .page-top--lab .page-top__inner { padding-block: .5rem .7rem; gap: .5rem; }
+  .page-top--lab .lab-head .icon-badge, .page-top--lab .page-top__lede { display: none; }
+  .page-top--lab h1 { font-size: var(--step-2); }
+  .lab-chapters { margin-top: .3rem; }
+  .lab-chapter { padding-block: .35rem; }
+  .lab-body { padding-block: .6rem 0; gap: 1rem; }
+  .lab-brief { position: sticky; top: 60px; max-height: calc(100vh - 72px); overflow-y: auto; overscroll-behavior: contain; }
+  .lab-stage { gap: .6rem; }
+  /* Robot Chef, Pumpkin Launcher, Sled Hill, and Moon Gate are the tallest stages. */
+  #rc-scene { max-height: 150px; }
+  #rc-scene svg { max-height: 150px; }
+  .launch__field { max-height: 300px; }
+  .launch__field svg, .launch__field canvas { max-height: 270px; }
+  .ramp__q .pred-q { gap: .3rem; }
+  .ramp__q { padding-block: .6rem; }
+  .ramp__canvas { max-height: 165px; width: auto; max-width: 100%; margin-inline: auto; }   /* keep the canvas's proportions */
+  .ramp__q h3 { font-size: 1rem; }
+  .ramp__q .eyebrow { display: none; }
+  .rc-prog { max-height: 150px; overflow-y: auto; }   /* the program scrolls inside its panel */
+  .rc-note { padding-block: .3rem; }
+  .mg-scene { max-height: 210px; }
+  .mg-scene svg { max-height: 210px; }
+  .dp-stage { max-height: 240px; }
+  /* Field Station 360: the view on the left; the task (with Scan and I'm facing it) beside it, the notebook below the task. */
+  .fs { grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); align-items: start; }
+  .fs > :not(.fs__panels) { grid-column: 1; }
+  .fs__view { height: 300px; }
+  .fs__panels { grid-column: 2; grid-row: 1 / span 4; grid-template-columns: minmax(0, 1fr); align-content: start; max-height: calc(100vh - 72px); overflow-y: auto; }
+  .fs__task { order: -1; }
+}

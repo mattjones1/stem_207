@@ -245,6 +245,16 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - External platforms: verify against official docs or the live site before writing steps, and mark anything unverified for the teacher. Don't build custom apps for external-platform missions.
 - AI content: label simulations as simulations, and present scores as model outputs rather than guarantees.
 
+## Chromebook target
+- The target device is a school Chromebook at 1366×768, 100% scaling: about **1366×650** of page. Design and test there; other sizes must not break.
+- Short-screen mode is `@media (max-height: 760px) and (min-width: 1000px)` in `styles.css` and `labs.css` (compact brand row, see `brand/BRAND.md`; tighter page tops; 5-column sign-in pictures; compact lab header and a sticky, scrolling brief). `SE.labs.shortScreen()` is the same test in JS.
+- **Every lab:** at 1366×650 the stage and its main button (Run / Test / Check) are visible on load without scrolling. On short screens the lab shell scrolls the lab body under the menu after the route renders, through the one-time `SE.afterRoute({ fresh })` hook in `main.js`. Trim a tall stage with a `max-height` in the short-screen block.
+- **Activity pages (students):** What you'll learn, Why it matters, and Before you begin are folded `<details>` after the first visit (`stem207.seen.<id>`), and a sticky `.act-bar` jumps to the launch or steps and to the debrief. Moxie sessions have the same bar.
+- Route scrolls use `behavior: "instant"` (CSS smooth scrolling would animate them).
+- Moxie on ChromeOS: the Cloud Editor doesn't list ESP32 boards, so students use Copy my code / Download .ino and the teacher uploads (validation item 16).
+- Outside domains for school web filters: `node tools/list_domains.js --write` regenerates `planning/CHROMEBOOK_IT_ALLOWLIST.md`. Run it after adding launch or Go deeper links.
+- Test: `python3 tests/site/test_chromebook.py`.
+
 ## Run and test
 - Local mode: `LOCAL_MODE=1 PORT=8767 node tests/backend/mock-supabase.js`, then open http://localhost:8767. The sample class code is `MOOSE7` (Ava R.: pine, lighthouse, moon). For an educator, use "Fill demo" on `#/signin/educator`.
 - Cloud mock: Postgres plus `node tests/backend/mock-supabase.js` on port 8787 (see `tests/backend/README.md`).

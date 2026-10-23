@@ -145,10 +145,12 @@
     if (anchor) {
       jumpTo(anchor);
     } else if (!force || isAuthRoute) {
-      window.scrollTo(0, 0);
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });   // a new page starts at the top right away (no smooth scroll)
       const h1 = document.querySelector("#app h1");
       if (h1 && booted) h1.focus({ preventScroll: true });
     }
+    // A view can ask for one adjustment after the router's own scroll (labs on short screens, lab-shell.js).
+    if (typeof SE.afterRoute === "function") { const fn = SE.afterRoute; SE.afterRoute = null; fn({ fresh: !anchor && (!force || isAuthRoute) }); }
   }
   SE.route = route;
 

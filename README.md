@@ -348,6 +348,12 @@ Two activities are marked **Resource coming soon** until the program picks a res
 
 STEM 207, LLC is a program offered exclusively through **STEM Coliseum and Learning Center**, its parent company, and the site is co-branded. A white brand row at the top of every page shows the STEM 207 logo "powered by" a large STEM Coliseum logo, which links to the [STEM Coliseum and Learning Center website](https://stem-coliseum.odoo.com/). The footer carries the STEM Coliseum and Learning Center logo and the relationship, and the sign-in card and printable certificates show the parent logo too. The site uses STEM Coliseum's palette (Dark Teal `#012d2b`, Teal `#03968f`, Green 2 `#94c93d`) and fonts (Montserrat headings, Open Sans body). The STEM 207 wordmark keeps its drawing (the pine in the M, Maine in the 0), recolored to Dark Teal and Green 2. Rules for both brands are in [`brand/BRAND.md`](brand/BRAND.md); the parent brand guide and logo files are in [`brand/coliseum/`](brand/coliseum/). The STEM 207 mission is **Keep the humanity in technology.**
 
+## Chromebooks
+The target device is a school Chromebook (1366×768 at 100%, about 1366×650 of page). On short screens the brand row and page tops are compact, every lab shows its stage and Run button without scrolling, and the student activity page has a bar that jumps to the steps and to "Show what you know". Test: `python3 tests/site/test_chromebook.py`.
+
+- **School web filters:** [`planning/CHROMEBOOK_IT_ALLOWLIST.md`](planning/CHROMEBOOK_IT_ALLOWLIST.md) lists every outside domain. Regenerate it with `node tools/list_domains.js --write`.
+- **Moxie:** ESP32 uploads don't work from ChromeOS's Arduino Cloud Editor. Students copy or download their code, and the teacher uploads from a class laptop until the school's setup is tested ([validation item 16](planning/MOXIE_VALIDATION.md)).
+
 ## Accessibility
 
 Keyboard navigation with visible focus, a skip link, focus moved to the page heading on each view, touch targets of at least 44px, and experience levels shown with filled squares and a text label so meaning never relies on color alone. The site follows the device's light or dark setting.

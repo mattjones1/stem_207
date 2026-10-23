@@ -712,6 +712,15 @@
       </figure>`;
   }
 
+  /* Students see background sections folded after their first visit, so the steps and the answer come
+     sooner (Chromebooks have about 650px of page). Teachers always see them open. */
+  const seenKey = (id) => `stem207.seen.${id}`;
+  const firstVisit = (id) => { try { return !localStorage.getItem(seenKey(id)); } catch (e) { return true; } };
+  const markSeen = (id) => { try { localStorage.setItem(seenKey(id), "1"); } catch (e) { /* private mode: always open */ } };
+  const fold = (fold, open, id, ic, title, body, cls = "") => fold
+    ? `<details class="block block--fold ${cls}" ${open ? "open" : ""}><summary><h2 id="${id}">${icon(ic)}${title}</h2><span class="toggle-hint" aria-hidden="true"></span></summary>${body}</details>`
+    : `<section class="block ${cls}" aria-labelledby="${id}"><h2 id="${id}">${icon(ic)}${title}</h2>${body}</section>`;
+
   SE.views.activity = function (user, id) {
     const a = SE.activityById[id];
     if (!a || !SE.content.visibleTo(a, user)) return SE.views.notFound();
@@ -723,6 +732,9 @@
     const related = sortActivities(activities.filter((x) => x.area === a.area && x.id !== a.id && !SE.hiddenForUser(x))).slice(0, 3);
     const checked = prof ? (prof.steps[a.id] || new Set()) : new Set();
     const lastCompletion = prof ? prof.completions.filter((c) => c.activity.id === a.id).pop() : null;
+    const openFolds = !isStudent || firstVisit(a.id);
+    const st = isStudent ? SE.game.statusFor(prof, a) : null;
+    const launchable = a.launch.status === "lab" || (a.launch.status === "ready" && a.launch.url);
 
     const stepsHtml = isStudent
       ? `<ol class="steps steps--check">${a.steps.map((x, i) => `
@@ -767,25 +779,17 @@
             ${a.board ? `<div class="board"><p class="board__title">${esc(a.board.title)}</p><ol class="${a.board.code ? "board--code" : ""}">${a.board.lines.map((x) => `<li>${a.board.code ? `<code>${esc(x)}</code>` : esc(x)}</li>`).join("")}</ol>${a.board.note ? `<p class="board__note">${esc(a.board.note)}</p>` : ""}</div>` : ""}
           </section>
           ${a.bridge && SE.activityById[a.bridge.from] ? `<p class="bridge">${icon("arrowRight")}<span><strong>You've seen this idea before.</strong> ${esc(a.bridge.text)} <a href="#/activity/${a.bridge.from}">${esc(SE.activityById[a.bridge.from].title)}</a></span></p>` : ""}
-          <section class="block" aria-labelledby="s-learn">
-            <h2 id="s-learn">${icon("bulb")}What you’ll learn</h2>
-            <ul class="bullets objectives">${a.learn.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul>
-          </section>
-          ${a.why ? `
-          <section class="block block--why" aria-labelledby="s-why">
-            <h2 id="s-why">${icon("star")}Why it matters</h2>
+          ${fold(isStudent, openFolds, "s-learn", "bulb", "What you’ll learn", `<ul class="bullets objectives">${a.learn.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul>`)}
+          ${a.why ? fold(isStudent, openFolds, "s-why", "star", "Why it matters", `
             <p>${esc(a.why)}</p>
             ${a.realWorld ? `<p class="why-real"><strong>In the real world:</strong> ${esc(a.realWorld)}</p>` : ""}
-            ${a.vocab ? `<h3>Key words</h3><dl class="vocab">${a.vocab.map((v) => `<div><dt>${esc(v.term)}</dt><dd>${esc(v.def)}</dd></div>`).join("")}</dl>` : ""}
-          </section>` : ""}
-          <section class="block" aria-labelledby="s-before">
-            <h2 id="s-before">${icon("box")}Before you begin</h2>
+            ${a.vocab ? `<h3>Key words</h3><dl class="vocab">${a.vocab.map((v) => `<div><dt>${esc(v.term)}</dt><dd>${esc(v.def)}</dd></div>`).join("")}</dl>` : ""}`, "block--why") : ""}
+          ${fold(isStudent, openFolds, "s-before", "box", "Before you begin", `
             <div class="prep">
               <div><h3>Materials</h3><ul class="bullets">${a.before.materials.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul></div>
               ${isStudent ? "" : `<div><h3>Setup</h3><ul class="bullets">${a.before.setup.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul></div>`}
               <div class="prep__full"><h3>${isStudent ? "Good to know first" : "Prerequisites"}</h3><p>${esc(a.before.prerequisites)}</p></div>
-            </div>
-          </section>
+            </div>`)}
           ${a.vr ? `
           <section class="block" aria-labelledby="s-vr">
             <h2 id="s-vr">${icon("headset")}VR setup for teachers</h2>
@@ -826,6 +830,13 @@
               <ul class="bullets">${a.teacherNotes.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul>
             </div>
           </details>`}
+          ${isStudent ? `
+          <nav class="act-bar" aria-label="Jump to">
+            ${launchable ? `<a class="btn btn--ghost btn--small" href="#s-launch" data-jump="s-launch">${icon("rocket")}${a.launch.status === "lab" ? "Open the lab" : "Launch"}</a>`
+              : `<a class="btn btn--ghost btn--small" href="#s-steps" data-jump="s-steps">${icon("list")}Steps</a>`}
+            ${st.state === "submitted" || st.state === "confirmed" ? `<span class="act-bar__state">${icon("check")}${esc(st.label)}</span>` : ""}
+            <a class="btn btn--primary btn--small" href="#s-debrief" data-jump="s-debrief">${icon("flag")}${st.state === "tryagain" ? "Try it again" : st.state === "submitted" || st.state === "confirmed" ? "My answer" : "Show what you know"}</a>
+          </nav>` : ""}
         </div>
 
         <aside class="aside" aria-label="Activity at a glance">
@@ -850,6 +861,7 @@
 
     // Student tracking
     if (isStudent) {
+      markSeen(a.id);
       SE.logOpen(user, a.id);
       const updateProgress = () => {
         const n = app().querySelectorAll("[data-step]:checked").length;

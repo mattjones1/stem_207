@@ -206,6 +206,12 @@
     mountEl.className = `lab-mount lab-mount--${lab.id}`;
     const c = lab.mount(mountEl, idx, api);
     if (typeof c === "function") cleanup = c;
+    // Short screens (Chromebooks, about 1366×650): start with the work area in view, under the pinned menu.
+    if (SE.labs.shortScreen()) SE.afterRoute = ({ fresh }) => {
+      if (!fresh) return;   // a re-render (like after a win) keeps the student's place
+      const body = app().querySelector(".lab-body"), menu = document.querySelector(".site-header");
+      if (body) window.scrollTo({ top: body.getBoundingClientRect().top + window.scrollY - (menu ? menu.offsetHeight : 0) - 6, behavior: "instant" });
+    };
   };
 
   /* Find the library activity that points at a lab (for its teacher guide). */
@@ -218,6 +224,8 @@
   window.addEventListener("hashchange", () => {
     if (!location.hash.startsWith("#/lab/") && cleanup) { try { cleanup(); } catch (e) { /* ignore */ } cleanup = null; }
   });
+  /* Wide but short (a Chromebook at 1366×768 has about 650px for the page): the CSS short-screen mode. */
+  SE.labs.shortScreen = () => !!(window.matchMedia && window.matchMedia("(max-height: 760px) and (min-width: 1000px)").matches);
   SE.labs._stop = () => { if (cleanup) { try { cleanup(); } catch (e) { /* ignore */ } cleanup = null; } };
 
   /* Small helper used by several labs: a seeded shuffle. */

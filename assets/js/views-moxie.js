@@ -337,6 +337,12 @@
           ${k === "build" ? buildSections(user, a, evs, prof) : (stu ? teamPanel(user) : "") + capstoneSections(user, a, evs)}
           ${checkoffSection(user, a, evs, prof)}
           ${stu ? SE.views.debrief(user, a, prof) : ""}
+          ${stu ? `
+          <nav class="act-bar" aria-label="Jump to">
+            ${a.code ? `<a class="btn btn--ghost btn--small" href="#s-code" data-jump="s-code">${icon("code")}Code it</a>` : ""}
+            <a class="btn btn--ghost btn--small" href="#s-checkoff" data-jump="s-checkoff">${icon("shield")}Checkoff</a>
+            <a class="btn btn--primary btn--small" href="#s-debrief" data-jump="s-debrief">${icon("flag")}${st && (st.state === "submitted" || st.state === "confirmed") ? "My answer" : "Send my answer"}</a>
+          </nav>` : ""}
           ${stu ? "" : `
           <details class="block teacher-notes" open>
             <summary><h2>${icon("clipboard")}Teacher notes</h2><span class="toggle-hint" aria-hidden="true"></span></summary>
@@ -465,7 +471,8 @@
           <button type="button" class="btn btn--ghost btn--small" id="mx-code-copy">${icon("clipboard")}Copy my code</button>
           <button type="button" class="btn btn--ghost btn--small" id="mx-code-dl">${icon("arrowRight")}Download .ino</button>
           ${status("mx-code-status")}</div>` : `<p class="muted small">Students fill the ${plural(model.count, "blank", "blanks")} on screen; you see their answers in Checks.</p>`}
-        ${a.code.remember ? `<p class="mx-remember">${icon("bulb")}<span>${esc(a.code.remember)}</span></p>` : ""}`) : ""}
+        ${a.code.remember ? `<p class="mx-remember">${icon("bulb")}<span>${esc(a.code.remember)}</span></p>` : ""}
+        <p class="mx-cb-note">${icon("code")}<span><strong>On a Chromebook?</strong> Fill in your code here, then use Copy my code or Download .ino. Your teacher uploads it to the board from the class laptop with the Arduino IDE.</span></p>`) : ""}
       ${a.tests ? sec("s-test", "flask", "Test it", `
         ${stu ? `<fieldset class="mx-checklist" data-checklist="test"><legend class="visually-hidden">Tests</legend>
           ${a.tests.map((x, i) => `<label class="mx-check"><input type="checkbox" data-ci="${i}" ${tested[i] ? "checked" : ""}><span>${esc(x)}</span></label>`).join("")}</fieldset>` : bullets(a.tests)}
@@ -926,6 +933,8 @@
             <h3>Still to decide</h3>
             <ul class="bullets">${Object.values(M.pending).map((p) => `<li><span>${esc(p)}</span></li>`).join("")}</ul>
             <p class="muted small">The full validation list is in <code>planning/MOXIE_VALIDATION.md</code>. Nothing on it is tested until it's signed off there.</p>
+            <h3>Chromebooks</h3>
+            <p>Uploading to an ESP32 needs the Arduino IDE on Windows, macOS, or Linux. On ChromeOS, Arduino's Cloud Editor lists only Arduino-brand boards, and the IDE runs only if your IT team turns on Linux. Until you've tested your own setup (validation item 16), use an <strong>upload station</strong>: students fill in their code on their Chromebooks, then use Copy my code or Download .ino, and you upload from one class laptop.</p>
             <h3>Teacher kit</h3>
             <p>The student sheets are on each session page (Print this sheet makes a paper copy). Answer sketches and solutions are in the private Moxie teacher kit, not on this site.</p>
           </div>

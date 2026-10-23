@@ -21,6 +21,7 @@ Owner roles: **Hardware** (an instructor who builds and runs the circuits), **Cu
 | 13 | Before publication | all | Set grade range and minutes per session from a pilot. Write the missing rubric levels (only "Meets", 3 of 4, exists). Write answer keys for the private teacher kit. | Curriculum + Program | Open | |
 | 14 | Review | 7, 9, 12, all | Check the simplified analog voltage examples, servo travel, OLED address troubleshooting, and every optional extension against the actual kit. | Hardware | Open | |
 | 15 | Review | all | Build the bill of materials per pair: models, quantities, spares, storage, and whether circuits stay built between sessions. No purchasing list from the worksheets alone. | Program + Hardware | Open | |
+| 16 | Before pilot | 1–16 | **Chromebooks.** On the school's own Chromebooks and ESP32 boards, test (a) the Arduino Cloud Editor (account, upload method, and the board's USB-serial chip: CH9102 boards are reported to fail from ChromeOS) and (b) the Arduino IDE in ChromeOS Linux mode, if IT allows it. Until one works, use an upload station (a class laptop). Wokwi's browser simulator was considered for practice but isn't linked: free projects are public and its terms don't say whether students under 13 may use it; a teacher may evaluate it. | Hardware + Program | Open | |
 
 ## Moving a session forward
 

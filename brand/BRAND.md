@@ -39,6 +39,9 @@ Sources: the *STEM 207 Brand Guide v1.0* (October 2026, `brand/STEM207_Brand_Gui
 - Keep clear space around it equal to the height of the "C" in COLISEUM. Minimum 120 px wide on screens.
 - The files supplied are 700 px wide PNGs with solid backgrounds. Ask the STEM Coliseum media team for SVG or transparent PNG originals before large or print use.
 
+## Short screens (Chromebooks)
+On screens 760 px tall or less and at least 1,000 px wide (a school Chromebook is 1366×768, about 650 px of page), the brand row is compact: the STEM 207 logo is 128 px wide and the STEM Coliseum logo is 190 px wide, still full color, on white, with "powered by" and its link. Elsewhere the Coliseum logo stays at 300 px. Never go below 120 px.
+
 ## STEM 207 logo
 - Same drawing as before (the pine in the M, Maine in the 0), recolored to the parent palette: **STEM in Dark Teal #012d2b, 207 in Green 2 #94c93d**. On dark backgrounds, STEM turns white.
 - Site copy: `assets/img/brand/stem207-logo.svg` (plus `-reverse`, `-mark`, `-pine`). `assets/js/brand.js` draws it inline. The kit originals are in `brand/logos/stem-207/`. Use those for print and marketing.
