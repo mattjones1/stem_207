@@ -593,6 +593,7 @@ window.STEM.activities = [
   /* Batch 7: Robot Chef lab entry and the grades 6–8 coding track (one per stage) plus the Python bridge. */
   {
     "id": "lab-robot-chef",
+    "next": "robot-maze-mission",
     "title": "Robot Chef",
     "area": "coding",
     "summary": "A robot chef follows your sandwich algorithm exactly as written. Find the first bug, fix the order, add missing steps, and make every step precise.",
@@ -2936,6 +2937,46 @@ window.STEM.activities = [
   /* ───────────────────────────── Interactive labs (run inside STEM 207) ───────────────────────────── */
   {
     id: "lab-rover",
+    why: "Real programmers rarely solve a problem in one try. They plan, run, watch what happens, and fix one thing at a time. The boat shows you every step, so you can see exactly where your plan and the program disagree.",
+    realWorld: "Self-driving boats and ocean robots map the Gulf of Maine on their own, and the people who program them test each route in small steps first, just like you.",
+    vocab: [
+      {
+        "term": "Sequence",
+        "def": "Instructions that run one after another, in order."
+      },
+      {
+        "term": "Loop",
+        "def": "A block that repeats the steps inside it."
+      },
+      {
+        "term": "Conditional",
+        "def": "An if–else block that chooses what to do based on a check."
+      },
+      {
+        "term": "Function",
+        "def": "A block you build yourself that does a group of steps with one name."
+      },
+      {
+        "term": "Debug",
+        "def": "Find and fix the step that went wrong."
+      }
+    ],
+    check: "Show a level you solved and point to the block that did the most work. Then say what would go wrong if you removed it.",
+    stopAt: "You finish Voyage 1 (Casco Bay, levels 1–12). Penobscot Bay and Down East are for later sessions.",
+    stuck: [
+      "Press Step instead of Run, and watch the boat one block at a time.",
+      "Find the first block where the boat goes the wrong way. Fix only that block.",
+      "Turn your body the way the boat faces. Left and right are the boat's left and right."
+    ],
+    next: "lab-moon-gate",
+    time: {
+      "prep": 5,
+      "core": [
+        30,
+        45
+      ],
+      "verified": false
+    },
     title: "Harbor Code Lab",
     area: "coding",
     summary: "Program a lobster boat with code blocks across three voyages and 36 levels: haul and set traps, dodge granite ledges, and write your own functions.",
@@ -2981,6 +3022,26 @@ window.STEM.activities = [
   },
   {
     id: "lab-dance-party",
+    why: "Every program is a list of steps that run in order. Change the order and you change what happens, even when the steps are the same. That's true for a dance robot, a video game, and the apps on a phone.",
+    realWorld: "Animators and game makers line up moves in exact order, and factory robots repeat the same sequence of moves thousands of times a day.",
+    vocab: [
+      {
+        "term": "Sequence",
+        "def": "Steps that happen one after another, in order."
+      },
+      {
+        "term": "Program",
+        "def": "A set of instructions a computer follows."
+      },
+      {
+        "term": "Loop",
+        "def": "A block that repeats the steps inside it."
+      },
+      {
+        "term": "Bug",
+        "def": "A mistake that makes a program do something you didn't want."
+      }
+    ],
     coreLevels: 2,
     pilot: true,
     time: { prep: 5, core: [10, 15], verified: false },
@@ -3037,6 +3098,26 @@ window.STEM.activities = [
   },
   {
     id: "lab-space-blob",
+    why: "Programs have to remember things: a score, a number of lives, how many snacks. A variable is a labeled box that holds that number, and the program can read it and change it.",
+    realWorld: "Games keep your score in a variable, a step counter keeps your steps in one, and a store's website keeps the number of items in your cart.",
+    vocab: [
+      {
+        "term": "Variable",
+        "def": "A named place where a program stores a value it can change."
+      },
+      {
+        "term": "Value",
+        "def": "What is stored in the variable right now, like 5."
+      },
+      {
+        "term": "Event",
+        "def": "Something that happens, like a click, that makes code run."
+      },
+      {
+        "term": "Initialize",
+        "def": "Set a variable's starting value before the program uses it."
+      }
+    ],
     coreLevels: 3,
     pilot: true,
     time: { prep: 5, core: [15, 20], verified: false },
@@ -3087,6 +3168,42 @@ window.STEM.activities = [
   },
   {
     id: "lab-moon-gate",
+    why: "A conditional lets a program make choices: IF something is true, do this, ELSE do that. To trust a rule, you have to test it with inputs that should pass and inputs that shouldn't.",
+    realWorld: "Door badges at schools and hospitals use rules like yours: IF the badge matches, THEN unlock, ELSE stay locked.",
+    vocab: [
+      {
+        "term": "Conditional",
+        "def": "A rule that checks something and picks one of two actions."
+      },
+      {
+        "term": "Branch",
+        "def": "One of the two paths, THEN or ELSE, a conditional can take."
+      },
+      {
+        "term": "Input",
+        "def": "Information a program gets, like a visitor's badge."
+      },
+      {
+        "term": "Test",
+        "def": "Try the program with an input to see if it does the right thing."
+      }
+    ],
+    check: "Tell which branch runs for a Planet visitor and why. Then name one visitor you'd test to prove your rule really works.",
+    stopAt: "You finish level 5 and your rule lets in only Star visitors.",
+    stuck: [
+      "Read the IF line out loud. Does the visitor's badge match it? Yes means THEN. No means ELSE.",
+      "Test one visitor who should get in and one who shouldn't.",
+      "When a rule is broken, look at what the ELSE line does."
+    ],
+    next: "lobster-trap-logic",
+    time: {
+      "prep": 0,
+      "core": [
+        15,
+        20
+      ],
+      "verified": false
+    },
     title: "Moon Base Gatekeeper",
     area: "coding",
     summary: "Write an IF / ELSE rule for a moon base gate, predict what each robot visitor will do, and test every badge. Then find the bug in a rule that lets everyone in.",
@@ -3130,6 +3247,46 @@ window.STEM.activities = [
   },
   {
     id: "lab-field-station",
+    why: "Scientists are careful about the difference between what they see (an observation) and what they think it means (an inference). Keeping those apart is how science stays honest.",
+    realWorld: "Field biologists in Maine study tide pools, ponds, and forests, write down exactly what they see, and use compass headings to find the same spot again next year.",
+    vocab: [
+      {
+        "term": "Observation",
+        "def": "Something you notice with your senses."
+      },
+      {
+        "term": "Inference",
+        "def": "An idea about what an observation means."
+      },
+      {
+        "term": "Adaptation",
+        "def": "A body part or behavior that helps a living thing survive where it lives."
+      },
+      {
+        "term": "Habitat",
+        "def": "The place where a plant or animal lives and finds what it needs."
+      },
+      {
+        "term": "Heading",
+        "def": "A direction in degrees: north is 0°, east is 90°."
+      }
+    ],
+    check: "Share one observation and one inference from the same station. Explain how you know which is which.",
+    stopAt: "You finish the Maine tide pool and the North Woods pond, including both compass checks. The other habitats are bonus.",
+    stuck: [
+      "Turn all the way around. Search markers can be behind you.",
+      "Ask yourself: did I see it, or am I guessing what it means?",
+      "For the compass: north is 0°, east is 90°, south is 180°, west is 270°."
+    ],
+    next: "acadia-from-above",
+    time: {
+      "prep": 5,
+      "core": [
+        25,
+        40
+      ],
+      "verified": false
+    },
     title: "Field Station 360",
     area: "vr",
     summary: "Start in a Gulf of Maine tide pool and a North Woods pond, then visit a rainforest, desert, and coral reef. Find clues, use a compass, and think like a field scientist.",
@@ -3179,6 +3336,42 @@ window.STEM.activities = [
   },
   {
     id: "lab-pattern-machine",
+    why: "AI doesn't think. It finds patterns in the examples people give it. If the examples are too few or lopsided, the AI learns the wrong lesson, so people have to check its work.",
+    realWorld: "Apps that sort photos, spam filters, and tools that help doctors read X-rays all learn from labeled examples, and all of them can make mistakes a person needs to catch.",
+    vocab: [
+      {
+        "term": "Training data",
+        "def": "The labeled examples an AI learns from."
+      },
+      {
+        "term": "Label",
+        "def": "The right answer attached to an example."
+      },
+      {
+        "term": "Bias",
+        "def": "When lopsided examples make an AI favor wrong answers."
+      },
+      {
+        "term": "Confidence",
+        "def": "How sure the model's output says it is. It can be confident and still wrong."
+      }
+    ],
+    check: "Show a moment when the machine got something wrong. Explain what in its training examples caused it, and how you fixed it.",
+    stopAt: "You finish level 6 and decide which uses of AI are responsible. Earning the certificate is a bonus.",
+    stuck: [
+      "Look at the training examples, not the new one. What do most of them have in common?",
+      "Add examples that are different from each other, not more of the same.",
+      "A high confidence score is a model output, not a guarantee. Ask: would a person need to check this?"
+    ],
+    next: "teachable-machine-classroom",
+    time: {
+      "prep": 5,
+      "core": [
+        35,
+        45
+      ],
+      "verified": false
+    },
     title: "Pattern Machine Lab",
     area: "ai",
     summary: "Train a real machine-learning model with examples, then find out how it learns, where it goes wrong, and why.",
@@ -3220,6 +3413,42 @@ window.STEM.activities = [
   },
   {
     id: "lab-launcher",
+    why: "Engineers rarely get a design right the first time. They test, look at the results, and change one thing at a time, so they know what made the difference.",
+    realWorld: "Engineers test bridges, boats, and sports equipment the same way, and pumpkin-launching contests at fall fairs are real engineering challenges.",
+    vocab: [
+      {
+        "term": "Iteration",
+        "def": "Testing a design, improving it, and testing again."
+      },
+      {
+        "term": "Variable",
+        "def": "One thing you can change in a test, like the angle."
+      },
+      {
+        "term": "Fair test",
+        "def": "A test where you change only one thing at a time."
+      },
+      {
+        "term": "Constraint",
+        "def": "A limit your design must stay within, like a budget."
+      }
+    ],
+    check: "Show your notebook. Point to two trials where you changed only one thing, and explain what that change did.",
+    stopAt: "You finish levels 1–3 and land on the target. Levels 4–6 (over the bale wall, the budget build, and three targets) are the challenge.",
+    stuck: [
+      "Change just one setting between launches: angle, force, or load.",
+      "Too short? Try more force or an angle closer to 45°. Too far? Do the opposite.",
+      "Read your notebook. Which change got you closest so far?"
+    ],
+    next: "marble-run-iteration",
+    time: {
+      "prep": 5,
+      "core": [
+        30,
+        45
+      ],
+      "verified": false
+    },
     title: "Pumpkin Launcher Lab",
     area: "engineering",
     summary: "Design and tune a catapult for a fall-fair pumpkin toss. Predict, test, change one thing at a time, and work within a budget.",
@@ -3260,6 +3489,42 @@ window.STEM.activities = [
   },
   {
     id: "lab-line-follower",
+    why: "Robots don't see the world like we do. They sense one thing, decide with a rule, and act, over and over. Good rules cover every case the robot might sense.",
+    realWorld: "Warehouse robots follow lines on the floor, and some plows and tractors use sensors and GPS to stay on course in bad weather.",
+    vocab: [
+      {
+        "term": "Sensor",
+        "def": "A part that lets a robot notice something, like light or dark."
+      },
+      {
+        "term": "Rule",
+        "def": "An if–then instruction: IF the sensor sees this, THEN do that."
+      },
+      {
+        "term": "Sense → think → act",
+        "def": "The loop robots repeat: notice, decide, move."
+      },
+      {
+        "term": "Debug",
+        "def": "Find the rule that made the robot go wrong, and fix it."
+      }
+    ],
+    check: "Point to the rule that keeps the plow on the road when only the left sensor sees the line. Explain why it works.",
+    stopAt: "Your plow finishes a full lap on levels 1 and 2. Sharp corners (level 3) and the speed trial (level 4) are the challenge.",
+    stuck: [
+      "Watch the sensor lights right before the plow leaves the road.",
+      "Every sensor combination needs a rule. Is one missing?",
+      "If it wobbles, try a gentler turn. If it misses corners, turn sharper."
+    ],
+    next: "lab-launcher",
+    time: {
+      "prep": 0,
+      "core": [
+        20,
+        30
+      ],
+      "verified": false
+    },
     title: "Snowplow Robot Lab",
     area: "engineering",
     summary: "A nor'easter buried the roads. Write sense → think → act rules so a robot plow follows the road on its own.",
@@ -3299,6 +3564,46 @@ window.STEM.activities = [
   },
   {
     id: "lab-ramp-racers",
+    why: "One test can fool you, because measurements vary. Scientists repeat trials, keep everything else the same, and let the data, not a guess, answer the question.",
+    realWorld: "Ski and sled designers, and engineers who build safe ramps and roads, test slopes and surfaces with repeated trials before they trust a result.",
+    vocab: [
+      {
+        "term": "Trial",
+        "def": "One run of a test."
+      },
+      {
+        "term": "Average",
+        "def": "One number that sums up several trials."
+      },
+      {
+        "term": "Variable",
+        "def": "Something that can change in a test, like the hill's height."
+      },
+      {
+        "term": "Claim",
+        "def": "Your answer to the question."
+      },
+      {
+        "term": "Evidence",
+        "def": "The data that supports your claim."
+      }
+    ],
+    check: "Make a claim about what makes the sled go farther. Back it up with the average from your trials, and say what you kept the same.",
+    stopAt: "You finish level 5: a claim about what makes the sled go farther, backed by the averages from your own trials.",
+    stuck: [
+      "Change only one thing. Keep everything else the same.",
+      "Run at least three trials. Use the average, not your best run.",
+      "Look at the graph. Which bar or point is higher?"
+    ],
+    next: "paper-helicopter",
+    time: {
+      "prep": 5,
+      "core": [
+        30,
+        45
+      ],
+      "verified": false
+    },
     title: "Sled Hill Science",
     area: "science",
     summary: "It's a snow day. Run a real investigation on a model sledding hill: predict, repeat trials, keep it fair, graph your data, and explain your results.",
@@ -3339,6 +3644,42 @@ window.STEM.activities = [
   },
   {
     id: "lab-pixel-studio",
+    why: "Every picture on a screen is a grid of tiny colored squares called pixels. Computers store a picture as numbers, and an animation is just pictures shown fast, one after another.",
+    realWorld: "Video game artists draw pixel art, and every cartoon, movie, and GIF you watch is a series of frames played quickly.",
+    vocab: [
+      {
+        "term": "Pixel",
+        "def": "One tiny square of color in a digital picture."
+      },
+      {
+        "term": "Resolution",
+        "def": "How many pixels a picture has. More pixels show more detail."
+      },
+      {
+        "term": "Frame",
+        "def": "One picture in an animation."
+      },
+      {
+        "term": "Frames per second",
+        "def": "How many frames play each second. More frames look smoother and faster."
+      }
+    ],
+    check: "Play your animation. Tell how many frames it has and what changes from one frame to the next.",
+    stopAt: "You decode the lighthouse picture and save one animation with at least three frames.",
+    stuck: [
+      "Draw your first frame, then use Copy frame and change just a little.",
+      "To decode, read the code one row at a time, left to right.",
+      "If it's too fast or too slow, change the frames per second."
+    ],
+    next: "animate-your-name",
+    time: {
+      "prep": 0,
+      "core": [
+        30,
+        45
+      ],
+      "verified": false
+    },
     title: "Pixel Animation Studio",
     area: "creative",
     summary: "Draw pixel art, decode a picture of a lighthouse, and bring your own Maine postcard to life frame by frame.",

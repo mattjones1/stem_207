@@ -60,7 +60,6 @@
     "standards"
   ],
   "lab-robot-chef": [
-    "next",
     "simple",
     "standards"
   ],
@@ -370,108 +369,38 @@
     "standards"
   ],
   "lab-rover": [
-    "why",
-    "realWorld",
-    "vocab",
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "simple",
     "standards"
   ],
   "lab-dance-party": [
-    "why",
-    "realWorld",
-    "vocab",
     "simple",
     "standards"
   ],
   "lab-space-blob": [
-    "why",
-    "realWorld",
-    "vocab",
     "simple",
     "standards"
   ],
   "lab-moon-gate": [
-    "why",
-    "realWorld",
-    "vocab",
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "simple",
     "standards"
   ],
   "lab-field-station": [
-    "why",
-    "realWorld",
-    "vocab",
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "simple",
     "standards"
   ],
   "lab-pattern-machine": [
-    "why",
-    "realWorld",
-    "vocab",
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "standards"
   ],
   "lab-launcher": [
-    "why",
-    "realWorld",
-    "vocab",
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "standards"
   ],
   "lab-line-follower": [
-    "why",
-    "realWorld",
-    "vocab",
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "standards"
   ],
   "lab-ramp-racers": [
-    "why",
-    "realWorld",
-    "vocab",
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "standards"
   ],
   "lab-pixel-studio": [
-    "why",
-    "realWorld",
-    "vocab",
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "simple",
     "standards"
   ],

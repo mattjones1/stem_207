@@ -5,6 +5,7 @@
 // that list may only shrink. A new gap fails, and so does a listed gap that has been fixed (remove it).
 //   node tests/tools/test_content.js            check
 //   node tests/tools/test_content.js --report   print every gap by activity
+//   node tests/tools/test_content.js --prune        take the gaps you just fixed off the list
 //   node tests/tools/test_content.js --write-todo   rewrite the list (only when tightening a rule)
 "use strict";
 const fs = require("fs"), path = require("path");
@@ -57,6 +58,14 @@ if (process.argv.includes("--report")) {
 }
 
 const todo = fs.existsSync(TODO_FILE) ? JSON.parse(fs.readFileSync(TODO_FILE, "utf8")) : {};
+// --prune: take fixed gaps off the list (it never adds one), then check as usual.
+if (process.argv.includes("--prune")) {
+  for (const id of Object.keys(todo)) {
+    todo[id] = todo[id].filter((r) => (gaps[id] || []).includes(r));
+    if (!todo[id].length) delete todo[id];
+  }
+  fs.writeFileSync(TODO_FILE, JSON.stringify(todo, null, 2) + "\n");
+}
 const fresh = [], fixed = [];
 Object.entries(gaps).forEach(([id, g]) => g.forEach((r) => { if (!(todo[id] || []).includes(r)) fresh.push(`${id}: ${r}`); }));
 Object.entries(todo).forEach(([id, g]) => g.forEach((r) => { if (!(gaps[id] || []).includes(r)) fixed.push(`${id}: ${r}`); }));
