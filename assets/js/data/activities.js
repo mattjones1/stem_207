@@ -1755,6 +1755,22 @@ window.STEM.activities = [
   /* ───────────────────────────── Artificial Intelligence ───────────────────────────── */
   {
     id: "how-ai-sorts",
+    why: "AI doesn't understand fruit. It finds a pattern in the examples it's given. When the examples leave something out, the AI's rule breaks, just like yours did.",
+    realWorld: "Grocery self-checkouts and farm sorting machines learn to tell foods apart from thousands of labeled pictures.",
+    vocab: [
+      {
+        "term": "Training data",
+        "def": "The labeled examples you learn from."
+      },
+      {
+        "term": "Model",
+        "def": "The rule you made from the examples."
+      },
+      {
+        "term": "Prediction",
+        "def": "Your best guess about something new."
+      }
+    ],
     pilot: true,
     time: { prep: 15, core: [15, 20], verified: false },
     stopAt: "Your team has sorted the test pile and talked about one card your rule got wrong. Retraining (step 6) is bonus.",
@@ -1810,6 +1826,42 @@ window.STEM.activities = [
   },
   {
     id: "teachable-machine-classroom",
+    why: "A model only knows what its training examples show it. Testing it with something new is how you find out what it really learned, and what it didn't.",
+    realWorld: "Phones that unlock by recognizing a face and apps that identify plants from a photo were trained the same way: lots of labeled pictures, then lots of testing.",
+    vocab: [
+      {
+        "term": "Class",
+        "def": "One of the groups the model learns to tell apart."
+      },
+      {
+        "term": "Training",
+        "def": "Showing the model labeled examples so it can find patterns."
+      },
+      {
+        "term": "Confidence",
+        "def": "How sure the model's output says it is. High confidence can still be wrong."
+      },
+      {
+        "term": "Limitation",
+        "def": "Something the model can't do well."
+      }
+    ],
+    check: "Name something the model got wrong. Explain what its training examples were missing, and how you'd fix it.",
+    stopAt: "The class model recognizes all three objects, and you've tested one thing it has never seen.",
+    stuck: [
+      "Record each object from different sides, distances, and angles.",
+      "Keep the background the same, or the model may learn the background instead of the object.",
+      "If one object always wins, give the others more examples."
+    ],
+    next: "lab-pattern-machine",
+    time: {
+      "prep": 15,
+      "core": [
+        35,
+        45
+      ],
+      "verified": false
+    },
     title: "Train a Classroom Model",
     area: "ai",
     summary: "Teach a computer to tell three objects apart using your webcam.",
@@ -1869,6 +1921,42 @@ window.STEM.activities = [
   },
   {
     id: "ai-secret-signals",
+    why: "An AI's prediction score is a model output, not proof it understands. Balanced, varied examples make a model more dependable, and testing with new examples shows where it still fails.",
+    realWorld: "Touch-free controls in hospitals, games that read hand gestures, and sign-language tools are trained with examples like yours and tested before people rely on them.",
+    vocab: [
+      {
+        "term": "Training example",
+        "def": "A labeled picture the model learns from."
+      },
+      {
+        "term": "Test example",
+        "def": "A new picture used to check what the model learned."
+      },
+      {
+        "term": "Balanced",
+        "def": "Each class has about the same number of examples."
+      },
+      {
+        "term": "Prediction score",
+        "def": "The model's output for how well an input matches a class. It isn't a guarantee."
+      }
+    ],
+    check: "Compare Round 1 and Round 2 in your test table. Explain one change you made to the training examples and what it changed.",
+    stopAt: "You've finished Round 2 of the test table and written one limitation of your model.",
+    stuck: [
+      "Record in short bursts, and keep the classes about the same size.",
+      "Add examples where the model made mistakes: new angles, distances, or backgrounds.",
+      "No signal needs examples too: an empty frame and a resting hand."
+    ],
+    next: "lab-pattern-machine",
+    time: {
+      "prep": 10,
+      "core": [
+        40,
+        50
+      ],
+      "verified": false
+    },
     title: "Teach the Computer Your Secret Signals",
     area: "ai",
     summary: "Train Teachable Machine to recognize two hand signals for a space station's contact-free controls. Test it with new examples, find where it fails, add better data, and compare.",
@@ -1933,6 +2021,38 @@ window.STEM.activities = [
   },
   {
     id: "ai-for-oceans",
+    why: "When people train an AI on facts, like fish versus trash, it can learn well. When they train it on opinions, it learns the trainers' opinions. The people who label the data shape what the AI does.",
+    realWorld: "Ocean scientists use AI trained on labeled photos to count fish and spot trash, and people check its work.",
+    vocab: [
+      {
+        "term": "Label",
+        "def": "Telling the AI what something is, like fish or not fish."
+      },
+      {
+        "term": "Training data",
+        "def": "The labeled examples the AI learns from."
+      },
+      {
+        "term": "Bias",
+        "def": "When an AI learns someone's opinion or a lopsided pattern instead of the truth."
+      }
+    ],
+    check: "Explain why your AI and a partner's AI made different choices about a word like \"angry.\" Who decided what was right?",
+    stopAt: "You finish the levels where you train on words and compare your AI with a partner's.",
+    stuck: [
+      "Read each instruction before you start labeling.",
+      "If the robot keeps making a mistake, label more examples of that thing.",
+      "For words like \"delicious,\" there's no right answer. Notice that the AI copies your choices."
+    ],
+    next: "ai-secret-signals",
+    time: {
+      "prep": 5,
+      "core": [
+        35,
+        45
+      ],
+      "verified": false
+    },
     title: "Clean the Ocean with AI",
     area: "ai",
     summary: "Train an AI to spot fish and trash, then see how your training changes its choices.",
@@ -1987,6 +2107,42 @@ window.STEM.activities = [
   },
   {
     id: "ai-limits-detectives",
+    why: "AI tools can sound sure and still be wrong, and their mistakes can affect real people. Knowing how to trace a mistake back to its training data is how you use AI wisely.",
+    realWorld: "Companies and governments test AI systems for mistakes and unfairness, and some require a person to check important decisions an AI makes.",
+    vocab: [
+      {
+        "term": "Training data",
+        "def": "The examples an AI learned from."
+      },
+      {
+        "term": "Bias",
+        "def": "When gaps or lopsided examples make an AI unfair or wrong for some people."
+      },
+      {
+        "term": "Human check",
+        "def": "A person reviews the AI's answer before it's used."
+      },
+      {
+        "term": "Limitation",
+        "def": "Something a system can't do well or can't be trusted for."
+      }
+    ],
+    check: "Present your case in one minute: what the AI got wrong, who it affects, what in its training explains it, and your fix.",
+    stopAt: "Your team presents one case, and the class agrees on three rules for using AI at school.",
+    stuck: [
+      "Ask: what examples would the AI have needed to get this right?",
+      "Think about who uses the tool and who could be harmed by a mistake.",
+      "A fix can be better data, a person checking, or a warning label."
+    ],
+    next: "ai-secret-signals",
+    time: {
+      "prep": 10,
+      "core": [
+        25,
+        30
+      ],
+      "verified": false
+    },
     title: "AI Detectives: When Is the Computer Wrong?",
     area: "ai",
     summary: "Investigate made-up AI mistakes and decide who should fix them.",
@@ -2035,6 +2191,22 @@ window.STEM.activities = [
 
   {
     id: "pattern-predictors",
+    why: "Many AI tools work by predicting what usually comes next. A prediction can be very likely and still be wrong, so it's a guess, not a fact.",
+    realWorld: "The word suggestions on a phone keyboard and the autocomplete in a search box predict the next word from patterns in lots of writing.",
+    vocab: [
+      {
+        "term": "Pattern",
+        "def": "Something that repeats in a way you can notice."
+      },
+      {
+        "term": "Prediction",
+        "def": "A guess about what comes next, based on a pattern."
+      },
+      {
+        "term": "Likely",
+        "def": "Probably true, but not certain."
+      }
+    ],
     pilot: true,
     time: { prep: 5, core: [10, 20], verified: false },
     stopAt: "The class has finished “I like to eat ___.” The fool-the-class extension is bonus.",
@@ -2738,6 +2910,38 @@ window.STEM.activities = [
   },
   {
     id: "blueberry-sorter",
+    why: "A sorting machine only knows the examples it was trained on. If it never saw a dusty-blue leaf, it can't know to toss one, so people test it and check its work.",
+    realWorld: "Plants that process Maine's wild blueberries use optical sorting machines with cameras to separate berries from leaves and stems, and workers check what the machines miss.",
+    vocab: [
+      {
+        "term": "Training",
+        "def": "Showing the machine labeled examples: KEEP or TOSS."
+      },
+      {
+        "term": "Test",
+        "def": "Checking the machine with new cards it hasn't seen."
+      },
+      {
+        "term": "Retrain",
+        "def": "Adding examples to fix the machine's mistakes."
+      }
+    ],
+    check: "Name one card the machine sorted wrong. Explain what example it was missing and how retraining helped.",
+    stopAt: "The machine is retrained once, and the class compares its score before and after.",
+    stuck: [
+      "Look at the mistakes. What do those cards have in common?",
+      "The machine can only use the examples it saw. It can't ask why.",
+      "Add just a few tricky cards when you retrain, then test with new ones."
+    ],
+    next: "ai-for-oceans",
+    time: {
+      "prep": 15,
+      "core": [
+        25,
+        30
+      ],
+      "verified": false
+    },
     title: "Blueberry Sorting Machine",
     area: "ai",
     summary: "Be the machine: learn to sort wild blueberries from example cards, then find out what happens when the examples are missing something.",
@@ -2769,7 +2973,7 @@ window.STEM.activities = [
       prerequisites: "None. How Does an AI Sort? is a good follow-up."
     },
     steps: [
-      "Explain the job: the machine sorts berries into KEEP and leaves, twigs, and unripe berries into TOSS.",
+      "Learn the job: the machine sorts berries into KEEP, and leaves, twigs, and unripe berries into TOSS.",
       "Training: the class shows the volunteer each training card and says KEEP or TOSS. The volunteer can't ask why.",
       "Testing: flip test cards one at a time. The volunteer sorts each one. The class tracks right and wrong on the board.",
       "Look at the mistakes together. What was the machine missing? (Maybe it never saw a dusty-blue leaf.)",
