@@ -11,6 +11,14 @@
 set -u
 # PYTHON overrides the interpreter (for example on Windows, where python3 may be a store stub).
 export PYTHONIOENCODING=utf-8   # test output includes symbols like →
+# Without PYTHON, use the first interpreter that can import Playwright (python3, python, or py -3; on
+# Windows, python3 is often a store stub and Playwright may live under a specific install).
+if [ -z "${PYTHON:-}" ]; then
+  for cand in python3 python "py -3" "$LOCALAPPDATA/Programs/Python/Python312-arm64/python.exe" "$LOCALAPPDATA/Programs/Python/Python312/python.exe"; do
+    if $cand -c "import playwright" >/dev/null 2>&1; then PYTHON=$cand; break; fi
+  done
+fi
+PYTHON=${PYTHON:-python3}
 cd "$(dirname "$0")/.."
 LOCAL=http://localhost:8767/
 CLOUD=http://localhost:8787/
@@ -65,7 +73,7 @@ for f in "${files[@]}"; do
   name=$(basename "$f")
   args=()
   if [[ "$CLOUD_TESTS" == *" $name "* ]]; then args=("$LOCAL"); [ "$cloud" = 1 ] && args+=("$CLOUD") || args+=(skip); fi
-  if [[ "$f" == *.js ]]; then out=$(node "$f" 2>&1); else out=$("${PYTHON:-python3}" "$f" "${args[@]}" 2>&1); fi
+  if [[ "$f" == *.js ]]; then out=$(node "$f" 2>&1); else out=$($PYTHON "$f" "${args[@]}" 2>&1); fi
   summary=$(printf '%s\n' "$out" | grep -E '^[0-9]+/[0-9]+ passed' | tail -1)
   if [ -n "$summary" ] && ! printf '%s\n' "$out" | grep -q '^FAIL'; then
     printf '  ok   %-28s %s\n' "$name" "$summary"; pass=$((pass + 1))
