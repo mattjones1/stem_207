@@ -110,11 +110,11 @@
           ${a.notice ? `<p class="today-card__note">${icon("alert")}<span><strong>Update:</strong> ${esc(a.notice)}</span></p>` : ""}
           <p class="today-card__what">${esc(a.summary)}</p>
           <p class="today-card__meta">${icon("clock")}${SE.timeText(a)}${lab ? ` · ${(prof.labLevels[lab.id] || new Set()).size} of ${lab.levels.length} levels done` : ""}</p>
-          ${a.stopAt ? `<p class="today-card__stop">${icon("flag")}<span><strong>You're done when:</strong> ${esc(a.stopAt)}</span></p>` : ""}
           <div class="today-card__actions">
             <a class="btn btn--launch btn--big" href="${lab ? `#/lab/${lab.id}` : `#/activity/${a.id}`}">${icon(started ? "arrowRight" : "rocket")}${verb}<span class="visually-hidden">: ${esc(a.title)}</span></a>
             <button type="button" class="btn btn--ghost btn--big" id="help-btn" aria-expanded="false" aria-controls="help-panel">${icon("question")}I need help</button>
           </div>
+          ${a.stopAt ? `<p class="today-card__stop">${icon("flag")}<span><strong>You're done when:</strong> ${esc(a.stopAt)}</span></p>` : ""}
           <div class="help-panel" id="help-panel" hidden>
             <h3>Stuck? Try these, in order</h3>
             <ol><li>Read the step you're on again, out loud.</li>

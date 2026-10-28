@@ -154,6 +154,7 @@ window.STEM.activities = [
   },
   {
     id: "loop-dance",
+    next: "debug-animation",
     starter: { file: "assets/starters/dance-crew.sb3", label: "Download the Dance Crew project", how: "In Scratch, choose File, then Load from your computer, and pick dance-crew.sb3." },
     bridge: { from: "lab-dance-party", text: "In Robot Dance Party you put moves in order. Here you'll find the moves that repeat and loop them." },
     time: { prep: 5, core: [25, 30], verified: false },
@@ -224,6 +225,22 @@ window.STEM.activities = [
   },
   {
     id: "debug-animation",
+    check: "Show your bug log. Pick one bug, explain what caused it, and show the one block you changed to fix it.",
+    stopAt: "All four bugs are fixed and written in your bug log. The second fish is a bonus.",
+    stuck: [
+      "Fix one bug at a time, then run it again.",
+      "Watch the fish closely. When does it first go wrong?",
+      "Read the blocks inside the loop one by one. Which one doesn't match what you want?"
+    ],
+    next: "interactive-story",
+    time: {
+      "prep": 5,
+      "core": [
+        25,
+        30
+      ],
+      "verified": false
+    },
     why: "Programmers spend a lot of their time finding and fixing bugs. Changing one thing at a time, then testing again, is how professionals do it.",
     realWorld: "Before an app update comes out, testers run it again and again looking for bugs, just like you.",
     vocab: [{"term": "Bug", "def": "A mistake that makes a program do the wrong thing."}, {"term": "Debugging", "def": "Finding and fixing bugs."}, {"term": "Forever loop", "def": "A loop that never stops on its own."}],
@@ -290,6 +307,22 @@ window.STEM.activities = [
   },
   {
     id: "interactive-story",
+    check: "Play your story both ways for a partner. Point to the if–else block and explain how it picks the ending.",
+    stopAt: "Both answers lead to their own ending, and you've tested what happens with an unexpected answer.",
+    stuck: [
+      "The answer has to match exactly. Is it yes, or Yes?",
+      "Put the ending blocks inside the if or the else, not after them.",
+      "Test both answers every time you change something."
+    ],
+    next: "score-keeper",
+    time: {
+      "prep": 5,
+      "core": [
+        40,
+        45
+      ],
+      "verified": false
+    },
     why: "Programs make choices. An if–then–else block lets your program pick a path based on what the reader decides.",
     realWorld: "Choose-your-path games, quizzes that show your score, and apps that ask “Are you sure?” all branch with if–else.",
     vocab: [{"term": "Conditional", "def": "A check that decides what happens next."}, {"term": "Condition", "def": "The question being checked, like “Did they answer yes?”"}, {"term": "Branch", "def": "One of the paths a program can take."}],
@@ -350,6 +383,22 @@ window.STEM.activities = [
   },
   {
     id: "score-keeper",
+    check: "Play a game for a partner. Explain what the score variable stores and where in your code it changes.",
+    stopAt: "Stars fall, the catcher catches them, the score goes up, and it starts at 0 every game.",
+    stuck: [
+      "Is the score check inside the forever loop? It has to check again and again.",
+      "If the score doesn't reset, add set score to 0 when the green flag is clicked.",
+      "If the star never comes back, check the y position test at the bottom."
+    ],
+    next: "my-blocks-patterns",
+    time: {
+      "prep": 5,
+      "core": [
+        40,
+        45
+      ],
+      "verified": false
+    },
     why: "Programs need memory. A variable remembers a value, like a score, and can change while the game is played.",
     realWorld: "Step counters, game high scores, and the battery percent on a phone are all variables.",
     vocab: [{"term": "Variable", "def": "A named place that stores a value that can change."}, {"term": "Value", "def": "What's stored in the variable right now."}, {"term": "Reset", "def": "Setting a variable back to its starting value."}],
@@ -411,6 +460,22 @@ window.STEM.activities = [
   },
   {
     id: "my-blocks-patterns",
+    check: "Show your custom block's definition. Change its size input and explain how one change updates the whole pattern.",
+    stopAt: "Your square block draws the 12-square pattern. A second custom shape is the challenge.",
+    stuck: [
+      "Did you put size in place of the number 50 inside the define block?",
+      "Click erase all and pen down before you test.",
+      "If the pattern is off, check the turn: 12 turns of 30 degrees make a full circle."
+    ],
+    next: "capstone-game",
+    time: {
+      "prep": 5,
+      "core": [
+        40,
+        45
+      ],
+      "verified": false
+    },
     why: "Big programs are built from small pieces you can reuse. When you make your own block, you write it once and use it anywhere.",
     realWorld: "Apps reuse the same code to draw every button. When programmers fix that code once, every button gets fixed.",
     vocab: [{"term": "Custom block (function)", "def": "A named set of steps you can reuse."}, {"term": "Input", "def": "A value you give a block, like size."}, {"term": "Decomposition", "def": "Breaking a big problem into smaller parts."}],
@@ -472,6 +537,22 @@ window.STEM.activities = [
   },
   {
     id: "capstone-game",
+    check: "Present your game. Explain one bug your tester found and how you fixed it.",
+    stopAt: "A classmate has tested your game, you've fixed their top problem, and you've added one feature.",
+    stuck: [
+      "Start smaller: one player, one goal. Add more later.",
+      "Watch your tester play without helping. Write down where they get confused.",
+      "Fix one problem at a time and test after each fix."
+    ],
+    next: "python-turtle-bridge",
+    time: {
+      "prep": 10,
+      "core": [
+        45,
+        90
+      ],
+      "verified": false
+    },
     why: "Real programmers plan, build, test with real users, and improve. This activity is the whole process, with your own idea.",
     realWorld: "Game studios and app teams work this way: plan, build a first version, playtest, fix, and repeat.",
     vocab: [{"term": "Plan", "def": "A sketch of what you'll build and how it works."}, {"term": "Playtest", "def": "Letting someone try your project while you watch what happens."}, {"term": "Iterate", "def": "Improving something by repeating build, test, fix."}],
@@ -533,6 +614,20 @@ window.STEM.activities = [
 
   {
     id: "fix-the-recipe",
+    check: "Name one bug you found, say what kind it was (missing, wrong order, or unclear), and read your fixed step out loud.",
+    stuck: [
+      "Watch for the first moment the robot does something strange. That step has the bug.",
+      "Ask: is a step missing, in the wrong place, or unclear?",
+      "Pretend you're the robot. Do exactly what the step says, nothing more."
+    ],
+    time: {
+      "prep": 10,
+      "core": [
+        15,
+        20
+      ],
+      "verified": false
+    },
     board: { title: "The robot chef's sandwich algorithm. It has bugs!", lines: ["Put the spread on the bread.", "Put the bread together.", "Open the bread bag.", "Eat the sandwich."], note: "Your teacher is the robot chef. The robot does exactly what each step says, and nothing more." },
     stopAt: "The robot chef makes the sandwich by following your class's fixed algorithm from step 1 to the end.",
     next: "lab-robot-chef",
@@ -1411,6 +1506,7 @@ window.STEM.activities = [
       "note": "Free. Works without signing in."
     },
     "id": "capstone-studio",
+    "next": "python-turtle-bridge",
     "title": "Capstone Studio: Design, Playtest, Ship",
     "summary": "Plan a game like a real studio: write a short design doc, build version 1, run two playtests, and ship version 2 with release notes. Across 2–3 class periods.",
     "level": "advanced",
@@ -1499,6 +1595,7 @@ window.STEM.activities = [
   },
   {
     "id": "python-turtle-bridge",
+    "next": "capstone-studio",
     "track": "6-8",
     "title": "From Blocks to Python: Turtle Patterns",
     "area": "coding",
@@ -1628,6 +1725,42 @@ window.STEM.activities = [
   /* ───────────────────────────── Virtual Reality ───────────────────────────── */
   {
     id: "ecosystem-field-trip",
+    why: "Scientists start by looking carefully before they explain anything. Separating what you see from what you think it means keeps your ideas honest.",
+    realWorld: "Ecologists use satellite views and field visits to study habitats around the world, including Maine's forests and coast, and how living things survive there.",
+    vocab: [
+      {
+        "term": "Ecosystem",
+        "def": "Living things and the place they live, working together."
+      },
+      {
+        "term": "Observation",
+        "def": "Something you notice with your senses."
+      },
+      {
+        "term": "Inference",
+        "def": "An idea about what an observation means."
+      },
+      {
+        "term": "Adaptation",
+        "def": "A feature that helps a living thing survive where it lives."
+      }
+    ],
+    check: "Read one \"I see\" and one \"I think\" from the same place. Explain how the observation led to your idea.",
+    stopAt: "You have five observations from two places, one \"I think\" statement, and one \"I wonder\" question.",
+    stuck: [
+      "\"I see\" is only what your eyes notice. Save the guesses for \"I think.\"",
+      "Look at the ground, the water, the plants, and the light.",
+      "Compare: what's in one place that isn't in the other?"
+    ],
+    next: "lab-field-station",
+    time: {
+      "prep": 10,
+      "core": [
+        35,
+        45
+      ],
+      "verified": false
+    },
     title: "Explore a Virtual Ecosystem",
     area: "vr",
     summary: "Fly to a rainforest, a reef, or a desert and record what lives there.",
@@ -1694,6 +1827,38 @@ window.STEM.activities = [
   },
   {
     id: "notice-and-wonder-360",
+    why: "Careful observers notice details other people miss. Explaining exactly where to look is a skill scientists use to share what they found.",
+    realWorld: "Scientists study 360° photos from the deep sea, forests, and even Mars to find details worth investigating.",
+    vocab: [
+      {
+        "term": "Detail",
+        "def": "A small thing you notice."
+      },
+      {
+        "term": "Observe",
+        "def": "Look carefully and notice what's really there."
+      },
+      {
+        "term": "Wonder",
+        "def": "A question something makes you curious about."
+      }
+    ],
+    check: "Share a detail only your team found. Explain exactly where to look so someone else can find it.",
+    stopAt: "Both partners have been the spotter, the class has shared details, and you've written one wonder question.",
+    stuck: [
+      "Turn slowly all the way around, including up and down.",
+      "Say where it is: left of, above, behind, or next to something.",
+      "Look for small things: shadows, colors, tracks, or text."
+    ],
+    next: "ecosystem-field-trip",
+    time: {
+      "prep": 15,
+      "core": [
+        25,
+        30
+      ],
+      "verified": false
+    },
     title: "360° Notice & Wonder Challenge",
     area: "vr",
     summary: "Look all around a 360° scene and find details your classmates missed.",
@@ -2745,6 +2910,38 @@ window.STEM.activities = [
   /* ───────────────────────────── Creative STEM ───────────────────────────── */
   {
     id: "pixel-art-code",
+    why: "Every picture on a screen is a grid of tiny squares, and a computer stores it as a code. If the code is exact, anyone can rebuild the picture perfectly.",
+    realWorld: "Phones and TVs show pictures made of millions of pixels, and computers send pictures as codes, much like yours.",
+    vocab: [
+      {
+        "term": "Pixel",
+        "def": "One tiny square of color in a picture."
+      },
+      {
+        "term": "Grid",
+        "def": "Rows and columns of squares."
+      },
+      {
+        "term": "Code",
+        "def": "Letters or numbers that stand for something, like colors."
+      }
+    ],
+    check: "Show your picture and your partner's copy side by side. If they didn't match, point to the row that was wrong and how you fixed it.",
+    stopAt: "Your partner's copy matches your picture exactly.",
+    stuck: [
+      "Read the code one row at a time, from left to right.",
+      "Count the squares in each row. Does the code have the same number?",
+      "Find the first row that doesn't match. Fix that row first."
+    ],
+    next: "lab-pixel-studio",
+    time: {
+      "prep": 10,
+      "core": [
+        15,
+        20
+      ],
+      "verified": false
+    },
     title: "Pixel Art Code",
     area: "creative",
     summary: "Turn a picture into a secret code, then trade codes and draw each other's art.",
@@ -2789,6 +2986,38 @@ window.STEM.activities = [
   },
   {
     id: "animate-your-name",
+    why: "In code, an event like a click can start an action. Each sprite can have its own script, so many things can happen in one project.",
+    realWorld: "Buttons on websites and apps run code when you click them, and animators use code to make letters move in movie titles and logos.",
+    vocab: [
+      {
+        "term": "Sprite",
+        "def": "A character or object in a Scratch project."
+      },
+      {
+        "term": "Event",
+        "def": "Something that happens, like a click, that starts code."
+      },
+      {
+        "term": "Script",
+        "def": "A stack of blocks that runs together."
+      }
+    ],
+    check: "Click each letter for a partner. Point to the event block that starts each animation.",
+    stopAt: "Each of your initials does its own animation when it's clicked.",
+    stuck: [
+      "Every letter needs its own when this sprite clicked block.",
+      "Too fast to see? Add a wait block or use smaller numbers.",
+      "Use repeat to make a change happen more than once."
+    ],
+    next: "loop-dance",
+    time: {
+      "prep": 5,
+      "core": [
+        25,
+        30
+      ],
+      "verified": false
+    },
     title: "Animate Your Initials",
     area: "creative",
     summary: "Make each letter of your initials move, spin, or change color.",
@@ -2843,6 +3072,38 @@ window.STEM.activities = [
   },
   {
     id: "stop-motion-studio",
+    why: "Animation is many still pictures shown quickly. Small, steady changes between frames make motion look smooth.",
+    realWorld: "Studios make stop-motion movies by moving clay figures and puppets a tiny bit for every photo, thousands of times.",
+    vocab: [
+      {
+        "term": "Frame",
+        "def": "One photo in an animation."
+      },
+      {
+        "term": "Storyboard",
+        "def": "Simple sketches that plan a story, box by box."
+      },
+      {
+        "term": "Frame rate",
+        "def": "How many frames play each second."
+      }
+    ],
+    check: "Play your animation. Point to one part where the motion looks smooth and explain how you made it smooth.",
+    stopAt: "Your story has at least 30 photos and plays back with a beginning, middle, and end.",
+    stuck: [
+      "Keep the camera in the same spot. Don't bump the tablet.",
+      "Move the character just a little between photos.",
+      "If a part jumps, reshoot it with smaller moves."
+    ],
+    next: "maine-postcard",
+    time: {
+      "prep": 15,
+      "core": [
+        40,
+        45
+      ],
+      "verified": false
+    },
     title: "Stop-Motion Story Studio",
     area: "creative",
     summary: "Make a short movie by taking photos of tiny changes, one frame at a time.",
@@ -2905,6 +3166,22 @@ window.STEM.activities = [
      with full directions on the page. */
   {
     id: "lobster-trap-logic",
+    check: "Run two lobster cards through your flowchart out loud. Then show the rule the one-question flowchart was missing.",
+    stopAt: "Your flowchart sorts every card the same way as another team's, and your rules are written as IF–ELSE text.",
+    stuck: [
+      "Ask only one yes/no question in each diamond.",
+      "Check the eggs and the V-notch before the size.",
+      "Follow the arrows out loud for a card that should go back. Where does it end up?"
+    ],
+    next: "interactive-story",
+    time: {
+      "prep": 15,
+      "core": [
+        25,
+        30
+      ],
+      "verified": false
+    },
     why: "Rules written as if–else let anyone, or any computer, make the same decision every time. That makes the decision fair and consistent.",
     realWorld: "Mail-sorting machines and ticket scanners use if–else rules too. On a lobster boat, clear rules help the whole crew sort the catch the same way.",
     vocab: [{"term": "Conditional", "def": "A check that decides what happens next."}, {"term": "Flowchart", "def": "A drawing of a decision, with boxes and arrows."}, {"term": "Rule order", "def": "Which check happens first. Changing the order can change the result."}],
@@ -3376,6 +3653,42 @@ window.STEM.activities = [
   },
   {
     id: "acadia-from-above",
+    why: "Maps and 3D views let you explore places you can't visit, and landforms hold clues to the past. Acadia's smooth mountains and long sound were shaped by glaciers.",
+    realWorld: "Park rangers, geologists, and search-and-rescue teams in Acadia use maps, compass directions, and 3D views to plan routes and study the land.",
+    vocab: [
+      {
+        "term": "Landmark",
+        "def": "A place that's easy to recognize and find."
+      },
+      {
+        "term": "Compass direction",
+        "def": "North, south, east, or west."
+      },
+      {
+        "term": "Glacier",
+        "def": "A huge sheet of ice that slowly moves and shapes the land."
+      },
+      {
+        "term": "Fjard",
+        "def": "A long, narrow bay carved by a glacier, like Somes Sound."
+      }
+    ],
+    check: "Share one clue that glaciers once covered Acadia. Tell which stop it came from and what direction the ocean was from there.",
+    stopAt: "Your trip log has an observation, an inference, and a question from all four stops.",
+    stuck: [
+      "Tilt to 3D and turn slowly all the way around.",
+      "Find north first. The compass is in the corner of the screen.",
+      "Look for smooth, rounded mountain tops and long, narrow valleys."
+    ],
+    next: "tide-watchers",
+    time: {
+      "prep": 10,
+      "core": [
+        25,
+        30
+      ],
+      "verified": false
+    },
     title: "Acadia from Above",
     area: "vr",
     summary: "Fly over Acadia National Park in a virtual globe, find famous landmarks, and read the land like a geologist.",
@@ -3431,6 +3744,42 @@ window.STEM.activities = [
   },
   {
     id: "maine-postcard",
+    why: "A loop repeats code forever, so a small animation can keep going. Planning what stays still and what moves keeps a project simple.",
+    realWorld: "Animated greeting cards, website banners, and app icons use short loops to catch your eye.",
+    vocab: [
+      {
+        "term": "Backdrop",
+        "def": "The background picture in Scratch."
+      },
+      {
+        "term": "Costume",
+        "def": "One look a sprite can switch to."
+      },
+      {
+        "term": "Loop",
+        "def": "Code that repeats again and again."
+      },
+      {
+        "term": "Storyboard",
+        "def": "Simple sketches that plan what happens."
+      }
+    ],
+    check: "Show your postcard. Point to the forever loop and explain how changing the wait time changed the animation.",
+    stopAt: "Your postcard has a backdrop, one thing moving on a loop, and your greeting.",
+    stuck: [
+      "Put the motion blocks inside forever.",
+      "Too fast? Add a wait block inside the loop.",
+      "Switching costumes? Use next costume, then wait."
+    ],
+    next: "lab-pixel-studio",
+    time: {
+      "prep": 5,
+      "core": [
+        40,
+        45
+      ],
+      "verified": false
+    },
     title: "Animated Maine Postcard",
     area: "creative",
     summary: "Design an animated postcard of your favorite Maine place: a sweeping lighthouse beam, falling snow, or a loon diving.",
@@ -4402,6 +4751,7 @@ window.STEM.activities = [
   },
   {
     id: "3d-fix-it-clip",
+    next: "lab-launcher",
     title: "Fix It! Design a Clip",
     area: "3d-printing",
     summary: "Measure a real pencil or cable, design a clip with the right gap, print a quick test, and improve it until it holds.",

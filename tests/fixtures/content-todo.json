@@ -8,54 +8,25 @@
     "standards"
   ],
   "loop-dance": [
-    "next",
     "simple",
     "standards"
   ],
   "debug-animation": [
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "standards"
   ],
   "interactive-story": [
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "standards"
   ],
   "score-keeper": [
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "standards"
   ],
   "my-blocks-patterns": [
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "standards"
   ],
   "capstone-game": [
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "standards"
   ],
   "fix-the-recipe": [
-    "check",
-    "stuck",
-    "time",
     "simple",
     "standards"
   ],
@@ -82,34 +53,16 @@
     "standards"
   ],
   "capstone-studio": [
-    "next",
     "standards"
   ],
   "python-turtle-bridge": [
-    "next",
     "standards"
   ],
   "ecosystem-field-trip": [
-    "why",
-    "realWorld",
-    "vocab",
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "simple",
     "standards"
   ],
   "notice-and-wonder-360": [
-    "why",
-    "realWorld",
-    "vocab",
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "simple",
     "standards"
   ],
@@ -158,47 +111,18 @@
     "standards"
   ],
   "pixel-art-code": [
-    "why",
-    "realWorld",
-    "vocab",
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "simple",
     "standards"
   ],
   "animate-your-name": [
-    "why",
-    "realWorld",
-    "vocab",
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "simple",
     "standards"
   ],
   "stop-motion-studio": [
-    "why",
-    "realWorld",
-    "vocab",
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "simple",
     "standards"
   ],
   "lobster-trap-logic": [
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "simple",
     "standards"
   ],
@@ -220,26 +144,10 @@
     "standards"
   ],
   "acadia-from-above": [
-    "why",
-    "realWorld",
-    "vocab",
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "simple",
     "standards"
   ],
   "maine-postcard": [
-    "why",
-    "realWorld",
-    "vocab",
-    "check",
-    "stopAt",
-    "stuck",
-    "next",
-    "time",
     "standards"
   ],
   "lab-rover": [
@@ -285,7 +193,6 @@
     "standards"
   ],
   "3d-fix-it-clip": [
-    "next",
     "standards"
   ]
 }
