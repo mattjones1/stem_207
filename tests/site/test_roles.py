@@ -28,6 +28,7 @@ async def main():
       ok(f"guest at {h} goes Home and is told why", pg.url.endswith("#/") and word in await toast(pg), pg.url)
     await go(pg, "#/activity/robot-maze-mission")
     ok("guest doesn't see teacher notes", await pg.locator(".teacher-notes").count() == 0)
+    ok("guest doesn't see standards codes", await pg.locator(".facts__std").count() == 0)
     await go(pg, "#/moxie")
     ok("guest at Moxie sees what it is, not 'not found'", "Moxie: build with an ESP32" in await pg.inner_text("#app") and "couldn’t find" not in await pg.inner_text("#app"))
 
@@ -43,6 +44,7 @@ async def main():
       ok(f"student at {h} goes Home with 'That page is for teachers.', menu kept", pg.url.endswith("#/") and "for teachers" in await toast(pg) and await pg.locator("#site-nav a").count() > 0, pg.url)
     await go(pg, "#/activity/sort-the-catch")
     ok("student doesn't see teacher notes", await pg.locator(".teacher-notes").count() == 0)
+    ok("student doesn't see standards codes", await pg.locator(".facts__std").count() == 0)
     await go(pg, "#/moxie")
     ok("student at Moxie (not assigned) is told the teacher opens it", "Your teacher will open Moxie" in await pg.inner_text("#app"))
 
@@ -51,6 +53,15 @@ async def main():
     await go(pg, "#/signin/educator", 300); await pg.click("#fill-demo"); await pg.click("#edu-form button[type=submit]"); await pg.wait_for_timeout(900)
     await go(pg, "#/activity/sort-the-catch")
     ok("educator sees teacher notes", await pg.locator(".teacher-notes").count() == 1)
+    std = await pg.inner_text(".facts__std")
+    ok("educator sees the activity's standards, with wording and an official link", "1B-AP-08" in std and "2-AP-10" in std and await pg.locator('.facts__std a[href^="https://csteachers.org/"]').count() == 2, std)
+    await go(pg, "#/teach/plans/tpl-maine-coast")
+    ok("a template lists the standards its activities cover", "Standards covered" in await pg.inner_text("#app") and await pg.locator(".pw-box .std-list li").count() >= 3)
+    await go(pg, "#/activities")
+    await pg.fill("#f-q", "3-5-ETS1-3"); await pg.wait_for_timeout(300)
+    ok("library search finds activities by standard code", "Paper Bridge" in await pg.inner_text("#results"))
+    await go(pg, "#/activity/stop-motion-studio")
+    ok("an activity with no strong fit says so", "None tagged" in await pg.inner_text(".facts__std"))
     n0 = await pg.evaluate("SE.store.pathwaysFor(SE.store.currentUser().id).length")
     for _ in range(2):
       await go(pg, "#/teach/plans/new"); await go(pg, "#/teach")

@@ -2605,3 +2605,10 @@ body[data-role="student"] .site-footer__support { display: none; }
 .block--mission .read-btn:hover, .block--mission .simple-toggle:hover { color: #fff; border-color: #fff; }
 .block--mission .read-btn[aria-pressed="true"], .block--mission .simple-toggle[aria-pressed="true"] { background: #fff; color: #012d2b; border-color: #fff; }
 .is-reading { background: var(--teal-soft); box-shadow: inset 4px 0 0 var(--brand-teal); border-radius: var(--radius-sm); }
+
+/* Standards (educators): code, set, and wording */
+.std-list { list-style: none; padding: 0; margin: 0; display: grid; gap: .45rem; }
+.std-list li { display: grid; gap: .1rem; }
+.std-list a { justify-self: start; color: var(--fg); text-decoration: underline; }
+.std-text { font-size: .9rem; }
+.facts__std { align-items: start; }

@@ -19,6 +19,10 @@ window.STEM.activities = [
   /* ───────────────────────────── Coding & Computer Science ───────────────────────────── */
   {
     id: "robot-maze-mission",
+    standards: [
+      "1A-AP-10",
+      "1A-AP-14"
+    ],
     simple: {
       "mission": "A robot is stuck in a maze. Write steps that get it to the goal. Don't let it bump a wall!",
       "steps": [
@@ -105,6 +109,9 @@ window.STEM.activities = [
   },
   {
     id: "event-party",
+    standards: [
+      "1B-AP-10"
+    ],
     simple: {
       "mission": "Make a character that moves when you click it. Keys can make it move too.",
       "steps": [
@@ -185,6 +192,10 @@ window.STEM.activities = [
   },
   {
     id: "loop-dance",
+    standards: [
+      "1A-AP-10",
+      "1B-AP-10"
+    ],
     simple: {
       "mission": "Write a robot dance. Use repeat to make the program short. The dance must stay the same.",
       "steps": [
@@ -272,6 +283,10 @@ window.STEM.activities = [
   },
   {
     id: "debug-animation",
+    standards: [
+      "1B-AP-15",
+      "2-AP-17"
+    ],
     skills: [
       "debugging",
       "loops"
@@ -358,6 +373,9 @@ window.STEM.activities = [
   },
   {
     id: "interactive-story",
+    standards: [
+      "1B-AP-10"
+    ],
     skills: [
       "logic",
       "communication"
@@ -438,6 +456,10 @@ window.STEM.activities = [
   },
   {
     id: "score-keeper",
+    standards: [
+      "1B-AP-09",
+      "2-AP-11"
+    ],
     skills: [
       "data"
     ],
@@ -518,6 +540,9 @@ window.STEM.activities = [
   },
   {
     id: "my-blocks-patterns",
+    standards: [
+      "2-AP-14"
+    ],
     skills: [
       "functions"
     ],
@@ -598,6 +623,11 @@ window.STEM.activities = [
   },
   {
     id: "capstone-game",
+    standards: [
+      "1B-AP-13",
+      "2-AP-15",
+      "2-AP-17"
+    ],
     skills: [
       "debugging",
       "design-iteration",
@@ -680,6 +710,10 @@ window.STEM.activities = [
 
   {
     id: "fix-the-recipe",
+    standards: [
+      "1A-AP-08",
+      "1A-AP-14"
+    ],
     simple: {
       "mission": "The robot chef does exactly what the steps say. The steps have bugs. Fix them so the robot can make a sandwich.",
       "steps": [
@@ -770,6 +804,10 @@ window.STEM.activities = [
   /* Batch 7: Robot Chef lab entry and the grades 6–8 coding track (one per stage) plus the Python bridge. */
   {
     "id": "lab-robot-chef",
+    "standards": [
+      "1A-AP-08",
+      "1A-AP-14"
+    ],
     "simple": {
       "mission": "The robot chef follows your steps exactly. Fix the bugs so the robot can make lunch.",
       "steps": [
@@ -888,6 +926,10 @@ window.STEM.activities = [
   },
   {
     "id": "sort-the-catch",
+    "standards": [
+      "1B-AP-08",
+      "2-AP-10"
+    ],
     "skills": [
       "sequencing"
     ],
@@ -1022,6 +1064,10 @@ window.STEM.activities = [
       "note": "Free. Works without signing in."
     },
     "id": "lighthouse-network",
+    "standards": [
+      "1B-AP-10",
+      "2-AP-13"
+    ],
     "skills": [
       "events"
     ],
@@ -1134,6 +1180,9 @@ window.STEM.activities = [
       "note": "Free. Works without signing in."
     },
     "id": "snowstorm-clones",
+    "standards": [
+      "2-AP-12"
+    ],
     "skills": [
       "loops"
     ],
@@ -1249,6 +1298,10 @@ window.STEM.activities = [
       "note": "Free. Works without signing in."
     },
     "id": "noreaster-alerts",
+    "standards": [
+      "2-AP-12",
+      "2-AP-17"
+    ],
     "skills": [
       "logic",
       "design-iteration"
@@ -1382,6 +1435,9 @@ window.STEM.activities = [
       "note": "Free. Works without signing in."
     },
     "id": "catch-log-lists",
+    "standards": [
+      "2-AP-11"
+    ],
     "skills": [
       "loops",
       "data"
@@ -1502,6 +1558,9 @@ window.STEM.activities = [
       "note": "Free. Works without signing in."
     },
     "id": "snowflake-functions",
+    "standards": [
+      "2-AP-14"
+    ],
     "skills": [
       "functions"
     ],
@@ -1622,6 +1681,11 @@ window.STEM.activities = [
       "note": "Free. Works without signing in."
     },
     "id": "capstone-studio",
+    "standards": [
+      "2-AP-15",
+      "2-AP-17",
+      "2-AP-18"
+    ],
     "skills": [
       "design-iteration",
       "communication"
@@ -1715,6 +1779,10 @@ window.STEM.activities = [
   },
   {
     "id": "python-turtle-bridge",
+    "standards": [
+      "2-AP-12",
+      "2-AP-14"
+    ],
     "skills": [
       "loops",
       "functions"
@@ -1849,6 +1917,10 @@ window.STEM.activities = [
   /* ───────────────────────────── Virtual Reality ───────────────────────────── */
   {
     id: "ecosystem-field-trip",
+    standards: [
+      "2-LS4-1",
+      "3-LS4-3"
+    ],
     simple: {
       "mission": "You're a scientist visiting a new place. Find five clues about how living things survive there.",
       "steps": [
@@ -1966,6 +2038,7 @@ window.STEM.activities = [
   },
   {
     id: "notice-and-wonder-360",
+    standards: [],
     simple: {
       "mission": "Look all around a 360° picture. Find details no one else sees.",
       "steps": [
@@ -2074,6 +2147,9 @@ window.STEM.activities = [
   /* ───────────────────────────── Artificial Intelligence ───────────────────────────── */
   {
     id: "how-ai-sorts",
+    standards: [
+      "1A-DA-07"
+    ],
     simple: {
       "mission": "Pretend your team is a computer. Learn to sort fruit from examples. Then test your rule.",
       "steps": [
@@ -2160,6 +2236,10 @@ window.STEM.activities = [
   },
   {
     id: "teachable-machine-classroom",
+    standards: [
+      "1B-DA-07",
+      "2-DA-09"
+    ],
     skills: [
       "training-data"
     ],
@@ -2258,6 +2338,10 @@ window.STEM.activities = [
   },
   {
     id: "ai-secret-signals",
+    standards: [
+      "1B-DA-07",
+      "2-DA-09"
+    ],
     simple: {
       "mission": "Teach a computer two hand signals. It should also know when there's no signal.",
       "steps": [
@@ -2375,6 +2459,10 @@ window.STEM.activities = [
   },
   {
     id: "ai-for-oceans",
+    standards: [
+      "1B-DA-07",
+      "2-IC-21"
+    ],
     simple: {
       "mission": "Teach an AI robot to tell fish from trash in the ocean.",
       "steps": [
@@ -2477,6 +2565,10 @@ window.STEM.activities = [
   },
   {
     id: "ai-limits-detectives",
+    standards: [
+      "2-IC-20",
+      "2-IC-21"
+    ],
     skills: [
       "responsible-use"
     ],
@@ -2564,6 +2656,9 @@ window.STEM.activities = [
 
   {
     id: "pattern-predictors",
+    standards: [
+      "1A-DA-07"
+    ],
     simple: {
       "mission": "Guess what comes next in patterns. AI guesses the next word the same way.",
       "steps": [
@@ -2646,6 +2741,11 @@ window.STEM.activities = [
   /* ───────────────────────────── Engineering & Robotics ───────────────────────────── */
   {
     id: "paper-bridge",
+    standards: [
+      "K-2-ETS1-3",
+      "3-5-ETS1-3",
+      "MS-ETS1-3"
+    ],
     simple: {
       "mission": "Build a paper bridge across a gap. Test it with coins. Make it better. Test again.",
       "steps": [
@@ -2743,6 +2843,10 @@ window.STEM.activities = [
   },
   {
     id: "sense-think-act",
+    standards: [
+      "1A-AP-08",
+      "1B-AP-10"
+    ],
     simple: {
       "mission": "Be a robot! You can only react to what your sensors notice.",
       "steps": [
@@ -2831,6 +2935,10 @@ window.STEM.activities = [
   },
   {
     id: "marble-run-iteration",
+    standards: [
+      "3-5-ETS1-3",
+      "MS-ETS1-4"
+    ],
     skills: [
       "data",
       "design-iteration"
@@ -2921,6 +3029,9 @@ window.STEM.activities = [
   /* ───────────────────────────── Science & Discovery ───────────────────────────── */
   {
     id: "sink-or-float",
+    standards: [
+      "2-PS1-1"
+    ],
     simple: {
       "mission": "Test ten things in water. Guess first. Then explain what happened.",
       "steps": [
@@ -3013,6 +3124,9 @@ window.STEM.activities = [
   },
   {
     id: "paper-helicopter",
+    standards: [
+      "3-5-ETS1-3"
+    ],
     skills: [
       "data",
       "fair-testing"
@@ -3104,6 +3218,9 @@ window.STEM.activities = [
 
   {
     id: "melting-race",
+    standards: [
+      "4-PS3-2"
+    ],
     simple: {
       "mission": "Race four ice cubes on four different things. Guess which melts first. Watch and explain.",
       "steps": [
@@ -3199,6 +3316,9 @@ window.STEM.activities = [
   /* ───────────────────────────── Creative STEM ───────────────────────────── */
   {
     id: "pixel-art-code",
+    standards: [
+      "1A-AP-09"
+    ],
     simple: {
       "mission": "Pictures are made of tiny squares. Draw one on a grid. Write its code. Can a partner copy it?",
       "steps": [
@@ -3290,6 +3410,9 @@ window.STEM.activities = [
   },
   {
     id: "animate-your-name",
+    standards: [
+      "1B-AP-10"
+    ],
     simple: {
       "mission": "Make the letters of your name move! Each letter moves when you click it.",
       "steps": [
@@ -3390,6 +3513,7 @@ window.STEM.activities = [
   },
   {
     id: "stop-motion-studio",
+    standards: [],
     simple: {
       "mission": "Make a short movie with toys or clay. Take lots of photos and move them a tiny bit each time.",
       "steps": [
@@ -3499,6 +3623,10 @@ window.STEM.activities = [
      with full directions on the page. */
   {
     id: "lobster-trap-logic",
+    standards: [
+      "1A-AP-08",
+      "2-AP-10"
+    ],
     simple: {
       "mission": "You work on a lobster boat. Some lobsters must go back in the water. Make rules so everyone sorts them the same way.",
       "steps": [
@@ -3587,6 +3715,9 @@ window.STEM.activities = [
   },
   {
     id: "tide-watchers",
+    standards: [
+      "1B-DA-06"
+    ],
     skills: [
       "data"
     ],
@@ -3675,6 +3806,10 @@ window.STEM.activities = [
   },
   {
     id: "lighthouse-beam",
+    standards: [
+      "3-5-ETS1-3",
+      "MS-ETS1-3"
+    ],
     simple: {
       "mission": "Lighthouses shine light far out to sea. Make a shiny cover for a flashlight. Aim for a small, bright spot.",
       "steps": [
@@ -3775,6 +3910,10 @@ window.STEM.activities = [
   },
   {
     id: "float-a-turbine",
+    standards: [
+      "MS-ETS1-2",
+      "MS-ETS1-3"
+    ],
     skills: [
       "design-iteration"
     ],
@@ -3864,6 +4003,10 @@ window.STEM.activities = [
   },
   {
     id: "blueberry-sorter",
+    standards: [
+      "1A-DA-07",
+      "1B-DA-07"
+    ],
     simple: {
       "mission": "Machines help sort Maine blueberries. One kid is the sorting machine. The class teaches it with examples.",
       "steps": [
@@ -3958,6 +4101,9 @@ window.STEM.activities = [
   },
   {
     id: "sap-run-detectives",
+    standards: [
+      "1B-DA-07"
+    ],
     skills: [
       "data"
     ],
@@ -4040,6 +4186,10 @@ window.STEM.activities = [
   },
   {
     id: "acadia-from-above",
+    standards: [
+      "4-ESS2-1",
+      "4-ESS2-2"
+    ],
     simple: {
       "mission": "Take a class trip to Acadia National Park on the computer. Visit four places and look for clues left by glaciers.",
       "steps": [
@@ -4145,6 +4295,9 @@ window.STEM.activities = [
   },
   {
     id: "maine-postcard",
+    standards: [
+      "1B-AP-10"
+    ],
     skills: [
       "encoding-art",
       "communication"
@@ -4235,6 +4388,11 @@ window.STEM.activities = [
   /* ───────────────────────────── Interactive labs (run inside STEM 207) ───────────────────────────── */
   {
     id: "lab-rover",
+    standards: [
+      "1A-AP-10",
+      "1B-AP-10",
+      "2-AP-14"
+    ],
     simple: {
       "mission": "You drive a lobster boat with code. Steer to the wharf, pull up traps, and stay off the rocks.",
       "steps": [
@@ -4339,6 +4497,10 @@ window.STEM.activities = [
   },
   {
     id: "lab-dance-party",
+    standards: [
+      "1A-AP-10",
+      "1A-AP-14"
+    ],
     simple: {
       "mission": "The robot dances exactly what your program says, in order. Make it dance!",
       "steps": [
@@ -4433,6 +4595,9 @@ window.STEM.activities = [
   },
   {
     id: "lab-space-blob",
+    standards: [
+      "1B-AP-09"
+    ],
     simple: {
       "mission": "Feed the hungry Space Blob! Your code counts the snacks.",
       "steps": [
@@ -4517,6 +4682,10 @@ window.STEM.activities = [
   },
   {
     id: "lab-moon-gate",
+    standards: [
+      "1B-AP-10",
+      "1B-AP-15"
+    ],
     simple: {
       "mission": "You guard the gate on the Moon. Your rule decides which robots get in.",
       "steps": [
@@ -4610,6 +4779,10 @@ window.STEM.activities = [
   },
   {
     id: "lab-field-station",
+    standards: [
+      "2-LS4-1",
+      "3-LS4-3"
+    ],
     simple: {
       "mission": "Be a scientist! Explore a Maine tide pool, a pond, and three faraway places. Look for clues.",
       "steps": [
@@ -4713,6 +4886,10 @@ window.STEM.activities = [
   },
   {
     id: "lab-pattern-machine",
+    standards: [
+      "2-DA-09",
+      "2-IC-21"
+    ],
     skills: [
       "data",
       "training-data",
@@ -4795,6 +4972,10 @@ window.STEM.activities = [
   },
   {
     id: "lab-launcher",
+    standards: [
+      "3-5-ETS1-3",
+      "MS-ETS1-4"
+    ],
     skills: [
       "data",
       "fair-testing",
@@ -4876,6 +5057,10 @@ window.STEM.activities = [
   },
   {
     id: "lab-line-follower",
+    standards: [
+      "1B-AP-10",
+      "1B-AP-15"
+    ],
     skills: [
       "debugging",
       "logic"
@@ -4955,6 +5140,10 @@ window.STEM.activities = [
   },
   {
     id: "lab-ramp-racers",
+    standards: [
+      "3-PS2-1",
+      "MS-PS2-2"
+    ],
     skills: [
       "data",
       "fair-testing"
@@ -5039,6 +5228,10 @@ window.STEM.activities = [
   },
   {
     id: "lab-pixel-studio",
+    standards: [
+      "1A-AP-09",
+      "2-DA-07"
+    ],
     simple: {
       "mission": "Learn how computers make pictures. Then make a moving picture.",
       "steps": [
@@ -5131,6 +5324,10 @@ window.STEM.activities = [
   // record tells teachers to check the steps in Tinkercad before class. Steps are printer-agnostic (PLA).
   {
     id: "3d-buoy-charm",
+    standards: [
+      "3-5-ETS1-1",
+      "MS-ETS1-1"
+    ],
     title: "Lobster Buoy Charm",
     area: "3d-printing",
     summary: "Design a lobster buoy charm in Tinkercad: stack basic shapes, cut a hole for a key ring, and keep it under 40 mm so it prints fast.",
@@ -5199,6 +5396,10 @@ window.STEM.activities = [
   },
   {
     id: "3d-trail-marker",
+    standards: [
+      "3-5-ETS1-1",
+      "MS-ETS1-1"
+    ],
     title: "Trail Blaze Marker",
     area: "3d-printing",
     summary: "Design a trail marker with raised letters, exactly 50 × 30 × 4 mm, and make sure it prints flat with no supports.",
@@ -5266,6 +5467,10 @@ window.STEM.activities = [
   },
   {
     id: "3d-fix-it-clip",
+    standards: [
+      "3-5-ETS1-3",
+      "MS-ETS1-4"
+    ],
     next: "lab-launcher",
     title: "Fix It! Design a Clip",
     area: "3d-printing",

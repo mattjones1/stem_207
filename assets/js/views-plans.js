@@ -120,6 +120,11 @@
   /* A plan's required time, noting activities whose time isn't set yet. */
   const planTime = (t) => !t.pending ? timeText(t.min, t.max) : t.max ? `${timeText(t.min, t.max)} + ${t.pending} pending` : "Time pending";
   const areaChip = (a) => `<span class="pw-area">${icon(SE.areaById[a.area].icon)}${esc(SE.areaById[a.area].short)}</span>`;
+  /* The standards a plan's activities cover (each code once, in order of first use). */
+  const standardsBox = (steps) => {
+    const codes = [...new Set(steps.flatMap((s) => (actOf(s) || {}).standards || []))];
+    return codes.length ? `<div class="pw-box"><h3>${icon("flag")}Standards covered</h3>${SE.standardsList(codes)}</div>` : "";
+  };
   const listBox = (cls, title, items, ic) => items.length ? `<div class="pw-box ${cls}"><h3>${icon(ic)}${esc(title)}</h3><ul>${items.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>` : "";
   const classNames = (p) => SE.store.planAssignmentsOf(p.id).map((x) => (SE.store.classById(x.classId) || {}).name).filter(Boolean);
 
@@ -317,6 +322,7 @@
           <div class="block"><h2>At a glance</h2>${totalsBox(t)}</div>
           ${workshopBoxes(t, stepsOf(t))}
           ${listBox("pw-box--warn", "Check before teaching", warnings(t), "alert")}
+          ${standardsBox(stepsOf(t))}
         </aside>
       </div>`, t.title, "Template", "pw-title");
     bindUse();
@@ -347,6 +353,7 @@
           <div class="block"><h2>At a glance</h2>${totalsBox(p)}</div>
           ${workshopBoxes(template(p.basedOn), null)}
           ${listBox("pw-box--warn", "Check before teaching", warnings(p), "alert")}
+          ${standardsBox(stepsOf(p))}
         </aside>
       </div>`;
     page(user, "plans", `

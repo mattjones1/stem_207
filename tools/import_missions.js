@@ -23,7 +23,7 @@ const vm = require("vm");
 const ROOT = path.resolve(__dirname, "..");
 // STEM207_IMPORT_OUT lets tests work on a copy of imported.js instead of the real one.
 const OUT = process.env.STEM207_IMPORT_OUT || path.join(ROOT, "assets/js/data/imported.js");
-const DATA = ["areas", "activities", "pathway", "moxie", "drafts-3d-printing"].map((f) => path.join(ROOT, `assets/js/data/${f}.js`)).concat(OUT);
+const DATA = ["areas", "standards", "activities", "pathway", "moxie", "drafts-3d-printing"].map((f) => path.join(ROOT, `assets/js/data/${f}.js`)).concat(OUT);
 
 /* Load the current library the same way the browser does. */
 function loadLibrary() {
@@ -58,6 +58,8 @@ function problems(m, STEM) {
   if (m.skills !== undefined) need(Array.isArray(m.skills) && m.skills.every((s) => STEM.skills.some((x) => x.id === s)), `skills must come from STEM.skills (${STEM.skills.map((s) => s.id).join(", ")})`);
   if (m.alsoIn !== undefined) need(Array.isArray(m.alsoIn) && m.alsoIn.every((id) => id !== m.area && STEM.areas.some((a) => a.id === id)), "alsoIn must list other existing areas");
   if (m.delivery !== undefined) need(isStr(m.delivery), "delivery must be text");
+  if (m.standards !== undefined) need(Array.isArray(m.standards) && m.standards.length <= 4 && m.standards.every((c) => !!(STEM.standards || {})[c]), "standards must be up to 4 codes from assets/js/data/standards.js (verified CSTA or NGSS)");
+  if (m.simple !== undefined) need(!!m.simple && isStr(m.simple.mission) && Array.isArray(m.simple.steps) && Array.isArray(m.steps) && m.simple.steps.length === m.steps.length && m.simple.steps.every(isStr), "simple needs a mission and one simple step for each step, in order");
   if (m.version !== undefined) need(/^\d+(\.\d+)?$/.test(String(m.version)), "version must be a number like 1 or 1.2");
   const launch = m.launch || {};
   if (m.launch !== undefined || pub === "published" || pub === "pilot") {

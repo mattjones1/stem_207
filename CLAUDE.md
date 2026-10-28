@@ -38,6 +38,12 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - `node tests/tools/test_content.js` checks every published activity for the full lesson shape: `learn` (2–6), `why`, `realWorld`, `vocab` (2–5 `{term, def}`), `check`, `stopAt`, `stuck` (2–4), `next` (a published id), `time { prep, core }`, `teacherNotes` (3+), `steps`, a `simple { mission, steps }` version for grades 2–3 (same steps, in order), and `standards` (codes from `data/standards.js` only). It also checks skills, standards, and Coding Foundations listings.
 - Known gaps from October 28, 2026 are in `tests/fixtures/content-todo.json`. That list only shrinks: a new gap fails, and so does a fixed gap still on the list. **A new activity must be complete.** `--report` prints the gaps.
 
+## Standards (CSTA + NGSS)
+- `assets/js/data/standards.js` (`STEM.standards`, loaded after `templates.js`) lists every code we use, `{ set, text, url }`, verified against the official sources on October 28, 2026: CSTA 2017 (Levels 1A, 1B, 2, from CSTA's progression chart) and NGSS (nextgenscience.org). **Only codes in that file may be used**, and a new code must be checked against the official source first.
+- Each activity has `standards: [codes]` (1–4, conservative), or `[]` when it was reviewed and nothing fits well (360° Notice & Wonder, Stop-Motion Studio).
+- **Educators only:** a Standards row in the activity facts (`standardsRow`, `SE.standardsList`) and "Standards covered" on plan and template pages (`standardsBox`). Library search matches codes. Students and guests never see codes.
+- The importer validates `standards` and `simple`.
+
 ## Young readers (grades 2–3)
 - Every activity that includes grades 2–3 has `simple: { mission, steps }`: the same steps in the same order, short sentences (12 words or fewer, checked by the linter).
 - **Simple words** (`#simple-toggle` on the activity page) is on by default for students in the 2–3 band; anyone can switch, and the choice is remembered (`localStorage stem207.simple`).

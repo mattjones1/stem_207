@@ -60,6 +60,14 @@
   }
   SE.activityCard = activityCard;
 
+  /* Standards (data/standards.js), for educators only: each code with its wording and official source. */
+  SE.standardsList = (codes) => `<ul class="std-list">${codes.filter((c) => STEM.standards && STEM.standards[c]).map((c) => `<li><a href="${esc(STEM.standards[c].url)}" target="_blank" rel="noopener"><strong>${esc(c)}</strong><span class="visually-hidden"> (opens in a new tab)</span></a> <span class="muted small">${esc(STEM.standards[c].set)}</span><span class="std-text">${esc(STEM.standards[c].text)}</span></li>`).join("")}</ul>`;
+  function standardsRow(a) {
+    const u = SE.store.currentUser && SE.store.currentUser();
+    if (!u || u.role !== "educator" || !Array.isArray(a.standards)) return "";
+    return `<div class="facts__std"><dt>Standards</dt><dd>${a.standards.length ? SE.standardsList(a.standards) : '<span class="muted small">None tagged: no CSTA or NGSS standard is a strong fit.</span>'}</dd></div>`;
+  }
+
   function factsList(a) {
     return `
       <dl class="facts">
@@ -72,6 +80,7 @@
         <div><dt>Equipment</dt><dd>${esc(SE.equipmentText(a.equipment))}</dd></div>
         ${a.delivery ? `<div><dt>Delivery</dt><dd>${esc(a.delivery)}</dd></div>` : ""}
         ${a.skills && a.skills.length ? `<div><dt>Skills</dt><dd>${esc(a.skills.map(SE.skillName).join(", "))}</dd></div>` : ""}
+        ${standardsRow(a)}
         ${a.alsoIn && a.alsoIn.length ? `<div><dt>Also in</dt><dd>${a.alsoIn.filter((id) => SE.areaById[id]).map((id) => `<a href="#/activities/${id}">${esc(SE.areaById[id].name)}</a>`).join(", ")}</dd></div>` : ""}
       </dl>`;
   }
@@ -129,7 +138,7 @@
       if (f.status === "done" && !done) return false;
     }
     if (f.q) {
-      const hay = [a.title, a.summary, a.mission, SE.areaById[a.area].name, ...(a.keywords || []), ...(a.skills || []).map((s) => SE.skillName(s))].join(" ").toLowerCase();
+      const hay = [a.title, a.summary, a.mission, SE.areaById[a.area].name, ...(a.keywords || []), ...(a.skills || []).map((s) => SE.skillName(s)), ...(a.standards || [])].join(" ").toLowerCase();
       if (!f.q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => hay.includes(w))) return false;
     }
     return true;
