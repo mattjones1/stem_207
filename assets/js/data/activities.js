@@ -2259,6 +2259,38 @@ window.STEM.activities = [
   /* ───────────────────────────── Engineering & Robotics ───────────────────────────── */
   {
     id: "paper-bridge",
+    why: "Engineers don't just build. They test, look closely at how a design failed, and use that to improve it. Shape can make weak paper surprisingly strong.",
+    realWorld: "Bridge engineers use strong shapes like arches, beams, and trusses, and they test models before building real bridges across Maine's rivers.",
+    vocab: [
+      {
+        "term": "Design process",
+        "def": "Plan, build, test, and improve, again and again."
+      },
+      {
+        "term": "Load",
+        "def": "The weight a structure has to hold up."
+      },
+      {
+        "term": "Prototype",
+        "def": "A first version you build to test an idea."
+      }
+    ],
+    check: "Show both versions and your coin counts. Explain how Version 1 failed and what you changed because of it.",
+    stopAt: "You've built and tested Version 2 and recorded whether your change helped.",
+    stuck: [
+      "Look at how it failed: did it bend, slide, or tear? Fix that first.",
+      "Try folding, rolling, or pleating the paper to make it stiffer.",
+      "Make one change at a time, so you know what helped."
+    ],
+    next: "lighthouse-beam",
+    time: {
+      "prep": 10,
+      "core": [
+        40,
+        45
+      ],
+      "verified": false
+    },
     title: "Paper Bridge Challenge",
     area: "engineering",
     summary: "Build a bridge from paper and tape that holds as many coins as possible.",
@@ -2308,6 +2340,38 @@ window.STEM.activities = [
   },
   {
     id: "sense-think-act",
+    why: "Robots don't decide like people do. They follow rules: sense something, check a rule, then act. When two rules conflict, the robot needs a priority, or it gets stuck.",
+    realWorld: "Robot vacuums sense a wall and turn, and self-driving cars have rules for which signal matters most when two happen at once.",
+    vocab: [
+      {
+        "term": "Sensor",
+        "def": "A part that lets a robot notice something, like light or touch."
+      },
+      {
+        "term": "Rule",
+        "def": "IF something happens, THEN do this."
+      },
+      {
+        "term": "Priority",
+        "def": "Which rule wins when two rules happen at the same time."
+      }
+    ],
+    check: "Say one robot rule as IF–THEN. Then explain which rule should win when green goes up and someone taps your shoulder, and why.",
+    stopAt: "The class has played all the rules and agreed on a priority for the conflict.",
+    stuck: [
+      "React only to what your sensor notices. No guessing.",
+      "Say the rule out loud: IF I see ___, THEN I ___.",
+      "For a conflict, ask: which rule keeps the robot safest?"
+    ],
+    next: "lab-line-follower",
+    time: {
+      "prep": 5,
+      "core": [
+        15,
+        20
+      ],
+      "verified": false
+    },
     title: "Sense–Think–Act: Human Robot Game",
     area: "engineering",
     summary: "Act out how a robot senses the world, decides, and moves.",
@@ -2350,6 +2414,42 @@ window.STEM.activities = [
   },
   {
     id: "marble-run-iteration",
+    why: "Hitting an exact target takes careful testing. Changing one thing at a time and averaging three runs shows what each change really does.",
+    realWorld: "Engineers tune roller coasters, conveyor belts, and water slides the same way: small changes, many measured tests.",
+    vocab: [
+      {
+        "term": "Iteration",
+        "def": "Testing, changing one thing, and testing again."
+      },
+      {
+        "term": "Slope",
+        "def": "How steep a path is."
+      },
+      {
+        "term": "Average",
+        "def": "The total of your times divided by how many runs."
+      },
+      {
+        "term": "Target",
+        "def": "The result you're aiming for, here 10 seconds."
+      }
+    ],
+    check: "Show your version table. Point to the change that helped most and explain why it changed the time.",
+    stopAt: "Your average time is within 1 second of 10, and every version is in your table.",
+    stuck: [
+      "Too fast? Make it flatter or longer. Too slow? Make it steeper.",
+      "Time three runs every time and use the average.",
+      "Change only one thing per version, or you won't know what worked."
+    ],
+    next: "float-a-turbine",
+    time: {
+      "prep": 15,
+      "core": [
+        40,
+        45
+      ],
+      "verified": false
+    },
     title: "Marble Run Iteration Lab",
     area: "engineering",
     summary: "Build a marble run that takes as close to 10 seconds as you can get.",
@@ -2400,6 +2500,38 @@ window.STEM.activities = [
   /* ───────────────────────────── Science & Discovery ───────────────────────────── */
   {
     id: "sink-or-float",
+    why: "Scientists predict, test, and then change their ideas when the evidence surprises them. A surprise isn't a mistake. It's how you learn something new.",
+    realWorld: "Boat builders in Maine shape heavy steel and wood so boats float, the same idea as your crumpled and flat foil.",
+    vocab: [
+      {
+        "term": "Predict",
+        "def": "Say what you think will happen, and why."
+      },
+      {
+        "term": "Observe",
+        "def": "Watch carefully and notice what really happens."
+      },
+      {
+        "term": "Evidence",
+        "def": "What you saw that supports an idea."
+      }
+    ],
+    check: "Share one object that surprised you. Explain what happened and how it changed your idea about sinking and floating.",
+    stopAt: "You've tested all ten objects and your team has written one rule that explains most of your results.",
+    stuck: [
+      "Place each object gently. Don't drop it or push it down.",
+      "Look at your stars. What do the surprises have in common?",
+      "Same material, different shape? Shape can matter, not just what it's made of."
+    ],
+    next: "melting-race",
+    time: {
+      "prep": 10,
+      "core": [
+        25,
+        30
+      ],
+      "verified": false
+    },
     title: "Sink or Float: Predict, Test, Explain",
     area: "science",
     summary: "Predict which objects will float, test them, and explain the surprises.",
@@ -2446,6 +2578,42 @@ window.STEM.activities = [
   },
   {
     id: "paper-helicopter",
+    why: "A fair test changes just one thing, measures one thing, and keeps everything else the same. Repeating trials and averaging them means one odd drop can't fool you.",
+    realWorld: "Maple seeds spin like helicopters as they fall, and engineers study that spin when they design drones and parachutes.",
+    vocab: [
+      {
+        "term": "Independent variable",
+        "def": "The one thing you change on purpose, like wing length."
+      },
+      {
+        "term": "Dependent variable",
+        "def": "What you measure, like the fall time."
+      },
+      {
+        "term": "Controlled variables",
+        "def": "Everything you keep the same so the test is fair."
+      },
+      {
+        "term": "Average",
+        "def": "The total of your trials divided by how many there are."
+      }
+    ],
+    check: "Share your claim about wing length. Support it with your averages, and name two things you kept the same.",
+    stopAt: "You've timed three drops for each of the three helicopters, found the averages, and written your claim.",
+    stuck: [
+      "Drop every helicopter from the same height, the same way.",
+      "Run three trials and average them. One drop can be a fluke.",
+      "Only the wing length should change. Use the same paper and the same paper clip."
+    ],
+    next: "tide-watchers",
+    time: {
+      "prep": 10,
+      "core": [
+        35,
+        45
+      ],
+      "verified": false
+    },
     title: "Paper Helicopter Investigation",
     area: "science",
     summary: "Change one thing about a paper helicopter and measure how it falls.",
@@ -2497,6 +2665,38 @@ window.STEM.activities = [
 
   {
     id: "melting-race",
+    why: "Some materials move heat quickly and some slowly. Metal feels cold because it pulls heat from your hand fast, and that same speed is what melts the ice.",
+    realWorld: "Maine homes use insulation to keep heat in during winter, and cooks choose metal or wooden spoons depending on whether they want heat to move.",
+    vocab: [
+      {
+        "term": "Heat",
+        "def": "Energy that moves from something warmer to something colder."
+      },
+      {
+        "term": "Conductor",
+        "def": "A material that moves heat quickly, like metal."
+      },
+      {
+        "term": "Insulator",
+        "def": "A material that slows heat down, like foam or wool."
+      }
+    ],
+    check: "Rank the four surfaces from fastest to slowest melting. Explain why the coldest-feeling surface melted the ice fastest.",
+    stopAt: "You've ranked all four ice cubes after 15 minutes and compared the result with your prediction.",
+    stuck: [
+      "Put all four ice cubes down at the same moment.",
+      "Feeling cold means a material is pulling heat from your hand quickly.",
+      "Look at your 3-minute notes. Which cube changed first?"
+    ],
+    next: "lab-ramp-racers",
+    time: {
+      "prep": 10,
+      "core": [
+        20,
+        25
+      ],
+      "verified": false
+    },
     title: "Ice Melt Race",
     area: "science",
     summary: "Put ice cubes on different materials and predict which one melts first.",
@@ -2762,6 +2962,42 @@ window.STEM.activities = [
   },
   {
     id: "tide-watchers",
+    why: "Graphs turn a table of numbers into a picture you can read. A pattern that's hard to see in a list, like two tides a day, jumps out on a line graph.",
+    realWorld: "Harbormasters, lobstermen, and ferry captains in Maine check tide predictions from NOAA every day to know when boats can safely come and go.",
+    vocab: [
+      {
+        "term": "Tide",
+        "def": "The daily rise and fall of the ocean's water level."
+      },
+      {
+        "term": "Tidal range",
+        "def": "The difference between high tide and low tide."
+      },
+      {
+        "term": "Line graph",
+        "def": "A graph that shows how something changes over time."
+      },
+      {
+        "term": "Cycle",
+        "def": "A pattern that repeats again and again."
+      }
+    ],
+    check: "Use your graph to explain how the tides at Portland and Eastport are alike and how they're different. Give one reason Eastport's are so much bigger.",
+    stopAt: "Both harbors are on your graph, you've measured both tidal ranges, and your team has an explanation for the difference.",
+    stuck: [
+      "Plot the high and low points first, then connect them with a smooth wave.",
+      "Tidal range is high minus low. Do it for each harbor.",
+      "Look at the map. Eastport is at the mouth of a long, narrowing bay."
+    ],
+    next: "sap-run-detectives",
+    time: {
+      "prep": 10,
+      "core": [
+        35,
+        45
+      ],
+      "verified": false
+    },
     title: "Tide Watchers: Portland vs. Eastport",
     area: "science",
     summary: "Graph a day of tides at two Maine harbors and discover why one rises more than twice as high as the other.",
@@ -2811,6 +3047,42 @@ window.STEM.activities = [
   },
   {
     id: "lighthouse-beam",
+    why: "Light reflects off shiny surfaces, and a curved reflector can gather scattered light into a strong beam. Measuring the spot tells you which design really works.",
+    realWorld: "Maine's lighthouses, like Portland Head Light, used curved reflectors and glass lenses to send their beams many miles out to sea.",
+    vocab: [
+      {
+        "term": "Reflect",
+        "def": "When light bounces off a surface."
+      },
+      {
+        "term": "Reflector",
+        "def": "A shiny shape that bounces light in one direction."
+      },
+      {
+        "term": "Beam",
+        "def": "Light aimed in one direction."
+      },
+      {
+        "term": "Baseline",
+        "def": "Your first measurement, to compare your designs to."
+      }
+    ],
+    check: "Compare your best spot with the baseline. Explain which reflector shape made it smaller or brighter, and why.",
+    stopAt: "You've traced the baseline and at least two reflector designs from the launch line.",
+    stuck: [
+      "Keep the shiny side of the foil facing in, and smooth out the wrinkles.",
+      "Test from the same launch line every time.",
+      "Try a deeper bowl or a cone, and change one thing at a time."
+    ],
+    next: "marble-run-iteration",
+    time: {
+      "prep": 15,
+      "core": [
+        40,
+        45
+      ],
+      "verified": false
+    },
     title: "Lighthouse Beam Challenge",
     area: "engineering",
     summary: "Engineer a reflector that turns a weak flashlight into a beam bright enough to guide a boat home.",
@@ -2860,6 +3132,42 @@ window.STEM.activities = [
   },
   {
     id: "float-a-turbine",
+    why: "Floating things stay upright when their weight sits low and their base is wide. Engineers test with the same waves each time so they can compare designs fairly.",
+    realWorld: "The University of Maine designed a floating wind turbine base, VolturnUS, to put turbines in the deep water of the Gulf of Maine.",
+    vocab: [
+      {
+        "term": "Buoyancy",
+        "def": "The push of water that holds something up."
+      },
+      {
+        "term": "Center of gravity",
+        "def": "The point where an object's weight is balanced."
+      },
+      {
+        "term": "Stability",
+        "def": "How well something stays upright when it's pushed."
+      },
+      {
+        "term": "Trade-off",
+        "def": "Giving up some of one thing to get more of another, like cost for stability."
+      }
+    ],
+    check: "Show your design table. Explain why your best platform stays upright, using buoyancy or center of gravity, and what it cost.",
+    stopAt: "You've tested at least two platforms with the same 10 waves and picked your best design.",
+    stuck: [
+      "Hang weight low, below the base. A low center of gravity helps.",
+      "A wider base tips less. Try spreading the floats apart.",
+      "Make the same 10 waves every time so the test is fair."
+    ],
+    next: "lab-launcher",
+    time: {
+      "prep": 15,
+      "core": [
+        40,
+        45
+      ],
+      "verified": false
+    },
     title: "Float a Wind Turbine",
     area: "engineering",
     summary: "Design a floating platform that keeps a model wind turbine upright in waves, like the ones Maine engineers test for the Gulf of Maine.",
@@ -2989,6 +3297,38 @@ window.STEM.activities = [
   },
   {
     id: "sap-run-detectives",
+    why: "Patterns in data can explain how nature works. Here, cold nights and warm days line up with sap running, and that's the clue to what's happening inside the tree.",
+    realWorld: "Maine's maple producers watch the weather forecast for freezing nights and thawing days to know when to tap their trees and collect sap.",
+    vocab: [
+      {
+        "term": "Pattern",
+        "def": "Something in the data that repeats in a way you can predict."
+      },
+      {
+        "term": "Freeze-thaw cycle",
+        "def": "Below freezing at night, above freezing in the day."
+      },
+      {
+        "term": "Ratio",
+        "def": "A comparison of two amounts, like 40 gallons of sap to 1 gallon of syrup."
+      }
+    ],
+    check: "State your rule for when sap runs. Point to two days in the table that prove it, and solve one sugaring math problem.",
+    stopAt: "Your rule works for every day in the log, and you've finished the sugaring math.",
+    stuck: [
+      "Below freezing is under 32°F. Look at each night, then the day after it.",
+      "Test your rule on every day, not just the busiest ones.",
+      "For a quarter gallon of syrup, use a quarter of 40 gallons of sap."
+    ],
+    next: "lab-ramp-racers",
+    time: {
+      "prep": 5,
+      "core": [
+        25,
+        30
+      ],
+      "verified": false
+    },
     title: "Sap Run Detectives",
     area: "science",
     summary: "Use temperature data to figure out the weather maple trees need before sap starts to flow, then do the sugaring math.",
