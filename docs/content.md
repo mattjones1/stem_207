@@ -11,6 +11,16 @@ How an activity record is shaped, how labs are built, and the rules that keep ev
 - Templates: `tpl-coding-foundations-23` (Coding Foundations: Grades 2–3) reaches all seven stages with labs and hands-on activities, each activity once (`reviewed: false`).
 - Test: `python3 tests/site/test_coding.py`.
 
+## Python ramp: mini-Python and the Harbor Python Lab
+- **`assets/js/labs/minipy.js`** (`SE.minipy`, loaded before `lab-coding.js`): a small Python subset that compiles to Harbor Code's block programs, so `SE.harbor.run` runs it. No eval, no library.
+  - `parse(src) → { main, fn, fnName, errors: [{ line, message }] }`. Supported: `move()`, `turn_left()`, `turn_right()`, `haul()`, `set_trap()`, `for i in range(n|steps):`, `while not at_wharf():`, `if at_buoy()/at_spot()/ledge_ahead():` (only `ledge_ahead()` has `else`), `steps = n` / `+=` / `-=`, one `def name():`, `pass`, and comments. Tabs count as 4 spaces.
+  - Errors are for students: they name the line and say what to try (a missing colon, indenting, an unknown name with a "did you mean", elif, a second function).
+  - `toPython(main, fn, fnName)`: Harbor Code's **See it in Python** (a folded panel under the program).
+- **Harbor Python Lab** (`lab-python.js`, id `harbor-python`, `.py-` styles): 12 levels in 4 chapters (Read it, Put it in order, Fix it, Write it). Level kinds: `read` (marks A/B/C and an `answer`), `parsons` (`lines`, tap to add, Indent/Outdent buttons, no dragging), `fix` (`code`), `write` (`starter`, `maxLines`, `mustUse`). Tab leaves the editor (no keyboard trap); Indent/Outdent buttons do the indenting.
+  - Pure rules: `SE.harborPython.check(levelIndex, src)` and `predictEnd(levelIndex)`.
+  - Activity `lab-harbor-python` is in Coding Foundations stage 6 and the Python group.
+- Tests: `node tests/tools/test_minipy.js` (parser, every error, round trips, and Python steering the boat exactly like blocks on all 36 Harbor levels), `node tests/tools/test_harbor_python.js` (every level solvable; Fix it programs fail as given), and `python3 tests/labs/test_harbor_python.py`.
+
 ## Every activity is complete (content linter)
 - `node tests/tools/test_content.js` checks every published activity for the full lesson shape: `learn` (2–6), `why`, `realWorld`, `vocab` (2–5 `{term, def}`), `check`, `stopAt`, `stuck` (2–4), `next` (a published id), `time { prep, core }`, `teacherNotes` (3+), `steps`, a `simple { mission, steps }` version for grades 2–3 (same steps, in order), and `standards` (codes from `data/standards.js` only). It also checks skills, standards, and Coding Foundations listings.
 - Known gaps from October 28, 2026 are in `tests/fixtures/content-todo.json`. That list only shrinks: a new gap fails, and so does a fixed gap still on the list. **A new activity must be complete.** `--report` prints the gaps.

@@ -423,5 +423,11 @@
    "route": "#/activity/3d-fix-it-clip",
    "lab": null
   }
+ ],
+ "added": [
+  {
+   "id": "lab-harbor-python",
+   "plan": "planning/CODING_PLAN.md (step 2, October 28, 2026)"
+  }
  ]
 }

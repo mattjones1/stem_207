@@ -30,7 +30,10 @@ async def main():
     await pg.evaluate("SE.store.startGuest()"); await go(pg, "#/")
 
     # Counts and ids are the baseline: nothing lost; the three 3D exercises are the only additions.
-    ok("library total is the baseline", await pg.evaluate("STEM.activities.length") == BASE["total"])
+    # Activities added since the baseline are listed in it with the plan that added them ("added").
+    added = BASE.get("added", [])
+    ok("library total is the baseline plus planned additions", await pg.evaluate("STEM.activities.length") == BASE["total"] + len(added), f"{BASE['total']} + {len(added)}")
+    ok("every planned addition resolves", await pg.evaluate(f"{json.dumps([a['id'] for a in added])}.every((id) => SE.activityById[id])"))
     ok("every baseline mission still resolves", await pg.evaluate(f"{json.dumps([m['id'] for m in BASE['missions']])}.every((id) => SE.activityById[id])"))
     ok("7 categories, all live", await pg.evaluate("STEM.areas.length === 7 && SE.liveAreas.length === 7"))
     ok("home shows 7 category cards", await pg.locator("a.area-card").count() == 7)

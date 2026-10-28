@@ -4695,6 +4695,144 @@ window.STEM.activities = [
 
   /* ───────────────────────────── Interactive labs (run inside STEM 207) ───────────────────────────── */
   {
+    "id": "lab-harbor-python",
+    "title": "Harbor Python Lab",
+    "area": "coding",
+    "group": "python",
+    "pathwayStage": 6,
+    "summary": "Steer the lobster boat with real Python. Read it, put scrambled lines in order, fix buggy code, then write your own loops, ifs, and functions.",
+    "level": "intermediate",
+    "grades": [
+      "4-5",
+      "6-8"
+    ],
+    "duration": 45,
+    "format": "independent",
+    "equipment": [
+      "computer"
+    ],
+    "source": "original",
+    "keywords": [
+      "python",
+      "text coding",
+      "loops",
+      "conditionals",
+      "functions",
+      "debugging",
+      "indentation",
+      "harbor"
+    ],
+    "access": {
+      "account": "none",
+      "cost": "free",
+      "supervision": false,
+      "hardware": []
+    },
+    "launch": {
+      "status": "lab",
+      "labId": "harbor-python",
+      "label": "Open the Harbor Python Lab",
+      "note": "Runs inside STEM 207. No outside account or website needed."
+    },
+    "mission": "You've steered the lobster boat with blocks. Now steer it the way programmers do: by typing Python. Read code and predict where the boat stops, put lines in order, fix programs that don't work, and write your own.",
+    "learn": [
+      "Read Python code and predict what it will do before running it.",
+      "Use indenting to put lines inside a loop, an if, or a function.",
+      "Find and fix bugs from error messages and wrong results, then write loops, ifs, and functions of your own."
+    ],
+    "why": "Most software is written as text, in languages like Python. The ideas you used in blocks, like sequence, loops, if, and functions, are exactly the same in Python. Only the way you write them changes.",
+    "realWorld": "Python is one of the most used programming languages in the world, in science labs, banks, game studios, and ocean research.",
+    "vocab": [
+      {
+        "term": "Python",
+        "def": "A programming language you write as text."
+      },
+      {
+        "term": "Indent",
+        "def": "Spaces at the start of a line that put it inside a loop, an if, or a function."
+      },
+      {
+        "term": "Syntax error",
+        "def": "A mistake in how the code is written, like a missing colon, so Python can't read it."
+      },
+      {
+        "term": "Function",
+        "def": "A named group of lines, made with def, that you can use again and again."
+      }
+    ],
+    "before": {
+      "materials": [
+        "A computer or Chromebook with a keyboard"
+      ],
+      "setup": [
+        "Students who haven't used Harbor Code should play a few of its levels first (loops and functions), since the boat and harbor are the same.",
+        "Pairs work well: one types, one reads the code aloud and predicts. Switch each level."
+      ],
+      "prerequisites": "Loops and functions in blocks (Harbor Code levels 4–11, or Coding Foundations stages 3–6)."
+    },
+    "steps": [
+      "Open the lab. Chapter 1, Read it: read the Python, choose where the boat will stop, then press Run.",
+      "Chapter 2, Put it in order: tap each line to add it to your program. Use Indent to put lines inside a loop or an if.",
+      "Chapter 3, Fix it: press Run and read the error or the result. Fix the code, then run it again.",
+      "Chapter 4, Write it: type your own program. Indent with 4 spaces or the Indent button.",
+      "Stuck? Read the code out loud, one line at a time, and follow the boat with your finger."
+    ],
+    "reflect": "How is writing Python like building with blocks? What was different?",
+    "extend": "Write a program for the Follow the coast level that uses for loops instead of while. Which version is easier to read?",
+    "teacherNotes": [
+      "The lab uses a small, real subset of Python (move(), for, while, if/else, one variable called steps, and def). Programs that work here are real Python syntax; the boat's commands are made for the lab.",
+      "Common misconceptions: indentation is just style (it changes what the program means); range(4) runs 5 times; a function runs when it's defined (it runs only when called).",
+      "Error messages are written for students and name the line. Ask students to read the message aloud before changing anything.",
+      "Ask afterward: What does indenting tell Python? How did predicting before running help you find bugs?"
+    ],
+    "check": "Show a program you wrote in Chapter 4. Point to an indented line and explain what it's inside of, and why.",
+    "stopAt": "You finish Chapters 1–3 and at least one Write it level.",
+    "stuck": [
+      "Read the error message. It names the line to look at.",
+      "Lines inside a loop, an if, or a def are indented 4 spaces more than the line above.",
+      "Trace the code with your finger on the map, one line at a time."
+    ],
+    "next": "python-turtle-bridge",
+    "time": {
+      "prep": 5,
+      "core": [
+        35,
+        45
+      ],
+      "verified": false
+    },
+    "skills": [
+      "loops",
+      "logic",
+      "functions",
+      "debugging"
+    ],
+    "standards": [
+      "1B-AP-10",
+      "1B-AP-15",
+      "2-AP-12"
+    ],
+    "primm": {
+      "predict": "Before you press Run, say where the boat will stop. In Chapter 1, that's the whole level.",
+      "investigate": [
+        "What does indenting a line tell Python?",
+        "How is def like Make your own block in Harbor Code?"
+      ],
+      "modify": "Take a program that works and change one number or one line. Predict the result, then run it.",
+      "make": "Write your own program for the Follow the coast or Name it, use it level."
+    },
+    "career": {
+      "role": "Software developer",
+      "industry": "Maine ocean technology and research",
+      "what": "Writes Python that controls underwater robots and analyzes the data they collect."
+    },
+    "explain": "In three sentences: what your best program does, one error you fixed and what it meant, and how your Python is like the blocks you used before.",
+    "bridge": {
+      "from": "lab-rover",
+      "text": "You steered this same boat with blocks in Harbor Code. The ideas are the same; now you type them."
+    }
+  },
+  {
     id: "lab-rover",
     group: "labs",
     primm: {

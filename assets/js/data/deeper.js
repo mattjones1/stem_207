@@ -75,7 +75,7 @@ window.STEM = window.STEM || {};
     "my-blocks-patterns": ["turtle", "scratchIdeas"], "capstone-game": ["scratchIdeas", "designSquad"], "fix-the-recipe": ["kidbots"],
     "lab-robot-chef": ["kidbots", "maze"], "sort-the-catch": ["sorting"], "lighthouse-network": ["scratchIdeas", "lighthouses"],
     "snowstorm-clones": ["scratchIdeas"], "noreaster-alerts": ["scratchIdeas"], "catch-log-lists": ["gmri", "scratchIdeas"],
-    "snowflake-functions": ["turtle"], "capstone-studio": ["scratchIdeas", "designSquad"], "python-turtle-bridge": ["turtle"],
+    "snowflake-functions": ["turtle"], "capstone-studio": ["scratchIdeas", "designSquad"], "python-turtle-bridge": ["turtle"], "lab-harbor-python": ["turtle", "maze"],
     "lobster-trap-logic": ["gmri"], "lab-rover": ["maze"], "lab-dance-party": ["dance", "scratchIdeas"], "lab-space-blob": ["scratchIdeas", "binary"],
     "lab-moon-gate": ["maze"],
     "ecosystem-field-trip": ["acadia", "gmri"], "notice-and-wonder-360": ["earth"], "acadia-from-above": ["acadia"], "lab-field-station": ["acadia", "gmri"],

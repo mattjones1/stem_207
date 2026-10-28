@@ -515,6 +515,7 @@
             <div id="prog-list"></div>
           </div>
           <p class="field-help">Tap a gap (the dashed line) to choose where new blocks go. Tap ✕ to remove a block.</p>
+          ${SE.minipy ? `<details class="py-view"><summary>${icon("code")}See it in Python</summary><pre class="py-view__code" id="py-view" aria-live="polite"></pre><p class="field-help">The same program, written in Python. Try typing programs like this in the Harbor Python Lab.</p></details>` : ""}
         </div>
       </div>`;
 
@@ -591,6 +592,8 @@
       const bc = el.querySelector("#blk-count");
       bc.textContent = L.maxBlocks ? `${n} / ${L.maxBlocks} blocks` : `${n} blocks${L.par ? ` · par ${L.par}` : ""}`;
       bc.classList.toggle("is-over", !!(L.maxBlocks && n > L.maxBlocks));
+      const pv = el.querySelector("#py-view");   // the Python view updates as blocks change
+      if (pv) pv.textContent = program.length || fn.length ? SE.minipy.toPython(program, fn, fnName) : "# Add blocks to see them in Python.";
     }
     function findAndRemove(list, id) {
       const i = list.findIndex((b) => b.id === id);

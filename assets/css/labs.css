@@ -836,3 +836,50 @@
   .fs__panels { grid-column: 2; grid-row: 1 / span 4; grid-template-columns: minmax(0, 1fr); align-content: start; max-height: calc(100vh - 72px); overflow-y: auto; }
   .fs__task { order: -1; }
 }
+
+/* ───────── Harbor Python Lab (lab-python.js): board, code, Parsons, editor ───────── */
+.py { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 1rem; align-items: start; }
+@media (max-width: 860px) { .py { grid-template-columns: 1fr; } }
+.py-stage { background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius); padding: .5rem; }
+.py-board { width: 100%; height: auto; max-height: 300px; display: block; margin: 0 auto; }
+.py-water { fill: #cde8f2; stroke: #b3d9e6; stroke-width: 1; }
+.py-ledge { fill: #6b7b80; stroke: #5a686c; stroke-width: 1; }
+.py-wharf { fill: #a0784f; stroke: #6b4a2c; stroke-width: 2; }
+.py-label { fill: #fff; font: 700 14px var(--font-display, sans-serif); text-anchor: middle; }
+.py-buoy { fill: #e9603f; stroke: #01201e; stroke-width: 2; }
+.py-boat path { fill: #f7f6f0; stroke: #01201e; stroke-width: 2; }
+.py-cabin { fill: #012d2b; }
+.py-mark circle { fill: #012d2b; }
+.py-mark text { fill: #fff; font: 700 12px var(--font-display, sans-serif); text-anchor: middle; }
+.py-panel { display: grid; gap: .6rem; align-content: start; }
+.py-h { font-family: var(--font-display); font-weight: 700; font-size: 1rem; margin: 0; }
+.py-code, .py-placed { margin: 0; padding: .5rem .5rem .5rem 2.6rem; background: #012d2b; color: #f0f7f6; border-radius: var(--radius-sm); font-family: ui-monospace, Consolas, "Courier New", monospace; font-size: .95rem; }
+.py-code li, .py-placed li { padding: .1rem 0; }
+.py-code li::marker, .py-placed li::marker { color: #94c93d; }
+.py-code code, .py-placed code { color: inherit; background: none; white-space: pre; }
+.py-placed li { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.py-placed .muted { color: #a6c5c1; }
+.py-tools { display: inline-flex; gap: .25rem; }
+.py-tools .btn { color: #f0f7f6; border-color: rgba(255, 255, 255, .45); min-height: 32px; padding: .2rem .45rem; }
+.py-tools .btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; }
+.py-bank { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: .4rem; }
+.py-bank code { font-family: ui-monospace, Consolas, "Courier New", monospace; }
+.py-choices { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.py-choices legend { font-weight: 700; margin-bottom: .3rem; }
+.py-choice { min-width: 3rem; min-height: 44px; font-weight: 800; }
+.py-choice[aria-pressed="true"] { background: var(--teal-soft); border-color: var(--brand-teal); }
+.py-editor { width: 100%; font-family: ui-monospace, Consolas, "Courier New", monospace; font-size: 1rem; line-height: 1.5; padding: .6rem; border: 1.5px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--fg); tab-size: 4; }
+.py-edit-tools { display: flex; flex-wrap: wrap; gap: .4rem; }
+.py-errors { list-style: none; padding: 0; margin: 0; display: grid; gap: .3rem; }
+.py-errors li { display: flex; gap: .4rem; align-items: flex-start; padding: .45rem .6rem; border-radius: var(--radius-sm); background: #fdecea; color: #7a1d12; border-left: 4px solid #c0392b; }
+.py-errors svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; }
+@media (max-height: 760px) and (min-width: 1000px) {
+  .py-board { max-height: 200px; }
+  .py-editor { min-height: 0; }
+  .py-editor[rows] { height: 9.5rem; }
+}
+/* Harbor Code: See it in Python */
+.py-view { margin-top: .6rem; }
+.py-view summary { cursor: pointer; font-weight: 700; min-height: 32px; display: inline-flex; align-items: center; gap: .4rem; }
+.py-view summary svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
+.py-view__code { margin: .4rem 0; padding: .6rem .8rem; background: #012d2b; color: #f0f7f6; border-radius: var(--radius-sm); font-family: ui-monospace, Consolas, "Courier New", monospace; font-size: .9rem; white-space: pre; overflow-x: auto; }

@@ -84,7 +84,7 @@ window.STEM.pathway = [
     project: "Make a custom shape block and reuse it to draw a large pattern.",
     debugging: "Test the custom block on its own before using it in the bigger program.",
     iCan: "I can break a problem into smaller parts and make a reusable block for one of them.",
-    activities: ["my-blocks-patterns", "snowflake-functions", "python-turtle-bridge"]
+    activities: ["my-blocks-patterns", "snowflake-functions", "lab-harbor-python", "python-turtle-bridge"]
   },
   {
     stage: 7,
