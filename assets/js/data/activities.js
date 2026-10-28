@@ -19,6 +19,22 @@ window.STEM.activities = [
   /* ───────────────────────────── Coding & Computer Science ───────────────────────────── */
   {
     id: "robot-maze-mission",
+    group: "foundations",
+    primm: {
+      "predict": "Before you press Run, say out loud exactly where the character will stop.",
+      "investigate": [
+        "Where did it actually stop? Which block made the difference?",
+        "Why do left and right depend on which way the character faces?"
+      ],
+      "modify": "Change one block so the character takes a shorter path.",
+      "make": "Draw your own maze on grid paper, write its program, and trade with a partner."
+    },
+    career: {
+      "role": "Robotics programmer",
+      "industry": "Maine warehouses and logistics",
+      "what": "Writes the exact moves that guide robots through aisles without bumping into anything."
+    },
+    explain: "In three sentences: how your program gets to the goal, one wrong turn you fixed, and how you'd solve a harder maze.",
     standards: [
       "1A-AP-10",
       "1A-AP-14"
@@ -109,6 +125,22 @@ window.STEM.activities = [
   },
   {
     id: "event-party",
+    group: "blocks",
+    primm: {
+      "predict": "Before you click the sprite, say what it will do.",
+      "investigate": [
+        "What starts each script running?",
+        "What happens if two events start at the same time?"
+      ],
+      "modify": "Change which key starts one of your scripts.",
+      "make": "Make a character with three different events that each do something new."
+    },
+    career: {
+      "role": "App developer",
+      "industry": "Maine banks and payment companies",
+      "what": "Builds apps where every tap and click starts exactly the right action."
+    },
+    explain: "In three sentences: what each event does, one that didn't work at first and how you fixed it, and one event you'd add next.",
     standards: [
       "1B-AP-10"
     ],
@@ -192,6 +224,22 @@ window.STEM.activities = [
   },
   {
     id: "loop-dance",
+    group: "blocks",
+    primm: {
+      "predict": "Count the blocks in the long dance. How many do you think a loop could save?",
+      "investigate": [
+        "Which moves repeat, and how many times?",
+        "Does the short program do exactly the same dance as the long one?"
+      ],
+      "modify": "Change the repeat count and predict how the dance changes.",
+      "make": "Make your own dance with a loop inside a loop, and have a partner predict it."
+    },
+    career: {
+      "role": "Software engineer",
+      "industry": "Maine manufacturing",
+      "what": "Uses loops to make machines repeat the same job thousands of times without a mistake."
+    },
+    explain: "In three sentences: what your dance does, how many blocks the loops saved, and how you checked it matched the long version.",
     standards: [
       "1A-AP-10",
       "1B-AP-10"
@@ -283,6 +331,22 @@ window.STEM.activities = [
   },
   {
     id: "debug-animation",
+    group: "blocks",
+    primm: {
+      "predict": "Before you click the green flag, read the script. What do you think will go wrong?",
+      "investigate": [
+        "Which block caused each bug?",
+        "Why does changing one thing at a time make debugging easier?"
+      ],
+      "modify": "Fix one bug, run it, then fix the next.",
+      "make": "Add a second fish that swims at a different speed, and test it."
+    },
+    career: {
+      "role": "Quality assurance engineer",
+      "industry": "Maine software and game studios",
+      "what": "Finds and reports bugs before a game or app goes out to players."
+    },
+    explain: "In three sentences: what the fish does now, the trickiest bug you fixed, and how your bug log helped.",
     standards: [
       "1B-AP-15",
       "2-AP-17"
@@ -373,6 +437,22 @@ window.STEM.activities = [
   },
   {
     id: "interactive-story",
+    group: "games",
+    primm: {
+      "predict": "Before you type an answer, say which ending you'll see.",
+      "investigate": [
+        "How does the if–else decide the ending?",
+        "What happens with an answer you didn't plan for?"
+      ],
+      "modify": "Handle the unexpected answer, like maybe.",
+      "make": "Add a second choice so the story has three or four endings."
+    },
+    career: {
+      "role": "Narrative game designer",
+      "industry": "Maine game and media studios",
+      "what": "Plans the choices in a story game and programs which path each one opens."
+    },
+    explain: "In three sentences: how the reader's choice changes the story, how you handled an unexpected answer, and what you'd add next.",
     standards: [
       "1B-AP-10"
     ],
@@ -456,6 +536,22 @@ window.STEM.activities = [
   },
   {
     id: "score-keeper",
+    group: "games",
+    primm: {
+      "predict": "If you catch 3 stars, what should the score be? Will it start at 0 next game?",
+      "investigate": [
+        "Where in your code does the score change?",
+        "Why does the score need to reset when the game starts?"
+      ],
+      "modify": "Make some stars worth more points than others.",
+      "make": "Add a timer or lives, using another variable."
+    },
+    career: {
+      "role": "Game developer",
+      "industry": "Maine game and app studios",
+      "what": "Programs scores, timers, and rules that make games fair and fun."
+    },
+    explain: "In three sentences: how your game keeps score, one bug with the score you fixed, and the feature you'd add next.",
     standards: [
       "1B-AP-09",
       "2-AP-11"
@@ -540,6 +636,22 @@ window.STEM.activities = [
   },
   {
     id: "my-blocks-patterns",
+    group: "blocks",
+    primm: {
+      "predict": "What will square (100) draw? What about repeat 12 with a 30-degree turn?",
+      "investigate": [
+        "Why is a custom block easier than copying the same code?",
+        "What does the size input change?"
+      ],
+      "modify": "Change the size inside one block and watch the whole pattern update.",
+      "make": "Build a second custom shape and combine both into your own pattern."
+    },
+    career: {
+      "role": "Software engineer",
+      "industry": "Maine design and engineering firms",
+      "what": "Writes reusable functions so one fix updates every place a tool is used."
+    },
+    explain: "In three sentences: what your custom block does, how the input changes it, and how reusing it built your pattern.",
     standards: [
       "2-AP-14"
     ],
@@ -623,6 +735,22 @@ window.STEM.activities = [
   },
   {
     id: "capstone-game",
+    group: "games",
+    primm: {
+      "predict": "Before your tester plays, predict where they'll get stuck.",
+      "investigate": [
+        "Where did your tester actually get confused?",
+        "Which fix will help the most players?"
+      ],
+      "modify": "Fix your tester's top problem and test again.",
+      "make": "Add one feature that makes the game more fun, and test it."
+    },
+    career: {
+      "role": "Game designer and producer",
+      "industry": "Maine game studios and app companies",
+      "what": "Plans a game, watches players test it, and decides what to fix before release."
+    },
+    explain: "In three sentences: what your game is about, the problem your tester found and how you fixed it, and what you'd build next.",
     standards: [
       "1B-AP-13",
       "2-AP-15",
@@ -710,6 +838,22 @@ window.STEM.activities = [
 
   {
     id: "fix-the-recipe",
+    group: "foundations",
+    primm: {
+      "predict": "Read the algorithm. Which step do you think will cause the first problem?",
+      "investigate": [
+        "What happened when the robot followed that step exactly?",
+        "Was the bug a missing step, a wrong order, or an unclear step?"
+      ],
+      "modify": "Rewrite the buggy step so the robot can't misunderstand it.",
+      "make": "Write the precise steps for a different task, like brushing teeth, and test them on a partner."
+    },
+    career: {
+      "role": "Technical writer",
+      "industry": "Maine manufacturing",
+      "what": "Writes step-by-step instructions so people and machines can do a job exactly right."
+    },
+    explain: "In three sentences: what your fixed algorithm does, the bug you're proudest of finding, and how you made one step precise.",
     standards: [
       "1A-AP-08",
       "1A-AP-14"
@@ -804,6 +948,22 @@ window.STEM.activities = [
   /* Batch 7: Robot Chef lab entry and the grades 6–8 coding track (one per stage) plus the Python bridge. */
   {
     "id": "lab-robot-chef",
+    "group": "foundations",
+    "primm": {
+      "predict": "Before you press Run, point to the step where you think the robot will go wrong first.",
+      "investigate": [
+        "Which kind of bug did you find: missing, wrong order, or unclear?",
+        "Why can't the robot just guess what you meant?"
+      ],
+      "modify": "Fix one step, then run the whole algorithm again from the top.",
+      "make": "Write a full sandwich algorithm yourself from the step bank (level 5)."
+    },
+    "career": {
+      "role": "Software tester",
+      "industry": "Maine healthcare and hospitals",
+      "what": "Checks that the steps in hospital software happen in the right order, so nothing important gets skipped."
+    },
+    "explain": "In three sentences: what your algorithm does, one bug you fixed and how you found it, and one step you'd make even more precise.",
     "standards": [
       "1A-AP-08",
       "1A-AP-14"
@@ -926,6 +1086,22 @@ window.STEM.activities = [
   },
   {
     "id": "sort-the-catch",
+    "group": "foundations",
+    "primm": {
+      "predict": "Which algorithm do you think will take fewer comparisons for 8 cards? Write your guess before you start.",
+      "investigate": [
+        "How many comparisons did each algorithm take? Were you right?",
+        "What happens to the number of comparisons when the list doubles to 16 cards?"
+      ],
+      "modify": "Start from a list that's already almost sorted. Which algorithm wins now?",
+      "make": "Invent your own way to sort the cards and count its comparisons against A and B."
+    },
+    "career": {
+      "role": "Software engineer",
+      "industry": "Maine seafood and shipping logistics",
+      "what": "Chooses fast algorithms to sort and track thousands of orders and shipments every day."
+    },
+    "explain": "In three sentences: which algorithm you'd recommend and why, what your comparison counts showed, and what would change with a much bigger list.",
     "standards": [
       "1B-AP-08",
       "2-AP-10"
@@ -1064,6 +1240,22 @@ window.STEM.activities = [
       "note": "Free. Works without signing in."
     },
     "id": "lighthouse-network",
+    "group": "blocks",
+    "primm": {
+      "predict": "When you press space, which lighthouse flashes first, and in what order do the others follow?",
+      "investigate": [
+        "How does a broadcast pass the signal along?",
+        "What's the difference between broadcast and broadcast and wait?"
+      ],
+      "modify": "Add a fourth lighthouse to the chain.",
+      "make": "Design your own message chain, like a relay race or a doorbell system."
+    },
+    "career": {
+      "role": "Network engineer",
+      "industry": "Maine telecommunications and broadband",
+      "what": "Designs how messages travel from device to device across the state's networks."
+    },
+    "explain": "In three sentences: how your signal travels, what broadcast and wait changed, and one bug in the chain you fixed.",
     "standards": [
       "1B-AP-10",
       "2-AP-13"
@@ -1180,6 +1372,22 @@ window.STEM.activities = [
       "note": "Free. Works without signing in."
     },
     "id": "snowstorm-clones",
+    "group": "blocks",
+    "primm": {
+      "predict": "How many snowflakes do you think will be on the screen at once?",
+      "investigate": [
+        "What does each clone do on its own?",
+        "Why does a clone need to delete itself?"
+      ],
+      "modify": "Give the flakes different speeds with a variable for this sprite only.",
+      "make": "Simulate something else with clones, like rain, stars, or fish in a school."
+    },
+    "career": {
+      "role": "Weather data programmer",
+      "industry": "Maine weather forecasting and emergency management",
+      "what": "Builds simulations that help forecasters predict where a storm's snow will fall."
+    },
+    "explain": "In three sentences: how your storm works, what the clones and variables do, and one change that made it more realistic.",
     "standards": [
       "2-AP-12"
     ],
@@ -1298,6 +1506,22 @@ window.STEM.activities = [
       "note": "Free. Works without signing in."
     },
     "id": "noreaster-alerts",
+    "group": "blocks",
+    "primm": {
+      "predict": "For each test reading, write which alert you expect before you run it.",
+      "investigate": [
+        "Why does the order of the checks matter?",
+        "What happens at an edge case, like exactly 35 mph?"
+      ],
+      "modify": "Swap the order of two checks and find the test that breaks.",
+      "make": "Add a new alert with its own compound condition, and write two tests for it."
+    },
+    "career": {
+      "role": "Emergency alert systems developer",
+      "industry": "Maine public safety and weather services",
+      "what": "Writes and tests the rules that decide when to send storm warnings to phones."
+    },
+    "explain": "In three sentences: how your station picks an alert, the edge case you handled, and why the order of the checks matters.",
     "standards": [
       "2-AP-12",
       "2-AP-17"
@@ -1435,6 +1659,22 @@ window.STEM.activities = [
       "note": "Free. Works without signing in."
     },
     "id": "catch-log-lists",
+    "group": "blocks",
+    "primm": {
+      "predict": "With 2, 4, 6, 8, and 10, what should the total, average, and best day be?",
+      "investigate": [
+        "How does the loop visit every item in the list?",
+        "Why does best start as the first item?"
+      ],
+      "modify": "Add the worst day to your catch log.",
+      "make": "Log something else for a week, like steps or temperatures, and report the totals."
+    },
+    "career": {
+      "role": "Data analyst",
+      "industry": "Maine fisheries and aquaculture",
+      "what": "Turns daily catch and harvest numbers into totals and trends that help crews plan."
+    },
+    "explain": "In three sentences: what your log calculates, how you checked it was right, and one more statistic you'd add.",
     "standards": [
       "2-AP-11"
     ],
@@ -1558,6 +1798,22 @@ window.STEM.activities = [
       "note": "Free. Works without signing in."
     },
     "id": "snowflake-functions",
+    "group": "blocks",
+    "primm": {
+      "predict": "With snowflake (80) (6), how many arms will you see, and how far apart?",
+      "investigate": [
+        "How does the snowflake block use the arm block?",
+        "Why does the turn equal 360 divided by arms?"
+      ],
+      "modify": "Try 5 and 8 arms. Predict the angle first.",
+      "make": "Fill the sky with different flakes using random inputs."
+    },
+    "career": {
+      "role": "Graphics programmer",
+      "industry": "Maine game, media, and design studios",
+      "what": "Builds functions with inputs that draw complex shapes and effects from simple pieces."
+    },
+    "explain": "In three sentences: how your snowflake is built from blocks, what the inputs control, and one bug you fixed.",
     "standards": [
       "2-AP-14"
     ],
@@ -1681,6 +1937,22 @@ window.STEM.activities = [
       "note": "Free. Works without signing in."
     },
     "id": "capstone-studio",
+    "group": "games",
+    "primm": {
+      "predict": "Before each playtest, write where you think the player will struggle.",
+      "investigate": [
+        "What did your playtesters actually do that surprised you?",
+        "Which changes made version 2 better?"
+      ],
+      "modify": "Fix the most important playtest problem and save version 2.",
+      "make": "Ship version 2 with release notes, then demo it in 60 seconds."
+    },
+    "career": {
+      "role": "Independent game developer",
+      "industry": "Maine creative technology",
+      "what": "Designs, builds, playtests, and ships games, and writes release notes for every update."
+    },
+    "explain": "In three sentences: what your game is, the most important change between version 1 and 2, and one part of your code you can explain.",
     "standards": [
       "2-AP-15",
       "2-AP-17",
@@ -1779,6 +2051,22 @@ window.STEM.activities = [
   },
   {
     "id": "python-turtle-bridge",
+    "group": "python",
+    "primm": {
+      "predict": "Read def square(size). What will square(100) draw, and how big?",
+      "investigate": [
+        "What does the indentation tell Python?",
+        "How is def like Make a Block in Scratch?"
+      ],
+      "modify": "Change the number of sides and the turn angle to draw a different shape.",
+      "make": "Write shape(size, sides) and draw a pattern of your own with a loop."
+    },
+    "career": {
+      "role": "Python developer",
+      "industry": "Maine biotech and research labs",
+      "what": "Writes Python functions that analyze data and draw charts that scientists use every day."
+    },
+    "explain": "In three sentences: what your function does, one error message you fixed and what it meant, and how your Python matches a Scratch block.",
     "standards": [
       "2-AP-12",
       "2-AP-14"
@@ -2843,6 +3131,10 @@ window.STEM.activities = [
   },
   {
     id: "sense-think-act",
+    alsoIn: [
+      "coding"
+    ],
+    group: "robotics",
     standards: [
       "1A-AP-08",
       "1B-AP-10"
@@ -3623,6 +3915,22 @@ window.STEM.activities = [
      with full directions on the page. */
   {
     id: "lobster-trap-logic",
+    group: "foundations",
+    primm: {
+      "predict": "Pick a lobster card. Before you follow your flowchart, say whether it's KEEP or BACK.",
+      "investigate": [
+        "Why does the order of your questions matter?",
+        "Which cards does the size-only flowchart get wrong, and why?"
+      ],
+      "modify": "Add one more rule to your flowchart and test it on every card.",
+      "make": "Write the rules as IF–ELSE IF–ELSE text, like a real program."
+    },
+    career: {
+      "role": "Fisheries data scientist",
+      "industry": "Maine fisheries and marine science",
+      "what": "Writes rules and programs that check catch data against the laws that protect the lobster population."
+    },
+    explain: "In three sentences: what your rules do, why the eggs and V-notch checks come first, and one card your first flowchart got wrong.",
     standards: [
       "1A-AP-08",
       "2-AP-10"
@@ -4388,6 +4696,22 @@ window.STEM.activities = [
   /* ───────────────────────────── Interactive labs (run inside STEM 207) ───────────────────────────── */
   {
     id: "lab-rover",
+    group: "labs",
+    primm: {
+      "predict": "Before you press Run, trace the program with your finger. Where will the boat end up?",
+      "investigate": [
+        "Which block did the most work in your program?",
+        "How did a loop or a function let you use fewer blocks?"
+      ],
+      "modify": "Change one number in a repeat block. Predict where the boat ends up, then run it.",
+      "make": "Solve a Create level with the fewest blocks you can."
+    },
+    career: {
+      "role": "Autonomous systems engineer",
+      "industry": "Maine ocean technology",
+      "what": "Programs underwater and surface robots that map the Gulf of Maine and steer around hazards on their own."
+    },
+    explain: "In three sentences: how your program solves the level, which loop or function made it shorter, and one bug you fixed by stepping through it.",
     standards: [
       "1A-AP-10",
       "1B-AP-10",
@@ -4497,6 +4821,22 @@ window.STEM.activities = [
   },
   {
     id: "lab-dance-party",
+    group: "foundations",
+    primm: {
+      "predict": "Read the three steps. What will the robot do first, and what will it do last?",
+      "investigate": [
+        "What changed when you swapped two steps?",
+        "How does a Repeat block make the program shorter without changing the dance?"
+      ],
+      "modify": "Shorten a long dance with a Repeat block, without changing what the robot does.",
+      "make": "Design a 12-move dance in 6 blocks or fewer (level 8), then rebuild it in Scratch."
+    },
+    career: {
+      "role": "Animator and game developer",
+      "industry": "Maine game and media studios",
+      "what": "Programs characters' moves in exact sequences and loops to make them dance, run, and fight."
+    },
+    explain: "In three sentences: what your dance does, how a loop made it shorter, and one bug you fixed.",
     standards: [
       "1A-AP-10",
       "1A-AP-14"
@@ -4595,6 +4935,22 @@ window.STEM.activities = [
   },
   {
     id: "lab-space-blob",
+    group: "labs",
+    primm: {
+      "predict": "After 3 feeds, how many snacks will be stored? Say your number first.",
+      "investigate": [
+        "What happened when you turned off the starting value?",
+        "Why does every run need a known starting value?"
+      ],
+      "modify": "Change how much each feed adds, and predict the new total before testing.",
+      "make": "Make the blob reach exactly 14 snacks in 4 feeds."
+    },
+    career: {
+      "role": "Game developer",
+      "industry": "Maine game and app studios",
+      "what": "Uses variables for scores, lives, and coins, and makes sure each game starts with the right values."
+    },
+    explain: "In three sentences: what the snacks variable stores, why it needs a starting value, and how you reached 14.",
     standards: [
       "1B-AP-09"
     ],
@@ -4682,6 +5038,22 @@ window.STEM.activities = [
   },
   {
     id: "lab-moon-gate",
+    group: "labs",
+    primm: {
+      "predict": "A Planet visitor arrives. Will the gate open? Decide before you test.",
+      "investigate": [
+        "Which branch ran, THEN or ELSE? How do you know?",
+        "Why test a visitor who should NOT get in?"
+      ],
+      "modify": "Change the rule so a different badge gets in, and test both kinds of visitors.",
+      "make": "Write a rule that lets in only Star visitors, and prove it with all three badges."
+    },
+    career: {
+      "role": "Security systems developer",
+      "industry": "Maine hospitals, schools, and offices",
+      "what": "Writes the rules that decide which badges can open which doors, and tests every case."
+    },
+    explain: "In three sentences: what your rule does, how you tested it, and the bug in the broken rule you fixed.",
     standards: [
       "1B-AP-10",
       "1B-AP-15"
@@ -5057,6 +5429,10 @@ window.STEM.activities = [
   },
   {
     id: "lab-line-follower",
+    alsoIn: [
+      "coding"
+    ],
+    group: "robotics",
     standards: [
       "1B-AP-10",
       "1B-AP-15"

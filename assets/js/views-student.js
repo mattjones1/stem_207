@@ -222,6 +222,12 @@
             <p class="field-help" id="d-show-help" hidden>Great. Your teacher will ask you to say it or show it. You can still add a few words below if you want.</p>
             <p class="form__error" id="d-err" role="alert"></p>
           </div>
+          ${a.explain ? `
+          <div class="debrief-q debrief-q--explain">
+            <span class="debrief-q__tag">${icon("star")}Explain your build (optional, for your portfolio)</span>
+            <label for="d-explain">${esc(a.explain)}</label>
+            <textarea id="d-explain" rows="3" maxlength="500" placeholder="Optional"></textarea>
+          </div>` : ""}
           <div class="debrief-q debrief-q--extend">
             <span class="debrief-q__tag">${icon("rocket")}Go deeper (optional)</span>
             <label for="d-extend-note">Did you try Go deeper? What did you find?</label>
@@ -271,6 +277,7 @@
         evidence,
         reflection: text,
         extensionNote: document.getElementById("d-extend-note").value.trim().slice(0, 200),
+        explain: ((document.getElementById("d-explain") || {}).value || "").trim().slice(0, 500),
         confidence: (form.querySelector("input[name=d-conf]:checked") || {}).value || "got-it",
         stepsDone,
         stepsTotal: a.steps.length
@@ -370,6 +377,7 @@
   SE.views.me = function (user) {
     const prof = SE.game.profile(user.id);
     const log = prof.completions.slice().reverse();
+    const portfolio = log.filter((c) => (c.event.data.explain || "").trim());   // Explain your build answers
     app().innerHTML = `
       <section class="page-top">
         <div class="wrap page-top__inner">
@@ -423,6 +431,12 @@
       <section class="section wrap" aria-labelledby="notes-title">
         <div class="section__head"><div><span class="eyebrow">Just for you</span><h2 id="notes-title">Notes from your teacher</h2></div></div>
         <ul class="home-msg__list notes-list">${prof.notes.map((e) => `<li><p>${esc(e.data.note)}</p><small>${SE.dateShort(e.at)}</small></li>`).join("")}</ul>
+      </section>` : ""}
+
+      ${portfolio.length ? `
+      <section class="section wrap" aria-labelledby="portfolio-title">
+        <div class="section__head"><div><span class="eyebrow">Explain your build</span><h2 id="portfolio-title">My portfolio</h2></div><p>What you built and how, in your own words.</p></div>
+        <ul class="portfolio">${portfolio.map((c) => `<li><a href="#/activity/${c.activity.id}"><strong>${esc(c.activity.title)}</strong></a><small>${SE.dateShort(c.event.at)}</small><p>${esc(c.event.data.explain)}</p></li>`).join("")}</ul>
       </section>` : ""}
 
       <section class="section wrap" aria-labelledby="log-title">

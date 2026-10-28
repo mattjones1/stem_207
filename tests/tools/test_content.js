@@ -24,6 +24,7 @@ const acts = STEM.activities, byId = Object.fromEntries(acts.map((a) => [a.id, a
 const SKILLS = new Set((STEM.skills || []).map((s) => s.id));
 const STANDARDS = STEM.standards || {};   // code -> { set, text, url } (assets/js/data/standards.js)
 const text = (v) => typeof v === "string" && /[a-z]/i.test(v);
+const CODING_GROUPS = (STEM.codingGroups || []).map((g) => g.id);
 const list = (v, lo, hi) => Array.isArray(v) && v.length >= lo && v.length <= hi && v.every(text);
 
 /* The rules: each returns true when the activity meets it. */
@@ -43,6 +44,12 @@ const RULES = {
   simple: (a) => !(a.grades || []).includes("2-3") || (!!a.simple && text(a.simple.mission) && Array.isArray(a.simple.steps) && a.simple.steps.length === a.steps.length && a.simple.steps.every(text)),
   // Standards: 1–4 verified codes, or [] when the activity was reviewed and nothing fits well.
   standards: (a) => Array.isArray(a.standards) && a.standards.length <= 4 && a.standards.every((c) => !!STANDARDS[c]),
+  // Coding activities (planning/CODING_PLAN.md): PRIMM, a Maine career card (roles and industries only,
+  // never a company), an "Explain your build" prompt, and a browsing group.
+  primm: (a) => a.area !== "coding" || (!!a.primm && text(a.primm.predict) && list(a.primm.investigate, 2, 3) && text(a.primm.modify) && text(a.primm.make)),
+  career: (a) => a.area !== "coding" || (!!a.career && text(a.career.role) && text(a.career.industry) && text(a.career.what)),
+  explain: (a) => a.area !== "coding" || text(a.explain),
+  group: (a) => a.area !== "coding" || CODING_GROUPS.includes(a.group),
 };
 
 const gaps = {};

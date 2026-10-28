@@ -462,6 +462,20 @@
   SE.views.timePicker = timePicker;
 
   /* ───────── Area ───────── */
+  /* The Coding page in browsing groups (STEM.codingGroups, planning/CODING_PLAN.md). A group with nothing
+     in it isn't shown. */
+  function codingGroups(items, prof) {
+    return (STEM.codingGroups || []).map((g) => {
+      const inG = items.filter((a) => a.group === g.id);
+      return inG.length ? `
+        <div class="code-group" aria-labelledby="cg-${g.id}">
+          <h3 id="cg-${g.id}" class="code-group__title">${esc(g.name)} <span class="muted small">${plural(inG.length, "activity", "activities")}</span></h3>
+          <p class="muted">${esc(g.blurb)}</p>
+          <div class="cards">${inG.map((a) => activityCard(a, prof)).join("")}</div>
+        </div>` : "";
+    }).join("");
+  }
+
   SE.views.area = function (user, id) {
     const area = SE.areaById[id];
     if (!area) return SE.views.notFound();
@@ -508,12 +522,12 @@
         <div class="section__head">
           <div><span class="eyebrow">${user && user.role === "educator" ? "All activities" : "Choose your next adventure"}</span><h2 id="area-acts">${plural(list.length, "activity", "activities")}</h2></div>
         </div>
-        <div class="cards">${list.map((a) => activityCard(a, prof)).join("")}</div>
+        ${id === "coding" ? codingGroups(list.concat(also.filter((a) => a.group)), prof) : `<div class="cards">${list.map((a) => activityCard(a, prof)).join("")}</div>`}
       </section>`}
-      ${also.length ? `
+      ${also.filter((a) => id !== "coding" || !a.group).length ? `
       <section class="wrap section" aria-labelledby="area-also">
         <div class="section__head"><div><span class="eyebrow">From other areas</span><h2 id="area-also">Also fits here</h2></div></div>
-        <div class="cards">${also.map((a) => activityCard(a, prof)).join("")}</div>
+        <div class="cards">${also.filter((a) => id !== "coding" || !a.group).map((a) => activityCard(a, prof)).join("")}</div>
       </section>` : ""}
       ${drafts.length ? `
       <section class="wrap section" aria-labelledby="area-drafts">
@@ -830,6 +844,12 @@
             <p>${esc(a.why)}</p>
             ${a.realWorld ? `<p class="why-real"><strong>In the real world:</strong> ${esc(a.realWorld)}</p>` : ""}
             ${a.vocab ? `<h3>Key words</h3><dl class="vocab">${a.vocab.map((v) => `<div><dt>${esc(v.term)}</dt><dd>${esc(v.def)}</dd></div>`).join("")}</dl>` : ""}`, "block--why") : ""}
+          ${a.career ? `
+          <section class="block career" aria-labelledby="s-career">
+            <h2 id="s-career">${icon("compass")}Who does this in Maine</h2>
+            <p class="career__role"><strong>${esc(a.career.role)}</strong><span>${esc(a.career.industry)}</span></p>
+            <p>${esc(a.career.what)}</p>
+          </section>` : ""}
           ${fold(isStudent, openFolds, "s-before", "box", "Before you begin", `
             <div class="prep">
               <div><h3>Materials</h3><ul class="bullets">${a.before.materials.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul></div>
@@ -841,6 +861,17 @@
             <h2 id="s-vr">${icon("headset")}VR setup for teachers</h2>
             <ul class="bullets">${a.vr.setup.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul>
             <h3>Taking part without a headset</h3><p>${esc(a.vr.nonHeadset)}</p>
+          </section>` : ""}
+          ${a.primm ? `
+          <section class="block primm" aria-labelledby="s-primm">
+            <h2 id="s-primm">${icon("bulb")}Think like a coder</h2>
+            <ol class="primm__list">
+              <li><strong>Predict</strong><span>${esc(a.primm.predict)}</span></li>
+              <li><strong>Run</strong><span>Now try it, and compare what happens with your prediction.</span></li>
+              <li><strong>Investigate</strong><span>${a.primm.investigate.map(esc).join(" ")}</span></li>
+              <li><strong>Modify</strong><span>${esc(a.primm.modify)}</span></li>
+              <li><strong>Make</strong><span>${esc(a.primm.make)}</span></li>
+            </ol>
           </section>` : ""}
           <section class="block" aria-labelledby="s-steps">
             <div class="block__head-row"><h2 id="s-steps">${icon("list")}Your steps</h2><div class="read-tools">${SE.speech.button("steps")}</div></div>

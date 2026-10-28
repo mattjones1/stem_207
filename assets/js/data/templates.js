@@ -164,6 +164,26 @@ window.STEM = window.STEM || {};
         label: `Stage ${st.stage}`, required: i === 0,
         bridge: i === 0 ? `${st.title}. ${st.iCan}` : `More practice for stage ${st.stage}.`
       })))
+    }),
+    // Coding Foundations for grades 2–3 (planning/CODING_PLAN.md): every stage reachable with labs and
+    // hands-on activities written for 2–3. Each activity appears once; notes name the levels for each stage.
+    ids({
+      id: "tpl-coding-foundations-23", reviewed: false,
+      title: "Coding Foundations: Grades 2–3",
+      essentialQuestion: "How do we go from clear instructions to a project of our own?",
+      goal: "All seven coding stages for younger coders, from precise instructions to a program they design, using labs and hands-on activities.",
+      finalProduct: "A Harbor Code program the student designs, with the fewest blocks they can, and an explanation of how it works.",
+      audience: { grades: ["2-3"], minutes: null, equipment: [], prior: "No coding experience needed." },
+      steps: [
+        m("lab-robot-chef", { label: "Stage 1", bridge: "Clear instructions: fix the robot chef's sandwich steps." }),
+        m("robot-maze-mission", { label: "Stage 1", required: false, bridge: "More practice: walk the maze, then code it." }),
+        m("lab-dance-party", { label: "Stages 1 and 3", bridge: "Levels 1–4 for sequence; level 5 adds a Repeat loop." }),
+        m("animate-your-name", { label: "Stage 2", bridge: "Events: each letter moves when it's clicked." }),
+        m("lab-moon-gate", { label: "Stage 4", bridge: "Choices: write an IF / ELSE rule and test every badge." }),
+        m("lobster-trap-logic", { label: "Stage 4", required: false, bridge: "More practice: keep-or-release rules as a flowchart." }),
+        m("lab-space-blob", { label: "Stage 5", bridge: "Variables: count the snacks, and start from a known value." }),
+        m("lab-rover", { label: "Stages 6 and 7", bridge: "Harbor Code Voyage 1: level 11 is functions (your own block); level 12 is a free build with the fewest blocks." })
+      ]
     })
   ];
 })();

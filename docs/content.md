@@ -2,6 +2,15 @@
 
 How an activity record is shaped, how labs are built, and the rules that keep every activity complete. Read before adding or editing an activity, a lab, standards, or Go deeper links.
 
+## Coding activities (Coding 2.0, planning/CODING_PLAN.md)
+- Every coding activity also has (the linter requires them):
+  - `primm: { predict, investigate: [2–3], modify, make }`: shown as **Think like a coder** before the steps (Run is a fixed line).
+  - `career: { role, industry, what }`: shown as **Who does this in Maine**. Roles and industries only; **never name a company** without permission.
+  - `explain`: the **Explain your build** prompt, an optional box in the debrief saved as `explain` on `mission_completed`. Me lists these as **My portfolio**.
+  - `group`: one of `STEM.codingGroups` (`areas.js`). The Coding page shows activities by group; a group with no activities is hidden (Web development until it has reviewed content). An activity from another category joins with `alsoIn: ["coding"]` plus a `group` (the Snowplow lab and Sense–Think–Act are in robotics).
+- Templates: `tpl-coding-foundations-23` (Coding Foundations: Grades 2–3) reaches all seven stages with labs and hands-on activities, each activity once (`reviewed: false`).
+- Test: `python3 tests/site/test_coding.py`.
+
 ## Every activity is complete (content linter)
 - `node tests/tools/test_content.js` checks every published activity for the full lesson shape: `learn` (2–6), `why`, `realWorld`, `vocab` (2–5 `{term, def}`), `check`, `stopAt`, `stuck` (2–4), `next` (a published id), `time { prep, core }`, `teacherNotes` (3+), `steps`, a `simple { mission, steps }` version for grades 2–3 (same steps, in order), and `standards` (codes from `data/standards.js` only). It also checks skills, standards, and Coding Foundations listings.
 - Known gaps from October 28, 2026 are in `tests/fixtures/content-todo.json`. That list only shrinks: a new gap fails, and so does a fixed gap still on the list. **A new activity must be complete.** `--report` prints the gaps.

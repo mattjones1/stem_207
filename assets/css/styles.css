@@ -2612,3 +2612,17 @@ body[data-role="student"] .site-footer__support { display: none; }
 .std-list a { justify-self: start; color: var(--fg); text-decoration: underline; }
 .std-text { font-size: .9rem; }
 .facts__std { align-items: start; }
+
+/* Coding: Think like a coder (PRIMM), Who does this in Maine, My portfolio */
+.primm__list { list-style: none; counter-reset: none; padding: 0; margin: 0; display: grid; gap: .5rem; }
+.primm__list li { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: .75rem; align-items: baseline; }
+.primm__list strong { font-family: var(--font-display); color: var(--teal); }
+@media (max-width: 520px) { .primm__list li { grid-template-columns: 1fr; gap: .1rem; } }
+.career { border-left: 4px solid var(--brand-teal); }
+.career__role { display: flex; flex-wrap: wrap; gap: .25rem .6rem; align-items: baseline; margin: 0 0 .3rem; }
+.career__role span { color: var(--muted); font-size: .95rem; }
+.portfolio { list-style: none; padding: 0; margin: 0; display: grid; gap: .8rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+.portfolio li { display: grid; gap: .3rem; padding: 1rem; background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius); }
+.portfolio small { color: var(--muted); }
+.portfolio p { margin: 0; }
+.code-group { margin-top: 1.5rem; } .code-group__title { font-size: var(--step-1); margin: 0 0 .2rem; } .code-group > .muted { margin: 0 0 .8rem; }

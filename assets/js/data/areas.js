@@ -80,6 +80,20 @@ window.STEM.areas = [
   }
 ];
 
+/* Coding browsing groups (planning/CODING_PLAN.md). Every coding activity has one `group`; an activity in
+   another category can join through `alsoIn: ["coding"]` plus a `group`. A group with no activities is never
+   shown (Web Development waits for reviewed content). Order here is the order on the Coding page. */
+window.STEM.codingGroups = [
+  { id: "foundations", name: "Coding Foundations", blurb: "Clear instructions, sorting, and debugging. Start here, with or without a computer." },
+  { id: "labs", name: "Code right here", blurb: "In-site labs: steer a lobster boat, guard a moon gate, feed a space blob. Nothing to install." },
+  { id: "blocks", name: "Block coding with Scratch", blurb: "Events, loops, conditions, and custom blocks in Scratch projects." },
+  { id: "games", name: "Games and stories", blurb: "Design, build, playtest, and ship your own game or interactive story." },
+  { id: "python", name: "Python and text coding", blurb: "From blocks to real Python: read it, put it in order, fix it, then write your own." },
+  { id: "crew-ai", name: "AI Engineer crew", blurb: "Engineers who build with AI check its work. Test and fix code an AI wrote." },
+  { id: "robotics", name: "Robotics and physical computing", blurb: "Sensors, rules, and robots that act on their own." },
+  { id: "web", name: "Web development", blurb: "Build web pages with HTML and CSS." },
+];
+
 /* Skills that cross categories (optional `skills: [...]` on an activity). Tag an activity only after
    the proposed tags in planning/CATEGORIES_PATHWAYS_AUDIT.md (section 6a) are approved. */
 window.STEM.skills = [
