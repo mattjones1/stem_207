@@ -280,6 +280,7 @@
             <h2 id="dash-cb">${icon("compass")}Using Chromebooks?</h2>
             <p class="small">If your school filters websites, give your IT team the <a href="https://github.com/mattjones1/stem_207/blob/main/planning/CHROMEBOOK_IT_ALLOWLIST.md" target="_blank" rel="noopener">list of sites STEM 207 uses<span class="visually-hidden"> (opens in a new tab)</span></a>.</p>
           </section>
+          <section class="block dash-donate" aria-label="Support STEM 207">${SE.donateCard({ compact: true })}</section>
         </aside>
       </div>`;
     app().innerHTML = frame(user, null, classes, "teach", body, { title: "Dashboard", demo: classes.some((c) => c.isDemo) });

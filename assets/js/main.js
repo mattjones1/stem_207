@@ -170,6 +170,17 @@
     target.focus({ preventScroll: true });
   }
 
+  // Footer "Support STEM 207" (hidden for students by CSS): the donate card in the shared dialog.
+  document.getElementById("donate-open").addEventListener("click", () => {
+    if (document.body.dataset.role === "student") return;
+    SE.modal.open({ title: "Support STEM 207", body: SE.donateCard() });
+  });
+  // A Venmo QR that won't load falls back to the "coming soon" frame.
+  document.addEventListener("error", (e) => {
+    const qr = e.target && e.target.closest && e.target.closest(".donate__qr");
+    if (qr) qr.classList.add("is-missing");
+  }, true);
+
   document.getElementById("app").addEventListener("click", (e) => {
     const j = e.target.closest("[data-jump]");
     if (!j) return;

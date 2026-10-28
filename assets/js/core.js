@@ -54,6 +54,7 @@
     bug: '<rect x="7.5" y="7" width="9" height="13" rx="4.5"/><path d="M12 7v13M9 4.5l1.5 2.5M15 4.5L13.5 7M3.5 10.5h4M16.5 10.5h4M3.5 15h4M16.5 15h4"/>',
     flag: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
     lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+    heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
     logout: '<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4"/><path d="M10 16l-4-4 4-4M6 12h10"/>',
     map: '<path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/>',
     chart: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',

@@ -82,6 +82,24 @@
   SE.sortActivities = sortActivities;
 
   /* What "home" (#/) is called for whoever is signed in: Home, or Dashboard for educators. */
+  /* The donate card. Never call it on a student screen. */
+  SE.donateCard = function ({ compact = false } = {}) {
+    const d = (window.STEM207_CONFIG || {}).donate || {};
+    const name = String(d.venmo || "").trim().replace(/^@/, "");
+    const ok = /^[A-Za-z0-9_-]{1,30}$/.test(name);
+    const qr = ok && d.qr ? `<img src="${esc(d.qr)}" alt="Venmo QR code for STEM 207" width="160" height="160">` : "";
+    return `
+      <div class="donate ${compact ? "donate--compact" : ""}">
+        <div class="donate__qr ${qr ? "" : "is-missing"}">${qr}<span class="donate__soon">${icon("heart")}<small>QR coming soon</small></span></div>
+        <div class="donate__body">
+          <h2 class="donate__title">${icon("heart")}Support STEM 207</h2>
+          <p>STEM 207 is free for every Maine student. Your support keeps it that way.</p>
+          ${ok ? `<a class="btn btn--primary" href="https://venmo.com/u/${encodeURIComponent(name)}" target="_blank" rel="noopener">${icon("heart")}Donate with Venmo<span class="visually-hidden"> (opens in a new tab)</span></a>
+          <p class="muted small">Or send to <strong>@${esc(name)}</strong> on Venmo. Thank you!</p>` : `<p class="muted small">A way to give is coming soon. Thank you for thinking of us!</p>`}
+        </div>
+      </div>`;
+  };
+
   SE.homeLabel = () => { const u = SE.store.currentUser(); return !u || u.role === "guest" ? "Home" : u.role === "student" ? "Home" : "Dashboard"; };
   const backLink = (href = "#/", label) => `<a class="back-link" href="${href}">${icon("arrowLeft")}${label || SE.homeLabel()}</a>`;
   SE.backLink = backLink;
@@ -398,6 +416,8 @@
       filtersFor = user && user.id;
     }
 
+    /* "Support STEM 207": grown-ups only (guests here, educators on the Dashboard, the footer link).
+       Students never see it. Set the Venmo name in config.js; until then it shows a placeholder. */
     const guestBanner = user && user.role === "guest" ? `
       <div class="wrap"><div class="guest-banner">
         ${icon("user")}<p><strong>You're exploring as a guest.</strong> Activities work, but nothing is saved. Sign in to save your work, earn XP, and collect patches.</p>
@@ -420,7 +440,8 @@
       ${user && user.role === "educator" ? SE.views.educatorStrip(user) : ""}
       ${areasSection(null, "Categories")}
       ${featuredSection()}
-      <section class="wrap section"><a class="btn btn--primary" href="#/activities">${icon("search")}Browse all activities</a></section>`;
+      <section class="wrap section"><a class="btn btn--primary" href="#/activities">${icon("search")}Browse all activities</a></section>
+      ${user && user.role === "guest" ? `<section class="wrap section">${SE.donateCard()}</section>` : ""}`;
     bindLibrary(null);
   };
   SE.views.timePicker = timePicker;

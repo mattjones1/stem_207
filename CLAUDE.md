@@ -249,6 +249,13 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - External platforms: verify against official docs or the live site before writing steps, and mark anything unverified for the teacher. Don't build custom apps for external-platform missions.
 - AI content: label simulations as simulations, and present scores as model outputs rather than guarantees.
 
+## Free site and donations
+- **The whole site is free.** A paid version (Family and Educator subscriptions) is a future goal and is **shelved** on the `paid-site` branch (tag `paid-shelved-2026-10`). Its plan and the must-fix list for resuming are at the top of `planning/STEM 207 PAID.md` on that branch. Don't bring paid code (access.js, tiers, locks, pricing, families) to `main` unless the user asks to resume it.
+- **"Support STEM 207"** (`SE.donateCard({ compact })` in `views-library.js`): a Venmo donate card for **grown-ups only**: the guest Home, the educator Dashboard side column, and the footer link `#donate-open` (opens it in `SE.modal`; hidden for students by `body[data-role="student"]`). **Never show it on a student screen.**
+  - `config.js` `donate: { venmo, qr }`. With `venmo` empty, it shows a "QR coming soon" placeholder and no button. Set the Venmo **Business** username (no @) to show "Donate with Venmo" (`https://venmo.com/u/<name>`), and put the Venmo app's QR at `assets/img/donate-venmo.png`. A QR that won't load falls back to the placeholder.
+  - Donations go to STEM 207, LLC. They aren't tax-deductible, so the wording is "Support", never "tax-deductible".
+  - Test: `python3 tests/site/test_donate.py`.
+
 ## Chromebook target
 - The target device is a school Chromebook at 1366×768, 100% scaling: about **1366×650** of page. Design and test there; other sizes must not break.
 - Short-screen mode is `@media (max-height: 760px) and (min-width: 1000px)` in `styles.css` and `labs.css` (compact brand row, see `brand/BRAND.md`; tighter page tops; 5-column sign-in pictures; compact lab header and a sticky, scrolling brief). `SE.labs.shortScreen()` is the same test in JS.

@@ -160,6 +160,11 @@ async def main():
         F = []
         await pg.goto(S); await pg.evaluate("localStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400)
         for h in PUBLIC: await visit(pg, h); await audit(pg, h, F)
+        # A guest: Home with the Support STEM 207 card, then the card in the dialog with a Venmo name set.
+        await pg.evaluate("SE.store.startGuest()"); await visit(pg, "#/"); await audit(pg, "guest home", F)
+        await pg.evaluate("window.STEM207_CONFIG.donate = { venmo: 'stem207-test', qr: '' }"); await pg.click("#donate-open"); await pg.wait_for_timeout(250)
+        await audit(pg, "modal: support", F); await pg.keyboard.press("Escape")
+        await pg.evaluate("window.STEM207_CONFIG.donate = {}; SE.store.signOut()"); await pg.wait_for_timeout(200)
         await sign_student(pg)
         for h in STUDENT: await visit(pg, h); await audit(pg, h, F)
         await pg.evaluate("STEM.moxieSessions.forEach((s) => { s.pub = 'published'; })")

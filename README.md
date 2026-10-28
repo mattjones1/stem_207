@@ -344,6 +344,13 @@ Check every external link before adding it, and record whether it needs an accou
 
 Two activities are marked **Resource coming soon** until the program picks a resource: the 360° Notice & Wonder Challenge (needs a 360° scene) and Stop-Motion Story Studio (needs a stop-motion app). The ecosystem field trip uses Google Earth now and still needs a headset experience.
 
+## Support STEM 207 (donations)
+STEM 207 is free. Grown-ups (guests, educators, and the footer link) see a **Support STEM 207** card; students never do. To turn it on:
+1. In `assets/js/config.js`, set `donate.venmo` to your Venmo Business username (without the @).
+2. Save the QR from the Venmo app as `assets/img/donate-venmo.png`.
+
+Until then the card shows a "QR coming soon" placeholder. Donations go to STEM 207, LLC and aren't tax-deductible. The paid version is shelved on the `paid-site` branch for later.
+
 ## Brand
 
 STEM 207, LLC is a program offered exclusively through **STEM Coliseum and Learning Center**, its parent company, and the site is co-branded. A white brand row at the top of every page shows the STEM 207 logo "powered by" a large STEM Coliseum logo, which links to the [STEM Coliseum and Learning Center website](https://stem-coliseum.odoo.com/). The footer carries the STEM Coliseum and Learning Center logo and the relationship, and the sign-in card and printable certificates show the parent logo too. The site uses STEM Coliseum's palette (Dark Teal `#012d2b`, Teal `#03968f`, Green 2 `#94c93d`) and fonts (Montserrat headings, Open Sans body). The STEM 207 wordmark keeps its drawing (the pine in the M, Maine in the 0), recolored to Dark Teal and Green 2. Rules for both brands are in [`brand/BRAND.md`](brand/BRAND.md); the parent brand guide and logo files are in [`brand/coliseum/`](brand/coliseum/). The STEM 207 mission is **Keep the humanity in technology.**
