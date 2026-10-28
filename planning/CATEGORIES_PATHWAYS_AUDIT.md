@@ -170,7 +170,7 @@ Each update is safe to re-run and is also folded into `schema.sql`. Until an upd
 
 Vocabulary: sequencing, debugging, events, loops, logic, data, functions, observation, fair-testing, design-iteration, training-data, responsible-use, encoding-art, communication.
 
-The tags below come from each mission's own keywords, with obvious misreads corrected by hand. **They're proposals.** Approve or edit them before they go into `activities.js`.
+The tags below come from each mission's own keywords, with obvious misreads corrected by hand. **Approved as written on October 28, 2026**, and applied to `activities.js` (`skills`). The library and the Learning Plan picker filter by skill, and the activity facts list them.
 
 | id | Title | Proposed skills |
 | --- | --- | --- |
@@ -240,6 +240,6 @@ The tags below come from each mission's own keywords, with obvious misreads corr
 **Approved on October 21, 2026.** Maine Coast Explorers uses the brief's evidence wording. The other templates use each mission's own check plus the brief's goal and final product. Templates are marked `reviewed: true` in `assets/js/data/templates.js`.
 
 ### 6c. Other decisions
-- The delivery labels in section 2.
-- Whether the `vr` equipment filter should be renamed "VR headset optional".
+- The delivery labels in section 2: **approved as written on October 28, 2026** and applied (`delivery` on the four VR activities).
+- The `vr` equipment filter is renamed "VR headset optional" (October 28, 2026).
 - The 3D Printing card text. The placeholder default is "Coming soon. No exercises yet."

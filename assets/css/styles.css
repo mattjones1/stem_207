@@ -537,7 +537,7 @@ ul, ol { margin: 0; padding: 0; }
 
 .filters {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: .75rem;
 }
 .field { display: grid; gap: .3rem; min-width: 0; }
@@ -2591,3 +2591,4 @@ h1, h2, h3, h4 { letter-spacing: -.015em; }
 .site-footer__support .linkish { min-height: 24px; color: inherit; text-decoration: underline; font-weight: 700; }
 body[data-role="student"] .site-footer__support { display: none; }
 @media (max-width: 520px) { .donate { grid-template-columns: 1fr; } }
+

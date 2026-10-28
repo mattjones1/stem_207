@@ -462,6 +462,7 @@
             <div class="pw-search pk-filters">
               <div class="form__field"><label for="pw-q">Search every category</label><input id="pw-q" class="input" type="search" placeholder="Title or keyword"></div>
               <div class="form__field"><label for="pw-fgrade">Grades</label><select id="pw-fgrade" class="input"><option value="">Any grade</option>${STEM.gradeBands.map((g) => `<option value="${g.id}">${esc(g.name)}</option>`).join("")}</select></div>
+              <div class="form__field"><label for="pw-fskill">Skill</label><select id="pw-fskill" class="input"><option value="">Any skill</option>${(STEM.skills || []).map((s) => `<option value="${s.id}">${esc(s.name)}</option>`).join("")}</select></div>
               <div class="form__field"><label for="pw-ftime">Time</label><select id="pw-ftime" class="input"><option value="">Any length</option>${STEM.durations.map((d) => `<option value="${d.max}">${esc(d.name)}</option>`).join("")}</select></div>
             </div>
             <p class="pk-count muted small" id="pw-count" role="status"></p>
@@ -521,8 +522,10 @@
   /* The picker: one category at a time (every activity in it), or a search across every category. */
   function pickList() {
     const v = (id) => (document.getElementById(id) || {}).value || "";
-    const q = v("pw-q").trim().toLowerCase(), grade = v("pw-fgrade"), time = Number(v("pw-ftime")) || 0;
-    return SE.sortActivities(STEM.activities.filter((a) => (q ? `${a.title} ${a.summary} ${(a.keywords || []).join(" ")}`.toLowerCase().includes(q) : (a.area === pick.area || (a.alsoIn || []).includes(pick.area)))
+    const q = v("pw-q").trim().toLowerCase(), grade = v("pw-fgrade"), time = Number(v("pw-ftime")) || 0, skill = v("pw-fskill");
+    // A search or a skill looks across every category; otherwise the picker shows the chosen category.
+    return SE.sortActivities(STEM.activities.filter((a) => (q || skill ? (!q || `${a.title} ${a.summary} ${(a.keywords || []).join(" ")}`.toLowerCase().includes(q)) : (a.area === pick.area || (a.alsoIn || []).includes(pick.area)))
+      && (!skill || (a.skills || []).includes(skill))
       && (!grade || (a.grades || []).includes(grade)) && (!time || SE.timeMax(a) <= time)));
   }
   function renderResults() {
@@ -612,7 +615,7 @@
       save();
     });
     document.getElementById("pw-q").addEventListener("input", renderResults);
-    ["pw-fgrade", "pw-ftime"].forEach((id) => document.getElementById(id).addEventListener("change", renderResults));
+    ["pw-fgrade", "pw-ftime", "pw-fskill"].forEach((id) => document.getElementById(id).addEventListener("change", renderResults));
     app().querySelectorAll("[data-pick-area]").forEach((b) => b.addEventListener("click", () => {
       pick.area = b.dataset.pickArea;
       app().querySelectorAll("[data-pick-area]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));

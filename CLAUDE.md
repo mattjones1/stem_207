@@ -155,7 +155,7 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
   - Use `SE.liveAreas` (not `STEM.areas`) for filters, the buoy hero, suggestions, and teacher area tabs. The category grid shows all areas. The buoy hero (`BUOYS`) and star map (`SECTORS`) have seven slots; add one before adding an eighth area.
   - Two placeholders (`3d-printing-exercise-04`, `-05` in `data/drafts-3d-printing.js`) stay generic and hidden. Replace one only with a complete, reviewed record.
 - Optional mission fields: `alsoIn` (counted once, in the primary area), `skills` (from `STEM.skills`), and `delivery`.
-  - Apply skill tags and delivery labels only after the proposals in audit section 6 are approved.
+  - Skill tags (audit 6a) and the VR delivery labels (6c) were approved and applied on October 28, 2026. New activities pick skills from `STEM.skills`. The library and the plan picker have a Skill filter (`SE.skillName`), and search matches skill names.
 - Import: `node tools/import_missions.js <file.json> [--write] [--new-version]` writes `data/imported.js` (generated). Test: `node tests/tools/test_import_missions.js`.
   - `tests/run.sh` runs `.js` tests with Node.
 - Baseline: `tests/fixtures/catalog-baseline.json`. Test: `python3 tests/site/test_categories.py`.

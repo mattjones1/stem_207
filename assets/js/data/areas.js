@@ -134,7 +134,7 @@ window.STEM.equipment = {
   unplugged: { name: "No devices needed", filter: true },
   computer: { name: "Laptop or Chromebook", filter: true },
   tablet: { name: "Tablet", filter: true },
-  vr: { name: "VR headset", filter: true },
+  vr: { name: "VR headset optional", filter: true },
   projector: { name: "Projector or shared screen", filter: true },
   webcam: { name: "Webcam", filter: false },
   building: { name: "Building materials", filter: true },

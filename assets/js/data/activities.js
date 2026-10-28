@@ -19,6 +19,9 @@ window.STEM.activities = [
   /* ───────────────────────────── Coding & Computer Science ───────────────────────────── */
   {
     id: "robot-maze-mission",
+    skills: [
+      "sequencing"
+    ],
     why: "An algorithm is a set of exact steps. Computers can't guess what you mean, so every app, game, and robot starts with someone writing clear steps in the right order.",
     realWorld: "Warehouse robots, delivery robots, and Mars rovers all follow algorithms to get where they're going without bumping into things.",
     vocab: [{"term": "Algorithm", "def": "A set of steps, in order, that solves a problem."}, {"term": "Sequence", "def": "The order the steps happen in."}, {"term": "Bug", "def": "A mistake that makes a program do the wrong thing."}],
@@ -89,6 +92,9 @@ window.STEM.activities = [
   },
   {
     id: "event-party",
+    skills: [
+      "events"
+    ],
     why: "Most programs sit and wait for you. Events are how a program knows you clicked, tapped, or pressed a key, so it can do something.",
     realWorld: "Every button you tap on a phone and every key you press in a video game starts an event.",
     vocab: [{"term": "Event", "def": "Something that happens, like a click or a key press, that starts code."}, {"term": "Input", "def": "Information you give a program."}, {"term": "Sprite", "def": "A character or object in Scratch."}],
@@ -154,6 +160,9 @@ window.STEM.activities = [
   },
   {
     id: "loop-dance",
+    skills: [
+      "loops"
+    ],
     next: "debug-animation",
     starter: { file: "assets/starters/dance-crew.sb3", label: "Download the Dance Crew project", how: "In Scratch, choose File, then Load from your computer, and pick dance-crew.sb3." },
     bridge: { from: "lab-dance-party", text: "In Robot Dance Party you put moves in order. Here you'll find the moves that repeat and loop them." },
@@ -225,6 +234,10 @@ window.STEM.activities = [
   },
   {
     id: "debug-animation",
+    skills: [
+      "debugging",
+      "loops"
+    ],
     check: "Show your bug log. Pick one bug, explain what caused it, and show the one block you changed to fix it.",
     stopAt: "All four bugs are fixed and written in your bug log. The second fish is a bonus.",
     stuck: [
@@ -307,6 +320,10 @@ window.STEM.activities = [
   },
   {
     id: "interactive-story",
+    skills: [
+      "logic",
+      "communication"
+    ],
     check: "Play your story both ways for a partner. Point to the if–else block and explain how it picks the ending.",
     stopAt: "Both answers lead to their own ending, and you've tested what happens with an unexpected answer.",
     stuck: [
@@ -383,6 +400,9 @@ window.STEM.activities = [
   },
   {
     id: "score-keeper",
+    skills: [
+      "data"
+    ],
     check: "Play a game for a partner. Explain what the score variable stores and where in your code it changes.",
     stopAt: "Stars fall, the catcher catches them, the score goes up, and it starts at 0 every game.",
     stuck: [
@@ -460,6 +480,9 @@ window.STEM.activities = [
   },
   {
     id: "my-blocks-patterns",
+    skills: [
+      "functions"
+    ],
     check: "Show your custom block's definition. Change its size input and explain how one change updates the whole pattern.",
     stopAt: "Your square block draws the 12-square pattern. A second custom shape is the challenge.",
     stuck: [
@@ -537,6 +560,11 @@ window.STEM.activities = [
   },
   {
     id: "capstone-game",
+    skills: [
+      "debugging",
+      "design-iteration",
+      "communication"
+    ],
     check: "Present your game. Explain one bug your tester found and how you fixed it.",
     stopAt: "A classmate has tested your game, you've fixed their top problem, and you've added one feature.",
     stuck: [
@@ -614,6 +642,10 @@ window.STEM.activities = [
 
   {
     id: "fix-the-recipe",
+    skills: [
+      "sequencing",
+      "debugging"
+    ],
     check: "Name one bug you found, say what kind it was (missing, wrong order, or unclear), and read your fixed step out loud.",
     stuck: [
       "Watch for the first moment the robot does something strange. That step has the bug.",
@@ -688,6 +720,10 @@ window.STEM.activities = [
   /* Batch 7: Robot Chef lab entry and the grades 6–8 coding track (one per stage) plus the Python bridge. */
   {
     "id": "lab-robot-chef",
+    "skills": [
+      "sequencing",
+      "debugging"
+    ],
     "next": "robot-maze-mission",
     "title": "Robot Chef",
     "area": "coding",
@@ -792,6 +828,9 @@ window.STEM.activities = [
   },
   {
     "id": "sort-the-catch",
+    "skills": [
+      "sequencing"
+    ],
     "track": "6-8",
     "title": "Sort the Catch: Race Two Algorithms",
     "area": "coding",
@@ -923,6 +962,9 @@ window.STEM.activities = [
       "note": "Free. Works without signing in."
     },
     "id": "lighthouse-network",
+    "skills": [
+      "events"
+    ],
     "title": "Lighthouse Network: Broadcast Messages",
     "summary": "Make three lighthouses signal each other with broadcast messages, so one key press sends a light down the coast.",
     "level": "intermediate",
@@ -1032,6 +1074,9 @@ window.STEM.activities = [
       "note": "Free. Works without signing in."
     },
     "id": "snowstorm-clones",
+    "skills": [
+      "loops"
+    ],
     "title": "Snowstorm Simulator: Clones and Loops",
     "summary": "Use loops to make 100 snowflake clones that each fall on their own, with random sizes and speeds.",
     "level": "intermediate",
@@ -1144,6 +1189,10 @@ window.STEM.activities = [
       "note": "Free. Works without signing in."
     },
     "id": "noreaster-alerts",
+    "skills": [
+      "logic",
+      "design-iteration"
+    ],
     "title": "Nor'easter Alert Station: Compound Conditions",
     "summary": "Build a weather station that asks for wind, snow, and temperature, then uses and, or, and not to choose the right alert.",
     "level": "intermediate",
@@ -1273,6 +1322,10 @@ window.STEM.activities = [
       "note": "Free. Works without signing in."
     },
     "id": "catch-log-lists",
+    "skills": [
+      "loops",
+      "data"
+    ],
     "title": "Catch Log: Lists and Averages",
     "summary": "Store a week of lobster counts in a list, then write code that finds the total, the average, and the best day.",
     "level": "intermediate",
@@ -1389,6 +1442,9 @@ window.STEM.activities = [
       "note": "Free. Works without signing in."
     },
     "id": "snowflake-functions",
+    "skills": [
+      "functions"
+    ],
     "title": "Snowflake Studio: Custom Blocks with Inputs",
     "summary": "Make custom blocks with inputs, use one inside another, and draw a sky full of different snowflakes.",
     "level": "advanced",
@@ -1506,6 +1562,10 @@ window.STEM.activities = [
       "note": "Free. Works without signing in."
     },
     "id": "capstone-studio",
+    "skills": [
+      "design-iteration",
+      "communication"
+    ],
     "next": "python-turtle-bridge",
     "title": "Capstone Studio: Design, Playtest, Ship",
     "summary": "Plan a game like a real studio: write a short design doc, build version 1, run two playtests, and ship version 2 with release notes. Across 2–3 class periods.",
@@ -1595,6 +1655,10 @@ window.STEM.activities = [
   },
   {
     "id": "python-turtle-bridge",
+    "skills": [
+      "loops",
+      "functions"
+    ],
     "next": "capstone-studio",
     "track": "6-8",
     "title": "From Blocks to Python: Turtle Patterns",
@@ -1725,6 +1789,10 @@ window.STEM.activities = [
   /* ───────────────────────────── Virtual Reality ───────────────────────────── */
   {
     id: "ecosystem-field-trip",
+    skills: [
+      "observation"
+    ],
+    delivery: "Browser (Google Earth); headset version not chosen",
     why: "Scientists start by looking carefully before they explain anything. Separating what you see from what you think it means keeps your ideas honest.",
     realWorld: "Ecologists use satellite views and field visits to study habitats around the world, including Maine's forests and coast, and how living things survive there.",
     vocab: [
@@ -1827,6 +1895,10 @@ window.STEM.activities = [
   },
   {
     id: "notice-and-wonder-360",
+    skills: [
+      "observation"
+    ],
+    delivery: "Missing resource",
     why: "Careful observers notice details other people miss. Explaining exactly where to look is a skill scientists use to share what they found.",
     realWorld: "Scientists study 360° photos from the deep sea, forests, and even Mars to find details worth investigating.",
     vocab: [
@@ -1920,6 +1992,10 @@ window.STEM.activities = [
   /* ───────────────────────────── Artificial Intelligence ───────────────────────────── */
   {
     id: "how-ai-sorts",
+    skills: [
+      "data",
+      "training-data"
+    ],
     why: "AI doesn't understand fruit. It finds a pattern in the examples it's given. When the examples leave something out, the AI's rule breaks, just like yours did.",
     realWorld: "Grocery self-checkouts and farm sorting machines learn to tell foods apart from thousands of labeled pictures.",
     vocab: [
@@ -1991,6 +2067,9 @@ window.STEM.activities = [
   },
   {
     id: "teachable-machine-classroom",
+    skills: [
+      "training-data"
+    ],
     why: "A model only knows what its training examples show it. Testing it with something new is how you find out what it really learned, and what it didn't.",
     realWorld: "Phones that unlock by recognizing a face and apps that identify plants from a photo were trained the same way: lots of labeled pictures, then lots of testing.",
     vocab: [
@@ -2086,6 +2165,10 @@ window.STEM.activities = [
   },
   {
     id: "ai-secret-signals",
+    skills: [
+      "data",
+      "training-data"
+    ],
     why: "An AI's prediction score is a model output, not proof it understands. Balanced, varied examples make a model more dependable, and testing with new examples shows where it still fails.",
     realWorld: "Touch-free controls in hospitals, games that read hand gestures, and sign-language tools are trained with examples like yours and tested before people rely on them.",
     vocab: [
@@ -2186,6 +2269,11 @@ window.STEM.activities = [
   },
   {
     id: "ai-for-oceans",
+    skills: [
+      "data",
+      "training-data",
+      "responsible-use"
+    ],
     why: "When people train an AI on facts, like fish versus trash, it can learn well. When they train it on opinions, it learns the trainers' opinions. The people who label the data shape what the AI does.",
     realWorld: "Ocean scientists use AI trained on labeled photos to count fish and spot trash, and people check its work.",
     vocab: [
@@ -2272,6 +2360,9 @@ window.STEM.activities = [
   },
   {
     id: "ai-limits-detectives",
+    skills: [
+      "responsible-use"
+    ],
     why: "AI tools can sound sure and still be wrong, and their mistakes can affect real people. Knowing how to trace a mistake back to its training data is how you use AI wisely.",
     realWorld: "Companies and governments test AI systems for mistakes and unfairness, and some require a person to check important decisions an AI makes.",
     vocab: [
@@ -2356,6 +2447,9 @@ window.STEM.activities = [
 
   {
     id: "pattern-predictors",
+    skills: [
+      "training-data"
+    ],
     why: "Many AI tools work by predicting what usually comes next. A prediction can be very likely and still be wrong, so it's a guess, not a fact.",
     realWorld: "The word suggestions on a phone keyboard and the autocomplete in a search box predict the next word from patterns in lots of writing.",
     vocab: [
@@ -2424,6 +2518,10 @@ window.STEM.activities = [
   /* ───────────────────────────── Engineering & Robotics ───────────────────────────── */
   {
     id: "paper-bridge",
+    skills: [
+      "data",
+      "design-iteration"
+    ],
     why: "Engineers don't just build. They test, look closely at how a design failed, and use that to improve it. Shape can make weak paper surprisingly strong.",
     realWorld: "Bridge engineers use strong shapes like arches, beams, and trusses, and they test models before building real bridges across Maine's rivers.",
     vocab: [
@@ -2505,6 +2603,9 @@ window.STEM.activities = [
   },
   {
     id: "sense-think-act",
+    skills: [
+      "logic"
+    ],
     why: "Robots don't decide like people do. They follow rules: sense something, check a rule, then act. When two rules conflict, the robot needs a priority, or it gets stuck.",
     realWorld: "Robot vacuums sense a wall and turn, and self-driving cars have rules for which signal matters most when two happen at once.",
     vocab: [
@@ -2579,6 +2680,10 @@ window.STEM.activities = [
   },
   {
     id: "marble-run-iteration",
+    skills: [
+      "data",
+      "design-iteration"
+    ],
     why: "Hitting an exact target takes careful testing. Changing one thing at a time and averaging three runs shows what each change really does.",
     realWorld: "Engineers tune roller coasters, conveyor belts, and water slides the same way: small changes, many measured tests.",
     vocab: [
@@ -2665,6 +2770,9 @@ window.STEM.activities = [
   /* ───────────────────────────── Science & Discovery ───────────────────────────── */
   {
     id: "sink-or-float",
+    skills: [
+      "fair-testing"
+    ],
     why: "Scientists predict, test, and then change their ideas when the evidence surprises them. A surprise isn't a mistake. It's how you learn something new.",
     realWorld: "Boat builders in Maine shape heavy steel and wood so boats float, the same idea as your crumpled and flat foil.",
     vocab: [
@@ -2743,6 +2851,10 @@ window.STEM.activities = [
   },
   {
     id: "paper-helicopter",
+    skills: [
+      "data",
+      "fair-testing"
+    ],
     why: "A fair test changes just one thing, measures one thing, and keeps everything else the same. Repeating trials and averaging them means one odd drop can't fool you.",
     realWorld: "Maple seeds spin like helicopters as they fall, and engineers study that spin when they design drones and parachutes.",
     vocab: [
@@ -2830,6 +2942,10 @@ window.STEM.activities = [
 
   {
     id: "melting-race",
+    skills: [
+      "observation",
+      "fair-testing"
+    ],
     why: "Some materials move heat quickly and some slowly. Metal feels cold because it pulls heat from your hand fast, and that same speed is what melts the ice.",
     realWorld: "Maine homes use insulation to keep heat in during winter, and cooks choose metal or wooden spoons depending on whether they want heat to move.",
     vocab: [
@@ -2910,6 +3026,10 @@ window.STEM.activities = [
   /* ───────────────────────────── Creative STEM ───────────────────────────── */
   {
     id: "pixel-art-code",
+    skills: [
+      "data",
+      "encoding-art"
+    ],
     why: "Every picture on a screen is a grid of tiny squares, and a computer stores it as a code. If the code is exact, anyone can rebuild the picture perfectly.",
     realWorld: "Phones and TVs show pictures made of millions of pixels, and computers send pictures as codes, much like yours.",
     vocab: [
@@ -2986,6 +3106,9 @@ window.STEM.activities = [
   },
   {
     id: "animate-your-name",
+    skills: [
+      "encoding-art"
+    ],
     why: "In code, an event like a click can start an action. Each sprite can have its own script, so many things can happen in one project.",
     realWorld: "Buttons on websites and apps run code when you click them, and animators use code to make letters move in movie titles and logos.",
     vocab: [
@@ -3072,6 +3195,10 @@ window.STEM.activities = [
   },
   {
     id: "stop-motion-studio",
+    skills: [
+      "encoding-art",
+      "communication"
+    ],
     why: "Animation is many still pictures shown quickly. Small, steady changes between frames make motion look smooth.",
     realWorld: "Studios make stop-motion movies by moving clay figures and puppets a tiny bit for every photo, thousands of times.",
     vocab: [
@@ -3166,6 +3293,10 @@ window.STEM.activities = [
      with full directions on the page. */
   {
     id: "lobster-trap-logic",
+    skills: [
+      "sequencing",
+      "logic"
+    ],
     check: "Run two lobster cards through your flowchart out loud. Then show the rule the one-question flowchart was missing.",
     stopAt: "Your flowchart sorts every card the same way as another team's, and your rules are written as IF–ELSE text.",
     stuck: [
@@ -3239,6 +3370,9 @@ window.STEM.activities = [
   },
   {
     id: "tide-watchers",
+    skills: [
+      "data"
+    ],
     why: "Graphs turn a table of numbers into a picture you can read. A pattern that's hard to see in a list, like two tides a day, jumps out on a line graph.",
     realWorld: "Harbormasters, lobstermen, and ferry captains in Maine check tide predictions from NOAA every day to know when boats can safely come and go.",
     vocab: [
@@ -3324,6 +3458,10 @@ window.STEM.activities = [
   },
   {
     id: "lighthouse-beam",
+    skills: [
+      "data",
+      "design-iteration"
+    ],
     why: "Light reflects off shiny surfaces, and a curved reflector can gather scattered light into a strong beam. Measuring the spot tells you which design really works.",
     realWorld: "Maine's lighthouses, like Portland Head Light, used curved reflectors and glass lenses to send their beams many miles out to sea.",
     vocab: [
@@ -3409,6 +3547,9 @@ window.STEM.activities = [
   },
   {
     id: "float-a-turbine",
+    skills: [
+      "design-iteration"
+    ],
     why: "Floating things stay upright when their weight sits low and their base is wide. Engineers test with the same waves each time so they can compare designs fairly.",
     realWorld: "The University of Maine designed a floating wind turbine base, VolturnUS, to put turbines in the deep water of the Gulf of Maine.",
     vocab: [
@@ -3495,6 +3636,11 @@ window.STEM.activities = [
   },
   {
     id: "blueberry-sorter",
+    skills: [
+      "data",
+      "training-data",
+      "responsible-use"
+    ],
     why: "A sorting machine only knows the examples it was trained on. If it never saw a dusty-blue leaf, it can't know to toss one, so people test it and check its work.",
     realWorld: "Plants that process Maine's wild blueberries use optical sorting machines with cameras to separate berries from leaves and stems, and workers check what the machines miss.",
     vocab: [
@@ -3574,6 +3720,9 @@ window.STEM.activities = [
   },
   {
     id: "sap-run-detectives",
+    skills: [
+      "data"
+    ],
     why: "Patterns in data can explain how nature works. Here, cold nights and warm days line up with sap running, and that's the clue to what's happening inside the tree.",
     realWorld: "Maine's maple producers watch the weather forecast for freezing nights and thawing days to know when to tap their trees and collect sap.",
     vocab: [
@@ -3653,6 +3802,10 @@ window.STEM.activities = [
   },
   {
     id: "acadia-from-above",
+    skills: [
+      "observation"
+    ],
+    delivery: "Browser (Google Earth)",
     why: "Maps and 3D views let you explore places you can't visit, and landforms hold clues to the past. Acadia's smooth mountains and long sound were shaped by glaciers.",
     realWorld: "Park rangers, geologists, and search-and-rescue teams in Acadia use maps, compass directions, and 3D views to plan routes and study the land.",
     vocab: [
@@ -3744,6 +3897,10 @@ window.STEM.activities = [
   },
   {
     id: "maine-postcard",
+    skills: [
+      "encoding-art",
+      "communication"
+    ],
     why: "A loop repeats code forever, so a small animation can keep going. Planning what stays still and what moves keeps a project simple.",
     realWorld: "Animated greeting cards, website banners, and app icons use short loops to catch your eye.",
     vocab: [
@@ -3830,6 +3987,14 @@ window.STEM.activities = [
   /* ───────────────────────────── Interactive labs (run inside STEM 207) ───────────────────────────── */
   {
     id: "lab-rover",
+    skills: [
+      "sequencing",
+      "debugging",
+      "loops",
+      "logic",
+      "data",
+      "functions"
+    ],
     why: "Real programmers rarely solve a problem in one try. They plan, run, watch what happens, and fix one thing at a time. The boat shows you every step, so you can see exactly where your plan and the program disagree.",
     realWorld: "Self-driving boats and ocean robots map the Gulf of Maine on their own, and the people who program them test each route in small steps first, just like you.",
     vocab: [
@@ -3915,6 +4080,10 @@ window.STEM.activities = [
   },
   {
     id: "lab-dance-party",
+    skills: [
+      "sequencing",
+      "debugging"
+    ],
     why: "Every program is a list of steps that run in order. Change the order and you change what happens, even when the steps are the same. That's true for a dance robot, a video game, and the apps on a phone.",
     realWorld: "Animators and game makers line up moves in exact order, and factory robots repeat the same sequence of moves thousands of times a day.",
     vocab: [
@@ -3991,6 +4160,11 @@ window.STEM.activities = [
   },
   {
     id: "lab-space-blob",
+    skills: [
+      "debugging",
+      "events",
+      "data"
+    ],
     why: "Programs have to remember things: a score, a number of lives, how many snacks. A variable is a labeled box that holds that number, and the program can read it and change it.",
     realWorld: "Games keep your score in a variable, a step counter keeps your steps in one, and a store's website keeps the number of items in your cart.",
     vocab: [
@@ -4061,6 +4235,10 @@ window.STEM.activities = [
   },
   {
     id: "lab-moon-gate",
+    skills: [
+      "logic",
+      "debugging"
+    ],
     why: "A conditional lets a program make choices: IF something is true, do this, ELSE do that. To trust a rule, you have to test it with inputs that should pass and inputs that shouldn't.",
     realWorld: "Door badges at schools and hospitals use rules like yours: IF the badge matches, THEN unlock, ELSE stay locked.",
     vocab: [
@@ -4140,6 +4318,10 @@ window.STEM.activities = [
   },
   {
     id: "lab-field-station",
+    skills: [
+      "observation"
+    ],
+    delivery: "Browser 360° (not headset VR)",
     why: "Scientists are careful about the difference between what they see (an observation) and what they think it means (an inference). Keeping those apart is how science stays honest.",
     realWorld: "Field biologists in Maine study tide pools, ponds, and forests, write down exactly what they see, and use compass headings to find the same spot again next year.",
     vocab: [
@@ -4229,6 +4411,11 @@ window.STEM.activities = [
   },
   {
     id: "lab-pattern-machine",
+    skills: [
+      "data",
+      "training-data",
+      "responsible-use"
+    ],
     why: "AI doesn't think. It finds patterns in the examples people give it. If the examples are too few or lopsided, the AI learns the wrong lesson, so people have to check its work.",
     realWorld: "Apps that sort photos, spam filters, and tools that help doctors read X-rays all learn from labeled examples, and all of them can make mistakes a person needs to catch.",
     vocab: [
@@ -4306,6 +4493,11 @@ window.STEM.activities = [
   },
   {
     id: "lab-launcher",
+    skills: [
+      "data",
+      "fair-testing",
+      "design-iteration"
+    ],
     why: "Engineers rarely get a design right the first time. They test, look at the results, and change one thing at a time, so they know what made the difference.",
     realWorld: "Engineers test bridges, boats, and sports equipment the same way, and pumpkin-launching contests at fall fairs are real engineering challenges.",
     vocab: [
@@ -4382,6 +4574,10 @@ window.STEM.activities = [
   },
   {
     id: "lab-line-follower",
+    skills: [
+      "debugging",
+      "logic"
+    ],
     why: "Robots don't see the world like we do. They sense one thing, decide with a rule, and act, over and over. Good rules cover every case the robot might sense.",
     realWorld: "Warehouse robots follow lines on the floor, and some plows and tractors use sensors and GPS to stay on course in bad weather.",
     vocab: [
@@ -4457,6 +4653,10 @@ window.STEM.activities = [
   },
   {
     id: "lab-ramp-racers",
+    skills: [
+      "data",
+      "fair-testing"
+    ],
     why: "One test can fool you, because measurements vary. Scientists repeat trials, keep everything else the same, and let the data, not a guess, answer the question.",
     realWorld: "Ski and sled designers, and engineers who build safe ramps and roads, test slopes and surfaces with repeated trials before they trust a result.",
     vocab: [
@@ -4537,6 +4737,9 @@ window.STEM.activities = [
   },
   {
     id: "lab-pixel-studio",
+    skills: [
+      "encoding-art"
+    ],
     why: "Every picture on a screen is a grid of tiny colored squares called pixels. Computers store a picture as numbers, and an animation is just pictures shown fast, one after another.",
     realWorld: "Video game artists draw pixel art, and every cartoon, movie, and GIF you watch is a series of frames played quickly.",
     vocab: [

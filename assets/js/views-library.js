@@ -33,6 +33,9 @@
     return chips.join("");
   }
 
+  /* Skill names (STEM.skills, the vocabulary approved October 28, 2026). */
+  SE.skillName = (id) => ((STEM.skills || []).find((s) => s.id === id) || { name: id }).name;
+
   SE.isMaine = (a) => (a.keywords || []).includes("maine");
   const maineTag = (a) => (SE.isMaine(a) ? `<span class="maine-tag">${SE.pine(14)}Made in Maine</span>` : "") + pilotTag(a);
   /* Pilot activities are only flagged for educators; students just see a normal activity. */
@@ -68,7 +71,7 @@
         <div><dt>Format</dt><dd>${esc(formats[a.format].name)}</dd></div>
         <div><dt>Equipment</dt><dd>${esc(SE.equipmentText(a.equipment))}</dd></div>
         ${a.delivery ? `<div><dt>Delivery</dt><dd>${esc(a.delivery)}</dd></div>` : ""}
-        ${a.skills && a.skills.length ? `<div><dt>Skills</dt><dd>${esc(a.skills.map((id) => (STEM.skills.find((s) => s.id === id) || { name: id }).name).join(", "))}</dd></div>` : ""}
+        ${a.skills && a.skills.length ? `<div><dt>Skills</dt><dd>${esc(a.skills.map(SE.skillName).join(", "))}</dd></div>` : ""}
         ${a.alsoIn && a.alsoIn.length ? `<div><dt>Also in</dt><dd>${a.alsoIn.filter((id) => SE.areaById[id]).map((id) => `<a href="#/activities/${id}">${esc(SE.areaById[id].name)}</a>`).join(", ")}</dd></div>` : ""}
       </dl>`;
   }
@@ -105,7 +108,7 @@
   SE.backLink = backLink;
 
   /* ───────── Library state ───────── */
-  const defaultFilters = () => ({ q: "", area: "", level: "", grade: "", time: "", equip: "", status: "", pilot: "" });
+  const defaultFilters = () => ({ q: "", area: "", level: "", grade: "", time: "", equip: "", skill: "", status: "", pilot: "" });
   let filters = defaultFilters();
   let filtersFor = null; // the user the filters were set up for
 
@@ -119,13 +122,14 @@
     if (f.time && SE.timeMax(a) > durations.find((d) => d.id === f.time).max) return false;
     if (f.pilot && !a.pilot) return false;
     if (f.equip && !a.equipment.includes(f.equip)) return false;
+    if (f.skill && !(a.skills || []).includes(f.skill)) return false;
     if (f.status && prof) {
       const done = prof.completedIds.has(a.id);
       if (f.status === "todo" && done) return false;
       if (f.status === "done" && !done) return false;
     }
     if (f.q) {
-      const hay = [a.title, a.summary, a.mission, SE.areaById[a.area].name, ...(a.keywords || [])].join(" ").toLowerCase();
+      const hay = [a.title, a.summary, a.mission, SE.areaById[a.area].name, ...(a.keywords || []), ...(a.skills || []).map((s) => SE.skillName(s))].join(" ").toLowerCase();
       if (!f.q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => hay.includes(w))) return false;
     }
     return true;
@@ -158,13 +162,14 @@
             <label for="f-q" class="visually-hidden">Search activities</label>
             <input id="f-q" type="search" placeholder="Search activities, like maze, loops, or bridge" autocomplete="off" value="${esc(filters.q)}">
           </div>
-          <div class="filters ${prof ? "filters--six" : ""}">
+          <div class="filters">
             ${selectField("f-area", "Topic", "area", "All topics", SE.liveAreas.map((a) => [a.id, a.name]))}
             ${selectField("f-level", "Experience", "level", "Any level", levels.map((l) => [l.id, l.name]))}
             ${selectField("f-grade", "Grade band", "grade", "Any grade", gradeBands.map((g) => [g.id, g.name]))}
             ${selectField("f-time", "Time", "time", "Any length", durations.map((d) => [d.id, d.name]))}
             ${selectField("f-equip", "Equipment", "equip", "Any equipment",
               Object.entries(equipment).filter(([, v]) => v.filter).map(([k, v]) => [k, v.name]))}
+            ${selectField("f-skill", "Skill", "skill", "Any skill", (STEM.skills || []).map((s) => [s.id, s.name]))}
             ${prof ? selectField("f-status", "My progress", "status", "All activities", [["todo", "Not done yet"], ["done", "Completed"]]) : ""}
             ${user && user.role === "educator" ? selectField("f-pilot", "Collection", "pilot", "All activities", [["yes", "Pilot activities"]]) : ""}
           </div>
@@ -230,6 +235,7 @@
     if (filters.grade) names.push(SE.gradeById[filters.grade].name);
     if (filters.time) names.push(durations.find((d) => d.id === filters.time).name);
     if (filters.equip) names.push(equipment[filters.equip].name);
+    if (filters.skill) names.push(SE.skillName(filters.skill));
     if (filters.status) names.push(filters.status === "done" ? "Completed" : "Not done yet");
 
     document.getElementById("reset-filters").hidden = names.length === 0;
