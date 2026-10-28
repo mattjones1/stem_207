@@ -1850,7 +1850,7 @@ window.STEM.activities = [
     },
     steps: [
       "Open Teachable Machine and start an Image Project. Name three classes after your objects.",
-      "Hold up object 1 and record about 50 images. Ask students: should we move it around? Why?",
+      "Hold up object 1 and record about 50 images. Talk about it: should you move it around while you record? Why?",
       "Record the other two objects the same way.",
       "Click Train Model and wait.",
       "Test: hold up each object. Read the confidence bars aloud.",
@@ -2161,7 +2161,7 @@ window.STEM.activities = [
     },
     steps: [
       "Volunteers are \"robots.\" Their sensor is their eyes, and they may only react to the colored cards.",
-      "The teacher holds up colors. Robots follow the rule.",
+      "Watch for the colored cards. When a color goes up, follow the rule.",
       "Add a rule: IF you see yellow, THEN turn around.",
       "Add a touch sensor: IF someone taps your shoulder, THEN freeze.",
       "Try a conflict: hold up green while tapping a shoulder. What should the robot do?",
@@ -2575,7 +2575,7 @@ window.STEM.activities = [
       "In teams, draw a flowchart. Each diamond asks one yes/no question. Each arrow leads to another question or to KEEP or BACK.",
       "Run your flowchart: one teammate reads a card, another follows the arrows out loud, a third drops the card in a bin.",
       "Trade flowcharts with another team and run their cards through it. Did both flowcharts sort every lobster the same way?",
-      "Debug: the teacher shows a flowchart that only checks “Is it at least 3¼ inches?” Find the lobster cards it gets wrong.",
+      "Debug: look at a flowchart that only checks “Is it at least 3¼ inches?” Find the lobster cards it gets wrong.",
       "Rewrite your rules as code-like text: IF eggs THEN back. ELSE IF V-notch THEN back. ELSE IF …"
     ],
     reflect: "Does it matter which question your flowchart asks first? Try putting the questions in a different order. Does it still sort correctly?",
@@ -3433,7 +3433,7 @@ window.STEM.activities = [
       "Make a small cylinder hole about 4 mm wide. Push it through the top of the buoy, so it goes all the way across.",
       "Select the buoy and the hole together and press Group. Check from two sides that the hole goes all the way through.",
       "Put the Ruler on the workplane. Is the charm under 40 mm tall? If not, shrink it evenly.",
-      "Lay the buoy on its side if your teacher asks, so it prints without supports. Press Export and choose .STL.",
+      "Lay the buoy on its side so it prints without supports (skip this if you've been told to print it standing up). Press Export and choose .STL.",
       "Hand in your STL for printing. While it prints, sketch the colors for your family's buoy."
     ],
     reflect: "Which basic shapes did you combine to make your buoy? If you made it again, what would you change so it prints better or looks more like a real buoy?",

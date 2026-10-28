@@ -45,7 +45,7 @@ window.STEM.pathway = [
     project: "Shorten a long dance with loops, then fix a broken animation that uses the wrong kind of loop.",
     debugging: "Compare what the loop should repeat with what it actually repeats. Change one thing, then test.",
     iCan: "I can use a loop to repeat steps, and explain how many times it will run.",
-    activities: ["loop-dance", "debug-animation", "snowstorm-clones"]
+    activities: ["loop-dance", "debug-animation", "snowstorm-clones", "lab-rover"]
   },
   {
     stage: 4,
@@ -58,7 +58,7 @@ window.STEM.pathway = [
     project: "Build an interactive story where the reader's choice changes the ending.",
     debugging: "Test every branch, including answers you didn't plan for.",
     iCan: "I can use if–then–else to make a program choose what to do, and test every path.",
-    activities: ["interactive-story", "sense-think-act", "lab-moon-gate", "noreaster-alerts"]
+    activities: ["interactive-story", "sense-think-act", "lab-moon-gate", "lobster-trap-logic", "noreaster-alerts"]
   },
   {
     stage: 5,

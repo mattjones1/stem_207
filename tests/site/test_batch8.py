@@ -34,7 +34,7 @@ async def main():
         await go(pg, old)
         ok(f"educator: {old} goes to the template", pg.url.endswith(new), pg.url)
     await go(pg, "#/teach/plans/tpl-coding-foundations")
-    ok("Coding Foundations template has the 24 coding activities", await pg.locator(".pw-step").count() == 24)
+    ok("Coding Foundations template has its 26 activities (Harbor Code and Lobster Trap Logic added October 28, 2026)", await pg.locator(".pw-step").count() == 26)
     await go(pg, "#/activities/coding")
     ok("Coding category points educators to the template", await pg.locator('a[href="#/teach/plans/tpl-coding-foundations"]').count() == 1)
 

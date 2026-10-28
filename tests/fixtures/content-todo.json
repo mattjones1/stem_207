@@ -1,0 +1,488 @@
+{
+  "robot-maze-mission": [
+    "simple",
+    "standards"
+  ],
+  "event-party": [
+    "simple",
+    "standards"
+  ],
+  "loop-dance": [
+    "next",
+    "simple",
+    "standards"
+  ],
+  "debug-animation": [
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "standards"
+  ],
+  "interactive-story": [
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "standards"
+  ],
+  "score-keeper": [
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "standards"
+  ],
+  "my-blocks-patterns": [
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "standards"
+  ],
+  "capstone-game": [
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "standards"
+  ],
+  "fix-the-recipe": [
+    "check",
+    "stuck",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "lab-robot-chef": [
+    "next",
+    "simple",
+    "standards"
+  ],
+  "sort-the-catch": [
+    "standards"
+  ],
+  "lighthouse-network": [
+    "standards"
+  ],
+  "snowstorm-clones": [
+    "standards"
+  ],
+  "noreaster-alerts": [
+    "standards"
+  ],
+  "catch-log-lists": [
+    "standards"
+  ],
+  "snowflake-functions": [
+    "standards"
+  ],
+  "capstone-studio": [
+    "next",
+    "standards"
+  ],
+  "python-turtle-bridge": [
+    "next",
+    "standards"
+  ],
+  "ecosystem-field-trip": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "notice-and-wonder-360": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "how-ai-sorts": [
+    "why",
+    "realWorld",
+    "vocab",
+    "simple",
+    "standards"
+  ],
+  "teachable-machine-classroom": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "standards"
+  ],
+  "ai-secret-signals": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "ai-for-oceans": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "ai-limits-detectives": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "standards"
+  ],
+  "pattern-predictors": [
+    "why",
+    "realWorld",
+    "vocab",
+    "simple",
+    "standards"
+  ],
+  "paper-bridge": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "sense-think-act": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "marble-run-iteration": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "standards"
+  ],
+  "sink-or-float": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "paper-helicopter": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "standards"
+  ],
+  "melting-race": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "pixel-art-code": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "animate-your-name": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "stop-motion-studio": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "lobster-trap-logic": [
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "tide-watchers": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "standards"
+  ],
+  "lighthouse-beam": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "float-a-turbine": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "standards"
+  ],
+  "blueberry-sorter": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "sap-run-detectives": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "standards"
+  ],
+  "acadia-from-above": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "maine-postcard": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "standards"
+  ],
+  "lab-rover": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "lab-dance-party": [
+    "why",
+    "realWorld",
+    "vocab",
+    "simple",
+    "standards"
+  ],
+  "lab-space-blob": [
+    "why",
+    "realWorld",
+    "vocab",
+    "simple",
+    "standards"
+  ],
+  "lab-moon-gate": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "lab-field-station": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "lab-pattern-machine": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "standards"
+  ],
+  "lab-launcher": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "standards"
+  ],
+  "lab-line-follower": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "standards"
+  ],
+  "lab-ramp-racers": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "standards"
+  ],
+  "lab-pixel-studio": [
+    "why",
+    "realWorld",
+    "vocab",
+    "check",
+    "stopAt",
+    "stuck",
+    "next",
+    "time",
+    "simple",
+    "standards"
+  ],
+  "3d-buoy-charm": [
+    "standards"
+  ],
+  "3d-trail-marker": [
+    "standards"
+  ],
+  "3d-fix-it-clip": [
+    "next",
+    "standards"
+  ]
+}

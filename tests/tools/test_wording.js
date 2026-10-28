@@ -37,7 +37,7 @@ VIEWS.forEach((f) => {
 ok("view text between tags is clean", !viewHits.length, "\n  " + viewHits.join("\n  "));
 
 // Student steps speak to the student.
-const TEACHER_VOICE = /^(Give each|Show (the|one)|Reveal|Hand out|Have (students|each|teams)|Tell students|Ask students|Pass out|Distribute|Divide the class)|\bstudents (write|call out)\b/i;
+const TEACHER_VOICE = /^(Give each|Show (the|one)|Reveal|Hand out|Have (students|each|teams)|Tell students|Ask students|Pass out|Distribute|Divide the class)|\bstudents (write|call out)\b|\b(the teacher (holds|shows|says|reads|hands|calls|picks|asks)|ask students|have students|tell students|if your teacher asks)\b/i;
 const voice = [];
 STEM.activities.forEach((a) => (a.steps || []).forEach((s, i) => { const t = typeof s === "string" ? s : s.text || ""; if (TEACHER_VOICE.test(t)) voice.push(`${a.id} step ${i + 1}: ${t.slice(0, 80)}`); }));
 ok("student steps are written to students", !voice.length, "\n  " + voice.join("\n  "));

@@ -34,6 +34,10 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 5. If the lab practices a pathway stage, add its activity id to that stage in `pathway.js`.
 6. Add a row to the lab table in `README.md`.
 
+## Every activity is complete (content linter)
+- `node tests/tools/test_content.js` checks every published activity for the full lesson shape: `learn` (2–6), `why`, `realWorld`, `vocab` (2–5 `{term, def}`), `check`, `stopAt`, `stuck` (2–4), `next` (a published id), `time { prep, core }`, `teacherNotes` (3+), `steps`, a `simple { mission, steps }` version for grades 2–3 (same steps, in order), and `standards` (codes from `data/standards.js` only). It also checks skills, standards, and Coding Foundations listings.
+- Known gaps from October 28, 2026 are in `tests/fixtures/content-todo.json`. That list only shrinks: a new gap fails, and so does a fixed gap still on the list. **A new activity must be complete.** `--report` prints the gaps.
+
 ## Pilot mission fields (optional on any activity)
 - `pilot: true` puts it in the teacher "Pilot missions" filters.
 - `time: { prep, core: [min, max], verified }`: shown as student time and teacher prep, and used by the time filters. Keep `duration` (20/30/45) for XP. Set `verified: true` only after classroom timing.
