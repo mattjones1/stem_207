@@ -38,6 +38,12 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - `node tests/tools/test_content.js` checks every published activity for the full lesson shape: `learn` (2–6), `why`, `realWorld`, `vocab` (2–5 `{term, def}`), `check`, `stopAt`, `stuck` (2–4), `next` (a published id), `time { prep, core }`, `teacherNotes` (3+), `steps`, a `simple { mission, steps }` version for grades 2–3 (same steps, in order), and `standards` (codes from `data/standards.js` only). It also checks skills, standards, and Coding Foundations listings.
 - Known gaps from October 28, 2026 are in `tests/fixtures/content-todo.json`. That list only shrinks: a new gap fails, and so does a fixed gap still on the list. **A new activity must be complete.** `--report` prints the gaps.
 
+## Young readers (grades 2–3)
+- Every activity that includes grades 2–3 has `simple: { mission, steps }`: the same steps in the same order, short sentences (12 words or fewer, checked by the linter).
+- **Simple words** (`#simple-toggle` on the activity page) is on by default for students in the 2–3 band; anyone can switch, and the choice is remembered (`localStorage stem207.simple`).
+- **Read it to me** (`SE.speech` in `core.js`): the browser's own voice, only when a button is pressed (never autoplay). The same button stops it, it highlights the part being read (`.is-reading`), and changing pages stops it. It's on the mission, the steps, and a lab's goal and steps. The button is hidden when the browser has no speech support. Nothing leaves the device.
+- Test: `python3 tests/site/test_young_readers.py` (it stubs `speechSynthesis`).
+
 ## Pilot mission fields (optional on any activity)
 - `pilot: true` puts it in the teacher "Pilot missions" filters.
 - `time: { prep, core: [min, max], verified }`: shown as student time and teacher prep, and used by the time filters. Keep `duration` (20/30/45) for XP. Set `verified: true` only after classroom timing.

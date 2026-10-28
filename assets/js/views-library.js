@@ -764,16 +764,25 @@
     const st = isStudent ? SE.game.statusFor(prof, a) : null;
     const launchable = a.launch.status === "lab" || (a.launch.status === "ready" && a.launch.url);
 
+    /* Simple words: a plainer mission and steps for grades 2–3 (a.simple). On by default for students
+       in the 2–3 band; anyone can switch, and the choice is remembered on this device. */
+    let simplePref = null;
+    try { simplePref = localStorage.getItem("stem207.simple"); } catch (e) { /* private mode */ }
+    const simple = !!a.simple && (simplePref ? simplePref === "1" : !!isStudent && user.gradeBand === "2-3");
+    const missionText = simple ? a.simple.mission : a.mission;
+    const stepText = (i) => (simple ? a.simple.steps[i] : a.steps[i]);
+    const simpleToggle = a.simple ? `<button type="button" class="btn btn--ghost btn--small simple-toggle" id="simple-toggle" aria-pressed="${simple}">${icon("bulb")}Simple words</button>` : "";
+
     const stepsHtml = isStudent
       ? `<ol class="steps steps--check">${a.steps.map((x, i) => `
           <li><label class="step-check">
             <input type="checkbox" data-step="${i}" ${checked.has(i) ? "checked" : ""}>
             <span class="step-check__box" aria-hidden="true">${icon("check")}</span>
             <span class="step-check__num" aria-hidden="true">${i + 1}</span>
-            <span class="step-check__text"><span class="visually-hidden">Step ${i + 1}: </span>${esc(x)}</span>
+            <span class="step-check__text"><span class="visually-hidden">Step ${i + 1}: </span>${esc(stepText(i))}</span>
           </label></li>`).join("")}</ol>
          <p class="steps-progress" id="steps-progress" aria-live="polite"></p>`
-      : `<ol class="steps">${a.steps.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ol>`;
+      : `<ol class="steps">${a.steps.map((x, i) => `<li><span>${esc(stepText(i))}</span></li>`).join("")}</ol>`;
 
     app().innerHTML = `
       <section class="page-top">
@@ -802,8 +811,8 @@
       <div class="wrap activity-layout">
         <div class="activity-main">
           <section class="block block--mission" aria-labelledby="s-mission">
-            <h2 id="s-mission">${icon("target")}Your activity</h2>
-            <p>${esc(a.mission)}</p>
+            <div class="block__head-row"><h2 id="s-mission">${icon("target")}Your activity</h2><div class="read-tools">${simpleToggle}${SE.speech.button("mission")}</div></div>
+            <p id="mission-text">${esc(missionText)}</p>
             ${a.board ? `<div class="board"><p class="board__title">${esc(a.board.title)}</p><ol class="${a.board.code ? "board--code" : ""}">${a.board.lines.map((x) => `<li>${a.board.code ? `<code>${esc(x)}</code>` : esc(x)}</li>`).join("")}</ol>${a.board.note ? `<p class="board__note">${esc(a.board.note)}</p>` : ""}</div>` : ""}
           </section>
           ${a.bridge && SE.activityById[a.bridge.from] ? `<p class="bridge">${icon("arrowRight")}<span><strong>You've seen this idea before.</strong> ${esc(a.bridge.text)} <a href="#/activity/${a.bridge.from}">${esc(SE.activityById[a.bridge.from].title)}</a></span></p>` : ""}
@@ -825,7 +834,7 @@
             <h3>Taking part without a headset</h3><p>${esc(a.vr.nonHeadset)}</p>
           </section>` : ""}
           <section class="block" aria-labelledby="s-steps">
-            <h2 id="s-steps">${icon("list")}Your steps</h2>
+            <div class="block__head-row"><h2 id="s-steps">${icon("list")}Your steps</h2><div class="read-tools">${SE.speech.button("steps")}</div></div>
             ${isStudent ? `<p class="block__hint">Check off each step as you finish it.</p>` : ""}
             ${a.starter ? `<div class="starter">${icon("box")}<span><strong>Starter project:</strong> ${esc(a.starter.how)}</span><a class="btn btn--primary btn--small" href="${esc(a.starter.file)}" download>${icon("arrowRight")}${esc(a.starter.label)}</a></div>` : ""}
             ${stepsHtml}
@@ -886,6 +895,17 @@
         </div>
         <div class="cards">${related.map((r) => activityCard(r, prof)).join("")}</div>
       </section>` : ""}`;
+
+    const st2 = document.getElementById("simple-toggle");
+    if (st2) st2.addEventListener("click", () => {
+      try { localStorage.setItem("stem207.simple", simple ? "0" : "1"); } catch (e) { /* private mode: this page only */ }
+      const y = window.scrollY; SE.route(true); window.scrollTo(0, y);
+      const t = document.getElementById("simple-toggle"); if (t) t.focus();
+    });
+    app().querySelectorAll("[data-read]").forEach((b) => b.addEventListener("click", () => {
+      if (b.dataset.read === "mission") SE.speech.read(b, [{ text: missionText, el: document.getElementById("mission-text") }]);
+      else SE.speech.read(b, [...app().querySelectorAll(".block:has(#s-steps) ol.steps > li")].map((li, i) => ({ text: `Step ${i + 1}. ${stepText(i)}`, el: li })));
+    }));
 
     // Student tracking
     if (isStudent) {

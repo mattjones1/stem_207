@@ -113,6 +113,7 @@
           <p class="lab-goal"><strong>Your goal:</strong> ${esc(level.goal)}</p>
           ${level.steps ? `<ol class="lab-steps">${level.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>` : ""}
           <div class="lab-brief__tools">
+            ${SE.speech.button("lab")}
             <button type="button" class="btn btn--ghost btn--small" id="lab-hint-btn" aria-expanded="false" aria-controls="lab-hint">${icon("question")}Need a hint?</button>
             ${done.has(idx) ? `<span class="chip chip--done">${icon("check")}You finished this level</span>` : ""}
           </div>
@@ -126,6 +127,11 @@
         </section>
       </div>
       ${!user || user.role === "guest" ? `<div class="wrap"><p class="muted lab-guest">${icon("user", 'class="inline-icon"')}Exploring as a guest: your lab progress won't be saved. <a href="#/signin">Sign in</a> to save your progress.</p></div>` : ""}`;
+
+    const readBtn = document.querySelector('[data-read="lab"]');
+    if (readBtn) readBtn.addEventListener("click", () => SE.speech.read(readBtn,
+      [{ text: `Your goal: ${level.goal}`, el: document.querySelector(".lab-goal") }]
+        .concat((level.steps || []).map((s, i) => ({ text: `Step ${i + 1}. ${s}`, el: document.querySelectorAll(".lab-steps li")[i] })))));
 
     const hintBtn = document.getElementById("lab-hint-btn");
     hintBtn.addEventListener("click", () => {

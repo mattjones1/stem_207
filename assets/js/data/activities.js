@@ -19,6 +19,19 @@ window.STEM.activities = [
   /* ───────────────────────────── Coding & Computer Science ───────────────────────────── */
   {
     id: "robot-maze-mission",
+    simple: {
+      "mission": "A robot is stuck in a maze. Write steps that get it to the goal. Don't let it bump a wall!",
+      "steps": [
+        "One partner is the Robot. Stand on Start. Do only what the cards say.",
+        "The Programmer puts arrow cards in order. No talking!",
+        "The Programmer reads each card. The Robot moves one square or turns.",
+        "Did the Robot bump a wall? Stop. Find the wrong card. Fix it. Try again.",
+        "Switch jobs. Try a new maze.",
+        "Now open the Maze game. Drag blocks to move to the goal.",
+        "Before you press Run, say where it will stop.",
+        "Play more levels. Later levels have repeat blocks."
+      ]
+    },
     skills: [
       "sequencing"
     ],
@@ -92,6 +105,18 @@ window.STEM.activities = [
   },
   {
     id: "event-party",
+    simple: {
+      "mission": "Make a character that moves when you click it. Keys can make it move too.",
+      "steps": [
+        "Open Scratch. Pick a sprite, or keep the cat.",
+        "Find the yellow Events blocks. Drag out \"when this sprite clicked.\"",
+        "Snap a block under it, like \"say Hello!\"",
+        "Click your sprite to test it.",
+        "Add \"when space key pressed.\" Make it do something new.",
+        "Add one more key that does something else.",
+        "Test each one. If one doesn't work, check which key it uses."
+      ]
+    },
     skills: [
       "events"
     ],
@@ -160,6 +185,19 @@ window.STEM.activities = [
   },
   {
     id: "loop-dance",
+    simple: {
+      "mission": "Write a robot dance. Use repeat to make the program short. The dance must stay the same.",
+      "steps": [
+        "Do the long dance as a class. Count the moves. There are 16.",
+        "Circle moves that repeat. Write the dance again with \"Repeat ___ times.\"",
+        "Open the Dance Crew starter in Scratch. Click the green flag.",
+        "Count the blocks. Write the number down.",
+        "Put a repeat block around one clap and stomp. Delete the extra copies.",
+        "The dance happens twice. Put repeat 2 around the middle part.",
+        "Run it. Is it the same dance? Count your blocks again.",
+        "Bonus: make your own dance with a loop inside a loop."
+      ]
+    },
     skills: [
       "loops"
     ],
@@ -642,6 +680,18 @@ window.STEM.activities = [
 
   {
     id: "fix-the-recipe",
+    simple: {
+      "mission": "The robot chef does exactly what the steps say. The steps have bugs. Fix them so the robot can make a sandwich.",
+      "steps": [
+        "Read the robot chef's steps. Do you see a problem?",
+        "Watch the robot do step 1 exactly.",
+        "When something goes wrong, call out \"Bug!\" Which step was it?",
+        "Is a step missing, in the wrong place, or not clear?",
+        "Help fix the step so it says exactly what to do.",
+        "Start again from step 1 with your fix.",
+        "Keep fixing until the robot makes the sandwich."
+      ]
+    },
     skills: [
       "sequencing",
       "debugging"
@@ -720,6 +770,16 @@ window.STEM.activities = [
   /* Batch 7: Robot Chef lab entry and the grades 6–8 coding track (one per stage) plus the Python bridge. */
   {
     "id": "lab-robot-chef",
+    "simple": {
+      "mission": "The robot chef follows your steps exactly. Fix the bugs so the robot can make lunch.",
+      "steps": [
+        "Level 1: Run the steps. Find the first one that goes wrong.",
+        "Level 2: Put the steps in the right order. Run it.",
+        "Level 3: Add the missing steps. Put them in place.",
+        "Level 4: Fix steps that aren't clear.",
+        "Level 5: Write all the steps yourself."
+      ]
+    },
     "skills": [
       "sequencing",
       "debugging"
@@ -1789,6 +1849,17 @@ window.STEM.activities = [
   /* ───────────────────────────── Virtual Reality ───────────────────────────── */
   {
     id: "ecosystem-field-trip",
+    simple: {
+      "mission": "You're a scientist visiting a new place. Find five clues about how living things survive there.",
+      "steps": [
+        "Look at the first place for one minute. Don't talk. Just look.",
+        "Write three \"I see\" sentences.",
+        "Write one \"I think\" sentence about how something survives.",
+        "Go to the second place. Do it again.",
+        "Talk with a partner. What's the same? What's different?",
+        "Write one \"I wonder\" question."
+      ]
+    },
     skills: [
       "observation"
     ],
@@ -1895,6 +1966,17 @@ window.STEM.activities = [
   },
   {
     id: "notice-and-wonder-360",
+    simple: {
+      "mission": "Look all around a 360° picture. Find details no one else sees.",
+      "steps": [
+        "The Spotter looks around and calls out what they see.",
+        "The Recorder writes each detail and where it is.",
+        "After 3 minutes, switch jobs.",
+        "Share your details. Cross off ones other teams found too.",
+        "Tell exactly where to look for your special details.",
+        "Write one question the picture makes you wonder."
+      ]
+    },
     skills: [
       "observation"
     ],
@@ -1992,6 +2074,17 @@ window.STEM.activities = [
   /* ───────────────────────────── Artificial Intelligence ───────────────────────────── */
   {
     id: "how-ai-sorts",
+    simple: {
+      "mission": "Pretend your team is a computer. Learn to sort fruit from examples. Then test your rule.",
+      "steps": [
+        "Look at the cards with your team. Find a rule for fruit.",
+        "Write your rule down. That's your model.",
+        "Look at one new card at a time. Fruit or not fruit?",
+        "Check the answer. Count how many you got right.",
+        "Talk about the misses. Why did the tomato trick you?",
+        "Add the tricky cards. Change your rule."
+      ]
+    },
     skills: [
       "data",
       "training-data"
@@ -2165,6 +2258,19 @@ window.STEM.activities = [
   },
   {
     id: "ai-secret-signals",
+    simple: {
+      "mission": "Teach a computer two hand signals. It should also know when there's no signal.",
+      "steps": [
+        "Start a new Image Project. Make three groups: Open hand, Closed fist, and No signal.",
+        "Click Webcam. Record short bursts. Give each group about the same number.",
+        "Click Train Model. Guess what it will say.",
+        "Test each signal. Write what happens in the table.",
+        "Change one thing, like your hand angle. Test again.",
+        "Add more kinds of pictures to every group. Train again.",
+        "Test the same way. Compare Round 1 and Round 2.",
+        "Challenge: fix a hand position it got wrong. Then close the tab."
+      ]
+    },
     skills: [
       "data",
       "training-data"
@@ -2269,6 +2375,17 @@ window.STEM.activities = [
   },
   {
     id: "ai-for-oceans",
+    simple: {
+      "mission": "Teach an AI robot to tell fish from trash in the ocean.",
+      "steps": [
+        "Watch the video with your class.",
+        "Label fish and trash. Then watch the robot choose.",
+        "Keep going. Read each direction carefully.",
+        "Stop when it asks about words like \"angry.\"",
+        "Did your AI choose the same as your partner's? Why?",
+        "Talk as a class. What happens when people teach opinions?"
+      ]
+    },
     skills: [
       "data",
       "training-data",
@@ -2447,6 +2564,17 @@ window.STEM.activities = [
 
   {
     id: "pattern-predictors",
+    simple: {
+      "mission": "Guess what comes next in patterns. AI guesses the next word the same way.",
+      "steps": [
+        "Look at the first pattern. What comes next?",
+        "How sure are you? Show 1 to 5 fingers.",
+        "Do the same for each pattern.",
+        "Finish \"Once upon a ___.\" Why do most people say \"time\"?",
+        "Some AI tools guess the next word the same way.",
+        "Try \"I like to eat ___.\" Can there be two good answers?"
+      ]
+    },
     skills: [
       "training-data"
     ],
@@ -2518,6 +2646,18 @@ window.STEM.activities = [
   /* ───────────────────────────── Engineering & Robotics ───────────────────────────── */
   {
     id: "paper-bridge",
+    simple: {
+      "mission": "Build a paper bridge across a gap. Test it with coins. Make it better. Test again.",
+      "steps": [
+        "Lay flat paper across the gap. How many coins does it hold?",
+        "Draw two bridge ideas. Circle one to try.",
+        "Build Version 1. You have 10 minutes.",
+        "Add coins one at a time. Write how many it held.",
+        "How did it break? Did it bend, slide, or tear?",
+        "Change one thing. Build Version 2.",
+        "Test again. Did your change help?"
+      ]
+    },
     skills: [
       "data",
       "design-iteration"
@@ -2603,6 +2743,17 @@ window.STEM.activities = [
   },
   {
     id: "sense-think-act",
+    simple: {
+      "mission": "Be a robot! You can only react to what your sensors notice.",
+      "steps": [
+        "Some kids are robots. They react only to the colored cards.",
+        "Watch for a card. Follow the rule for that color.",
+        "New rule: if you see yellow, turn around.",
+        "New rule: if someone taps your shoulder, freeze.",
+        "Green card and a tap at once? What should you do?",
+        "As a class, choose which rule wins. Write it down."
+      ]
+    },
     skills: [
       "logic"
     ],
@@ -2770,6 +2921,17 @@ window.STEM.activities = [
   /* ───────────────────────────── Science & Discovery ───────────────────────────── */
   {
     id: "sink-or-float",
+    simple: {
+      "mission": "Test ten things in water. Guess first. Then explain what happened.",
+      "steps": [
+        "Guess: will it sink or float? Write one reason.",
+        "Put it in the water gently. Don't drop it.",
+        "Write what happened.",
+        "Put a star next to surprises.",
+        "Try flat foil and balled-up foil. What's different?",
+        "With your team, write one rule that fits most results."
+      ]
+    },
     skills: [
       "fair-testing"
     ],
@@ -2942,6 +3104,17 @@ window.STEM.activities = [
 
   {
     id: "melting-race",
+    simple: {
+      "mission": "Race four ice cubes on four different things. Guess which melts first. Watch and explain.",
+      "steps": [
+        "Touch each surface. Which one feels coldest? Write it down.",
+        "Guess which ice cube melts first, and which melts last.",
+        "Put the ice cubes down at the same time. Start the timer.",
+        "Every 3 minutes, draw or write how each cube looks.",
+        "After 15 minutes, line up the cubes from most melted to least.",
+        "Was your guess right? Did the coldest one melt the ice fastest?"
+      ]
+    },
     skills: [
       "observation",
       "fair-testing"
@@ -3026,6 +3199,17 @@ window.STEM.activities = [
   /* ───────────────────────────── Creative STEM ───────────────────────────── */
   {
     id: "pixel-art-code",
+    simple: {
+      "mission": "Pictures are made of tiny squares. Draw one on a grid. Write its code. Can a partner copy it?",
+      "steps": [
+        "Color squares on your grid to make a picture, like a heart.",
+        "Write each row as letters. W is blank. B is colored.",
+        "Hide your picture. Give your partner only the code.",
+        "Your partner colors a grid using just the code.",
+        "Compare the pictures. Do they match? Find the row that's different.",
+        "Fix it until they match."
+      ]
+    },
     skills: [
       "data",
       "encoding-art"
@@ -3106,6 +3290,17 @@ window.STEM.activities = [
   },
   {
     id: "animate-your-name",
+    simple: {
+      "mission": "Make the letters of your name move! Each letter moves when you click it.",
+      "steps": [
+        "Delete the cat. Add a sprite for each letter of your initials.",
+        "Pick a background.",
+        "Make the first letter spin when it's clicked.",
+        "Make the second letter change color 10 times.",
+        "Make the third letter grow, then shrink back.",
+        "Click each letter to test it. Change the speed if you want."
+      ]
+    },
     skills: [
       "encoding-art"
     ],
@@ -3195,6 +3390,17 @@ window.STEM.activities = [
   },
   {
     id: "stop-motion-studio",
+    simple: {
+      "mission": "Make a short movie with toys or clay. Take lots of photos and move them a tiny bit each time.",
+      "steps": [
+        "Draw three boxes: beginning, middle, and end.",
+        "Set up your scene. Keep the tablet still.",
+        "Take a photo. Move your toy a tiny bit. Take another photo.",
+        "Keep going until your story is done. Try for 30 photos.",
+        "Play it fast. Does it move smoothly?",
+        "If it jumps, take those photos again with smaller moves."
+      ]
+    },
     skills: [
       "encoding-art",
       "communication"
@@ -3293,6 +3499,17 @@ window.STEM.activities = [
      with full directions on the page. */
   {
     id: "lobster-trap-logic",
+    simple: {
+      "mission": "You work on a lobster boat. Some lobsters must go back in the water. Make rules so everyone sorts them the same way.",
+      "steps": [
+        "Read the rules. Why does Maine protect some lobsters?",
+        "Draw a flowchart. Each diamond asks one yes or no question.",
+        "Try it with cards. One reads, one follows the arrows, one sorts.",
+        "Trade with another team. Do both flowcharts sort the same way?",
+        "Look at a flowchart that only checks size. Which lobsters does it get wrong?",
+        "Write your rules like code: IF eggs, THEN back."
+      ]
+    },
     skills: [
       "sequencing",
       "logic"
@@ -3458,6 +3675,17 @@ window.STEM.activities = [
   },
   {
     id: "lighthouse-beam",
+    simple: {
+      "mission": "Lighthouses shine light far out to sea. Make a shiny cover for a flashlight. Aim for a small, bright spot.",
+      "steps": [
+        "Shine the flashlight at the wall. Trace the spot. This is your start.",
+        "Draw a shape idea: a cone, a bowl, or a tube. Which will work best?",
+        "Build it with foil, shiny side in. Put the flashlight inside.",
+        "Shine it again. Trace the new spot. Is it smaller? Brighter?",
+        "Change one thing. Test again.",
+        "Share your best one. Which shapes worked best?"
+      ]
+    },
     skills: [
       "data",
       "design-iteration"
@@ -3636,6 +3864,16 @@ window.STEM.activities = [
   },
   {
     id: "blueberry-sorter",
+    simple: {
+      "mission": "Machines help sort Maine blueberries. One kid is the sorting machine. The class teaches it with examples.",
+      "steps": [
+        "Learn the job. Berries go in KEEP. Leaves and twigs go in TOSS.",
+        "Show the machine each card and say KEEP or TOSS.",
+        "Now test it with new cards. Keep score on the board.",
+        "Look at the mistakes. What did the machine never see?",
+        "Teach it the tricky cards. Test again. Did it get better?"
+      ]
+    },
     skills: [
       "data",
       "training-data",
@@ -3802,6 +4040,16 @@ window.STEM.activities = [
   },
   {
     id: "acadia-from-above",
+    simple: {
+      "mission": "Take a class trip to Acadia National Park on the computer. Visit four places and look for clues left by glaciers.",
+      "steps": [
+        "Fly to Cadillac Mountain. Turn all the way around. What do you see?",
+        "Fly to Sand Beach. Which way is the ocean?",
+        "Fly to Bass Harbor Head Light. Why is the lighthouse here?",
+        "Fly to Somes Sound. What shape is it?",
+        "At each stop, write something you see, an idea, and a question."
+      ]
+    },
     skills: [
       "observation"
     ],
@@ -3987,6 +4235,17 @@ window.STEM.activities = [
   /* ───────────────────────────── Interactive labs (run inside STEM 207) ───────────────────────────── */
   {
     id: "lab-rover",
+    simple: {
+      "mission": "You drive a lobster boat with code. Steer to the wharf, pull up traps, and stay off the rocks.",
+      "steps": [
+        "Open the lab. Read the goal.",
+        "Tap blocks to add them to your program.",
+        "Press Run to watch the boat. Or press Step to go one block at a time.",
+        "Did the boat hit a rock? Find the lit-up block and fix it.",
+        "When you finish, read what you learned. Then try the next level.",
+        "When a voyage is done, pick the next one at the top."
+      ]
+    },
     skills: [
       "sequencing",
       "debugging",
@@ -4080,6 +4339,20 @@ window.STEM.activities = [
   },
   {
     id: "lab-dance-party",
+    simple: {
+      "mission": "The robot dances exactly what your program says, in order. Make it dance!",
+      "steps": [
+        "Level 1: Read the steps. Guess what the robot does first and last. Press Run.",
+        "Level 2: Switch two steps. Run it again. What changed?",
+        "Level 3: Make a dance with five or more steps.",
+        "Level 4: Make the robot jump, spin, and end with a pose.",
+        "Level 5: Use a Repeat block to make the dance.",
+        "Level 6: Fix the dance that has a bug.",
+        "Level 7: Make a long dance with only a few blocks.",
+        "Level 8: Make your own long dance with only a few blocks.",
+        "Remember: the computer does your steps in order."
+      ]
+    },
     skills: [
       "sequencing",
       "debugging"
@@ -4160,6 +4433,15 @@ window.STEM.activities = [
   },
   {
     id: "lab-space-blob",
+    simple: {
+      "mission": "Feed the hungry Space Blob! Your code counts the snacks.",
+      "steps": [
+        "Level 1: Press Start. Feed the blob 3 times. How many snacks?",
+        "Level 2: Make each feed add 2. Guess the total after 3 feeds. Test it.",
+        "Level 3: Turn off \"set snacks to.\" Restart. What happens? Turn it back on.",
+        "Level 4: Start with 2 snacks. Add 3 each feed. Get to 14 in 4 feeds."
+      ]
+    },
     skills: [
       "debugging",
       "events",
@@ -4235,6 +4517,16 @@ window.STEM.activities = [
   },
   {
     id: "lab-moon-gate",
+    simple: {
+      "mission": "You guard the gate on the Moon. Your rule decides which robots get in.",
+      "steps": [
+        "Level 1: Will a Moon robot get in? Guess, then test.",
+        "Level 2: Will a Star robot get in? Guess, then test.",
+        "Level 3: Change who gets in. Test one who should and one who shouldn't.",
+        "Level 4: The rule is broken. Find the bug. Fix it. Test again.",
+        "Level 5: Let only Star robots in. Test all three badges."
+      ]
+    },
     skills: [
       "logic",
       "debugging"
@@ -4318,6 +4610,16 @@ window.STEM.activities = [
   },
   {
     id: "lab-field-station",
+    simple: {
+      "mission": "Be a scientist! Explore a Maine tide pool, a pond, and three faraway places. Look for clues.",
+      "steps": [
+        "Open the lab. Pick the first place.",
+        "Look all the way around. Tap a marker when you find one.",
+        "Read what you see. Pick the best idea about what it means.",
+        "Turn to the compass direction you're given.",
+        "After all five places, compare them."
+      ]
+    },
     skills: [
       "observation"
     ],
@@ -4737,6 +5039,16 @@ window.STEM.activities = [
   },
   {
     id: "lab-pixel-studio",
+    simple: {
+      "mission": "Learn how computers make pictures. Then make a moving picture.",
+      "steps": [
+        "Pick a color. Tap the grid to draw.",
+        "Watch your picture turn into code.",
+        "Turn a code back into a picture.",
+        "Copy your picture, change it a little, and press Play.",
+        "Try fast and slow. Save your best one."
+      ]
+    },
     skills: [
       "encoding-art"
     ],

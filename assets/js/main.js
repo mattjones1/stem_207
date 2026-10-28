@@ -68,6 +68,7 @@
 
     document.querySelectorAll(".overlay").forEach((o) => o.remove());
     if (SE.modal) SE.modal.close();
+    if (SE.speech) SE.speech.stop();
     document.body.classList.remove("has-overlay");
 
     if (!user && !isAuthRoute) { location.replace("#/signin"); return; }

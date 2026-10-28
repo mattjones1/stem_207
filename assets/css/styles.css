@@ -2592,3 +2592,16 @@ h1, h2, h3, h4 { letter-spacing: -.015em; }
 body[data-role="student"] .site-footer__support { display: none; }
 @media (max-width: 520px) { .donate { grid-template-columns: 1fr; } }
 
+
+/* Young readers: Simple words and Read it to me */
+.block__head-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; }
+.block__head-row h2 { margin: 0; }
+.read-tools { display: flex; flex-wrap: wrap; gap: .4rem; }
+.read-btn, .simple-toggle { min-height: 44px; }
+.read-btn svg, .simple-toggle svg { fill: none; stroke: currentColor; }
+.read-btn[aria-pressed="true"], .simple-toggle[aria-pressed="true"] { background: var(--teal-soft); border-color: var(--brand-teal); color: var(--fg); }
+/* On the dark mission block: light buttons, and a white pressed state with dark text. */
+.block--mission .read-btn, .block--mission .simple-toggle { color: var(--on-dark); border-color: rgba(255, 255, 255, .45); }
+.block--mission .read-btn:hover, .block--mission .simple-toggle:hover { color: #fff; border-color: #fff; }
+.block--mission .read-btn[aria-pressed="true"], .block--mission .simple-toggle[aria-pressed="true"] { background: #fff; color: #012d2b; border-color: #fff; }
+.is-reading { background: var(--teal-soft); box-shadow: inset 4px 0 0 var(--brand-teal); border-radius: var(--radius-sm); }

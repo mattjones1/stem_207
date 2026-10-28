@@ -82,6 +82,14 @@ ok("standards codes are in standards.js (verified codes only)", !badStd.length, 
 const badStdFile = Object.entries(STANDARDS).filter(([, s]) => !(s.set && text(s.text) && /^https:\/\//.test(s.url || ""))).map(([c]) => c);
 ok("every standard in standards.js has its set, wording, and source link", !badStdFile.length, badStdFile.join(", "));
 
+// Simple words stay simple: no sentence over 12 words.
+const longSimple = [];
+acts.filter((a) => a.simple).forEach((a) => [a.simple.mission, ...(a.simple.steps || [])].forEach((t) => String(t).split(/(?<=[.!?])\s+/).forEach((x) => {
+  const n = x.split(/\s+/).filter(Boolean).length;
+  if (n > 12) longSimple.push(`${a.id} (${n} words): ${x}`);
+})));
+ok("simple-words sentences have 12 words or fewer", !longSimple.length, "\n  " + longSimple.join("\n  "));
+
 // Coding Foundations: an activity's stage lists it, and the template has no repeats.
 const stageOf = Object.fromEntries((STEM.pathway || []).map((s) => [s.stage, s]));
 const unlisted = acts.filter((a) => a.pathwayStage && !(stageOf[a.pathwayStage] && stageOf[a.pathwayStage].activities.includes(a.id))).map((a) => `${a.id} (stage ${a.pathwayStage})`);

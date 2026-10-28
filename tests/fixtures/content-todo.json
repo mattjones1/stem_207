@@ -1,14 +1,11 @@
 {
   "robot-maze-mission": [
-    "simple",
     "standards"
   ],
   "event-party": [
-    "simple",
     "standards"
   ],
   "loop-dance": [
-    "simple",
     "standards"
   ],
   "debug-animation": [
@@ -27,11 +24,9 @@
     "standards"
   ],
   "fix-the-recipe": [
-    "simple",
     "standards"
   ],
   "lab-robot-chef": [
-    "simple",
     "standards"
   ],
   "sort-the-catch": [
@@ -59,115 +54,93 @@
     "standards"
   ],
   "ecosystem-field-trip": [
-    "simple",
     "standards"
   ],
   "notice-and-wonder-360": [
-    "simple",
     "standards"
   ],
   "how-ai-sorts": [
-    "simple",
     "standards"
   ],
   "teachable-machine-classroom": [
     "standards"
   ],
   "ai-secret-signals": [
-    "simple",
     "standards"
   ],
   "ai-for-oceans": [
-    "simple",
     "standards"
   ],
   "ai-limits-detectives": [
     "standards"
   ],
   "pattern-predictors": [
-    "simple",
     "standards"
   ],
   "paper-bridge": [
-    "simple",
     "standards"
   ],
   "sense-think-act": [
-    "simple",
     "standards"
   ],
   "marble-run-iteration": [
     "standards"
   ],
   "sink-or-float": [
-    "simple",
     "standards"
   ],
   "paper-helicopter": [
     "standards"
   ],
   "melting-race": [
-    "simple",
     "standards"
   ],
   "pixel-art-code": [
-    "simple",
     "standards"
   ],
   "animate-your-name": [
-    "simple",
     "standards"
   ],
   "stop-motion-studio": [
-    "simple",
     "standards"
   ],
   "lobster-trap-logic": [
-    "simple",
     "standards"
   ],
   "tide-watchers": [
     "standards"
   ],
   "lighthouse-beam": [
-    "simple",
     "standards"
   ],
   "float-a-turbine": [
     "standards"
   ],
   "blueberry-sorter": [
-    "simple",
     "standards"
   ],
   "sap-run-detectives": [
     "standards"
   ],
   "acadia-from-above": [
-    "simple",
     "standards"
   ],
   "maine-postcard": [
     "standards"
   ],
   "lab-rover": [
-    "simple",
     "standards"
   ],
   "lab-dance-party": [
-    "simple",
     "standards"
   ],
   "lab-space-blob": [
-    "simple",
     "standards"
   ],
   "lab-moon-gate": [
-    "simple",
     "standards"
   ],
   "lab-field-station": [
-    "simple",
     "standards"
   ],
   "lab-pattern-machine": [
@@ -183,7 +156,6 @@
     "standards"
   ],
   "lab-pixel-studio": [
-    "simple",
     "standards"
   ],
   "3d-buoy-charm": [

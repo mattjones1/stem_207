@@ -54,6 +54,7 @@
     bug: '<rect x="7.5" y="7" width="9" height="13" rx="4.5"/><path d="M12 7v13M9 4.5l1.5 2.5M15 4.5L13.5 7M3.5 10.5h4M16.5 10.5h4M3.5 15h4M16.5 15h4"/>',
     flag: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
     lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+    sound: '<path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>',
     heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
     logout: '<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4"/><path d="M10 16l-4-4 4-4M6 12h10"/>',
     map: '<path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/>',
@@ -156,6 +157,40 @@
      the browser traps focus and Esc closes it; focus goes back to whatever opened it.
      SE.modal.open({ title, body, wide, onOpen(dlg), onClose() }) → the dialog. body is HTML. */
   let openDlg = null;
+  /* Read it to me: the browser's own voice (speechSynthesis), so nothing leaves the device.
+     Only ever starts from a button press; the same button stops it. read(btn, parts) speaks each
+     { text, el } in turn and marks the part being read (.is-reading). */
+  SE.speech = {
+    ok: () => "speechSynthesis" in window && typeof window.SpeechSynthesisUtterance === "function",
+    button: (key, label = "Read it to me") => SE.speech.ok()
+      ? `<button type="button" class="btn btn--ghost btn--small read-btn" data-read="${key}" aria-pressed="false">${SE.icon("sound")}<span class="read-btn__label">${label}</span></button>` : "",
+    stop() {
+      if (SE.speech.ok()) window.speechSynthesis.cancel();
+      document.querySelectorAll(".is-reading").forEach((e) => e.classList.remove("is-reading"));
+      document.querySelectorAll(".read-btn[aria-pressed=true]").forEach((b) => { b.setAttribute("aria-pressed", "false"); b.querySelector(".read-btn__label").textContent = "Read it to me"; });
+    },
+    read(btn, parts) {
+      if (!SE.speech.ok()) return;
+      if (btn.getAttribute("aria-pressed") === "true") return SE.speech.stop();
+      SE.speech.stop();
+      btn.setAttribute("aria-pressed", "true");
+      btn.querySelector(".read-btn__label").textContent = "Stop reading";
+      let i = 0;
+      const next = () => {
+        document.querySelectorAll(".is-reading").forEach((e) => e.classList.remove("is-reading"));
+        if (i >= parts.length || btn.getAttribute("aria-pressed") !== "true") return SE.speech.stop();
+        const p = parts[i++];
+        if (p.el) p.el.classList.add("is-reading");
+        const u = new window.SpeechSynthesisUtterance(p.text);
+        u.rate = 0.9;
+        u.onend = next;
+        u.onerror = () => SE.speech.stop();
+        window.speechSynthesis.speak(u);
+      };
+      next();
+    }
+  };
+
   SE.modal = {
     open({ title, body, wide, onOpen, onClose }) {
       SE.modal.close();
