@@ -346,8 +346,9 @@
   const ms = (t) => (t ? new Date(t).getTime() : Date.now());
   const iso = (n) => new Date(n || Date.now()).toISOString();
   const fromRow = {
-    educator: (r) => ({ id: r.id, name: r.name, email: r.email, createdAt: ms(r.created_at) }),
-    cls: (r) => ({ id: r.id, name: r.name, code: r.code, educatorId: r.educator_id, isDemo: r.is_demo, createdAt: ms(r.created_at), archivedAt: r.archived_at ? ms(r.archived_at) : null }),
+    // account_kind and plan arrive with supabase/update-13; before that every account is a (founding) educator.
+    educator: (r) => ({ id: r.id, name: r.name, email: r.email, accountKind: r.account_kind || "educator", plan: r.plan || undefined, createdAt: ms(r.created_at) }),
+    cls: (r) => ({ id: r.id, name: r.name, code: r.code, educatorId: r.educator_id, kind: r.kind || "class", isDemo: r.is_demo, createdAt: ms(r.created_at), archivedAt: r.archived_at ? ms(r.archived_at) : null }),
     student: (r) => ({ id: r.id, classId: r.class_id, displayName: r.display_name, gradeBand: r.grade_band, picCode: r.pic_code, isDemo: r.is_demo, createdAt: ms(r.created_at) }),
     event: (r) => ({ id: r.id, studentId: r.student_id, classId: r.class_id, type: r.type, at: Number(r.at), data: r.data || {}, by: r.by || undefined, isDemo: r.is_demo }),
     assignment: (r) => ({ id: r.id, classId: r.class_id, activityId: r.activity_id, assignedAt: ms(r.assigned_at), dueDate: r.due_date || null, note: r.note || null, isDemo: r.is_demo }),
@@ -359,7 +360,8 @@
     pathwayAssignment: (r) => ({ id: r.id, classId: r.class_id, pathwayId: r.pathway_id, version: r.version, assignedAt: ms(r.assigned_at), dueDate: r.due_date || null, note: r.note || null, isDemo: r.is_demo })
   };
   const toRow = {
-    cls: (c) => ({ id: c.id, educator_id: c.educatorId, name: c.name, code: c.code, is_demo: !!c.isDemo, created_at: iso(c.createdAt) }),
+    // kind is sent only for a family (classes.kind arrives with update-13; plain classes work without it).
+    cls: (c) => ({ id: c.id, educator_id: c.educatorId, name: c.name, code: c.code, is_demo: !!c.isDemo, created_at: iso(c.createdAt), ...(c.kind === "family" ? { kind: "family" } : {}) }),
     student: (s) => ({ id: s.id, class_id: s.classId, display_name: s.displayName, grade_band: s.gradeBand, pic_code: s.picCode, is_demo: !!s.isDemo, created_at: iso(s.createdAt) }),
     event: (e) => ({ id: e.id, student_id: e.studentId, class_id: e.classId, type: e.type, at: e.at, data: e.data || {}, by: e.by || null, is_demo: !!e.isDemo }),
     // note is sent only when set, so assigning still works before supabase/update-3 is run.
@@ -587,33 +589,32 @@
     },
 
     /* Educators */
-    async createEducator({ name, email, password, className }) {
+    /* A new account: an educator or a parent (accountKind). It starts with no plan (browse only) and no class;
+       subscribing unlocks classes (Educator) or children (Family). See assets/js/access.js. */
+    async createEducator({ name, email, password, accountKind = "educator" }) {
       email = String(email || "").trim().toLowerCase();
       name = String(name || "").trim();
-      if (!name) return { ok: false, field: "name", error: "Enter your name as students will see it, like Ms. Lopez." };
+      accountKind = accountKind === "parent" ? "parent" : "educator";
+      if (!name) return { ok: false, field: "name", error: accountKind === "parent" ? "Enter your name, like Sam Lopez." : "Enter your name as students will see it, like Ms. Lopez." };
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, field: "email", error: "Enter a full email address, like name@school.org." };
       if (String(password || "").length < 8) return { ok: false, field: "password", error: "Use at least 8 characters for your password." };
       if (CLOUD) {
         try {
-          const r = await SE.cloud.signUp(email, password, name);
+          const r = await SE.cloud.signUp(email, password, name, accountKind);
           if (r.needsConfirm) return { ok: false, field: "email", error: "Almost done: check your email for a link to confirm your account, then sign in." };
           await loadEducator(r.session.user);
-          const cls = { id: SE.uid("cls"), name: String(className || "").trim() || `${name}'s class`, code: cloudCode(), educatorId: r.session.user.id, createdAt: Date.now() };
-          db.classes.push(cls);
+          if (db.educators[0] && !db.educators[0].plan) Object.assign(db.educators[0], { accountKind });
           writeSession({ role: "educator", id: r.session.user.id, cloud: true });
-          await send(insertClassOp(cls));
-          return { ok: true, educator: db.educators[0], cls };
+          return { ok: true, educator: db.educators[0] };
         } catch (e) { return { ok: false, ...authError(e) }; }
       }
       if (db.educators.some((e) => e.email === email)) return { ok: false, field: "email", error: "An account with this email already exists. Sign in instead." };
       const salt = SE.uid("salt");
-      const educator = { id: SE.uid("edu"), name, email, salt, hash: await hash(password, salt), createdAt: Date.now() };
+      const educator = { id: SE.uid("edu"), name, email, accountKind, plan: "none", salt, hash: await hash(password, salt), createdAt: Date.now() };
       db.educators.push(educator);
-      const cls = { id: SE.uid("cls"), name: String(className || "").trim() || `${name}'s class`, code: newClassCode(), educatorId: educator.id, createdAt: Date.now() };
-      db.classes.push(cls);
       save();
       writeSession({ role: "educator", id: educator.id });
-      return { ok: true, educator, cls };
+      return { ok: true, educator };
     },
 
     async signInEducator(email, password) {
@@ -634,10 +635,32 @@
       return { ok: true, educator: edu };
     },
 
+    educatorById: (id) => db.educators.find((e) => e.id === id) || null,
+    /* Local mode only: simulate a subscription (cloud plans come from Stripe through the server). */
+    setPlan(id, plan) {
+      const ed = SE.store.educatorById(id);
+      if (CLOUD || !ed) return false;
+      ed.plan = plan;
+      save();
+      return true;
+    },
+
     /* Classes */
     /* An educator's active classes (archived ones are hidden everywhere except the Classes page). */
-    classesFor: (educatorId) => db.classes.filter((c) => c.educatorId === educatorId && !c.archivedAt),
-    archivedClassesFor: (educatorId) => db.classes.filter((c) => c.educatorId === educatorId && c.archivedAt),
+    classesFor: (educatorId) => db.classes.filter((c) => c.educatorId === educatorId && !c.archivedAt && c.kind !== "family"),
+    archivedClassesFor: (educatorId) => db.classes.filter((c) => c.educatorId === educatorId && c.archivedAt && c.kind !== "family"),
+    /* A family is a small class (kind "family") owned by a parent, or by an educator for their own children.
+       One per account, up to FAMILY_MAX children, who sign in with its code and their pictures. */
+    FAMILY_MAX: 4,
+    familyOf: (educatorId) => db.classes.find((c) => c.educatorId === educatorId && c.kind === "family" && !c.archivedAt) || null,
+    createFamily(user) {
+      const had = SE.store.familyOf(user.id);
+      if (had) return had;
+      const cls = { id: SE.uid("cls"), name: `${String(user.name || "My").split(" ")[0]}'s family`, kind: "family", code: CLOUD ? cloudCode() : newClassCode(), educatorId: user.id, createdAt: Date.now() };
+      db.classes.push(cls);
+      if (CLOUD) send(insertClassOp(cls)); else save();
+      return cls;
+    },
     classById: (id) => db.classes.find((c) => c.id === id),
     classByCode: (code) => db.classes.find((c) => !c.archivedAt && c.code === String(code || "").trim().toUpperCase().replace(/\s+/g, "")),
     /* Student sign-in step 1: the class and its roster (names only), or null. */
@@ -756,8 +779,10 @@
       const name = String(displayName || "").trim().replace(/\s+/g, " ");
       if (!name) return { ok: false, error: "Enter a first name and last initial, like Sam P." };
       if (name.length > 24) return { ok: false, error: "Keep display names short: a first name and last initial." };
+      const cls = SE.store.classById(classId);
+      if (cls && cls.kind === "family" && SE.store.studentsIn(classId).length >= SE.store.FAMILY_MAX) return { ok: false, error: `A family can have up to ${SE.store.FAMILY_MAX} children.` };
       if (db.students.some((s) => s.classId === classId && s.displayName.toLowerCase() === name.toLowerCase()))
-        return { ok: false, error: `${name} is already in this class. Add a last initial to tell them apart.` };
+        return { ok: false, error: `${name} is already in this ${cls && cls.kind === "family" ? "family" : "class"}. Add a last initial to tell them apart.` };
       const student = { id: SE.uid("stu"), classId, displayName: name, gradeBand: gradeBand || "4-5", picCode: newPictureCode(), createdAt: Date.now() };
       db.students.push(student);
       if (CLOUD) send(restOp("POST", "/students", toRow.student(student), "return=minimal")); else save();

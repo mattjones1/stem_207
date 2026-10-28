@@ -170,7 +170,24 @@
     return out.sort((a, b) => a.c.event.at - b.c.event.at);
   }
 
+  /* Classes, plans, and checks need the Educator plan (access.js). A free account sees what it adds. */
+  const educatorPitch = (title) => `
+      <div class="block teach-pitch">
+        <h2>${icon("star")}${esc(title)}</h2>
+        <p>The Educator plan adds classes with sign-in codes, Learning Plans and templates, checks with XP for students, and progress for every student. <strong>${SE.access.PRICES.educator.month} a month, or ${SE.access.PRICES.educator.year} a year.</strong></p>
+        <div class="acct__actions"><a class="btn btn--primary" href="#/pricing">${icon("arrowRight")}See plans</a><a class="btn btn--ghost" href="#/activities">${icon("compass")}Explore the free activities</a></div>
+      </div>`;
+  SE.educatorPitch = educatorPitch;
+
   function noClass(user) {
+    if (!SE.access.canTeach(user)) {
+      app().innerHTML = frame(user, null, [], "", `
+        <section class="wrap section">${educatorPitch("Make your classes with the Educator plan")}
+          ${SE.store.mode === "cloud" ? `<p class="muted">Or look around first: <button type="button" class="linkish" id="add-demo">add a sample class with made-up students</button>.</p>` : ""}
+        </section>`);
+      bindFrame(user);
+      return;
+    }
     app().innerHTML = frame(user, null, [], "", `
       <section class="wrap section"><div class="empty">${icon("users")}<h2>Create your first class</h2>
         <p>You'll get a class code students use to sign in.</p>
@@ -231,6 +248,7 @@
     const body = `
       <section class="wrap section dash">
         <p class="dash-hello">${icon("compass")}<span><strong>${hello}, ${esc(user.name || "educator")}.</strong> ${new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</span></p>
+        ${SE.access.canTeach(user) ? "" : educatorPitch("Your classes are read-only without the Educator plan")}
         <div class="dash-actions">
           <a class="btn btn--primary" href="#/teach/plans/new">${icon("plus")}New Learning Plan</a>
           <button type="button" class="btn btn--ghost" data-message-class="">${icon("message")}Message a class</button>
@@ -539,7 +557,7 @@
         ${classes.length ? `<ul class="dash-classes">${classes.map(card).join("")}</ul>` : `<p class="muted">No active classes. Add one below, or restore an archived class.</p>`}
       </section>
       <section class="wrap section" id="add-class" aria-labelledby="add-class-title">
-        <div class="block">
+        ${!SE.access.canTeach(user) ? educatorPitch("Add classes with the Educator plan") : `<div class="block">
           <h2 id="add-class-title">Add a class</h2>
           <p class="muted">Each class gets its own sign-in code.</p>
           <form id="new-class" class="inline-form">
@@ -548,7 +566,7 @@
             <button class="btn btn--primary" type="submit">${icon("plus")}Add class</button>
           </form>
           ${SE.store.mode === "cloud" && !classes.concat(archived).some((c) => c.isDemo) ? `<p class="muted">Want to see it with data first? <button type="button" class="linkish" id="add-demo">Add a sample class</button></p>` : ""}
-        </div>
+        </div>`}
       </section>
       ${archived.length ? `
       <section class="wrap section" aria-labelledby="archived-title">
@@ -559,7 +577,7 @@
       </section>` : ""}`;
     app().innerHTML = frame(user, null, classes, "classes", body, { title: "Classes" });
     bindFrame(user);
-    document.getElementById("new-class").addEventListener("submit", (e) => {
+    if (document.getElementById("new-class")) document.getElementById("new-class").addEventListener("submit", (e) => {
       e.preventDefault();
       const c = SE.store.createClass(user.id, document.getElementById("nc-name").value);
       currentClassId = c.id;
@@ -755,7 +773,7 @@
     return `
       <article class="login-card">
         <header><span class="login-card__brand">${SE.brandLogo(17)}</span><strong>${esc(st.displayName)}</strong></header>
-        <p class="login-card__code">Class code <b>${esc(cls.code)}</b></p>
+        <p class="login-card__code">${cls.kind === "family" ? "Family" : "Class"} code <b>${esc(cls.code)}</b></p>
         <div class="login-card__pics">${st.picCode.map(picChip).join("")}</div>
         ${tools}
       </article>`;
@@ -911,6 +929,7 @@
     else { const s = SE.store.studentById ? SE.store.studentById(b.dataset.noteStudent) : null; if (s) noteModal(s); }
   });
   SE.teachQuick = { addStudents: addStudentsModal, message: messageModal, note: noteModal };
+  SE.loginCard = loginCard;   // the family page prints the same cards
 
   /* ───────── Bits used on library pages ───────── */
   SE.views.educatorStrip = function (user) {

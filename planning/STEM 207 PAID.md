@@ -1,3 +1,40 @@
+# SHELVED (October 28, 2026)
+
+The paid site is **shelved**. The live site stays 100% free while the focus is content and quality. Paid is still a future goal. Everything below this section is the 2.0 plan as it stood. The work is on the `paid-site` branch (tag `paid-shelved-2026-10`).
+
+**What's here:**
+- **Workstream A** (sweep fixes). This was also brought to `main`.
+- **B and C**, shelved as work in progress:
+  - `access.js`, `tiers.js`, locked cards, pages, and lab levels;
+  - `#/pricing`, `#/account`;
+  - parent or educator sign-up;
+  - Families (`#/family`, 4 children, XP on send at home);
+  - tests `test_access.py`, `test_family.py`.
+
+**Not production-safe. Must fix before resuming** (from the October 25 architecture review):
+1. **Access fails open.** A missing `plan` counts as a founding educator, and `enforced()` is off in cloud mode. Missing must mean none.
+2. **Anyone could upgrade themselves.** The plan is read from the `educators` row, and its update policy (`schema.sql:141`) lets users change it. The server must decide: a `subscriptions` table written only by the Stripe webhook, `access_grants` (founding, school, comp), and `plan_of()` / `my_access()` / `plan_for_token()`.
+3. **Classes aren't gated.** RLS must refuse `classes` / `students` / `pathways` / `assignments` inserts without a plan. Add a 4-child trigger for families and rate-limit `class_roster`.
+4. **Paid content is in the public bundle.** Move it to a Postgres `content` table, served by `content_for(ids, p_token)`, which re-checks access on every call. Lab engines stay public; the 8 preview labs are refactored one at a time so their level config is data.
+5. **Prices in code are $200/$400.** The decision was **$180/$360**. Also: `?plan=` should carry into sign-up (`wantPlan` is never read), and `educatorPitch` is missing its "$".
+6. **`test_batch8` crashed** in the last full run.
+
+**The agreed shape (plan 4.0):**
+- **One site:** signed-out visitors are the demo (landing page, the free catalog, no locked cards), and paid content comes only from the server after sign-in.
+- **Hosting:** Cloudflare Pages from a private repo, on our own domain.
+- **Operations:** Supabase Pro, custom SMTP, backups.
+- **Billing:** Stripe through one Edge Function (checkout, portal, webhook, delete account).
+
+**Order:** make B and C safe → update-13 (the server decides) → Stripe in test mode → move content out of the public files → the front door (landing page, Sign up) → hosting and launch.
+
+**Prices:** Family $20/month or $180/year (4 children); Educator $40/month or $360/year (includes Family). No trial; children never see prices.
+
+**Go-live gate:** the merchant (STEM Coliseum or STEM 207, LLC), the domain, published policies and refund terms, content rights for commercial sale, and the Student Privacy Pledge.
+
+**The STEM 207 promise:** honest prices; try first, with no card; never sell to children; cancel in one click; refunds; privacy; and work kept read-only for 12 months after a lapse, then deleted only after notice.
+
+---
+
 # STEM 207 PAID 2.0: execution plan (Family + Educator subscriptions, and cleanup)
 
 _Approved October 23, 2026. Executed on the `paid-site` branch; `main` stays live until the go-live gate. v1 is in git history._

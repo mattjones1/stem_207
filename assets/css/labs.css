@@ -836,3 +836,9 @@
   .fs__panels { grid-column: 2; grid-row: 1 / span 4; grid-template-columns: minmax(0, 1fr); align-content: start; max-height: calc(100vh - 72px); overflow-y: auto; }
   .fs__task { order: -1; }
 }
+
+/* A level that needs a subscription (access.js): the level chip shows a lock, the stage says why. */
+.lab-levels a.is-locked { opacity: .75; }
+.lab-locked { display: grid; gap: .7rem; padding: 1.5rem; border: 1.5px dashed var(--brand-teal); border-radius: var(--radius); background: var(--surface); }
+.lab-locked h2 { display: flex; gap: .5rem; align-items: center; font-size: var(--step-1); }
+.lab-locked h2 svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; }

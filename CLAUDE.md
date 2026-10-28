@@ -219,7 +219,7 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
   - `classesFor` returns active classes only; `archivedClassesFor` returns archived ones.
   - `classByCode`/`findClass` skip archived classes.
   - Cloud mode needs `supabase/update-9-classes.sql` (`classes.archived_at`, and `class_roster`/`student_sign_in` skip archived classes).
-- After sign-up, a new educator lands on their class page.
+- Sign-up asks educator or parent (`accountKind`) and makes **no class**: a new account has no plan (browse only). Educators land on the Dashboard (an Educator plan pitch until they subscribe), parents on Family.
 - Test: `python3 tests/site/test_classes.py`.
 
 ## Wording
@@ -231,9 +231,10 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
   - Never "expedition".
 - Home (`#/`) is "Home" for students and guests and "Dashboard" for educators. Use `SE.homeLabel()`, which is the default for `SE.backLink`.
 - Menus:
-  - Educators: Dashboard · Learning Plans · Activities · Classes · Checks.
-  - Students: Home · My Learning Plans · Activities · My harbor.
-  - Guests: Home · Activities.
+  - Educators: Dashboard · Learning Plans · Activities · Classes · Checks, and the name chip links to Account.
+  - Parents (without an Educator plan): Family · Activities, and the name chip (Account).
+  - Students: Home · My Learning Plans · Activities · My harbor. Children at home have no My Learning Plans.
+  - Guests: Home · Activities · Pricing.
   - There's no Projector button.
 - `#/activities` is the shared category view, and `#/activities/<category>` is one category.
 - Old addresses redirect (`MOVED` in `main.js`): `#/library`, `#/area/<id>`, `#/explore`, `#/teach/pathways`, `#/teach/class`, `#/teach/reflections`, `#/teach/missions`, and `#/my/pathways/<id>`.
@@ -248,6 +249,17 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 - Collect no student personal information. Students have a display name and picture codes only. Camera activities frame hands or objects, never faces.
 - External platforms: verify against official docs or the live site before writing steps, and mark anything unverified for the teacher. Don't build custom apps for external-platform missions.
 - AI content: label simulations as simulations, and present scores as model outputs rather than guarantees.
+
+## Paid site: plans, access, and families (paid-site branch; planning/STEM 207 PAID.md)
+- **Two subscriptions, never per activity:** Family $20/month or $200/year (up to 4 children at home) and Educator $40/month or $400/year (adds classes, Learning Plans, checks, tracking; includes Family). No trial. Students and children never see prices.
+- **Free tier:** `assets/js/data/tiers.js` (`STEM.tiers`): 11 activities, 3 labs in full, level 1 of the other labs. Anything not listed is paid. Test: `node tests/tools/test_tiers.js`.
+- **`SE.access`** (`assets/js/access.js`, after `content.js`): `plan(user)` → none | family | educator (an account's `plan`; a student gets their class owner's; an account with no `plan` is a founding educator), `canOpen`, `canOpenLab(labId, levelIndex)`, `canTeach` (Educator), `canFamily`, `lockText`, `PRICES`. `SE.content.openable = visibleTo && canOpen`.
+  - `enforced()` is on in local mode and off in cloud mode until the server checks access (update-13), so the live site never locks anyone out by accident.
+  - Local mode: simulate a plan on `#/account` (`SE.store.setPlan`). Tests of how a lab works set `localStorage stem207.devPlan` (local only); `test_access.py` covers the locks.
+- **Locked UI:** cards show Free or a lock (`tierTag`); a locked activity shows what it is with no steps, notes, or launch (`lockedPage`); locked lab levels show a lock chip and a stage panel; educator gates (`SE.educatorPitch`) on the Dashboard, Classes, New Learning Plan, templates, and Add to a Learning Plan.
+- **Pages** (`views-account.js`): `#/pricing` (public; students are sent Home) and `#/account`. Checkout and billing (`SE.access.checkout`, `portal`) arrive with Stripe (workstream E).
+- **Families** (`views-family.js`, `#/family`): a family is a class with `kind: "family"` (`SE.store.familyOf / createFamily`, `FAMILY_MAX` 4), left out of `classesFor`. Children sign in with the family code and pictures. At home a written answer is the pass: `game.js` gives the XP when it's sent (`prof.home`, status "Done"); the debrief has no "Show or tell my teacher", Home has no class journey or plans. The classroom rule is unchanged.
+- Tests: `python3 tests/site/test_access.py`, `python3 tests/site/test_family.py`.
 
 ## Chromebook target
 - The target device is a school Chromebook at 1366×768, 100% scaling: about **1366×650** of page. Design and test there; other sizes must not break.

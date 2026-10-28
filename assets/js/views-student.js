@@ -95,6 +95,7 @@
     const messages = user.classId ? SE.store.messagesFor(user.classId) : [];
     const note = prof.notes.find((e) => Date.now() - e.at < 14 * SE.DAY);
     const first = user.displayName.split(" ")[0];
+    const home = prof.home;   // a child at home: no teacher, class journey, or Learning Plans
     const msg = (m) => `<li><p>${esc(m.body)}</p><small>${SE.timeAgo(m.createdAt)}</small></li>`;
 
     let card;
@@ -119,15 +120,15 @@
             <h3>Stuck? Try these, in order</h3>
             <ol><li>Read the step you're on again, out loud.</li>
               ${a.stuck ? `<li>Open the activity and look at <strong>Stuck? Try these</strong>.</li>` : lab ? `<li>In the lab, press <strong>Need a hint?</strong></li>` : ""}
-              <li>Ask a partner.</li>
-              <li>Still stuck? <button type="button" class="btn btn--small btn--primary" id="help-ask" data-activity="${a.id}">${icon("message")}Let my teacher know</button></li></ol>
+              ${home ? `<li>Still stuck? Ask a grown-up to try it with you.</li></ol>` : `<li>Ask a partner.</li>
+              <li>Still stuck? <button type="button" class="btn btn--small btn--primary" id="help-ask" data-activity="${a.id}">${icon("message")}Let my teacher know</button></li></ol>`}
             <p class="help-panel__status" id="help-status" role="status" aria-live="polite"></p>
           </div>
         </article>`;
     } else card = `
         <article class="today-card upnext upnext--empty" id="upnext" aria-labelledby="upnext-title">
           <h2 id="upnext-title" class="today-card__title">You're all caught up</h2>
-          <p class="today-card__what">Nothing new from your teacher right now. Explore an activity you like.</p>
+          <p class="today-card__what">${home ? "You've done everything we'd suggest right now. Explore an activity you like." : "Nothing new from your teacher right now. Explore an activity you like."}</p>
         </article>`;
 
     app().innerHTML = `
@@ -149,9 +150,9 @@
           ${messages.length ? `<ul class="home-msg__list">${msg(messages[0])}</ul>` : ""}
           ${messages.length > 1 ? `<details class="home-msg__more"><summary>Older messages (${messages.length - 1})</summary><ul class="home-msg__list">${messages.slice(1).map(msg).join("")}</ul></details>` : ""}
         </section>` : ""}
-        ${user.classId ? SE.classJourneyLine(SE.game.classJourney(user.classId)) : ""}
+        ${user.classId && !home ? SE.classJourneyLine(SE.game.classJourney(user.classId)) : ""}
         <nav class="home-actions" aria-label="More">
-          <a class="btn btn--primary btn--big" href="#/plans">${icon("map")}My Learning Plans</a>
+          ${home ? `<a class="btn btn--primary btn--big" href="#/me">${icon("star")}My XP and patches</a>` : `<a class="btn btn--primary btn--big" href="#/plans">${icon("map")}My Learning Plans</a>`}
           <a class="btn btn--ghost btn--big" href="#/activities">${icon("search")}Explore activities</a>
         </nav>
       </div>`;
@@ -187,7 +188,10 @@
     const base = SE.game.baseXp(a);
     const first = !last;
     const prompt = a.check || a.reflect;
-    const xpLine = st.state === "confirmed" ? "You already passed this one. Sending again is practice: your teacher can read your new answer."
+    const home = prof.home;   // a child at home: no teacher, the written answer is the pass
+    const xpLine = home ? (st.state === "confirmed" ? "You already finished this one. Sending a new answer is practice."
+        : `Worth <strong>${base} XP</strong>${!prof.counts.sectors.has(a.area) ? ` + ${P.xp.newSector} for your first one in ${esc(SE.areaById[a.area].short)}` : ""} when you send your answer.`)
+      : st.state === "confirmed" ? "You already passed this one. Sending again is practice: your teacher can read your new answer."
       : st.state === "tryagain" ? "Fix it up and send it again. Your teacher will look at your new answer."
       : `Worth <strong>${base} XP</strong>${!prof.counts.sectors.has(a.area) ? ` + ${P.xp.newSector} for your first pass in ${esc(SE.areaById[a.area].short)}` : ""} when your teacher passes it.`;
     const how = (st.confirmed && st.confirmed.data.how) ? ` (${esc({ oral: "spoken check", demo: "watched you show it", work: "reviewed your work" }[st.confirmed.data.how] || st.confirmed.data.how)})` : "";
@@ -195,25 +199,26 @@
       ${last || st.confirmed ? `
       <section class="block block--complete status--${st.state}" aria-labelledby="s-done">
         <h2 id="s-done">${icon(st.state === "tryagain" ? "refresh" : "check")}${esc(st.label)}</h2>
-        <p>${esc(STATUS_TEXT[st.state] || "")}${how}${last ? ` You sent it on ${SE.dateShort(last.event.at)}.` : ""}</p>
+        <p>${esc(home && st.state === "confirmed" ? "You finished it. Nice work!" : STATUS_TEXT[st.state] || "")}${how}${last ? ` You sent it on ${SE.dateShort(last.event.at)}.` : ""}</p>
         ${st.state === "tryagain" && st.tryAgain.data.note ? `<p class="teacher-reply">${icon("message")}<span><strong>Your teacher wrote:</strong> ${esc(st.tryAgain.data.note)}</span></p>` : ""}
         ${st.state === "confirmed" && st.confirmed.data.note ? `<p class="teacher-reply">${icon("message")}<span><strong>Your teacher wrote:</strong> ${esc(st.confirmed.data.note)}</span></p>` : ""}
         ${last && last.event.data.reflection ? `<blockquote class="your-answer"><span>Your answer</span>${esc(last.event.data.reflection)}</blockquote>` : last && last.event.data.evidence === "show" ? `<p class="muted">You chose to show or tell your teacher.</p>` : ""}
         ${review && review.data.note ? `<p class="teacher-reply">${icon("message")}<span><strong>Your teacher wrote:</strong> ${esc(review.data.note)}</span></p>` : ""}
       </section>` : ""}
 
-      ${SE.checksGuide("student")}
+      ${home ? "" : SE.checksGuide("student")}
       <section class="block block--debrief" aria-labelledby="s-debrief">
         <h2 id="s-debrief">${icon("flag")}${first ? "Show what you know" : st.state === "tryagain" ? "Try it again" : "Send a new answer"}</h2>
         <p class="block__hint">${xpLine}</p>
         <form id="debrief-form" novalidate>
           <div class="debrief-q">
             <p class="debrief-q__prompt"><span class="debrief-q__tag">${icon("question")}${a.check ? "Show what you know" : "Think about it"}</span>${esc(prompt)}</p>
+            ${home ? `<input type="radio" name="d-ev" value="written" checked hidden>` : `
             <fieldset class="evidence">
               <legend>How will you show it?</legend>
               <label class="evidence__opt"><input type="radio" name="d-ev" value="written" checked><span>${icon("message")}Write it here</span></label>
               <label class="evidence__opt"><input type="radio" name="d-ev" value="show"><span>${icon("users")}Show or tell my teacher</span></label>
-            </fieldset>
+            </fieldset>`}
             <div id="d-write">
               <label for="d-reflect" class="visually-hidden">Your answer</label>
               <textarea id="d-reflect" rows="4" maxlength="600" placeholder="Write what you did and what you figured out."></textarea>
@@ -249,6 +254,7 @@
     };
     form.querySelectorAll("input[name=d-ev]").forEach((r) => r.addEventListener("change", sync));
     let sent = false;
+    const before0 = SE.game.profile(user.id);
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       if (sent) return;   // a double-click or a second Enter must not record twice
@@ -256,7 +262,7 @@
       const text = document.getElementById("d-reflect").value.trim().slice(0, 600);
       const err = document.getElementById("d-err");
       if (evidence === "written" && !/[a-z0-9]/i.test(text)) {
-        err.textContent = "Write your answer first, or choose “Show or tell my teacher.”";
+        err.textContent = before0.home ? "Write your answer first." : "Write your answer first, or choose “Show or tell my teacher.”";
         document.getElementById("d-reflect").focus();
         return;
       }
@@ -285,6 +291,7 @@
     const gained = after.completions[after.completions.length - 1];
     const newPatches = after.patches.filter((p) => p.earned && !before.patches.find((b) => b.patch.id === p.patch.id).earned);
     const rankUp = after.index > before.index;
+    const earnedNow = after.passes.length > before.passes.length ? after.passes[after.passes.length - 1] : null;   // at home, a send can earn XP
     const recs = SE.game.recommendations(user, after, 1);
     const next = recs[0];
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -294,10 +301,11 @@
     wrap.innerHTML = `
       <div class="celebrate" role="dialog" aria-modal="true" aria-labelledby="cel-title">
         <div class="celebrate__stamp">${SE.patchArt({ name: "Sent", icon: SE.areaById[a.area].icon, ring: "orange" }, true, 120)}</div>
-        <h2 id="cel-title" tabindex="-1">${gained.event.data.evidence === "show" ? "Sent! Now show your teacher." : "Sent to your teacher!"}</h2>
+        <h2 id="cel-title" tabindex="-1">${after.home ? (earnedNow ? `Done! +${earnedNow.xp} XP` : "Sent!") : gained.event.data.evidence === "show" ? "Sent! Now show your teacher." : "Sent to your teacher!"}</h2>
         <p class="celebrate__sub">${esc(a.title)}</p>
         ${gained.event.data.evidence === "show" ? `<p class="celebrate__note celebrate__note--show">${icon("users")}Now show or tell your teacher what you did.</p>` : ""}
-        <p class="celebrate__note">${after.missions[a.id] && after.missions[a.id].confirmed
+        <p class="celebrate__note">${after.home ? (earnedNow ? "You earned it by explaining what you did. Keep going!" : "You already finished this one, so this is practice.")
+          : after.missions[a.id] && after.missions[a.id].confirmed && !earnedNow
           ? "You already passed this one, so this is practice. Your teacher can read your new answer."
           : `Your teacher will check it. When they pass it, you earn <strong>${SE.game.baseXp(a)} XP</strong>. If they ask you to try again, you'll see their note on Home.`}</p>
         ${rankUp ? `<div class="celebrate__rank">${SE.insignia(after.rank, 56)}<p><strong>${esc(after.rank.name)}</strong><br>${esc(after.rank.motto)}</p></div>` : ""}

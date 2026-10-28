@@ -5,6 +5,10 @@
  * One check for every activity: the student sends a reflection (the deliverable), and the teacher
  * marks it Pass (teacher_confirmed: XP is earned) or Try again (teacher_try_again: no XP; it reopens).
  * Sending, lab levels, and old "I can" stage checks earn nothing on their own.
+ *
+ * At home (a family: the student's class has kind "family"), there's no teacher: a written reflection
+ * that isn't empty counts as the pass when it's sent, and earns the same XP. The class kind comes from the
+ * store (the server in cloud mode), so a classroom device can't claim to be at home.
  */
 (function () {
   "use strict";
@@ -58,7 +62,16 @@
     "moxie_gate", "moxie_rubric", "pathway_review", "pathway_observation"]);
   const trusted = (e) => !TEACHER_ONLY.has(e.type) || !!e.by;
 
+  /* Is this student a child at home (in a family)? */
+  function atHome(studentId) {
+    const st = SE.store.studentById && SE.store.studentById(studentId);
+    const cls = st && SE.store.classById(st.classId);
+    return !!cls && cls.kind === "family";
+  }
+  const writtenAnswer = (d) => !!d && d.evidence === "written" && !!String(d.reflection || "").trim();
+
   function profile(studentId, events) {
+    const home = atHome(studentId);
     events = (events || SE.store.eventsFor(studentId)).filter(trusted).sort((a, b) => a.at - b.at);
     const c = {
       missions: 0, reflections: 0, extensions: 0, collaborative: 0, confident: 0,
@@ -89,6 +102,30 @@
       });
     };
 
+    /* A pass (the teacher's, or a sent answer at home) earns the activity's XP once. */
+    function pass(e, act, why) {
+      const ms = (missions[act.id] = missions[act.id] || {});
+      if (!ms.confirmed) {
+        const sub = (ms.submitted && ms.submitted.data) || {};
+        let gained = baseXp(act);
+        const parts = [[why, gained]];
+        if (!c.sectors.has(act.area)) { gained += P.xp.newSector; parts.push([`First pass in ${SE.areaById[act.area].short}`, P.xp.newSector]); }
+        xp += gained;
+        passes.push({ event: e, activity: act, xp: gained, parts });
+        c.missions++;
+        c.sectors.add(act.area);
+        c.areas[act.area] = (c.areas[act.area] || 0) + 1;
+        if (act.format === "collaborative") c.collaborative++;
+        (act.keywords || []).forEach((k) => { c.keywords[k] = (c.keywords[k] || 0) + 1; });
+        if ((sub.reflection || "").trim().length >= 3) c.reflections++;
+        if (sub.evidence ? !!(sub.extensionNote || "").trim() : !!sub.extension) c.extensions++;
+        if (sub.confidence === "teach") c.confident++;
+        completedIds.add(act.id);
+        checkPatches(e.at);
+      }
+      ms.confirmed = e; ms.tryAgain = null;
+    }
+
     events.forEach((e) => {
       if (!e.by) lastActive = Math.max(lastActive, e.at);
       const act = e.data && e.data.activityId ? SE.activityById[e.data.activityId] : null;
@@ -102,36 +139,16 @@
       }
 
       if (e.type === "mission_completed" && act) {
-        // A send is the deliverable. It earns nothing yet: XP comes when the teacher passes it.
+        // A send is the deliverable. In class it earns nothing yet: XP comes when the teacher passes it.
         const first = !sentIds.has(act.id);
         sentIds.add(act.id);
         completions.push({ event: e, activity: act, xp: 0, parts: [], first });
         const ms = (missions[act.id] = missions[act.id] || {});
         ms.submitted = e; if (ms.tryAgain && ms.tryAgain.at < e.at) ms.tryAgain = null;
+        if (home && writtenAnswer(e.data)) pass(e, act, "Done at home");   // no teacher at home: the answer is the pass
       }
       // Teacher checks. A pass sticks and earns the XP once; "try again" holds until the student sends again.
-      if (e.type === "teacher_confirmed" && act) {
-        const ms = (missions[act.id] = missions[act.id] || {});
-        if (!ms.confirmed) {
-          const sub = (ms.submitted && ms.submitted.data) || {};
-          let gained = baseXp(act);
-          const parts = [["Passed by your teacher", gained]];
-          if (!c.sectors.has(act.area)) { gained += P.xp.newSector; parts.push([`First pass in ${SE.areaById[act.area].short}`, P.xp.newSector]); }
-          xp += gained;
-          passes.push({ event: e, activity: act, xp: gained, parts });
-          c.missions++;
-          c.sectors.add(act.area);
-          c.areas[act.area] = (c.areas[act.area] || 0) + 1;
-          if (act.format === "collaborative") c.collaborative++;
-          (act.keywords || []).forEach((k) => { c.keywords[k] = (c.keywords[k] || 0) + 1; });
-          if ((sub.reflection || "").trim().length >= 3) c.reflections++;
-          if (sub.evidence ? !!(sub.extensionNote || "").trim() : !!sub.extension) c.extensions++;
-          if (sub.confidence === "teach") c.confident++;
-          completedIds.add(act.id);
-          checkPatches(e.at);
-        }
-        ms.confirmed = e; ms.tryAgain = null;
-      }
+      if (e.type === "teacher_confirmed" && act) pass(e, act, "Passed by your teacher");
       if (e.type === "teacher_try_again" && act) {
         const ms = (missions[act.id] = missions[act.id] || {});
         if (!ms.confirmed) ms.tryAgain = e;
@@ -176,7 +193,7 @@
     }));
 
     return {
-      xp, ...rankFor(xp),
+      xp, ...rankFor(xp), home,
       counts: c,
       completions,
       completedIds,
@@ -344,12 +361,12 @@
     const sub = ms.submitted;
     const legacy = !!sub && !sub.data.evidence && !sub.isDemo && sub.at < (P.legacyBefore || 0);
     const base = { sub, legacy, confirmed: ms.confirmed, tryAgain: ms.tryAgain };
-    if (ms.confirmed) return { ...base, state: "confirmed", label: "Passed" };
+    if (ms.confirmed) return { ...base, state: "confirmed", label: prof.home ? "Done" : "Passed" };
     if (ms.tryAgain) return { ...base, state: "tryagain", label: "Try again" };
     if (sub) return { ...base, state: "submitted", label: legacy ? "Sent (older record)" : sub.data.evidence === "show" ? "Sent (will show teacher)" : "Sent" };
     const started = prof.opened.has(a.id) || (prof.steps[a.id] && prof.steps[a.id].size > 0) || (lv && lv.size > 0);
     return { ...base, state: started ? "started" : "none", label: started ? "In progress" : "Not started" };
   }
 
-  SE.game = { profile, recommendations, classSummary, classGoal, classCounts, journeyFrom, classJourney, classPointsFor, rankFor, baseXp, missionDone, statusFor };
+  SE.game = { atHome, profile, recommendations, classSummary, classGoal, classCounts, journeyFrom, classJourney, classPointsFor, rankFor, baseXp, missionDone, statusFor };
 })();

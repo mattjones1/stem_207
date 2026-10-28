@@ -179,6 +179,7 @@
     const [id, sub] = rest || [];
     if (!id) return listView(user);
     if (id === "new") {
+      if (!SE.access.canTeach(user)) { location.replace("#/pricing"); SE.toast("Learning Plans are part of the Educator plan."); return; }
       const a = sub && SE.activityById[sub];
       const blank = !a && SE.store.pathwaysFor(user.id).find(isBlank);
       const p = blank || SE.store.createPathway(a ? { title: `New plan with ${a.title}`, steps: [{ kind: "mission", activityId: a.id, required: true, note: null }] } : {});
@@ -278,6 +279,7 @@
 
   function bindUse() {
     app().querySelectorAll("[data-use]").forEach((b) => b.addEventListener("click", () => {
+      if (!SE.access.canTeach(SE.store.currentUser())) { SE.toast("Templates are part of the Educator plan."); location.hash = "#/pricing"; return; }
       const t = template(b.dataset.use);
       const p = t && SE.store.duplicatePathway({ ...t, steps: stepsOf(t) });
       if (!p) return;
@@ -640,6 +642,7 @@
   /* ───────── Activity page (educators): add this activity to a plan ───────── */
   SE.planPicker = function (user, a) {
     if (!SE.content.assignable(a)) return "";
+    if (!SE.access.canTeach(user)) return `<div class="block plan-picker"><h2>Add to a Learning Plan</h2><p class="muted small">Learning Plans are part of the Educator plan. <a href="#/pricing">See plans</a></p></div>`;
     const plans = SE.store.pathwaysFor(user.id).filter((p) => p.status !== "archived");
     return `
       <div class="block plan-picker">

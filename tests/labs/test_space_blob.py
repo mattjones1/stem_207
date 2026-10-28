@@ -17,6 +17,7 @@ async def feed(pg, n=1):
 async def guest(pg):
     await pg.goto(S); await pg.evaluate("localStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400)
     await pg.click("text=Look around as a guest"); await pg.wait_for_timeout(300)
+    await pg.evaluate("localStorage.setItem('stem207.devPlan', 'educator')")   # this tests the lab, not who may open it (test_access.py does that)
 async def level(pg, n): await pg.goto(S + f"#/lab/space-blob/{n}"); await pg.wait_for_timeout(400)
 async def main():
   async with async_playwright() as p:
@@ -143,7 +144,7 @@ async def main():
     ok("educator can add it to a Learning Plan", await t.locator('a[href="#/teach/plans/new/lab-space-blob"]').count() >= 1)
     # reduced motion + phone
     rm = await b.new_page(viewport={"width": 390, "height": 844}, reduced_motion="reduce"); watch(rm)
-    await rm.goto(S); await rm.wait_for_timeout(300); await rm.click("text=Look around as a guest"); await rm.wait_for_timeout(300)
+    await rm.goto(S); await rm.wait_for_timeout(300); await rm.click("text=Look around as a guest"); await rm.wait_for_timeout(300); await rm.evaluate("localStorage.setItem('stem207.devPlan', 'educator')")
     await rm.goto(S + "#/lab/space-blob/1"); await rm.wait_for_timeout(400)
     await rm.click("#sb-start"); await rm.click("#sb-feed")
     an = await rm.evaluate("getComputedStyle(document.querySelector('.sb-blob__svg')).animationName")

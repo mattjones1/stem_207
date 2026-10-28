@@ -2570,3 +2570,52 @@ h1, h2, h3, h4 { letter-spacing: -.015em; }
 .mx-cb-note svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; margin-top: .2rem; }
 .myplans-note { display: flex; gap: .6rem; align-items: center; padding: .8rem 1rem; border-radius: var(--radius-sm); background: var(--teal-soft); margin: 0 0 1rem; }
 .myplans-note svg { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; }
+
+/* ───────── Pricing and Account (views-account.js) ───────── */
+.price-cards { list-style: none; padding: 0; margin: 1rem 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 1rem; }
+.price-card { display: grid; gap: .7rem; align-content: start; padding: 1.5rem; background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius); }
+.price-card--edu { border-color: var(--brand-teal); box-shadow: 0 0 0 2px var(--teal-soft); }
+.price-card h2 { font-size: var(--step-2); }
+.price-card__price { font-family: var(--font-display); font-weight: 800; font-size: 2.2rem; color: var(--fg); margin: 0; display: flex; align-items: baseline; gap: .5rem; flex-wrap: wrap; }
+.price-card__price small { font-size: 1rem; font-weight: 600; color: var(--muted); }
+.price-card__save { font-size: .85rem; font-family: var(--font-body, inherit); font-weight: 700; color: var(--teal); background: var(--teal-soft); padding: .15rem .55rem; border-radius: 999px; }
+.price-card .btn { justify-self: start; }
+.price-free { margin-top: 1rem; }
+.acct { display: grid; gap: 1rem; }
+.acct__actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .6rem; }
+.acct-dev { border-style: dashed; }
+.su-kind { border: 0; padding: 0; margin: 0 0 .5rem; display: grid; gap: .5rem; }
+.su-kind legend { font-weight: 700; margin-bottom: .4rem; }
+.su-kind__opt { display: flex; gap: .7rem; align-items: center; padding: .7rem .9rem; border: 1.5px solid var(--line); border-radius: var(--radius-sm); cursor: pointer; min-height: 44px; }
+.su-kind__opt:has(input:checked) { border-color: var(--brand-teal); background: var(--teal-soft); }
+.su-kind__opt input { width: 20px; height: 20px; accent-color: var(--teal); }
+.su-kind__opt span { display: grid; }
+.su-kind__opt small { color: var(--muted); }
+
+/* ───────── Family (views-family.js) ───────── */
+.fam-kids { list-style: none; padding: 0; margin: 0 0 1rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 1rem; }
+.fam-child { display: grid; gap: .7rem; align-content: start; padding: 1.25rem; background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius); }
+.fam-child__head { display: flex; gap: .8rem; align-items: center; }
+.fam-child__head h3 { font-size: var(--step-1); margin: 0; }
+.fam-child h4 { font-size: 1rem; margin: .2rem 0 0; }
+.fam-recent { list-style: none; padding: 0; margin: 0; display: grid; gap: .5rem; }
+.fam-recent li { display: grid; gap: .15rem; }
+.fam-recent small { color: var(--muted); }
+.fam-recent blockquote { margin: 0; padding: .4rem .7rem; border-left: 3px solid var(--brand-teal); background: var(--teal-soft); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: .95rem; }
+.fam-child__tools { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.fam-add__row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto; gap: .8rem; align-items: end; }
+@media (max-width: 640px) { .fam-add__row { grid-template-columns: 1fr; } }
+.fam-steps { margin: 0 0 1rem; padding-left: 1.4rem; display: grid; gap: .3rem; }
+.fam-pitch .bullets { margin: .5rem 0 1rem; }
+@media print {
+  body:has(.fam-kids) .fam-kids, body:has(.fam-kids) .fam-add, body:has(.fam-kids) #fam-print, body:has(.fam-kids) .section__head p { display: none !important; }
+}
+
+/* ───────── Free and locked (access.js) ───────── */
+.free-tag, .lock-tag { display: inline-flex; align-items: center; gap: .25rem; margin-left: auto; padding: .1rem .55rem; border-radius: 999px; font-size: .78rem; font-weight: 700; }
+.free-tag { background: var(--teal-soft); color: var(--teal); }
+.lock-tag { background: var(--surface-2, #eef2f1); color: var(--muted); border: 1px solid var(--line); }
+.lock-tag svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
+.locked { display: grid; gap: 1rem; }
+.locked__box { border-color: var(--brand-teal); }
+.teach-pitch { border-color: var(--brand-teal); margin-bottom: 1rem; }

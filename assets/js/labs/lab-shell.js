@@ -69,6 +69,8 @@
     const ch = chapterOf(idx);
     const inView = (i) => !chapters || (i >= chapters[ch].from && i <= chapters[ch].to);
     const firstOpen = (c) => { for (let i = c.from; i <= c.to; i++) if (!done.has(i)) return i; return c.from; };
+    // Without a plan, a lab's level 1 is a free preview (some labs are free throughout: data/tiers.js).
+    const canLevel = (i) => SE.access.canOpenLab(lab.id, i, user);
 
     app().innerHTML = `
       <section class="page-top page-top--lab">
@@ -92,8 +94,8 @@
           }).join("")}</nav>` : ""}
           <ol class="lab-levels" aria-label="${chapters ? `${esc(chapters[ch].title)} levels` : "Levels"}">
             ${lab.levels.map((l, i) => !inView(i) ? "" : `
-              <li><a href="#/lab/${lab.id}/${i + 1}" class="${i === idx ? "is-current" : ""} ${done.has(i) ? "is-done" : ""}" ${i === idx ? 'aria-current="step"' : ""}>
-                <span class="lab-levels__n">${done.has(i) ? icon("check") : i + 1}</span>
+              <li><a href="#/lab/${lab.id}/${i + 1}" class="${i === idx ? "is-current" : ""} ${done.has(i) ? "is-done" : ""} ${canLevel(i) ? "" : "is-locked"}" ${i === idx ? 'aria-current="step"' : ""}>
+                <span class="lab-levels__n">${done.has(i) ? icon("check") : canLevel(i) ? i + 1 : icon("lock")}</span>
                 <span class="lab-levels__t">${esc(l.title)}</span>
               </a></li>`).join("")}
           </ol>
@@ -126,6 +128,21 @@
         </section>
       </div>
       ${!user || user.role === "guest" ? `<div class="wrap"><p class="muted lab-guest">${icon("user", 'class="inline-icon"')}Exploring as a guest: your lab progress won't be saved. <a href="#/signin">Sign in</a> to save your progress.</p></div>` : ""}`;
+
+    if (!canLevel(idx)) {
+      const student = user && user.role === "student";
+      document.getElementById("lab-mount").innerHTML = `
+        <div class="lab-locked">
+          <h2>${icon("lock")}Level ${idx + 1} is for subscribers</h2>
+          <p>${esc(SE.access.lockText(user))} Level 1 is free to try.</p>
+          <div class="acct__actions">
+            <a class="btn btn--ghost" href="#/lab/${lab.id}/1">${icon("arrowLeft")}Play level 1</a>
+            ${student ? "" : `<a class="btn btn--primary" href="#/pricing">${icon("arrowRight")}See plans</a>`}
+          </div>
+        </div>`;
+      document.querySelector(".lab-brief__tools").hidden = true;
+      return;
+    }
 
     const hintBtn = document.getElementById("lab-hint-btn");
     hintBtn.addEventListener("click", () => {

@@ -37,12 +37,19 @@
   const maineTag = (a) => (SE.isMaine(a) ? `<span class="maine-tag">${SE.pine(14)}Made in Maine</span>` : "") + pilotTag(a);
   /* Pilot activities are only flagged for educators; students just see a normal activity. */
   const pilotTag = (a) => a.pilot && ((SE.store.currentUser && SE.store.currentUser()) || {}).role === "educator" ? `<span class="pilot-tag">${icon("flag")}Pilot</span>` : "";
+  /* Without a plan: free activities say Free, the rest show a lock (students never see prices). */
+  const tierTag = (a) => {
+    const u = SE.store.currentUser && SE.store.currentUser();
+    if (!SE.access.enforced() || SE.access.paid(u)) return "";
+    return SE.access.isFree(a) ? `<span class="free-tag">Free</span>` : `<span class="lock-tag">${icon("lock")}${u && u.role === "student" ? "Locked" : "Subscribers"}</span>`;
+  };
   function activityCard(a, prof) {
     const area = SE.areaById[a.area];
     const done = prof && prof.completedIds.has(a.id);
+    const locked = !SE.access.canOpen(a, SE.store.currentUser && SE.store.currentUser());
     return `
-      <article class="card ${done ? "card--done" : ""}">
-        <div class="card__area"><span class="icon-badge">${icon(area.icon)}</span>${esc(area.short)}${maineTag(a)}</div>
+      <article class="card ${done ? "card--done" : ""} ${locked ? "card--locked" : ""}">
+        <div class="card__area"><span class="icon-badge">${icon(area.icon)}</span>${esc(area.short)}${maineTag(a)}${tierTag(a)}</div>
         <h3><a href="#/activity/${a.id}">${esc(a.title)}</a></h3>
         <p class="card__summary">${esc(a.summary)}</p>
         <div class="meta">
@@ -82,7 +89,7 @@
   SE.sortActivities = sortActivities;
 
   /* What "home" (#/) is called for whoever is signed in: Home, or Dashboard for educators. */
-  SE.homeLabel = () => { const u = SE.store.currentUser(); return !u || u.role === "guest" ? "Home" : u.role === "student" ? "Home" : "Dashboard"; };
+  SE.homeLabel = () => { const u = SE.store.currentUser(); return !u || u.role === "guest" || u.role === "student" ? "Home" : SE.access.isParent(u) && SE.access.plan(u) !== "educator" ? "Family" : "Dashboard"; };
   const backLink = (href = "#/", label) => `<a class="back-link" href="${href}">${icon("arrowLeft")}${label || SE.homeLabel()}</a>`;
   SE.backLink = backLink;
 
@@ -488,6 +495,33 @@
   };
 
   /* A placeholder record (educators only): a title and nothing to teach yet. */
+  /* A locked activity: what it is, but no steps, notes, or launch. Students are told to ask; others can subscribe. */
+  function lockedPage(a, user) {
+    const area = SE.areaById[a.area];
+    const student = user && user.role === "student";
+    app().innerHTML = `
+      <section class="page-top">
+        <div class="wrap page-top__inner">
+          <div class="backbar">${backLink(`#/activities/${area.id}`, area.name)}</div>
+          <div class="page-top__head"><span class="icon-badge">${icon(area.icon)}</span>
+            <div><span class="eyebrow">${esc(area.name)}</span><h1 tabindex="-1">${esc(a.title)}</h1></div></div>
+          <p class="page-top__lede">${esc(a.summary)}</p>
+        </div>
+      </section>
+      <section class="wrap section locked">
+        <div class="block locked__box">
+          <h2>${icon("lock")}${student ? "This one isn't open yet" : "Part of a STEM 207 subscription"}</h2>
+          <p>${esc(SE.access.lockText(user))}</p>
+          ${student ? "" : `<div class="acct__actions"><a class="btn btn--primary" href="#/pricing">${icon("arrowRight")}See plans</a><a class="btn btn--ghost" href="#/activities">${icon("compass")}Free activities</a></div>`}
+        </div>
+        <div class="block">
+          <h2>${icon("bulb")}What you’ll learn</h2>
+          <ul class="bullets objectives">${a.learn.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul>
+          <dl class="facts"><div><dt>Grades</dt><dd>${SE.gradesText(a.grades)}</dd></div><div><dt>Time</dt><dd>${SE.timeText(a)}</dd></div></dl>
+        </div>
+      </section>`;
+  }
+
   function placeholderPage(a) {
     const area = SE.areaById[a.area];
     app().innerHTML = `
@@ -725,6 +759,7 @@
     const a = SE.activityById[id];
     if (a && a.moxie && !SE.content.visibleTo(a, user) && SE.moxieClosed) return SE.moxieClosed(user);
     if (!a || !SE.content.visibleTo(a, user)) return SE.views.notFound();
+    if (!SE.access.canOpen(a, user)) return lockedPage(a, user);
     if (a.moxie) return SE.views.moxieSession(user, a);   // Moxie sessions have their own layout (views-moxie.js)
     if (a.placeholder) return placeholderPage(a);
     const area = SE.areaById[a.area];

@@ -40,18 +40,18 @@
         <a class="door" href="#/signin/student">
           <span class="door__icon">${icon("rocket")}</span>
           <strong>I'm a student</strong>
-          <span>Use your class code and secret pictures.</span>
+          <span>Use your class or family code and secret pictures.</span>
         </a>
         <a class="door" href="#/signin/educator">
           <span class="door__icon">${icon("clipboard")}</span>
-          <strong>I'm an educator</strong>
-          <span>See your class dashboard and student progress.</span>
+          <strong>I'm an educator or parent</strong>
+          <span>See your classes or your family, and how they're doing.</span>
         </a>
       </div>
       <div class="auth__alt">
         <button type="button" class="linkish" id="guest-btn">Look around as a guest</button>
         <span aria-hidden="true">·</span>
-        <a href="#/signup">Create an educator account</a>
+        <a href="#/signup">Create an account</a>
       </div>
       ${prototypeNote}`, true);
     document.getElementById("guest-btn").addEventListener("click", () => {
@@ -81,7 +81,7 @@
     app().innerHTML = shell(`
       <a class="auth__back" href="#/signin">${icon("arrowLeft")}Back</a>
       ${stepper(1)}
-      <h1 tabindex="-1">What's your class code?</h1>
+      <h1 tabindex="-1">What's your class or family code?</h1>
       <p class="muted">Your teacher has it. It looks like a word and a number, like <strong>MOOSE7</strong>.</p>
       <form id="code-form" class="form" novalidate>
         <div class="form__field">
@@ -182,7 +182,7 @@
     const demo = SE.store.DEMO;
     app().innerHTML = shell(`
       <a class="auth__back" href="#/signin">${icon("arrowLeft")}Back</a>
-      <h1 tabindex="-1">Educator sign in</h1>
+      <h1 tabindex="-1">Educator or parent sign in</h1>
       <form id="edu-form" class="form" novalidate>
         <div class="form__field">
           <label for="edu-email">Email</label>
@@ -200,7 +200,7 @@
         <button class="btn btn--primary btn--big" type="submit">Sign in</button>
       </form>
       ${CLOUD ? "" : `<div class="demo-hint">${icon("flag")}<p><strong>Trying the prototype?</strong> Sign in to the sample class with <code>${demo.email}</code> and password <code>${demo.password}</code>. <button type="button" class="linkish" id="fill-demo">Fill it in for me</button></p></div>`}
-      <p class="auth__alt">New here? <a href="#/signup">Create an educator account</a></p>
+      <p class="auth__alt">New here? <a href="#/signup">Create an account</a></p>
       ${prototypeNote}`);
     bindPwToggle();
     if (document.getElementById("fill-demo")) document.getElementById("fill-demo").addEventListener("click", () => {
@@ -216,7 +216,7 @@
       const res = await SE.store.signInEducator(document.getElementById("edu-email").value, document.getElementById("edu-pw").value);
       btn.disabled = false;
       if (!res.ok) return showError(res.field === "email" ? "edu-email" : "edu-pw", res.error);
-      location.hash = "#/teach";
+      location.hash = "#/";   // Home sends educators to the Dashboard and parents to Family
       SE.route(true);
     });
   };
@@ -225,17 +225,18 @@
   SE.views.signup = function () {
     app().innerHTML = shell(`
       <a class="auth__back" href="#/signin/educator">${icon("arrowLeft")}Back</a>
-      <h1 tabindex="-1">Create an educator account</h1>
-      <p class="muted">You'll get a class code to share with students. Students never need an email or password.</p>
+      <h1 tabindex="-1">Create an account</h1>
+      <p class="muted">Free to make. Look around the free activities, then subscribe when you're ready. Children never need an email or password.</p>
       <form id="su-form" class="form" novalidate>
+        <fieldset class="su-kind">
+          <legend>I'm signing up as</legend>
+          <label class="su-kind__opt"><input type="radio" name="su-kind" value="educator" checked><span><strong>An educator</strong><small>Classes, Learning Plans, and checks</small></span></label>
+          <label class="su-kind__opt"><input type="radio" name="su-kind" value="parent"><span><strong>A parent or family</strong><small>Learning at home for up to 4 children</small></span></label>
+        </fieldset>
         <div class="form__field">
-          <label for="su-name">Your name, as students see it</label>
+          <label for="su-name">Your name, as children see it</label>
           <input id="su-name" class="input" autocomplete="name" placeholder="Ms. Lopez" aria-describedby="su-name-err">
           <p class="form__error" id="su-name-err" role="alert"></p>
-        </div>
-        <div class="form__field">
-          <label for="su-class">Class name</label>
-          <input id="su-class" class="input" placeholder="Room 12, Tuesday Explorers">
         </div>
         <div class="form__field">
           <label for="su-email">Email</label>
@@ -271,16 +272,17 @@
       // Catch a typo before the account exists, so the same password works at sign-in.
       if (pw.length >= 8 && pw !== pw2) return showError("su-pw2", pw2 ? "The two passwords don't match. Type them again, or press the eye to check." : "Type your password a second time to confirm it.");
       btn.disabled = true;
+      const accountKind = (document.querySelector("[name=su-kind]:checked") || {}).value || "educator";
       const res = await SE.store.createEducator({
         name: document.getElementById("su-name").value,
-        className: document.getElementById("su-class").value,
+        accountKind,
         email: document.getElementById("su-email").value,
         password: document.getElementById("su-pw").value
       });
       btn.disabled = false;
       if (!res.ok) return showError({ name: "su-name", email: "su-email", password: "su-pw" }[res.field], res.error);
-      SE.toast(`Welcome, ${res.educator.name}. Your class code is ${res.cls.code}.`);
-      location.hash = `#/teach/classes/${res.cls.id}`;
+      SE.toast(`Welcome, ${res.educator.name}.`);
+      location.hash = accountKind === "parent" ? "#/family" : "#/teach";
       SE.route(true);
     });
   };

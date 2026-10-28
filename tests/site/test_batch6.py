@@ -26,6 +26,7 @@ async def main():
     ctx = await b.new_context(viewport={"width": 1280, "height": 900}); pg = await ctx.new_page()
     pg.on("pageerror", lambda e: errs.append(f"{pg.url}: {e}"))
     await pg.goto(S); await pg.evaluate("localStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400)
+    await pg.evaluate("localStorage.setItem('stem207.devPlan', 'educator')")   # tests the labs and certificate, not access (test_access.py)
     await pg.goto(S + "#/signin/student"); await pg.wait_for_timeout(300)
     await pg.fill("#class-code", "MOOSE7"); await pg.click("#code-form button[type=submit]"); await pg.wait_for_timeout(400)
     await pg.click("text=Ava R."); await pg.wait_for_timeout(200)

@@ -72,8 +72,8 @@
     url: base,
     auth: readAuth,
 
-    async signUp(email, password, name) {
-      const r = await http("POST", "/auth/v1/signup", { body: { email, password, data: { name } } });
+    async signUp(email, password, name, accountKind = "educator") {
+      const r = await http("POST", "/auth/v1/signup", { body: { email, password, data: { name, account_kind: accountKind } } });
       if (r && r.access_token) return { session: saveSession(r) };
       return { needsConfirm: true };
     },

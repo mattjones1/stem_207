@@ -14,18 +14,25 @@
     if (!user) {
       html = `<a href="#/signin" class="nav-signin">${icon("user")}Sign in</a>`;
     } else if (user.role === "guest") {
-      html = link("#/", "dashboard", "Home") + link("#/activities", "activities", "Activities") +
+      html = link("#/", "dashboard", "Home") + link("#/activities", "activities", "Activities") + link("#/pricing", "pricing", "Pricing") +
         `<a href="#/signin" class="nav-signin" data-signout>${icon("user")}Sign in</a>`;
     } else if (user.role === "student") {
       const prof = SE.game.profile(user.id);
-      html = link("#/", "dashboard", "Home") + link("#/plans", "plans", "My Learning Plans") + link("#/activities", "activities", "Activities") + link("#/base", "base", "My harbor") +
+      // A child at home (a family) has no Learning Plans.
+      html = link("#/", "dashboard", "Home") + (SE.access.atHome(user) ? "" : link("#/plans", "plans", "My Learning Plans")) + link("#/activities", "activities", "Activities") + link("#/base", "base", "My harbor") +
         `<a href="#/me" class="user-chip" ${navKey === "me" ? 'aria-current="page"' : ""}>${SE.ownAvatar(user.id, 28)}<span><b>${esc(user.displayName)}</b><small>${SE.num(prof.xp)} XP · ${esc(prof.rank.name)}</small></span></a>` +
         `<button type="button" class="nav-out" data-signout>${icon("logout")}<span>Sign out</span></button>`;
     } else {
-      const waiting = SE.teachChecksWaiting ? SE.teachChecksWaiting(user) : 0;
-      html = link("#/teach", "teach", "Dashboard") + link("#/teach/plans", "plans", "Learning Plans") + link("#/activities", "activities", "Activities") +
-        link("#/teach/classes", "classes", "Classes") + link("#/teach/checks", "checks", `Checks${waiting ? ` <span class="nav-badge" aria-label="${waiting} waiting">${waiting}</span>` : ""}`) +
-        `<span class="user-chip user-chip--edu">${icon("clipboard")}<span><b>${esc(user.name)}</b><small>Educator</small></span></span>` +
+      // The name chip is the Account link (plan and billing). Parents see Family and Activities.
+      const planName = { none: "Free account", family: "Family plan", educator: "Educator plan" }[SE.access.plan(user)];
+      const chip = `<a href="#/account" class="user-chip user-chip--edu" ${navKey === "account" ? 'aria-current="page"' : ""}>${icon("clipboard")}<span><b>${esc(user.name)}</b><small>Account · ${planName}</small></span></a>`;
+      if (SE.access.isParent(user) && SE.access.plan(user) !== "educator") html = link("#/family", "family", "Family") + link("#/activities", "activities", "Activities") + chip;
+      else {
+        const waiting = SE.teachChecksWaiting ? SE.teachChecksWaiting(user) : 0;
+        html = link("#/teach", "teach", "Dashboard") + link("#/teach/plans", "plans", "Learning Plans") + link("#/activities", "activities", "Activities") +
+          link("#/teach/classes", "classes", "Classes") + link("#/teach/checks", "checks", `Checks${waiting ? ` <span class="nav-badge" aria-label="${waiting} waiting">${waiting}</span>` : ""}`) + chip;
+      }
+      html +=
         `<button type="button" class="nav-out" data-signout>${icon("logout")}<span>Sign out</span></button>`;
     }
     nav.innerHTML = html;
@@ -112,11 +119,12 @@
     else if (a === "plans") {
       if (user.role === "educator") { location.replace("#/teach/plans"); return; }
       if (user.role !== "student") { elsewhere("#/signin/student", "Sign in to see your Learning Plans."); return; }
+      if (SE.access.atHome(user)) { elsewhere("#/"); return; }   // children at home have no Learning Plans
       if (b) SE.views.myPlan(user, b); else SE.views.myPlans(user);
       navKey = "plans"; title = "My Learning Plans · STEM 207";
     }
     else if (!a) {
-      if (user.role === "educator") { location.replace("#/teach"); return; }
+      if (user.role === "educator") { location.replace(SE.access.isParent(user) && SE.access.plan(user) !== "educator" ? "#/family" : "#/teach"); return; }
       SE.views.dashboard(user); navKey = "dashboard";
     }
     else if (a === "activities") {
@@ -136,6 +144,15 @@
       SE.views.lab(user, b, c);
       const lab = SE.labs.byId(b);
       title = `${lab ? lab.title : "Lab"} · STEM 207`;
+    }
+    else if (a === "pricing") { SE.views.pricing(user); navKey = "pricing"; title = "Pricing · STEM 207"; }
+    else if (a === "account") {
+      if (user.role !== "educator") { elsewhere("#/pricing"); return; }
+      SE.views.account(user); navKey = "account"; title = "Account · STEM 207";
+    }
+    else if (a === "family") {
+      if (user.role !== "educator") { elsewhere("#/", user.role === "student" ? "That page is for grown-ups." : ""); return; }
+      SE.views.family(user); navKey = "family"; title = "Family · STEM 207";
     }
     else if (a === "moxie" && !b) { SE.views.moxie(user); navKey = "activities"; title = "Moxie · STEM 207"; }
     else if (a === "moxie" && b === "teach") {

@@ -160,6 +160,10 @@ async def main():
         F = []
         await pg.goto(S); await pg.evaluate("localStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400)
         for h in PUBLIC: await visit(pg, h); await audit(pg, h, F)
+        # A guest: pricing, free and locked cards, a locked activity, a locked lab level.
+        await pg.evaluate("SE.store.startGuest()")
+        for h in ["#/pricing", "#/activities/coding", "#/activity/loop-dance", "#/lab/rover/2"]: await visit(pg, h); await audit(pg, f"guest {h}", F)
+        await pg.evaluate("SE.store.signOut()"); await pg.wait_for_timeout(200)
         await sign_student(pg)
         for h in STUDENT: await visit(pg, h); await audit(pg, h, F)
         await pg.evaluate("STEM.moxieSessions.forEach((s) => { s.pub = 'published'; })")
@@ -179,6 +183,9 @@ async def main():
         aid = await pg.evaluate(f"(() => {{ SE.store.publishPathway('{pw}'); const c = SE.store.classesFor(SE.store.currentUser().id)[0]; return SE.store.assignPathway(c.id, '{pw}').id; }})()")
         for h in [f"#/teach/plans/{pw}", f"#/teach/plans/{pw}/students", f"#/teach/plans/{pw}/checks"]: await visit(pg, h); await audit(pg, h, F)
         await visit(pg, "#/teach/plans/tpl-ws-sampler"); await audit(pg, "workshop template", F)
+        # Account and Family (with one child and its sign-in card).
+        await visit(pg, "#/account"); await audit(pg, "account", F)
+        await visit(pg, "#/family"); await pg.fill("#fa-name", "Mia L."); await pg.click("#fam-add button[type=submit]"); await pg.wait_for_timeout(300); await audit(pg, "family", F)
         # The shared modal, open: Add students (with a checked list), Message a class, and Send a note.
         await visit(pg, f"#/teach/classes/{cid}"); await pg.locator("[data-add-students]").first.click(); await pg.wait_for_timeout(250)
         await pg.fill("#ms-names", "Sam P.\nava r.\nx@y.org"); await pg.wait_for_timeout(150); await audit(pg, "modal: add students", F)
