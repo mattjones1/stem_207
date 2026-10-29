@@ -5875,6 +5875,263 @@ window.STEM.activities = [
     "explain": "In three sentences: the biggest risk you found, the defense you chose for it, and why people will follow your plan."
   },
   {
+    "id": "lab-web-builder",
+    "title": "Web Builder Lab",
+    "area": "coding",
+    "group": "web",
+    "summary": "Write real HTML and CSS and watch your page change live. Add links, pictures with alt text, and colors everyone can read, then ship a page for a made-up Maine business.",
+    "level": "intermediate",
+    "grades": [
+      "4-5",
+      "6-8"
+    ],
+    "duration": 45,
+    "format": "independent",
+    "equipment": [
+      "computer"
+    ],
+    "source": "original",
+    "keywords": [
+      "web development",
+      "html",
+      "css",
+      "accessibility",
+      "alt text",
+      "contrast",
+      "web page"
+    ],
+    "access": {
+      "account": "none",
+      "cost": "free",
+      "supervision": false,
+      "hardware": []
+    },
+    "launch": {
+      "status": "lab",
+      "labId": "web-builder",
+      "label": "Open the Web Builder Lab",
+      "note": "Runs inside STEM 207. The preview can't run scripts or reach the internet, and links don't open."
+    },
+    "mission": "Every website is built from HTML and CSS. Type real code, watch your page change, and learn what web developers check before a page goes live: clear links, pictures everyone can understand, and colors everyone can read.",
+    "learn": [
+      "Write HTML tags for headlines, paragraphs, lists, links, and pictures.",
+      "Write CSS rules that change colors, and check that text has enough contrast.",
+      "Test a page for accessibility: alt text, clear link words, and readable colors."
+    ],
+    "why": "HTML and CSS are the first languages of the web, and making pages that work for everyone is part of every web developer's job. Accessible pages help people who use screen readers, people with low vision, and everyone on a sunny screen.",
+    "realWorld": "Web developers build and test the websites of schools, towns, hospitals, and businesses, and many organizations are required to make their pages accessible.",
+    "vocab": [
+      {
+        "term": "HTML",
+        "def": "The code that tells a browser what each part of a page is: a headline, a paragraph, a link."
+      },
+      {
+        "term": "Tag",
+        "def": "An HTML label in angle brackets, like <h1>. Most come in pairs: <p> opens and </p> closes."
+      },
+      {
+        "term": "CSS",
+        "def": "The code that says how a page looks: colors, sizes, and spacing."
+      },
+      {
+        "term": "Alt text",
+        "def": "Words that describe a picture for people who can't see it. Screen readers read it aloud."
+      },
+      {
+        "term": "Contrast",
+        "def": "How different the text color is from the background. More contrast is easier to read."
+      }
+    ],
+    "before": {
+      "materials": [
+        "A computer or Chromebook with a keyboard"
+      ],
+      "setup": [
+        "Students type code, so check that keyboards work. The angle brackets < and > are Shift plus comma and period.",
+        "Code is kept on this device for each level, so students can come back to it."
+      ],
+      "prerequisites": "None. Comfortable typing helps."
+    },
+    "steps": [
+      "Open the lab. Type in the code box on the left, and watch the preview on the right.",
+      "Structure (levels 1–4): add a headline, a paragraph, a list, a link, and a picture with alt text.",
+      "Style (levels 5–6): change colors with CSS, then make sure the contrast number is at least 4.5.",
+      "Ship (levels 7–8): fix a broken page, then build a page for a made-up Maine business.",
+      "Press Check my page. Read what it found, fix it, and check again."
+    ],
+    "reflect": "Who would have trouble using a page with no alt text or low contrast? What would you check on your school's website?",
+    "extend": "Look at three real websites you use. For each one, find one thing that helps people use it and one thing that could be better. Share your list.",
+    "teacherNotes": [
+      "Objective: write HTML structure and CSS styles, and test a page for three accessibility basics (alt text, link words, contrast 4.5 to 1, the WCAG minimum for normal text).",
+      "Safety: the preview is a sandboxed frame with no scripts, and a content policy blocks every outside request, so students can't load outside images or sites. Code isn't sent anywhere; it stays on the device.",
+      "Common misconceptions: alt text is the file name; any link words are fine; colors that look OK to me are OK for everyone.",
+      "Ask afterward: Why do web developers test with a checklist instead of just looking at the page?"
+    ],
+    "check": "Show your level 8 page and point out its alt text, link words, and contrast number. Explain who each one helps.",
+    "stopAt": "You finish levels 1–7. Ship a page (level 8) is the challenge.",
+    "stuck": [
+      "Check that every opening tag has a closing tag, like <p> and </p>.",
+      "Read the message from Check my page. It names the one thing to fix next.",
+      "Start over brings back the level's starting code."
+    ],
+    "next": "wireframe-first",
+    "time": {
+      "prep": 5,
+      "core": [
+        35,
+        45
+      ],
+      "verified": false
+    },
+    "skills": [
+      "design-iteration",
+      "debugging"
+    ],
+    "standards": [
+      "1B-AP-15",
+      "2-AP-15"
+    ],
+    "primm": {
+      "predict": "Before you press Check, predict what the preview will show when you add the tag.",
+      "investigate": [
+        "What happens if you leave off a closing tag?",
+        "Which color change raised the contrast number the most?"
+      ],
+      "modify": "Change one CSS color and predict whether the contrast still passes.",
+      "make": "Build and ship a page for a made-up Maine business (level 8)."
+    },
+    "career": {
+      "role": "Web developer",
+      "industry": "Maine schools, towns, hospitals, and tourism businesses",
+      "what": "Builds and tests websites so they work for everyone, on every screen."
+    },
+    "explain": "In three sentences: what your page is for, one bug Check found and how you fixed it, and who your alt text and colors help."
+  },
+  {
+    "id": "wireframe-first",
+    "title": "Wireframe First",
+    "area": "coding",
+    "group": "web",
+    "summary": "Plan a web page on paper before you code it. Sketch a wireframe, test it with a partner in five seconds, then build it in the Web Builder Lab.",
+    "level": "intermediate",
+    "grades": [
+      "4-5",
+      "6-8"
+    ],
+    "duration": 45,
+    "format": "collaborative",
+    "equipment": [
+      "unplugged"
+    ],
+    "source": "original",
+    "keywords": [
+      "wireframe",
+      "web design",
+      "user experience",
+      "planning",
+      "five-second test",
+      "unplugged"
+    ],
+    "access": {
+      "account": "none",
+      "cost": "free",
+      "supervision": false,
+      "hardware": []
+    },
+    "launch": {
+      "status": "none"
+    },
+    "mission": "A made-up Maine business needs a web page: a bakery, a kayak rental, or a bait shop. Before anyone writes code, designers sketch a wireframe and test it with real people. Plan the page, test it in five seconds, and improve it.",
+    "learn": [
+      "Sketch a wireframe: boxes that show where each part of a page goes.",
+      "Run a five-second test to find out what people notice first.",
+      "Improve a design based on what a tester saw, not what you meant."
+    ],
+    "why": "Changing a sketch takes seconds. Changing finished code takes hours. Planning and testing first is how web teams build pages people can actually use.",
+    "realWorld": "User experience (UX) designers sketch wireframes and test them with real people before developers write any code.",
+    "vocab": [
+      {
+        "term": "Wireframe",
+        "def": "A simple sketch of a page, with boxes for each part and no colors or pictures yet."
+      },
+      {
+        "term": "User",
+        "def": "A person who uses a website or app."
+      },
+      {
+        "term": "Five-second test",
+        "def": "Show a design for five seconds, hide it, then ask what the person remembers."
+      }
+    ],
+    "before": {
+      "materials": [
+        "Paper and pencils",
+        "Optional: a printed outline of a laptop screen to sketch inside",
+        "A timer"
+      ],
+      "setup": [
+        "Pairs. Each student picks a made-up Maine business and one main job for its page, like \"find the hours\" or \"see the menu\".",
+        "Show one simple wireframe example on the board: boxes labeled Headline, Picture, Hours, Link."
+      ],
+      "prerequisites": "None. Web Builder Lab levels 1–4 help before building it."
+    },
+    "steps": [
+      "Pick a made-up Maine business. Write the one thing a visitor most needs to find.",
+      "Sketch a wireframe: draw boxes for the headline, a picture, a list, and a link. Label each box.",
+      "Run a five-second test: show your partner the sketch for five seconds, then hide it.",
+      "Ask: What was this page about? Where would you find the thing you need? Write down what they say.",
+      "Change your wireframe to fix one thing your partner missed.",
+      "Build your page in the Web Builder Lab, level 8."
+    ],
+    "reflect": "What did your tester notice first? Was it the thing you wanted them to notice?",
+    "extend": "Do a five-second test on a real website you use. What do you notice first? Sketch a wireframe that would make its most important thing easier to find.",
+    "teacherNotes": [
+      "Objective: plan before building, and use a quick user test to improve a design.",
+      "Keep wireframes plain: boxes and labels, no coloring. The point is where things go.",
+      "Common misconceptions: the designer knows what users will see (they don't); planning slows you down (fixing code later is slower).",
+      "Ask afterward: Why test a sketch instead of waiting until the page is built?"
+    ],
+    "check": "Show your first wireframe and your improved one. Explain what your tester missed and what you changed.",
+    "stopAt": "You've sketched a wireframe, run a five-second test, and made one change.",
+    "stuck": [
+      "Use boxes, not drawings. Label each one.",
+      "Put the most important thing near the top.",
+      "In the test, don't explain your page. Just listen."
+    ],
+    "next": "lab-web-builder",
+    "time": {
+      "prep": 5,
+      "core": [
+        30,
+        40
+      ],
+      "verified": false
+    },
+    "skills": [
+      "design-iteration",
+      "communication"
+    ],
+    "standards": [
+      "1B-AP-13",
+      "2-AP-15"
+    ],
+    "primm": {
+      "predict": "Before the five-second test, predict what your partner will notice first.",
+      "investigate": [
+        "What did your tester remember?",
+        "What did they miss?"
+      ],
+      "modify": "Move or change one box so the most important thing is easier to find.",
+      "make": "Build your page in the Web Builder Lab."
+    },
+    "career": {
+      "role": "UX designer",
+      "industry": "Maine web studios, banks, and health care",
+      "what": "Plans and tests how websites and apps work, so people can find what they need fast."
+    },
+    "explain": "In three sentences: what your page is for, what your tester missed, and what you changed in your wireframe."
+  },
+  {
     id: "lab-rover",
     group: "labs",
     primm: {

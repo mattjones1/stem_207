@@ -66,6 +66,8 @@ window.STEM = window.STEM || {};
       why: "Maine's maple farmers and the sugarhouses that open their doors to visitors." },
     interland: { title: "Interland: Be Internet Awesome", provider: "Google", url: "https://beinternetawesome.withgoogle.com/en_us/interland", grades: UP, minutes: 30, account: "none", verified: "2026-10-28",
       why: "A free game about online safety: spot phishing, guard your secrets, and share with care. Skip the name box at the end." },
+    mdnHtml: { title: "HTML: Creating the content", provider: "MDN (Mozilla)", url: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Getting_started/Your_first_website/Creating_the_content", grades: ["6-8"], minutes: 45, account: "none", verified: "2026-10-28",
+      why: "Mozilla's beginner guide to the same tags: headings, lists, links, and pictures with alt text. You build the page as a file, so ask your teacher which text editor to use." },
     tinkercad: { title: "Tinkercad lessons", provider: "Tinkercad (Autodesk)", url: "https://www.tinkercad.com/learn", grades: UP, minutes: 30, account: "teacher", app: true,
       why: "Free step-by-step 3D design lessons. Join your teacher's Tinkercad Class with the class code and your nickname." }
   };
@@ -77,7 +79,7 @@ window.STEM = window.STEM || {};
     "my-blocks-patterns": ["turtle", "scratchIdeas"], "capstone-game": ["scratchIdeas", "designSquad"], "fix-the-recipe": ["kidbots"],
     "lab-robot-chef": ["kidbots", "maze"], "sort-the-catch": ["sorting"], "lighthouse-network": ["scratchIdeas", "lighthouses"],
     "snowstorm-clones": ["scratchIdeas"], "noreaster-alerts": ["scratchIdeas"], "catch-log-lists": ["gmri", "scratchIdeas"],
-    "snowflake-functions": ["turtle"], "capstone-studio": ["scratchIdeas", "designSquad"], "python-turtle-bridge": ["turtle"], "lab-harbor-python": ["turtle", "maze"], "lab-code-review": ["oceans", "teachable"], "prompt-precision": ["kidbots"], "trust-but-verify": ["oceans", "quickdraw"], "lab-level-designer": ["scratchIdeas", "designSquad"], "playtest-lab": ["designSquad", "scratchIdeas"], "lab-cyber-defender": ["interland", "binary"], "secret-substitution": ["interland", "binary"], "defender-plan": ["interland"],
+    "snowflake-functions": ["turtle"], "capstone-studio": ["scratchIdeas", "designSquad"], "python-turtle-bridge": ["turtle"], "lab-harbor-python": ["turtle", "maze"], "lab-code-review": ["oceans", "teachable"], "prompt-precision": ["kidbots"], "trust-but-verify": ["oceans", "quickdraw"], "lab-level-designer": ["scratchIdeas", "designSquad"], "playtest-lab": ["designSquad", "scratchIdeas"], "lab-cyber-defender": ["interland", "binary"], "secret-substitution": ["interland", "binary"], "defender-plan": ["interland"], "lab-web-builder": ["mdnHtml"], "wireframe-first": ["mdnHtml", "designSquad"],
     "lobster-trap-logic": ["gmri"], "lab-rover": ["maze"], "lab-dance-party": ["dance", "scratchIdeas"], "lab-space-blob": ["scratchIdeas", "binary"],
     "lab-moon-gate": ["maze"],
     "ecosystem-field-trip": ["acadia", "gmri"], "notice-and-wonder-360": ["earth"], "acadia-from-above": ["acadia"], "lab-field-station": ["acadia", "gmri"],

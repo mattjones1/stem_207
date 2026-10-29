@@ -11,7 +11,7 @@ const R = [];
 const ok = (n, c, x = "") => { R.push(!!c); console.log((c ? "PASS " : "FAIL ") + n, c ? "" : x); };
 
 const PROVIDERS = new Set(["Code.org", "Scratch (MIT)", "Blockly Games", "CS Unplugged", "Google", "National Park Service", "Gulf of Maine Research Institute",
-  "NOAA", "PhET (University of Colorado)", "TeachEngineering", "PBS KIDS", "Piskel", "American Lighthouse Foundation", "Maine Maple Producers Association", "Tinkercad (Autodesk)"]);
+  "NOAA", "PhET (University of Colorado)", "TeachEngineering", "PBS KIDS", "Piskel", "American Lighthouse Foundation", "Maine Maple Producers Association", "Tinkercad (Autodesk)", "MDN (Mozilla)"]);
 const acts = STEM.activities;
 const missing = acts.filter((a) => !a.deeper);
 ok(`every activity has Go deeper (${acts.length})`, !missing.length, missing.map((a) => a.id).join(", "));

@@ -92,7 +92,7 @@ window.STEM.codingGroups = [
   { id: "crew-ai", name: "AI Engineer crew", blurb: "Engineers who build with AI check its work. Test and fix code an AI wrote." },
   { id: "crew-cyber", name: "Cyber Defender crew", blurb: "Crack ciphers, build strong passphrases, catch phishing, and plan a defense. All practice, all made up." },
   { id: "robotics", name: "Robotics and physical computing", blurb: "Sensors, rules, and robots that act on their own." },
-  { id: "web", name: "Web development", blurb: "Build web pages with HTML and CSS." },
+  { id: "web", name: "Web development", blurb: "Plan a page on paper, then write real HTML and CSS that works for everyone." },
 ];
 
 /* Skills that cross categories (optional `skills: [...]` on an activity). Tag an activity only after

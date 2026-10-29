@@ -20,6 +20,7 @@ For school IT teams. Managed Chromebooks often run a web filter (GoGuardian, Sec
 
 ## Site pages
 
+- `example.org`
 - `github.com`
 - `stem-coliseum.odoo.com`
 - `venmo.com`
@@ -41,6 +42,7 @@ For school IT teams. Managed Chromebooks often run a web filter (GoGuardian, Sec
 - `beinternetawesome.withgoogle.com`
 - `blockly.games`
 - `code.org`
+- `developer.mozilla.org`
 - `earth.google.com`
 - `mainemapleproducers.com`
 - `pbskids.org`

@@ -1,4 +1,4 @@
-# Coding 2.0 (planning/CODING_PLAN.md): the Coding page in browsing groups (empty groups hidden), "Think like a
+# Coding 2.0 (planning/CODING_PLAN.md): the Coding page in browsing groups (empty groups hidden; Web development shows once it has activities), "Think like a
 # coder" (PRIMM) and "Who does this in Maine" on coding activities, "Explain your build" in the debrief saved to
 # My portfolio, and the Coding Foundations template for grades 2–3.
 #   LOCAL_MODE=1 PORT=8767 node tests/backend/mock-supabase.js ; python3 tests/site/test_coding.py [url]
@@ -21,7 +21,8 @@ async def main():
     await go(pg, "#/activities/coding")
     titles = await pg.eval_on_selector_all(".code-group__title", "els => els.map(e => e.childNodes[0].textContent.trim())")
     ok("the Coding page shows its groups in order", titles[:5] == ["Coding Foundations", "Code right here", "Block coding with Scratch", "Game Dev crew: games and stories", "Python and text coding"], titles)
-    ok("an empty group (Web development) isn't shown", "Web development" not in titles)
+    ok("Web development shows now that it has activities", "Web development" in titles, titles)
+    ok("no group is shown empty", await pg.evaluate("[...document.querySelectorAll('.code-group')].every((g) => g.querySelector('.card'))"))
     ok("robotics activities from Engineering appear in their group", "Robotics and physical computing" in titles and "Snowplow" in await pg.evaluate("document.querySelector('.code-group:has(#cg-robotics) .cards').textContent"))
     n = await pg.evaluate("document.querySelectorAll('.code-group .card').length")
     total = await pg.evaluate("STEM.activities.filter(a => a.area === 'coding' || ((a.alsoIn || []).includes('coding') && a.group)).length")

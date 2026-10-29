@@ -460,6 +460,14 @@
   {
    "id": "defender-plan",
    "plan": "planning/CODING_PLAN.md (Cyber Defender crew, October 28, 2026)"
+  },
+  {
+   "id": "lab-web-builder",
+   "plan": "planning/CODING_PLAN.md (Web Builder, October 28, 2026)"
+  },
+  {
+   "id": "wireframe-first",
+   "plan": "planning/CODING_PLAN.md (Web Builder, October 28, 2026)"
   }
  ]
 }

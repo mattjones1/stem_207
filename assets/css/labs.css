@@ -962,3 +962,14 @@
 .cy-q [aria-pressed="true"] { background: var(--teal-soft); border-color: var(--brand-teal); }
 @media (prefers-reduced-motion: reduce) { .cy-bar i { transition: none; } }
 @media (max-height: 760px) and (min-width: 1000px) { .cy-list { grid-template-columns: repeat(3, 1fr); } .cy-card { padding: .35rem .5rem; } }
+
+/* ───────── Web Builder Lab (lab-web.js): code on the left, sandboxed preview on the right ───────── */
+.wb { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; align-items: start; }
+.wb-edit, .wb-view { display: grid; gap: .5rem; }
+.wb-code { min-height: 14rem; resize: vertical; white-space: pre; }
+.wb-pics { margin: 0; font-size: .9rem; }
+.wb-actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.wb-frame { width: 100%; height: 18rem; border: 1.5px solid var(--line); border-radius: var(--radius-sm); background: #fff; }
+.wb-stats { margin: 0; font-weight: 700; }
+@media (max-width: 800px) { .wb { grid-template-columns: 1fr; } }
+@media (max-height: 760px) and (min-width: 1000px) { .wb-code { min-height: 0; height: 11rem; } .wb-frame { height: 13rem; } }
