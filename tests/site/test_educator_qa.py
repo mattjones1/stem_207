@@ -80,7 +80,7 @@ async def main():
     # À la carte plan: one Coding, one VR, one AI
     await go(pg, "#/teach/plans")
     ok("plans: Build your own and Start from a template", await pg.locator('a[href="#/teach/plans/new"]').count() >= 1 and await pg.locator('a[data-jump="pw-tpl"]').count() == 1)
-    ok("plans: the Moxie course and 3 workshops first, then 6 classroom templates and a crew", await pg.locator(".pw-group-h").first.inner_text() and await pg.locator("[data-use^=tpl-ws-]").count() == 3 and await pg.locator("[data-use^=tpl-]").count() == 11)
+    ok("plans: the Moxie course and 3 workshops first, then 6 classroom templates and 2 crews", await pg.locator(".pw-group-h").first.inner_text() and await pg.locator("[data-use^=tpl-ws-]").count() == 3 and await pg.locator("[data-use^=tpl-]").count() == 12)
     await pg.goto(S + "#/teach/plans/new"); await pg.wait_for_timeout(700)
     coding_n = await pg.evaluate("STEM.activities.filter((a) => a.area === 'coding' || (a.alsoIn || []).includes('coding')).length")
     ok("picker: every coding activity is listed (no 12 cap)", await pg.locator("#pw-results .pk-card").count() == coding_n, coding_n)

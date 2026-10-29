@@ -26,7 +26,12 @@ How an activity record is shaped, how labs are built, and the rules that keep ev
   - **It's a simulation**: no AI is called; every program and claim is written for the lesson and says so on screen (`lab.simulation` and `.cr-sim`).
   - Pure rules: `SE.codeReview.check(levelIndex, { line, what, map, prompt, src })`, `runOn`, `failingMaps`.
 - Unplugged crew activities: `prompt-precision` (grades 2–8, with simple words) and `trust-but-verify` (grades 4–8; every answer card is made up for the lesson).
-- Next crews (planned in `planning/CODING_PLAN.md`): Game Dev, then Cyber Defender.
+## Crews: Game Dev
+- `tpl-crew-game-dev`: Score Keeper → Interactive Story → Harbor Level Designer → Capstone Studio → Playtest Lab (`reviewed: false`). Patch **Game Developer** (`crewPass`, 4). Its activities are in the `games` group ("Game Dev crew: games and stories").
+- **Harbor Level Designer** (`lab-builder.js`, id `level-designer`, `.ld-` styles): 6 levels. Students pick a tool (Ledge, Water, Trap buoy, Boat start, Wharf) and tap squares; every square is a labeled button, with no dragging. A route finder (`SE.levelDesigner.route`, breadth-first over position and traps collected) shows whether the level is possible and its best route in moves. Levels: fix an impossible level (keep 5 inner ledges), make the route 10+, place 3 reachable traps, tune into 12–16 moves with 2 traps, design then solve your level in Python (`solves`), and order 3 levels into a difficulty curve (`curve`).
+- **Playtest Lab** (`playtest-lab`, unplugged, works with any playable project): watch without helping, I noticed / I wondered / I'd change, one fix, release notes.
+- Next crew: Cyber Defender.
+- Tests: `node tests/tools/test_level_designer.js` and `python3 tests/labs/test_level_designer.py`.
 - Tests: `node tests/tools/test_code_review.js` (every AI program really fails; every fix passes) and `python3 tests/labs/test_code_review.py`.
 
 - Tests: `node tests/tools/test_minipy.js` (parser, every error, round trips, and Python steering the boat exactly like blocks on all 36 Harbor levels), `node tests/tools/test_harbor_python.js` (every level solvable; Fix it programs fail as given), and `python3 tests/labs/test_harbor_python.py`.

@@ -907,3 +907,30 @@
   .cr-left { max-height: calc(100vh - 150px); overflow-y: auto; padding-right: .3rem; }
   .cr-test { position: sticky; top: 64px; }
 }
+
+/* ───────── Harbor Level Designer (lab-builder.js): tools, tap-to-edit map, difficulty curve ───────── */
+.ld { display: grid; gap: .7rem; }
+.ld-tools { display: flex; flex-wrap: wrap; gap: .4rem; }
+.ld-tool[aria-pressed="true"] { background: var(--teal-soft); border-color: var(--brand-teal); }
+.ld-tool .ld-c { width: 16px; height: 16px; border-radius: 3px; display: inline-block; border: 1px solid #01201e; }
+.ld-grid { display: grid; gap: 2px; width: min(100%, 420px); }
+.ld-row { display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: 2px; }
+.ld-cell { aspect-ratio: 1; min-height: 32px; border: 1px solid rgba(1, 32, 30, .25); border-radius: 4px; font: 700 1rem var(--font-display, sans-serif); cursor: pointer; padding: 0; }
+.ld-c--water { background: #cde8f2; color: #012d2b; }
+.ld-c--ledge { background: #6b7b80; color: #fff; }
+.ld-c--buoy { background: #cde8f2; color: #c0392b; }
+.ld-c--start { background: #f7f6f0; color: #012d2b; }
+.ld-c--wharf { background: #7a5634; color: #fff; }   /* dark enough for white text (4.5:1) */
+.ld-cell:focus-visible { outline: 3px solid var(--teal); outline-offset: 1px; }
+.ld-stats { display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; margin: 0; }
+.ld-stats svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
+.ld-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.ld-choices { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: .8rem; }
+.ld-choice { display: grid; gap: .3rem; justify-items: center; padding: .5rem; }
+.ld-choice[aria-pressed="true"] { background: var(--teal-soft); border-color: var(--brand-teal); }
+.ld-mini { display: grid; grid-template-columns: repeat(8, 14px); gap: 1px; }
+.ld-mini .ld-c { width: 14px; height: 14px; display: block; }
+.ld-order { margin: 0; }
+/* Playtest it: the map and the Python editor side by side on wide screens. */
+@media (min-width: 1000px) { .ld--play { grid-template-columns: minmax(0, 340px) minmax(0, 1fr); align-items: start; } .ld--play > .ld-tools, .ld--play > .ld-stats { grid-column: 1 / -1; } .ld--play > .ld-code { grid-column: 2; grid-row: 2 / span 3; } }
+@media (max-height: 760px) and (min-width: 1000px) { .ld-grid { width: min(100%, 340px); } .ld-cell { min-height: 28px; } }

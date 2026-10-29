@@ -87,7 +87,7 @@ window.STEM.codingGroups = [
   { id: "foundations", name: "Coding Foundations", blurb: "Clear instructions, sorting, and debugging. Start here, with or without a computer." },
   { id: "labs", name: "Code right here", blurb: "In-site labs: steer a lobster boat, guard a moon gate, feed a space blob. Nothing to install." },
   { id: "blocks", name: "Block coding with Scratch", blurb: "Events, loops, conditions, and custom blocks in Scratch projects." },
-  { id: "games", name: "Games and stories", blurb: "Design, build, playtest, and ship your own game or interactive story." },
+  { id: "games", name: "Game Dev crew: games and stories", blurb: "Design levels, build games and stories, playtest them with real players, and ship version 2." },
   { id: "python", name: "Python and text coding", blurb: "From blocks to real Python: read it, put it in order, fix it, then write your own." },
   { id: "crew-ai", name: "AI Engineer crew", blurb: "Engineers who build with AI check its work. Test and fix code an AI wrote." },
   { id: "robotics", name: "Robotics and physical computing", blurb: "Sensors, rules, and robots that act on their own." },

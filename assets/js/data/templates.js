@@ -182,6 +182,21 @@ window.STEM = window.STEM || {};
         m("trust-but-verify", { label: "Human review", bridge: "Decide when a person must check an AI's work." })
       ]
     }),
+    ids({
+      id: "tpl-crew-game-dev", group: "crew", reviewed: false,
+      title: "Game Dev Crew",
+      essentialQuestion: "What makes a game fun to play, and how do game developers find out?",
+      goal: "Build games with scoring and choices, design and tune levels, playtest with real players, and ship a better version with release notes.",
+      finalProduct: "An original game, version 2, with playtest notes and release notes that explain what changed and why.",
+      audience: { grades: ["6-8"], minutes: null, equipment: ["computer"], prior: "Loops, events, and variables in Scratch or Harbor Code." },
+      steps: [
+        m("score-keeper", { label: "Scoring", bridge: "Variables keep score and make a game fair." }),
+        m("interactive-story", { label: "Player choices", bridge: "If–else gives players choices that matter." }),
+        m("lab-level-designer", { label: "Level design", bridge: "Design levels that are possible, interesting, and just hard enough." }),
+        m("capstone-studio", { label: "Build", bridge: "Plan and build version 1 of an original game." }),
+        m("playtest-lab", { label: "Playtest and ship", bridge: "Watch real players, fix the biggest problem, and ship version 2 with release notes." })
+      ]
+    }),
     // Coding Foundations for grades 2–3 (planning/CODING_PLAN.md): every stage reachable with labs and
     // hands-on activities written for 2–3. Each activity appears once; notes name the levels for each stage.
     ids({

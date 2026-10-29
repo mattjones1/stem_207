@@ -440,6 +440,14 @@
   {
    "id": "trust-but-verify",
    "plan": "planning/CODING_PLAN.md (step 3, AI Engineer crew, October 28, 2026)"
+  },
+  {
+   "id": "lab-level-designer",
+   "plan": "planning/CODING_PLAN.md (Game Dev crew, October 28, 2026)"
+  },
+  {
+   "id": "playtest-lab",
+   "plan": "planning/CODING_PLAN.md (Game Dev crew, October 28, 2026)"
   }
  ]
 }

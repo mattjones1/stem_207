@@ -11,7 +11,7 @@ def ok(n, c, x=""): R.append(bool(c)); print(("PASS " if c else "FAIL ") + n, x)
 async def go(pg, h, wait=500):
     await pg.goto(S + "#/activities"); await pg.wait_for_timeout(150); await pg.goto(S + h); await pg.wait_for_timeout(wait)
 
-LABS = ["code-review/1", "code-review/6", "code-review/8", "harbor-python/1", "harbor-python/5", "harbor-python/8", "harbor-python/11", "dance-party/1", "dance-party/5", "space-blob/1", "moon-gate/1", "robot-chef/1", "rover/1", "field-station/1",
+LABS = ["level-designer/1", "level-designer/5", "level-designer/6", "code-review/1", "code-review/6", "code-review/8", "harbor-python/1", "harbor-python/5", "harbor-python/8", "harbor-python/11", "dance-party/1", "dance-party/5", "space-blob/1", "moon-gate/1", "robot-chef/1", "rover/1", "field-station/1",
         "pattern-machine/1", "launcher/1", "line-follower/1", "ramp-racers/1", "pixel-studio/1"]
 # The stage's main button (Run / Test / Check), its position, and the page top.
 LAB = """() => { const q = (s) => document.querySelector(s); const rb = (e) => e && e.getBoundingClientRect();

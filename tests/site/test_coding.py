@@ -20,7 +20,7 @@ async def main():
 
     await go(pg, "#/activities/coding")
     titles = await pg.eval_on_selector_all(".code-group__title", "els => els.map(e => e.childNodes[0].textContent.trim())")
-    ok("the Coding page shows its groups in order", titles[:5] == ["Coding Foundations", "Code right here", "Block coding with Scratch", "Games and stories", "Python and text coding"], titles)
+    ok("the Coding page shows its groups in order", titles[:5] == ["Coding Foundations", "Code right here", "Block coding with Scratch", "Game Dev crew: games and stories", "Python and text coding"], titles)
     ok("an empty group (Web development) isn't shown", "Web development" not in titles)
     ok("robotics activities from Engineering appear in their group", "Robotics and physical computing" in titles and "Snowplow" in await pg.evaluate("document.querySelector('.code-group:has(#cg-robotics) .cards').textContent"))
     n = await pg.evaluate("document.querySelectorAll('.code-group .card').length")

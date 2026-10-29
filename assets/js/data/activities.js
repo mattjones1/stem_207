@@ -5232,6 +5232,263 @@ window.STEM.activities = [
     "explain": "In three sentences: your class's rule for human review, the card that taught you the most, and why."
   },
   {
+    "id": "lab-level-designer",
+    "title": "Harbor Level Designer",
+    "area": "coding",
+    "group": "games",
+    "summary": "Be the level designer: build harbor levels that are possible, interesting, and just hard enough, then playtest your own level in Python.",
+    "level": "intermediate",
+    "grades": [
+      "4-5",
+      "6-8"
+    ],
+    "duration": 45,
+    "format": "independent",
+    "equipment": [
+      "computer"
+    ],
+    "source": "original",
+    "keywords": [
+      "game design",
+      "level design",
+      "difficulty",
+      "playtesting",
+      "python",
+      "harbor",
+      "games"
+    ],
+    "access": {
+      "account": "none",
+      "cost": "free",
+      "supervision": false,
+      "hardware": []
+    },
+    "launch": {
+      "status": "lab",
+      "labId": "level-designer",
+      "label": "Open the Harbor Level Designer",
+      "note": "Runs inside STEM 207. No outside account or website needed."
+    },
+    "mission": "Game studios hire level designers to make levels that are possible, interesting, and fair. Fix a level nobody can finish, make a boring one better, place traps, tune the difficulty, playtest your own level in Python, and plan a difficulty curve.",
+    "learn": [
+      "Design a level that is possible to finish, and check it with a route finder.",
+      "Tune a level's difficulty using numbers: route length and number of goals.",
+      "Playtest a design by solving it in code, and order levels from easiest to hardest."
+    ],
+    "why": "Every game you play was designed level by level, and then tested and tuned. Level design mixes creativity with careful testing and numbers, the same mix professional game developers use.",
+    "realWorld": "Level designers and game testers build and tune the levels in the games you play, using editors much like this one and playtesting every change.",
+    "vocab": [
+      {
+        "term": "Level design",
+        "def": "Planning and building the spaces and challenges in a game."
+      },
+      {
+        "term": "Playtest",
+        "def": "Playing a game or level to find problems before players do."
+      },
+      {
+        "term": "Difficulty curve",
+        "def": "How a game gets harder, step by step, from start to finish."
+      },
+      {
+        "term": "Route",
+        "def": "The path a player takes. The best route is the shortest one that finishes the level."
+      }
+    ],
+    "before": {
+      "materials": [
+        "A computer or Chromebook"
+      ],
+      "setup": [
+        "Students should know the harbor from Harbor Code. Level 5 uses Python, so Harbor Python Lab chapters 1–2 help first.",
+        "Pairs work well: one designs, one playtests, then switch."
+      ],
+      "prerequisites": "Harbor Code Lab (any voyage). Harbor Python Lab chapters 1–2 before level 5."
+    },
+    "steps": [
+      "Open the lab. Choose a tool (Ledge, Water, Trap buoy, Boat start, or Wharf), then tap squares to change the map.",
+      "Watch the line under the map: it says whether the level is possible and how long the best route is.",
+      "Change the map until it meets the level's goal, then press Check design.",
+      "In level 5, design your own level, then write Python that solves it.",
+      "In level 6, put three levels in order from easiest to hardest."
+    ],
+    "reflect": "What makes a level fun instead of too easy or too hard? How did the route length help you decide?",
+    "extend": "Design a 3-level mini game for a partner, from easy to hard. Watch them play it, and change one level based on what you see.",
+    "teacherNotes": [
+      "The route finder counts the fewest moves (not turns) from the start to the wharf that collects every trap. It's the lab's measure of difficulty.",
+      "Common misconceptions: harder is always better; a level is fine if the designer can solve it. Push students to think about a player seeing it for the first time.",
+      "All map edits use tap-to-place tools, with no dragging, and every square is a labeled button for keyboard and screen-reader users.",
+      "Ask afterward: How would you know if a level is too hard for a new player? What would you watch for in a playtest?"
+    ],
+    "check": "Show your level 5 design and the Python that solves it. Explain how you made it challenging but fair.",
+    "stopAt": "You finish levels 1–4. Playtest it (level 5) and the difficulty curve (level 6) are the challenge.",
+    "stuck": [
+      "Read the line under the map: it tells you what's wrong.",
+      "To make a route longer, build walls the boat has to go around.",
+      "To make it possible again, open one square of water at a time."
+    ],
+    "next": "playtest-lab",
+    "time": {
+      "prep": 5,
+      "core": [
+        35,
+        45
+      ],
+      "verified": false
+    },
+    "skills": [
+      "design-iteration",
+      "debugging"
+    ],
+    "standards": [
+      "1B-AP-13",
+      "2-AP-15"
+    ],
+    "primm": {
+      "predict": "Before you press Check design, predict how many moves the best route will take.",
+      "investigate": [
+        "Which change made the route longest?",
+        "Why does a level need to be possible before it can be fun?"
+      ],
+      "modify": "Change one ledge or trap and predict how the route length changes.",
+      "make": "Design your own level and solve it in Python (level 5)."
+    },
+    "career": {
+      "role": "Level designer",
+      "industry": "Maine game and app studios",
+      "what": "Builds and tunes game levels so they're possible, fair, and fun, then playtests every change."
+    },
+    "explain": "In three sentences: what your level 5 design looks like, how you made it challenging but fair, and how your Python solves it.",
+    "bridge": {
+      "from": "lab-rover",
+      "text": "You sailed these harbors in Harbor Code. Now you design them."
+    }
+  },
+  {
+    "id": "playtest-lab",
+    "title": "Playtest Lab: Feedback That Helps",
+    "area": "coding",
+    "group": "games",
+    "summary": "Trade games with classmates, watch them play without helping, and turn what you see into one clear fix and a set of release notes.",
+    "level": "intermediate",
+    "grades": [
+      "4-5",
+      "6-8"
+    ],
+    "duration": 45,
+    "format": "collaborative",
+    "equipment": [
+      "computer"
+    ],
+    "source": "original",
+    "keywords": [
+      "playtesting",
+      "feedback",
+      "game design",
+      "release notes",
+      "user testing",
+      "games"
+    ],
+    "access": {
+      "account": "none",
+      "cost": "free",
+      "supervision": false,
+      "hardware": []
+    },
+    "launch": {
+      "status": "none"
+    },
+    "mission": "Your game is ready for testers. Watch a classmate play it without helping, write down exactly what happens, give and get feedback that helps, then ship version 2 with release notes that say what changed and why.",
+    "learn": [
+      "Watch a playtest without helping, and write down what the player actually does.",
+      "Give feedback that is specific and kind: I noticed, I wondered, I'd change.",
+      "Choose the most important fix, make it, and write release notes for version 2."
+    ],
+    "why": "Designers can't see their own game the way a new player does. Watching real players, and turning what you see into one clear fix, is how every game, app, and website gets better.",
+    "realWorld": "Game studios and app companies run playtests and user tests all the time, then publish release notes so players know what changed.",
+    "vocab": [
+      {
+        "term": "Playtest",
+        "def": "Watching someone play your game to find problems."
+      },
+      {
+        "term": "Feedback",
+        "def": "Information that helps someone improve their work."
+      },
+      {
+        "term": "Release notes",
+        "def": "A short list of what changed in a new version, and why."
+      }
+    ],
+    "before": {
+      "materials": [
+        "Each student's own game or interactive project (Scratch, a Harbor Level Designer level, or a paper game)",
+        "A playtest sheet: What I saw · Where they got stuck · I noticed / I wondered / I'd change",
+        "Pencils"
+      ],
+      "setup": [
+        "Students need a playable game before this lesson: Score Keeper, Interactive Story, Capstone, or a Level Designer level all work.",
+        "Model a bad playtest (helping, hinting, defending the game) and a good one (watching quietly, taking notes)."
+      ],
+      "prerequisites": "A playable game or interactive project of your own."
+    },
+    "steps": [
+      "Write one question you want your playtest to answer, like \"Is level 2 too hard?\"",
+      "Swap games. Play your partner's game without asking for help.",
+      "When your partner plays your game, watch quietly. Write what they do, where they get stuck, and what they say.",
+      "Give feedback on your partner's game: one \"I noticed,\" one \"I wondered,\" and one \"I'd change.\"",
+      "Choose the most important problem from your playtest. Fix it.",
+      "Write release notes for version 2: three short lines saying what you changed and why."
+    ],
+    "reflect": "What did your tester do that you didn't expect? How did that change your game?",
+    "extend": "Run a second playtest with a different classmate. Did your fix work? What would version 3 change?",
+    "teacherNotes": [
+      "Objective: watching real players and acting on what you see. Works with any playable project, including Scratch games and Harbor Level Designer levels.",
+      "Common misconceptions: playtesting is for finding out if people like it (it's for finding problems); the designer should explain the game first (let the game speak for itself).",
+      "Keep feedback kind and specific: the sentence starters help younger students.",
+      "Ask afterward: Why do companies test with real users instead of only testing it themselves?"
+    ],
+    "check": "Show your playtest notes and your release notes. Explain the most important thing you changed and what you saw that made you change it.",
+    "stopAt": "You've been playtested once, made one fix, and written release notes for version 2.",
+    "stuck": [
+      "Don't help while you watch. Write down what they do instead.",
+      "Feedback starts with what you noticed, not what you liked.",
+      "Fix the problem that stopped the player, not the one that bugs you most."
+    ],
+    "next": "capstone-studio",
+    "time": {
+      "prep": 10,
+      "core": [
+        40,
+        45
+      ],
+      "verified": false
+    },
+    "skills": [
+      "design-iteration",
+      "communication"
+    ],
+    "standards": [
+      "1B-AP-13",
+      "2-AP-15"
+    ],
+    "primm": {
+      "predict": "Before your playtest, predict where your tester will get stuck.",
+      "investigate": [
+        "Where did your tester really get stuck?",
+        "Which feedback will help the most players?"
+      ],
+      "modify": "Fix the one problem that stopped your tester.",
+      "make": "Ship version 2 with release notes."
+    },
+    "career": {
+      "role": "User experience (UX) researcher",
+      "industry": "Maine software, game, and app companies",
+      "what": "Watches people use games and apps, finds where they struggle, and helps the team decide what to fix."
+    },
+    "explain": "In three sentences: what you learned from your playtest, the fix you made, and what your release notes say."
+  },
+  {
     id: "lab-rover",
     group: "labs",
     primm: {

@@ -55,6 +55,8 @@ window.STEM.progression = {
       how: "Pass 3 team activities." },
     { id: "crew-ai-engineer", name: "AI Engineer", icon: "ai", ring: "navy", rule: "crewPass", crew: "tpl-crew-ai-engineer", n: 4,
       how: "Pass 4 activities from the AI Engineer crew." },
+    { id: "crew-game-dev", name: "Game Developer", icon: "star", ring: "orange", rule: "crewPass", crew: "tpl-crew-game-dev", n: 4,
+      how: "Pass 4 activities from the Game Dev crew." },
     { id: "bug-hunter", name: "Bug Hunter", icon: "bug", ring: "navy", rule: "keyword", keyword: "debugging", n: 2,
       how: "Pass 2 debugging activities." },
     { id: "sector-coding", name: "Coder", icon: "code", ring: "teal", rule: "area", area: "coding", n: 3,

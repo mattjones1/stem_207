@@ -2,7 +2,7 @@
 
 _Approved October 28, 2026. This is also the six-item planning pass that `planning/CODING_CATEGORIES.md` requires._
 
-**Status (October 28, 2026):** Steps 1–3 shipped: Foundations (PRIMM, careers, portfolios, groups, grades 2–3 template), the Python ramp (mini-Python, Harbor Python Lab, See it in Python), and the AI Engineer crew (AI Code Review Lab, Prompt Precision, Trust but Verify, crew template and patch). Next: Game Dev crew, then Cyber Defender. Templates `tpl-coding-foundations-23` and `tpl-crew-ai-engineer` wait for review.
+**Status (October 28, 2026):** Steps 1–3 shipped: Foundations (PRIMM, careers, portfolios, groups, grades 2–3 template), the Python ramp (mini-Python, Harbor Python Lab, See it in Python), and the AI Engineer crew (AI Code Review Lab, Prompt Precision, Trust but Verify, crew template and patch). The Game Dev crew shipped next (Harbor Level Designer, Playtest Lab, crew template and patch). Next: Cyber Defender. Templates `tpl-coding-foundations-23`, `tpl-crew-ai-engineer`, and `tpl-crew-game-dev` wait for review.
 
 ## Context
 The coding category is broad (23 activities, 5 in-site labs, a 7-stage Coding Foundations plan) and strong on debugging and game design. But:
