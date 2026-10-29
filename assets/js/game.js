@@ -41,6 +41,10 @@
       case "labs": return c.labsTouched;
       case "labFull": return c.labsFull;
       case "labLevels": return c.labLevelsDone;
+      case "crewPass": {   // passes among a crew template's activities
+        const t = (STEM.pathwayTemplates || []).find((x) => x.id === patch.crew);
+        return t ? t.steps.filter((s) => c.passedIds.has(s.activityId)).length : 0;
+      }
       default: return 0;
     }
   }
@@ -63,7 +67,8 @@
     const c = {
       missions: 0, reflections: 0, extensions: 0, collaborative: 0, confident: 0,
       sectors: new Set(), areas: {}, keywords: {}, stagesCleared: 0,
-      labsTouched: 0, labsFull: 0, labLevelsDone: 0
+      labsTouched: 0, labsFull: 0, labLevelsDone: 0,
+      passedIds: new Set()   // for crew patches
     };
     const labLevels = {}; // labId -> Set of completed level indexes
     const labResults = {}; // labId -> { level: latest result }
@@ -128,6 +133,7 @@
           if (sub.evidence ? !!(sub.extensionNote || "").trim() : !!sub.extension) c.extensions++;
           if (sub.confidence === "teach") c.confident++;
           completedIds.add(act.id);
+          c.passedIds.add(act.id);
           checkPatches(e.at);
         }
         ms.confirmed = e; ms.tryAgain = null;

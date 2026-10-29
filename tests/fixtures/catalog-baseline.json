@@ -428,6 +428,18 @@
   {
    "id": "lab-harbor-python",
    "plan": "planning/CODING_PLAN.md (step 2, October 28, 2026)"
+  },
+  {
+   "id": "prompt-precision",
+   "plan": "planning/CODING_PLAN.md (step 3, AI Engineer crew, October 28, 2026)"
+  },
+  {
+   "id": "lab-code-review",
+   "plan": "planning/CODING_PLAN.md (step 3, AI Engineer crew, October 28, 2026)"
+  },
+  {
+   "id": "trust-but-verify",
+   "plan": "planning/CODING_PLAN.md (step 3, AI Engineer crew, October 28, 2026)"
   }
  ]
 }

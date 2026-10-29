@@ -883,3 +883,27 @@
 .py-view summary { cursor: pointer; font-weight: 700; min-height: 32px; display: inline-flex; align-items: center; gap: .4rem; }
 .py-view summary svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
 .py-view__code { margin: .4rem 0; padding: .6rem .8rem; background: #012d2b; color: #f0f7f6; border-radius: var(--radius-sm); font-family: ui-monospace, Consolas, "Courier New", monospace; font-size: .9rem; white-space: pre; overflow-x: auto; }
+
+/* ───────── AI Code Review Lab (lab-review.js; shares the .py- board and code styles) ───────── */
+/* Left: the AI's code and the review questions (scrolls on short screens). Right: the map and both Run buttons. */
+.cr { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 1rem; align-items: start; }
+@media (max-width: 860px) { .cr { grid-template-columns: 1fr; } }
+.cr-left { display: grid; gap: .8rem; align-content: start; }
+.cr-left > .cr-ai, .cr-left > .cr-review { display: grid; gap: .5rem; align-content: start; }
+.cr-test { display: grid; gap: .5rem; align-content: start; }
+.cr-review { gap: .7rem; }
+.cr-sim { display: flex; gap: .4rem; align-items: flex-start; margin: 0; padding: .45rem .6rem; border-radius: var(--radius-sm); background: var(--teal-soft); font-size: .9rem; }
+.cr-sim svg, .cr-claim svg, .cr-h svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; }
+.cr-task, .cr-prompt { margin: 0; }
+.cr-h { display: flex; gap: .4rem; align-items: center; margin: 0; font-weight: 700; }
+.cr-claim { display: flex; gap: .4rem; align-items: flex-start; margin: 0; font-style: italic; color: var(--muted); }
+.cr-q { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+.cr-q legend { font-weight: 700; margin-bottom: .35rem; }
+.cr-lines { display: flex; flex-wrap: wrap; gap: .4rem; }
+.cr-q [aria-pressed="true"], .cr-maps [aria-pressed="true"] { background: var(--teal-soft); border-color: var(--brand-teal); }
+.cr-opt { text-align: left; white-space: normal; }
+@media (max-height: 760px) and (min-width: 1000px) {
+  .cr .py-board { max-height: 190px; }
+  .cr-left { max-height: calc(100vh - 150px); overflow-y: auto; padding-right: .3rem; }
+  .cr-test { position: sticky; top: 64px; }
+}

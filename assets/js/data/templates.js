@@ -165,6 +165,23 @@ window.STEM = window.STEM || {};
         bridge: i === 0 ? `${st.title}. ${st.iCan}` : `More practice for stage ${st.stage}.`
       })))
     }),
+    // Crews (planning/CODING_PLAN.md): a workforce track of activities, earning a crew patch. Proposed, not yet reviewed.
+    ids({
+      id: "tpl-crew-ai-engineer", group: "crew", reviewed: false,
+      title: "AI Engineer Crew",
+      essentialQuestion: "How do people who build with AI make sure it's right?",
+      goal: "Learn how AI finds patterns, where it goes wrong, how to give it clear prompts, and how to test and fix the code it writes, then decide when a human must check its work.",
+      finalProduct: "A bug report on AI-written code (the line, what's wrong, a test that proves it, the fix) and a class rule for when a person must review an AI's work.",
+      audience: { grades: ["6-8"], minutes: null, equipment: ["computer"], prior: "Loops and functions in blocks. Harbor Python Lab chapters 1–3 before the Code Review lab." },
+      steps: [
+        m("lab-pattern-machine", { label: "How AI learns", bridge: "Train a model, then catch it learning the wrong lesson." }),
+        m("ai-limits-detectives", { label: "When AI is wrong", bridge: "Trace AI mistakes back to their training data." }),
+        m("prompt-precision", { label: "Clear prompts", bridge: "Play the AI: prompts are instructions it follows word for word." }),
+        m("lab-harbor-python", { label: "Read and fix code", bridge: "Chapters 1–3: read Python, put it in order, fix bugs." }),
+        m("lab-code-review", { label: "Review AI code", bridge: "Run, test, and fix code an AI wrote (a simulation)." }),
+        m("trust-but-verify", { label: "Human review", bridge: "Decide when a person must check an AI's work." })
+      ]
+    }),
     // Coding Foundations for grades 2–3 (planning/CODING_PLAN.md): every stage reachable with labs and
     // hands-on activities written for 2–3. Each activity appears once; notes name the levels for each stage.
     ids({

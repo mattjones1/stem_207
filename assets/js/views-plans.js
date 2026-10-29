@@ -252,6 +252,8 @@
           <p>Using a template makes your own copy. The template never changes.</p></div>
         <h3 class="pw-group-h">${icon("tools")}Courses</h3>
         <ul class="pw-cards">${(STEM.pathwayTemplates || []).filter((t) => t.group === "course").map((t) => card(t, true)).join("")}</ul>
+        ${(STEM.pathwayTemplates || []).some((t) => t.group === "crew") ? `<h3 class="pw-group-h">${icon("users")}Crews: workforce tracks</h3>
+        <ul class="pw-cards">${(STEM.pathwayTemplates || []).filter((t) => t.group === "crew").map((t) => card(t, true)).join("")}</ul>` : ""}
         <h3 class="pw-group-h">${icon("star")}STEM 207 workshops</h3>
         <ul class="pw-cards">${(STEM.pathwayTemplates || []).filter((t) => t.group === "workshop").map((t) => card(t, true)).join("")}</ul>
         <h3 class="pw-group-h">${icon("list")}Classroom templates</h3>

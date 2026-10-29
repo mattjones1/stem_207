@@ -19,6 +19,16 @@ How an activity record is shaped, how labs are built, and the rules that keep ev
 - **Harbor Python Lab** (`lab-python.js`, id `harbor-python`, `.py-` styles): 12 levels in 4 chapters (Read it, Put it in order, Fix it, Write it). Level kinds: `read` (marks A/B/C and an `answer`), `parsons` (`lines`, tap to add, Indent/Outdent buttons, no dragging), `fix` (`code`), `write` (`starter`, `maxLines`, `mustUse`). Tab leaves the editor (no keyboard trap); Indent/Outdent buttons do the indenting.
   - Pure rules: `SE.harborPython.check(levelIndex, src)` and `predictEnd(levelIndex)`.
   - Activity `lab-harbor-python` is in Coding Foundations stage 6 and the Python group.
+## Crews: AI Engineer (the first workforce track)
+- A **crew** is a Learning Plan template with `group: "crew"` (listed under **Crews: workforce tracks** on Learning Plans) plus a crew patch. `tpl-crew-ai-engineer`: Pattern Machine → AI Detectives → Prompt Precision → Harbor Python (chapters 1–3) → AI Code Review → Trust but Verify (`reviewed: false`).
+- **Patch rule `crewPass`** (`progression.js`, `game.js`): count passes among the crew template's activities (`prof.counts.passedIds`). AI Engineer needs 4.
+- **AI Code Review Lab** (`lab-review.js`, id `code-review`, `.cr-` styles): 8 levels. Each shows a task, a program an "AI" wrote, and its confident claim. Students run it, choose the bug's line (refused with their choice named if wrong), choose what's wrong and the test map that proves it where asked, then fix it (it must pass every map). One level is about rewriting a vague prompt.
+  - **It's a simulation**: no AI is called; every program and claim is written for the lesson and says so on screen (`lab.simulation` and `.cr-sim`).
+  - Pure rules: `SE.codeReview.check(levelIndex, { line, what, map, prompt, src })`, `runOn`, `failingMaps`.
+- Unplugged crew activities: `prompt-precision` (grades 2–8, with simple words) and `trust-but-verify` (grades 4–8; every answer card is made up for the lesson).
+- Next crews (planned in `planning/CODING_PLAN.md`): Game Dev, then Cyber Defender.
+- Tests: `node tests/tools/test_code_review.js` (every AI program really fails; every fix passes) and `python3 tests/labs/test_code_review.py`.
+
 - Tests: `node tests/tools/test_minipy.js` (parser, every error, round trips, and Python steering the boat exactly like blocks on all 36 Harbor levels), `node tests/tools/test_harbor_python.js` (every level solvable; Fix it programs fail as given), and `python3 tests/labs/test_harbor_python.py`.
 
 ## Every activity is complete (content linter)

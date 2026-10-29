@@ -4833,6 +4833,405 @@ window.STEM.activities = [
     }
   },
   {
+    "id": "prompt-precision",
+    "title": "Prompt Precision: Be the AI",
+    "area": "coding",
+    "group": "crew-ai",
+    "summary": "One partner is an \"AI\" that does exactly what the prompt says, nothing more. Write prompts so clear the AI can't get them wrong.",
+    "level": "beginner",
+    "grades": [
+      "2-3",
+      "4-5",
+      "6-8"
+    ],
+    "duration": 30,
+    "format": "collaborative",
+    "equipment": [
+      "unplugged"
+    ],
+    "source": "original",
+    "keywords": [
+      "ai",
+      "prompts",
+      "instructions",
+      "precision",
+      "unplugged",
+      "algorithms"
+    ],
+    "access": {
+      "account": "none",
+      "cost": "free",
+      "supervision": false,
+      "hardware": []
+    },
+    "launch": {
+      "status": "none"
+    },
+    "mission": "AI tools do what you ask, not what you mean. Your partner plays an AI that follows prompts word for word. Write prompts so precise that the AI draws, builds, or arranges exactly what you pictured.",
+    "learn": [
+      "Explain that an AI follows the words of a prompt, not what you meant.",
+      "Rewrite a vague prompt so it says what, where, how many, and when to stop.",
+      "Test a prompt, find the word that caused a wrong result, and fix it."
+    ],
+    "why": "People who work with AI spend a lot of their time writing clear requests and checking the results. A precise prompt is an algorithm in plain words, and the same skills you use for coding make prompts work.",
+    "realWorld": "Designers, programmers, and analysts write prompts for AI tools every day, then check the results before they use them.",
+    "vocab": [
+      {
+        "term": "Prompt",
+        "def": "The instructions or question you give an AI."
+      },
+      {
+        "term": "Precise",
+        "def": "Exact, with no room to guess what you meant."
+      },
+      {
+        "term": "Output",
+        "def": "What the AI makes or says back."
+      }
+    ],
+    "before": {
+      "materials": [
+        "Blank paper and pencils",
+        "Simple building pieces, like 6 blocks or paper shapes, for each pair",
+        "A picture card for each pair (a simple drawing or a block design) that the AI player can't see"
+      ],
+      "setup": [
+        "Make picture cards: simple drawings (a house, a boat, a smiley face) or block designs. Keep them face down.",
+        "Model it first: ask a volunteer \"AI\" to \"draw a house\" and talk about how many ways that could go."
+      ],
+      "prerequisites": "None. Robot Chef or Bug Hunt is a good warm-up."
+    },
+    "steps": [
+      "Pick roles. The Prompter looks at the picture card. The AI can't see it.",
+      "The Prompter writes a prompt to make the picture, then reads it once.",
+      "The AI does exactly what the words say. No guessing, no questions.",
+      "Compare the result with the card. Circle each word that caused a difference.",
+      "Rewrite the prompt so those words are exact: what, where, how many, and when to stop. Try it again.",
+      "Switch roles and use a new card."
+    ],
+    "reflect": "What did you change between your first prompt and your best prompt? Why did it work better?",
+    "extend": "Write one prompt that works for two different AI players. Did they both make the same thing? If not, which word caused the difference?",
+    "teacherNotes": [
+      "Objective: prompts are instructions, and AI follows the words literally. This is the same idea as precise algorithms (Robot Chef, Bug Hunt).",
+      "Common misconception: a longer prompt is always better. Precise beats long. Push students to find the one word that caused the wrong result.",
+      "Remind the AI player to follow the words, not to be silly on purpose. Literal, not tricky.",
+      "Ask afterward: When would a vague prompt to a real AI cause a problem, and who should check the AI's result?"
+    ],
+    "check": "Read your first prompt and your best prompt. Point to the word you changed that made the biggest difference, and explain why.",
+    "stopAt": "Each partner has written a prompt that made a match on the second or third try.",
+    "stuck": [
+      "Say how many, what shape, and where it goes: \"two squares, side by side, at the top.\"",
+      "Say when to stop: \"then stop.\"",
+      "If the AI made something different, find the first word they could read two ways."
+    ],
+    "next": "lab-code-review",
+    "time": {
+      "prep": 10,
+      "core": [
+        25,
+        30
+      ],
+      "verified": false
+    },
+    "skills": [
+      "sequencing",
+      "responsible-use",
+      "communication"
+    ],
+    "standards": [
+      "1A-AP-08",
+      "1B-AP-15"
+    ],
+    "primm": {
+      "predict": "Before the AI follows your prompt, predict one thing they might get wrong.",
+      "investigate": [
+        "Which word in your prompt could be read two ways?",
+        "Did adding more words help, or did the exact words help?"
+      ],
+      "modify": "Change one word to make the prompt more precise, and try it again.",
+      "make": "Write a prompt for a new picture that works on the first try."
+    },
+    "career": {
+      "role": "AI product designer",
+      "industry": "Maine software and online services",
+      "what": "Writes and tests the prompts and instructions that make AI tools give people useful, correct answers."
+    },
+    "explain": "In three sentences: what your best prompt said, the word you changed and why, and what this shows about giving instructions to an AI.",
+    "simple": {
+      "mission": "Your partner plays an AI. It does just what your words say. Make your words exact!",
+      "steps": [
+        "Pick jobs. The Prompter sees the card. The AI can't.",
+        "The Prompter writes how to make the picture.",
+        "The AI does just what the words say. No guessing.",
+        "Compare. Circle words that caused a mistake.",
+        "Fix those words. Try again.",
+        "Switch jobs. Use a new card."
+      ]
+    }
+  },
+  {
+    "id": "lab-code-review",
+    "title": "AI Code Review Lab",
+    "area": "coding",
+    "group": "crew-ai",
+    "summary": "An AI assistant wrote the code and says it works. Run it, find the bug, prove it with a test, and fix it. (A simulation: no real AI is used.)",
+    "level": "intermediate",
+    "grades": [
+      "4-5",
+      "6-8"
+    ],
+    "duration": 45,
+    "format": "independent",
+    "equipment": [
+      "computer"
+    ],
+    "source": "original",
+    "keywords": [
+      "ai",
+      "code review",
+      "testing",
+      "debugging",
+      "python",
+      "prompts",
+      "bug report",
+      "harbor"
+    ],
+    "access": {
+      "account": "none",
+      "cost": "free",
+      "supervision": false,
+      "hardware": []
+    },
+    "launch": {
+      "status": "lab",
+      "labId": "code-review",
+      "label": "Open the AI Code Review Lab",
+      "note": "Runs inside STEM 207. A simulation: no real AI and no outside account."
+    },
+    "mission": "You're the engineer who checks the AI's work before anyone uses it. Each program steers the harbor boat, and the AI swears it's right. Run it, find the line with the bug, choose the test that proves it, and ship a fix.",
+    "learn": [
+      "Run code an AI wrote and compare the result with the task, not with the AI's claim.",
+      "Find the line with a bug and choose a test case that proves it.",
+      "Fix the code, rewrite a vague prompt, and write a bug report."
+    ],
+    "why": "AI tools now write a lot of code, fast, and they make mistakes while sounding sure. People who can read, test, and fix AI-written code are exactly who companies need.",
+    "realWorld": "Software teams review every change before it ships, and more and more of those changes are written with AI help. Reviewers test the code and write bug reports when something's wrong.",
+    "vocab": [
+      {
+        "term": "Code review",
+        "def": "Reading and testing someone's code before it's used."
+      },
+      {
+        "term": "Test case",
+        "def": "One situation you run the code in, to check that it works."
+      },
+      {
+        "term": "Bug report",
+        "def": "A note that says where the bug is, what's wrong, how to see it, and the fix."
+      },
+      {
+        "term": "Simulation",
+        "def": "A pretend version made for practice. This AI isn't real."
+      }
+    ],
+    "before": {
+      "materials": [
+        "A computer or Chromebook"
+      ],
+      "setup": [
+        "Students should know the Harbor Python commands first: play Harbor Python Lab chapters 1–3.",
+        "Tell students up front: the AI here is pretend. Its code was written with bugs on purpose."
+      ],
+      "prerequisites": "Harbor Python Lab, chapters 1–3 (reading, ordering, and fixing Python)."
+    },
+    "steps": [
+      "Read the task and the AI's code. Read its claim, then don't trust it yet.",
+      "Press Run the AI's code. Watch where the boat goes wrong.",
+      "Choose the line with the bug.",
+      "When asked, choose what's wrong and the test map that proves it.",
+      "Fix the code and press Run my fix. It has to pass every test map.",
+      "On the prompt level, choose the prompt that would get the right program."
+    ],
+    "reflect": "The AI said every program worked. How did you find out it was wrong? What would you check first next time?",
+    "extend": "Write your own buggy program for the harbor, with a confident AI-style claim. Trade with a partner and review each other's code.",
+    "teacherNotes": [
+      "This is a simulation: no AI is called, and no student data leaves the device. Each program and claim was written for the lesson with one bug on purpose.",
+      "Common misconceptions: if code runs with no error, it's right (level 2 finishes and still fails the task); one passing test proves it works (level 6).",
+      "Students must point to the bug's line before their fix counts, so they can't win by rewriting everything.",
+      "Ask afterward: When should a person check an AI's code before it's used? What's the cost if no one does?"
+    ],
+    "check": "Show your bug report from the last level. Say the line, what's wrong, the test that proves it, and your fix.",
+    "stopAt": "You finish levels 1–6. The vague-prompt level and the bug report are the challenge.",
+    "stuck": [
+      "Run the AI's code and watch for the first wrong move. The bug is near there.",
+      "Check the result against the task, not against the AI's claim.",
+      "If there are two test maps, run the code on both."
+    ],
+    "next": "trust-but-verify",
+    "time": {
+      "prep": 5,
+      "core": [
+        35,
+        45
+      ],
+      "verified": false
+    },
+    "skills": [
+      "debugging",
+      "responsible-use"
+    ],
+    "standards": [
+      "1B-AP-15",
+      "2-AP-17"
+    ],
+    "primm": {
+      "predict": "Before you run the AI's code, read it and predict whether it does the task.",
+      "investigate": [
+        "Which line made the boat go wrong?",
+        "Why did the AI's claim sound right even though the code was wrong?"
+      ],
+      "modify": "Fix the one line with the bug, then test on every map.",
+      "make": "Write a buggy program and a confident claim for a partner to review."
+    },
+    "career": {
+      "role": "Software test engineer",
+      "industry": "Maine finance, health, and software companies",
+      "what": "Reviews and tests code, including code written with AI, and writes bug reports before anything ships."
+    },
+    "explain": "In three sentences: one bug you found, the test that proved it, and how you'd check AI-written code in the future.",
+    "bridge": {
+      "from": "lab-harbor-python",
+      "text": "In Harbor Python you fixed your own code. Now you're reviewing code an AI wrote."
+    }
+  },
+  {
+    "id": "trust-but-verify",
+    "title": "Trust but Verify: When AI Needs a Human",
+    "area": "coding",
+    "group": "crew-ai",
+    "summary": "Sort made-up AI answers into ones you can check yourself and ones that need an expert, then decide when a person must review an AI's work.",
+    "level": "intermediate",
+    "grades": [
+      "4-5",
+      "6-8"
+    ],
+    "duration": 30,
+    "format": "teacher-led",
+    "equipment": [
+      "unplugged"
+    ],
+    "source": "original",
+    "keywords": [
+      "ai",
+      "responsible use",
+      "verification",
+      "fact checking",
+      "unplugged",
+      "human review"
+    ],
+    "access": {
+      "account": "none",
+      "cost": "free",
+      "supervision": false,
+      "hardware": []
+    },
+    "launch": {
+      "status": "none"
+    },
+    "mission": "Your team is the safety board for an AI helper. Each card shows a made-up answer the AI gave. Decide how to check it, how much harm a wrong answer could do, and whether a person must review it before anyone uses it.",
+    "learn": [
+      "Explain that AI answers can be wrong even when they sound confident.",
+      "Choose a way to check an AI answer: test it, look it up in a trusted source, or ask an expert.",
+      "Decide when a person must review an AI's work, based on how much harm a mistake could cause."
+    ],
+    "why": "AI is used for homework help, medical notes, money, and safety. Knowing when to double-check, and when a human has to decide, keeps people safe and is part of using AI responsibly.",
+    "realWorld": "Hospitals, banks, and newsrooms have rules about when a person must check an AI's work before it's used, especially when a mistake could hurt someone.",
+    "vocab": [
+      {
+        "term": "Verify",
+        "def": "Check that something is true or works."
+      },
+      {
+        "term": "Trusted source",
+        "def": "A reliable place to check facts, like an official website or an expert."
+      },
+      {
+        "term": "Human review",
+        "def": "A person checks the AI's work before it's used."
+      },
+      {
+        "term": "Risk",
+        "def": "How much harm a mistake could cause."
+      }
+    ],
+    "before": {
+      "materials": [
+        "Answer cards (made up for the lesson): 10 short AI answers, like a math answer, a recipe step, a fact about Maine, a weather alert, a medicine dose, a password tip",
+        "A sorting mat with two axes: Easy to check ↔ Needs an expert, and Low risk ↔ High risk"
+      ],
+      "setup": [
+        "Write or print the 10 answer cards. Make some correct and some subtly wrong. Label them clearly as made up for the lesson.",
+        "Draw the sorting mat on chart paper or a whiteboard."
+      ],
+      "prerequisites": "AI Detectives or Pattern Machine Lab is a good start, but not required."
+    },
+    "steps": [
+      "Read one answer card with your team.",
+      "Decide how you could check it: test it, look it up in a trusted source, or ask an expert.",
+      "Decide the risk. What happens if the answer is wrong, and who could be hurt?",
+      "Place the card on the mat.",
+      "For every card in the high-risk corner, write who should review it before it's used.",
+      "As a class, agree on one rule: when must a human check an AI's answer?"
+    ],
+    "reflect": "Which card was hardest to place? What made you decide a person had to check it?",
+    "extend": "Find a real AI tool your school or family uses. What's one thing it should never do without a person checking?",
+    "teacherNotes": [
+      "Every card is made up for the lesson. Don't use real AI output, real people's information, or real medical advice.",
+      "Common misconception: if an AI sounds confident, it's probably right. Confidence is a model output, not a guarantee.",
+      "There's no single right placement for every card. Look for reasoning about who could be harmed and how the answer could be checked.",
+      "Ask afterward: Who is responsible when an AI's answer causes a problem: the AI, the people who made it, or the person who used it?"
+    ],
+    "check": "Explain where you placed the riskiest card, how you'd check it, and who should review it before anyone uses it.",
+    "stopAt": "All 10 cards are on the mat, and the class has agreed on a rule for human review.",
+    "stuck": [
+      "Ask: if this answer is wrong, what's the worst thing that could happen?",
+      "Could you check it yourself, or would you need an expert like a doctor or a scientist?",
+      "Sounding sure isn't the same as being right."
+    ],
+    "next": "ai-limits-detectives",
+    "time": {
+      "prep": 15,
+      "core": [
+        25,
+        30
+      ],
+      "verified": false
+    },
+    "skills": [
+      "responsible-use",
+      "data"
+    ],
+    "standards": [
+      "2-IC-20",
+      "2-IC-21"
+    ],
+    "primm": {
+      "predict": "Before you sort the cards, predict which one will be the riskiest.",
+      "investigate": [
+        "What makes an answer easy or hard to check?",
+        "Why does the risk change whether a person must review it?"
+      ],
+      "modify": "Move one card after hearing another team's reasons. What changed your mind?",
+      "make": "Write your own rule for when a person must check an AI's work."
+    },
+    "career": {
+      "role": "AI safety and quality specialist",
+      "industry": "Maine healthcare and financial services",
+      "what": "Decides which AI answers need a person to check them, and builds the checks that keep mistakes from reaching people."
+    },
+    "explain": "In three sentences: your class's rule for human review, the card that taught you the most, and why."
+  },
+  {
     id: "lab-rover",
     group: "labs",
     primm: {
