@@ -53,6 +53,8 @@ window.STEM.progression = {
       how: "Pass activities in 4 different categories." },
     { id: "crew", name: "Sternman", icon: "users", ring: "teal", rule: "collaborative", n: 3,
       how: "Pass 3 team activities." },
+    { id: "crew-cyber", name: "Cyber Defender", icon: "shield", ring: "teal", rule: "crewPass", crew: "tpl-crew-cyber", n: 3,
+      how: "Pass 3 activities from the Cyber Defender crew." },
     { id: "crew-ai-engineer", name: "AI Engineer", icon: "ai", ring: "navy", rule: "crewPass", crew: "tpl-crew-ai-engineer", n: 4,
       how: "Pass 4 activities from the AI Engineer crew." },
     { id: "crew-game-dev", name: "Game Developer", icon: "star", ring: "orange", rule: "crewPass", crew: "tpl-crew-game-dev", n: 4,

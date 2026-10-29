@@ -197,6 +197,20 @@ window.STEM = window.STEM || {};
         m("playtest-lab", { label: "Playtest and ship", bridge: "Watch real players, fix the biggest problem, and ship version 2 with release notes." })
       ]
     }),
+    ids({
+      id: "tpl-crew-cyber", group: "crew", reviewed: false,
+      title: "Cyber Defender Crew",
+      essentialQuestion: "How do people keep information safe, and how do attackers try to trick them?",
+      goal: "Encrypt and crack messages, build strong passphrases, spot phishing, judge what to trust, and plan a defense for a workplace.",
+      finalProduct: "A security plan for a made-up Maine co-op, with ranked risks, defenses, and three rules people will follow.",
+      audience: { grades: ["4-5", "6-8"], minutes: null, equipment: ["computer"], prior: "None. Students should read comfortably on their own." },
+      steps: [
+        m("lab-cyber-defender", { label: "Defend", bridge: "Ciphers, passphrases, phishing, and privacy, all in one lab." }),
+        m("secret-substitution", { label: "Crack", bridge: "A cipher with a huge number of keys can still leak patterns." }),
+        m("trust-but-verify", { label: "Verify", bridge: "Check before you trust, whether it's an email or an AI answer." }),
+        m("defender-plan", { label: "Plan", bridge: "Put it together: find the risks and make a plan people will follow." })
+      ]
+    }),
     // Coding Foundations for grades 2–3 (planning/CODING_PLAN.md): every stage reachable with labs and
     // hands-on activities written for 2–3. Each activity appears once; notes name the levels for each stage.
     ids({

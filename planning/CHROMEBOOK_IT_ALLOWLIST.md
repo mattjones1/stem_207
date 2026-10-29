@@ -22,19 +22,23 @@ For school IT teams. Managed Chromebooks often run a web filter (GoGuardian, Sec
 
 - `github.com`
 - `stem-coliseum.odoo.com`
+- `venmo.com`
 
 ## Activity launch links
 
 - `blockly.games`
 - `code.org`
+- `csteachers.org`
 - `earth.google.com`
 - `editor.raspberrypi.org`
 - `scratch.mit.edu`
 - `teachablemachine.withgoogle.com`
+- `www.nextgenscience.org`
 - `www.tinkercad.com`
 
 ## Go deeper links
 
+- `beinternetawesome.withgoogle.com`
 - `blockly.games`
 - `code.org`
 - `earth.google.com`

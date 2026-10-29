@@ -505,7 +505,7 @@
           <div class="notice notice--row">
             <p><strong>Want a ready-made sequence?</strong> ${id === "coding" ? "Coding Foundations puts the coding activities in seven steps, from clear instructions to a project of their own." : "The AI route puts these activities in six steps, from patterns to responsible use."}</p>
             <a class="btn btn--primary btn--small" href="#/teach/plans/${({ coding: "tpl-coding-foundations", ai: "tpl-ai-route" })[id]}">See the Learning Plan template ${icon("arrowRight")}</a>
-            ${id === "coding" ? `<a class="btn btn--ghost btn--small" href="#/teach/plans/tpl-coding-foundations-23">Grades 2–3 version</a><a class="btn btn--ghost btn--small" href="#/teach/plans/tpl-crew-ai-engineer">AI Engineer crew</a><a class="btn btn--ghost btn--small" href="#/teach/plans/tpl-crew-game-dev">Game Dev crew</a>` : ""}
+            ${id === "coding" ? `<a class="btn btn--ghost btn--small" href="#/teach/plans/tpl-coding-foundations-23">Grades 2–3 version</a><a class="btn btn--ghost btn--small" href="#/teach/plans/tpl-crew-ai-engineer">AI Engineer crew</a><a class="btn btn--ghost btn--small" href="#/teach/plans/tpl-crew-game-dev">Game Dev crew</a><a class="btn btn--ghost btn--small" href="#/teach/plans/tpl-crew-cyber">Cyber Defender crew</a>` : ""}
           </div>
         </section>` : ""}
       ${id === "engineering" && SE.moxie.pathwayVisible(user) ? `

@@ -934,3 +934,31 @@
 /* Playtest it: the map and the Python editor side by side on wide screens. */
 @media (min-width: 1000px) { .ld--play { grid-template-columns: minmax(0, 340px) minmax(0, 1fr); align-items: start; } .ld--play > .ld-tools, .ld--play > .ld-stats { grid-column: 1 / -1; } .ld--play > .ld-code { grid-column: 2; grid-row: 2 / span 3; } }
 @media (max-height: 760px) and (min-width: 1000px) { .ld-grid { width: min(100%, 340px); } .ld-cell { min-height: 28px; } }
+
+/* ───────── Cyber Defender Lab (lab-cyber.js): cipher wheel, passphrase meter, message cards ───────── */
+.cy { display: grid; gap: .7rem; }
+.cy-msg, .cy-try { margin: 0; }
+.cy-msg code, .cy-try code { font-size: 1.05rem; letter-spacing: .08em; }
+.cy-shift { display: flex; align-items: center; gap: .6rem; }
+.cy-shift svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
+.cy-k { min-width: 5.5rem; text-align: center; }
+.cy-wheel { display: grid; gap: 2px; overflow-x: auto; }
+.cy-ring { display: grid; grid-template-columns: repeat(26, minmax(1.4rem, 1fr)); gap: 2px; }
+.cy-ring span { text-align: center; padding: .2rem 0; font: 700 .95rem var(--font-mono, monospace); background: var(--surface); border: 1px solid rgba(1, 32, 30, .2); border-radius: 3px; }
+.cy-ring--shift span { background: var(--teal-soft); }
+.cy-input { font-family: var(--font-mono, monospace); text-transform: uppercase; }
+.cy-input[type="text"] { text-transform: none; }
+.cy-meter { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+.cy-bar { flex: 0 0 160px; height: 12px; border-radius: 6px; background: var(--surface); border: 1px solid rgba(1, 32, 30, .3); overflow: hidden; }
+.cy-bar i { display: block; height: 100%; background: #b03a2e; transition: width .2s; }
+.cy-meter--okay .cy-bar i { background: #9a6a00; }
+.cy-meter--strong .cy-bar i { background: var(--teal); }
+.cy-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .6rem; }
+.cy-card { border: 1px solid rgba(1, 32, 30, .2); border-radius: var(--radius-sm); padding: .5rem .6rem; background: var(--surface); }
+.cy-card p { margin: 0 0 .35rem; }
+.cy-from { display: flex; gap: .3rem; align-items: center; font-weight: 700; font-size: .9rem; }
+.cy-from svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; }
+.cy-q { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .3rem; }
+.cy-q [aria-pressed="true"] { background: var(--teal-soft); border-color: var(--brand-teal); }
+@media (prefers-reduced-motion: reduce) { .cy-bar i { transition: none; } }
+@media (max-height: 760px) and (min-width: 1000px) { .cy-list { grid-template-columns: repeat(3, 1fr); } .cy-card { padding: .35rem .5rem; } }

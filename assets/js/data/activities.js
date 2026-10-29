@@ -5489,6 +5489,392 @@ window.STEM.activities = [
     "explain": "In three sentences: what you learned from your playtest, the fix you made, and what your release notes say."
   },
   {
+    "id": "lab-cyber-defender",
+    "title": "Cyber Defender Lab",
+    "area": "coding",
+    "group": "crew-cyber",
+    "summary": "Crack ciphers, build a strong passphrase, catch phishing messages, and decide what's safe to share. Everything is practice and stays on your device.",
+    "level": "intermediate",
+    "grades": [
+      "4-5",
+      "6-8"
+    ],
+    "duration": 45,
+    "format": "independent",
+    "equipment": [
+      "computer"
+    ],
+    "source": "original",
+    "keywords": [
+      "cybersecurity",
+      "encryption",
+      "cipher",
+      "passwords",
+      "phishing",
+      "privacy",
+      "cyber defender"
+    ],
+    "access": {
+      "account": "none",
+      "cost": "free",
+      "supervision": false,
+      "hardware": []
+    },
+    "launch": {
+      "status": "lab",
+      "labId": "cyber-defender",
+      "label": "Open the Cyber Defender Lab",
+      "note": "Runs inside STEM 207. No outside account or website needed. Nothing students type is saved or sent."
+    },
+    "mission": "Cyber defenders protect the information people and businesses count on. Decode and encode secret messages, crack a weak cipher, build a passphrase that would take ages to guess, catch the phishing messages in an inbox, and decide what's safe to share online.",
+    "learn": [
+      "Use a key to encrypt and decrypt a message, and explain why a Caesar cipher is easy to crack.",
+      "Build a strong passphrase and explain what makes it strong.",
+      "Spot the clues in a phishing message, and decide what personal information is safe to share."
+    ],
+    "why": "Every account you'll ever have depends on passwords, encryption, and people who can spot a trick. Cyber defenders protect hospitals, banks, schools, and shipping, and there aren't enough of them.",
+    "realWorld": "Cybersecurity analysts watch for phishing and break-ins, and encryption protects every message, payment, and password sent over the internet.",
+    "vocab": [
+      {
+        "term": "Encryption",
+        "def": "Scrambling a message with a key so only someone with the key can read it."
+      },
+      {
+        "term": "Cipher",
+        "def": "A method for encrypting a message, like shifting each letter."
+      },
+      {
+        "term": "Passphrase",
+        "def": "A password made of several random words. Long and easy to remember."
+      },
+      {
+        "term": "Phishing",
+        "def": "A trick message that tries to get your password or personal information."
+      },
+      {
+        "term": "Personal information",
+        "def": "Facts that identify you or help someone find you, like your address."
+      }
+    ],
+    "before": {
+      "materials": [
+        "A computer or Chromebook"
+      ],
+      "setup": [
+        "Say it before students start: never type a real password anywhere in class. The lab's passphrase meter runs on the device, and nothing typed is saved or sent.",
+        "Every message in the lab is made up. Remind students that real phishing messages can look very real."
+      ],
+      "prerequisites": "None. Students should read comfortably on their own."
+    },
+    "steps": [
+      "Open the lab. Levels 1–3 use the cipher wheel: press the arrows to turn it.",
+      "Level 1: decode a secret message. Level 2: encode one. Level 3: crack a message with no key.",
+      "Level 4: make up a passphrase for a pretend account until the meter says Strong. Never type a real password.",
+      "Level 5: mark each message Safe or Phishing, and choose the clue that gave each trick away.",
+      "Level 6: decide what's OK to share online, what to ask a grown-up about first, and what to never share."
+    ],
+    "reflect": "Which phishing clue would be easiest to miss? What will you check before you click a link?",
+    "extend": "Make a three-tip poster that teaches a younger student how to spot phishing, with one made-up example message.",
+    "teacherNotes": [
+      "Objective: model encryption with a key, build a strong passphrase, recognize phishing clues, and protect personal information.",
+      "The passphrase meter estimates guesses from length and random words. It's a teaching model, not a real security audit, and it never logs what students type (only that the level was won).",
+      "Common misconceptions: symbols make any password strong (length matters more); phishing always has bad spelling (many look perfect); encryption hides that you sent a message (it hides what it says).",
+      "Ask afterward: Why can a computer crack a Caesar cipher in a blink, but not the encryption your bank uses?"
+    ],
+    "check": "Explain to your teacher why your passphrase is strong (without saying it!), and name two clues that a message is phishing.",
+    "stopAt": "You finish all six levels.",
+    "stuck": [
+      "Use the hints. Each one points to where to look.",
+      "On the cipher levels, check one letter at a time on the wheel.",
+      "For phishing, read the sender's address letter by letter."
+    ],
+    "next": "secret-substitution",
+    "time": {
+      "prep": 5,
+      "core": [
+        30,
+        45
+      ],
+      "verified": false
+    },
+    "skills": [
+      "responsible-use",
+      "data"
+    ],
+    "standards": [
+      "1B-NI-05",
+      "2-NI-06"
+    ],
+    "primm": {
+      "predict": "Before you turn the wheel, predict what the first secret letter really is.",
+      "investigate": [
+        "Why does the same key both lock and unlock a Caesar message?",
+        "What makes a passphrase of random words harder to guess than a short password with symbols?",
+        "Which phishing clue showed up most?"
+      ],
+      "modify": "Change one word in your passphrase and predict how the meter changes.",
+      "make": "Write a secret message for a partner with your own shift, and give them the key a safe way."
+    },
+    "career": {
+      "role": "Cybersecurity analyst",
+      "industry": "Maine hospitals, banks, and state government",
+      "what": "Watches for break-ins and phishing, protects people's information, and teaches others to stay safe."
+    },
+    "explain": "In three sentences: how a cipher key works, what makes your passphrase strong, and the phishing clue you'll watch for most."
+  },
+  {
+    "id": "secret-substitution",
+    "title": "Substitution Cipher Challenge",
+    "area": "coding",
+    "group": "crew-cyber",
+    "summary": "Invent a secret alphabet, send a coded message to another team, then try to crack theirs by counting letters, the way real codebreakers did.",
+    "level": "intermediate",
+    "grades": [
+      "4-5",
+      "6-8"
+    ],
+    "duration": 45,
+    "format": "collaborative",
+    "equipment": [
+      "unplugged"
+    ],
+    "source": "original",
+    "keywords": [
+      "cipher",
+      "encryption",
+      "codebreaking",
+      "frequency analysis",
+      "unplugged",
+      "cybersecurity"
+    ],
+    "access": {
+      "account": "none",
+      "cost": "free",
+      "supervision": false,
+      "hardware": []
+    },
+    "launch": {
+      "status": "none"
+    },
+    "mission": "A Caesar cipher has only 25 keys. A substitution cipher, where every letter gets its own secret partner, has more keys than there are grains of sand on Earth. Can it still be cracked? Make one, send a message, and find out.",
+    "learn": [
+      "Make a substitution key and use it to encrypt and decrypt a message.",
+      "Crack a cipher by counting which letters show up most.",
+      "Explain why a cipher with a huge number of keys can still be weak."
+    ],
+    "why": "Codebreakers have cracked secret messages by spotting patterns for hundreds of years. Modern encryption is built so there are no patterns to spot, and testing that is a real cybersecurity job.",
+    "realWorld": "Cryptographers design the encryption that protects phone messages and online payments, and security testers try to break it before attackers do.",
+    "vocab": [
+      {
+        "term": "Substitution cipher",
+        "def": "A cipher where each letter is swapped for a different letter, using a secret key."
+      },
+      {
+        "term": "Key",
+        "def": "The secret that locks and unlocks a message."
+      },
+      {
+        "term": "Frequency analysis",
+        "def": "Cracking a code by counting which letters show up most. In English, E, T, and A are most common."
+      }
+    ],
+    "before": {
+      "materials": [
+        "Paper and pencils",
+        "A key sheet for each team: the alphabet in a row with a blank under each letter",
+        "Optional: a printed English letter-frequency chart (E, T, A, O, I, N are most common)"
+      ],
+      "setup": [
+        "Teams of 2–3. Each team writes a message of 2–3 sentences (at least 80 letters), so counting letters works. Short messages are much harder to crack.",
+        "Messages should be friendly and school-appropriate, with no names or personal information."
+      ],
+      "prerequisites": "Cyber Defender Lab levels 1–3 (Caesar ciphers) help first."
+    },
+    "steps": [
+      "Make your key: under each letter of the alphabet, write a different letter. Use every letter once.",
+      "Write a message of 2–3 sentences. Encrypt it with your key, letter by letter. Keep the spaces.",
+      "Swap encrypted messages with another team. Keep your key secret.",
+      "Count each letter in their message. Make a tally chart.",
+      "Guess: the most common letter is probably E. Look for one-letter words (A or I) and short words like THE.",
+      "Crack as much as you can. Then compare with their key. How close were you?"
+    ],
+    "reflect": "Your key had a huge number of possibilities, but the message could still be cracked. Why?",
+    "extend": "Design a cipher that beats letter counting. One idea: use two different keys and switch every other letter. Test it on another team.",
+    "teacherNotes": [
+      "Objective: apply a second encryption method (2-NI-06) and see why the number of keys alone doesn't make a cipher strong.",
+      "Common misconceptions: more possible keys always means safer (patterns can leak); a computer can't crack a code a person couldn't (computers count letters instantly).",
+      "Short messages resist frequency analysis. If teams get stuck, give them a hint letter or two.",
+      "Ask afterward: What would make your cipher impossible to crack by counting letters?"
+    ],
+    "check": "Show your key, your encrypted message, and your tally chart for the other team's message. Explain how counting letters helped you crack it.",
+    "stopAt": "You've encrypted a message and cracked at least half the letters in another team's message.",
+    "stuck": [
+      "Start with the most common letter. It's probably E.",
+      "A one-letter word is A or I.",
+      "Look for a three-letter word that shows up a lot. It might be THE or AND."
+    ],
+    "next": "defender-plan",
+    "time": {
+      "prep": 10,
+      "core": [
+        35,
+        45
+      ],
+      "verified": false
+    },
+    "skills": [
+      "data",
+      "logic"
+    ],
+    "standards": [
+      "2-NI-06"
+    ],
+    "primm": {
+      "predict": "Before you count, predict which secret letter stands for E.",
+      "investigate": [
+        "Which letters showed up most in their message?",
+        "Which short words gave the biggest clues?"
+      ],
+      "modify": "Change your key so a common word looks different each time. Does that help?",
+      "make": "Design a cipher that letter counting can't crack, and test it."
+    },
+    "career": {
+      "role": "Cryptographer",
+      "industry": "Maine banks, defense, and technology companies",
+      "what": "Designs and tests the encryption that keeps messages, payments, and passwords private."
+    },
+    "explain": "In three sentences: how your key works, how you cracked the other team's message, and what would make a cipher harder to crack."
+  },
+  {
+    "id": "defender-plan",
+    "title": "Defend the Harbor Office",
+    "area": "coding",
+    "group": "crew-cyber",
+    "summary": "A made-up lobster co-op office keeps getting tricked online. Find the risks, choose physical and digital defenses, and present a security plan.",
+    "level": "intermediate",
+    "grades": [
+      "4-5",
+      "6-8"
+    ],
+    "duration": 45,
+    "format": "collaborative",
+    "equipment": [
+      "unplugged"
+    ],
+    "source": "original",
+    "keywords": [
+      "cybersecurity",
+      "security plan",
+      "risk",
+      "phishing",
+      "passwords",
+      "privacy",
+      "unplugged"
+    ],
+    "access": {
+      "account": "none",
+      "cost": "free",
+      "supervision": false,
+      "hardware": []
+    },
+    "launch": {
+      "status": "none"
+    },
+    "mission": "The Pine Cove Lobster Co-op is made up, but its problems are real: shared passwords on sticky notes, an unlocked laptop by the door, and a fake invoice that almost got paid. Your crew is the security team. Find the risks and make a plan to fix them.",
+    "learn": [
+      "Find security risks in a workplace, both physical and digital.",
+      "Choose defenses that match each risk, and explain how they protect information.",
+      "Present a security plan that people would actually follow."
+    ],
+    "why": "Most break-ins start with a simple mistake, not a genius hacker. Small businesses, farms, and fishing co-ops across Maine need people who can spot the risks and make security easy to follow.",
+    "realWorld": "Security consultants walk through real offices and computer systems, find the risks, and write plans to fix the biggest ones first.",
+    "vocab": [
+      {
+        "term": "Risk",
+        "def": "Something that could go wrong, and how bad it would be."
+      },
+      {
+        "term": "Physical security",
+        "def": "Protecting things you can touch: locked doors, locked screens, and where devices are kept."
+      },
+      {
+        "term": "Digital security",
+        "def": "Protecting information on devices and online: passwords, updates, and backups."
+      },
+      {
+        "term": "Two-step login",
+        "def": "Signing in with a password plus a second check, like a code on your phone."
+      }
+    ],
+    "before": {
+      "materials": [
+        "The co-op scenario (read aloud or on the board, below)",
+        "Chart paper or a planning sheet: Risk · Physical or digital? · How bad? · Our defense",
+        "Markers"
+      ],
+      "setup": [
+        "Read the scenario aloud: The Pine Cove Lobster Co-op (made up) has one office. The password for everything is on a sticky note on the monitor. The laptop by the door is never locked. Everyone uses the same login. Last week, an email that looked like it came from a bait supplier asked the co-op to pay a new bank account. Their files have never been backed up.",
+        "Teams of 3–4. Every company and person in the scenario is made up."
+      ],
+      "prerequisites": "Cyber Defender Lab (any levels) helps first."
+    },
+    "steps": [
+      "Read the co-op story. List every risk you can find. Aim for at least five.",
+      "For each risk, decide: is it physical or digital? Some are both.",
+      "Rank the risks from most to least dangerous. Talk about why.",
+      "Choose a defense for each of your top three risks. Explain how it protects the co-op's information.",
+      "Make your plan easy to follow: people skip security that's annoying. Write three rules the whole co-op can remember.",
+      "Present your plan in two minutes. Listen to another team and ask one question."
+    ],
+    "reflect": "Which risk do you think is most common in real life? Do you see it anywhere in your own life?",
+    "extend": "Write a short phishing-awareness note for the co-op's crew: what the fake invoice email looked like, the clues, and what to do next time.",
+    "teacherNotes": [
+      "Objective: explain how physical and digital security measures protect information (2-NI-05) and discuss a real-world cybersecurity problem (1B-NI-05).",
+      "Risks to look for: the password note, the shared password and login, the unlocked laptop by the door, the fake invoice (phishing), and no backups. Defenses: a password manager or unique passphrases, separate logins, screen locks, two-step login, calling the supplier on a known number, and regular backups.",
+      "Common misconceptions: security is only about hackers (most problems are habits); more rules always help (rules people skip don't).",
+      "Ask afterward: Why did your team rank the fake invoice where you did?"
+    ],
+    "check": "Show your risk list and top-three plan. Explain how one physical and one digital defense protect the co-op.",
+    "stopAt": "Your team has found five risks, ranked them, chosen defenses for the top three, and presented.",
+    "stuck": [
+      "Read the story again and look for anything a stranger could see, touch, or trick.",
+      "Ask: what would happen if this went wrong? That's how bad the risk is.",
+      "A good defense is one people will actually do."
+    ],
+    "next": "trust-but-verify",
+    "time": {
+      "prep": 5,
+      "core": [
+        35,
+        45
+      ],
+      "verified": false
+    },
+    "skills": [
+      "responsible-use",
+      "communication"
+    ],
+    "standards": [
+      "2-NI-05",
+      "1B-NI-05"
+    ],
+    "primm": {
+      "predict": "Before you list risks, predict which one is the most dangerous.",
+      "investigate": [
+        "Which risks are physical, and which are digital?",
+        "Which defense fixes more than one risk?"
+      ],
+      "modify": "Change one rule so it's easier for busy people to follow.",
+      "make": "Present a security plan for the co-op."
+    },
+    "career": {
+      "role": "Security consultant",
+      "industry": "Maine small businesses, farms, and fishing co-ops",
+      "what": "Finds the security risks in a workplace and makes plans people will actually follow."
+    },
+    "explain": "In three sentences: the biggest risk you found, the defense you chose for it, and why people will follow your plan."
+  },
+  {
     id: "lab-rover",
     group: "labs",
     primm: {

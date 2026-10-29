@@ -90,6 +90,7 @@ window.STEM.codingGroups = [
   { id: "games", name: "Game Dev crew: games and stories", blurb: "Design levels, build games and stories, playtest them with real players, and ship version 2." },
   { id: "python", name: "Python and text coding", blurb: "From blocks to real Python: read it, put it in order, fix it, then write your own." },
   { id: "crew-ai", name: "AI Engineer crew", blurb: "Engineers who build with AI check its work. Test and fix code an AI wrote." },
+  { id: "crew-cyber", name: "Cyber Defender crew", blurb: "Crack ciphers, build strong passphrases, catch phishing, and plan a defense. All practice, all made up." },
   { id: "robotics", name: "Robotics and physical computing", blurb: "Sensors, rules, and robots that act on their own." },
   { id: "web", name: "Web development", blurb: "Build web pages with HTML and CSS." },
 ];

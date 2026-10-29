@@ -448,6 +448,18 @@
   {
    "id": "playtest-lab",
    "plan": "planning/CODING_PLAN.md (Game Dev crew, October 28, 2026)"
+  },
+  {
+   "id": "lab-cyber-defender",
+   "plan": "planning/CODING_PLAN.md (Cyber Defender crew, October 28, 2026)"
+  },
+  {
+   "id": "secret-substitution",
+   "plan": "planning/CODING_PLAN.md (Cyber Defender crew, October 28, 2026)"
+  },
+  {
+   "id": "defender-plan",
+   "plan": "planning/CODING_PLAN.md (Cyber Defender crew, October 28, 2026)"
   }
  ]
 }

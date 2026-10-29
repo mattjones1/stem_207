@@ -28,6 +28,12 @@ How an activity record is shaped, how labs are built, and the rules that keep ev
 - Unplugged crew activities: `prompt-precision` (grades 2–8, with simple words) and `trust-but-verify` (grades 4–8; every answer card is made up for the lesson).
 ## Crews: Game Dev
 - `tpl-crew-game-dev`: Score Keeper → Interactive Story → Harbor Level Designer → Capstone Studio → Playtest Lab (`reviewed: false`). Patch **Game Developer** (`crewPass`, 4). Its activities are in the `games` group ("Game Dev crew: games and stories").
+
+## Crews: Cyber Defender
+- `tpl-crew-cyber`: Cyber Defender Lab → Substitution Cipher Challenge → Trust but Verify → Defend the Harbor Office (`reviewed: false`). Patch **Cyber Defender** (`crewPass`, 3). Group `crew-cyber`.
+- Lab `cyber-defender` (`lab-cyber.js`, `.cy-`): decode, encode, and crack a Caesar cipher (a wheel turned by buttons), a passphrase meter on the device, phishing sort with clues, and share-or-not. Every message and account is made up. **The passphrase is never logged**: the win records only `{ level: "strong" }`. Pure rules: `SE.cyber.shift`, `strength`, `check(level, { text, marks, clues })`.
+- Standards `1A-NI-04`, `1B-NI-05`, `2-NI-05`, `2-NI-06` (checked against CSTA's standards PDF, October 28, 2026). Go deeper link: Google's Interland (no account; students skip the name box).
+- Tests: `node tests/tools/test_cyber.js`, `python3 tests/labs/test_cyber_defender.py`.
 - **Harbor Level Designer** (`lab-builder.js`, id `level-designer`, `.ld-` styles): 6 levels. Students pick a tool (Ledge, Water, Trap buoy, Boat start, Wharf) and tap squares; every square is a labeled button, with no dragging. A route finder (`SE.levelDesigner.route`, breadth-first over position and traps collected) shows whether the level is possible and its best route in moves. Levels: fix an impossible level (keep 5 inner ledges), make the route 10+, place 3 reachable traps, tune into 12–16 moves with 2 traps, design then solve your level in Python (`solves`), and order 3 levels into a difficulty curve (`curve`).
 - **Playtest Lab** (`playtest-lab`, unplugged, works with any playable project): watch without helping, I noticed / I wondered / I'd change, one fix, release notes.
 - Next crew: Cyber Defender.
