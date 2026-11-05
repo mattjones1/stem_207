@@ -135,7 +135,8 @@ window.STEM.gradeBands = [
 window.STEM.durations = [
   { id: "20", name: "20 minutes or less", max: 20 },
   { id: "30", name: "30 minutes or less", max: 30 },
-  { id: "45", name: "45 minutes or less", max: 45 }
+  { id: "45", name: "45 minutes or less", max: 45 },
+  { id: "90", name: "Workshop (up to 90 minutes)", max: 90 }
 ];
 
 window.STEM.formats = {

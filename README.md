@@ -24,7 +24,8 @@
 
 Some activities run on outside platforms. Their full teaching packs are Markdown files in `missions/`:
 
-- **Teach the Computer Your Secret Signals** (AI, grades 2–8, Google Teachable Machine): [`missions/ai/secret-signals/`](missions/ai/secret-signals/). Includes a student version, a low-reading version, a teacher guide, a before-and-after test table, and hints with an extension.
+- **VR First Contact** (VR, grades 5–8, 90 minutes, Meta Quest 3; STEM Coliseum VR / AR Workshop 1): [`missions/vr/vr-first-contact/`](missions/vr/vr-first-contact/). Includes the instructor guide (safety protocols, setup checklist, 90-minute plan, motion sickness guide) and printable scavenger hunt and exit ticket cards.
+- **Teach the Computer Your Secret Signals** (AI, grades 2–8, Google Teachable Machine): [`missions/ai/secret-signals/`](missions/ai/secret-signals/). Includes a student mission, a low-reading version, a teacher guide, a before-and-after test table, and hints with an extension.
 
 ## Classroom pilot
 
@@ -328,6 +329,9 @@ node tools/import_missions.js missions.json --write --new-version   # also allow
 - A published import is never overwritten silently. Changing one needs `--new-version`, which bumps its version.
 - Text is cleaned (HTML tags and control characters are removed). Attribution in `source` is kept.
 - Tests: `node tests/tools/test_import_missions.js` (fixtures in `tests/fixtures/import/`).
+| `safety` | Optional: `student` (shown to everyone as "Stay safe in VR"), `teacher` (protocols), and `sick` (motion sickness steps), the last two for educators only |
+| `schedule` | Optional: `[{ time, title, detail }]`, a teacher-only session plan table |
+| `workshop`, `gradeText` | Optional: STEM Coliseum workshop credit (`series`, `number`, `credit`, with `source: "coliseum"`) and an exact grades label such as "Grades 5–8" |
 
 ### Launch links
 

@@ -50,7 +50,7 @@
         <p class="card__summary">${esc(a.summary)}</p>
         <div class="meta">
           <span class="meta__item"><span class="visually-hidden">Experience level: </span>${SE.levelMarkup(a.level)}</span>
-          <span class="meta__item">${icon("grade")}${SE.gradesText(a.grades)}</span>
+          <span class="meta__item">${icon("grade")}${SE.gradesFor(a)}</span>
           <span class="meta__item">${icon("clock")}${SE.timeText(a)}</span>
           <span class="meta__item">${icon("users")}${esc(formats[a.format].name)}</span>
           <span class="meta__item meta__item--wide">${icon("tools")}<span><span class="visually-hidden">Equipment: </span>${esc(SE.equipmentText(a.equipment))}</span></span>
@@ -73,7 +73,7 @@
       <dl class="facts">
         <div><dt>Topic</dt><dd>${esc(SE.areaById[a.area].name)}</dd></div>
         <div><dt>Level</dt><dd>${SE.levelMarkup(a.level)}</dd></div>
-        <div><dt>Grades</dt><dd>${SE.gradesText(a.grades)}</dd></div>
+        <div><dt>Grades</dt><dd>${SE.gradesFor(a)}</dd></div>
         ${a.time ? `<div><dt>Student time</dt><dd>${SE.timeText(a)}${a.time.verified ? "" : ' <span class="muted small">(pilot estimate)</span>'}</dd></div>
         <div><dt>Teacher prep</dt><dd>${a.time.prep ? `About ${a.time.prep} min` : "None"}</dd></div>` : `<div><dt>Time</dt><dd>About ${a.duration} minutes</dd></div>`}
         <div><dt>Format</dt><dd>${esc(formats[a.format].name)}</dd></div>
@@ -684,6 +684,11 @@
           <p class="launch-panel__small">No link is shown until the program chooses and checks a resource.</p>
         </section>`;
     }
+    if (a.launch.note) return `
+      <section class="launch-panel launch-panel--handson" aria-labelledby="${id}">
+        <h2 id="${id}">${esc(a.launch.label || "Hands-on activity")}</h2>
+        <p>${esc(a.launch.note)}</p>
+      </section>`;
     return `
       <section class="launch-panel launch-panel--handson" aria-labelledby="${id}">
         <h2 id="${id}">Hands-on activity</h2>
@@ -824,7 +829,7 @@
           </div>
           <p class="page-top__lede">${esc(a.summary)}</p>
           <div class="page-top__tags">
-            ${a.source === "original" ? `<span class="label-original">${icon("flag")}Original STEM 207 lesson</span>` : ""}${maineTag(a)}${isStudent && SE.store.assignmentFor(user.classId, a.id) ? `<span class="assigned-tag">${icon("clipboard")}Assigned by your teacher${SE.store.assignmentFor(user.classId, a.id).dueDate ? ` · ${esc(SE.dueText(SE.store.assignmentFor(user.classId, a.id).dueDate))}` : ""}</span>` : ""}
+            ${a.source === "original" ? `<span class="label-original">${icon("flag")}Original STEM 207 lesson</span>` : a.source === "coliseum" ? `<span class="label-original label-coliseum">${icon("flag")}STEM Coliseum workshop${a.workshop ? ` ${a.workshop.number}` : ""}</span>` : ""}${maineTag(a)}${isStudent && SE.store.assignmentFor(user.classId, a.id) ? `<span class="assigned-tag">${icon("clipboard")}Assigned by your teacher${SE.store.assignmentFor(user.classId, a.id).dueDate ? ` · ${esc(SE.dueText(SE.store.assignmentFor(user.classId, a.id).dueDate))}` : ""}</span>` : ""}
             ${isStudent ? (lastCompletion
               ? `<span class="chip chip--done-dark">${icon("check")}${esc(SE.game.statusFor(prof, a).label === "Legacy" ? `Completed ${SE.dateShort(lastCompletion.event.at)}` : SE.game.statusFor(prof, a).label)}</span>`
               : `<span class="chip chip--xp-dark">Worth ${SE.game.baseXp(a)} XP</span>`) : ""}
@@ -839,6 +844,11 @@
             <p id="mission-text">${esc(missionText)}</p>
             ${a.board ? `<div class="board"><p class="board__title">${esc(a.board.title)}</p><ol class="${a.board.code ? "board--code" : ""}">${a.board.lines.map((x) => `<li>${a.board.code ? `<code>${esc(x)}</code>` : esc(x)}</li>`).join("")}</ol>${a.board.note ? `<p class="board__note">${esc(a.board.note)}</p>` : ""}</div>` : ""}
           </section>
+          ${a.safety ? `
+          <section class="block block--safety" aria-labelledby="s-safety">
+            <h2 id="s-safety">${icon("alert")}Stay safe in VR</h2>
+            <ul class="bullets">${a.safety.student.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul>
+          </section>` : ""}
           ${a.bridge && SE.activityById[a.bridge.from] ? `<p class="bridge">${icon("arrowRight")}<span><strong>You've seen this idea before.</strong> ${esc(a.bridge.text)} <a href="#/activity/${a.bridge.from}">${esc(SE.activityById[a.bridge.from].title)}</a></span></p>` : ""}
           ${fold(isStudent, openFolds, "s-learn", "bulb", "What you’ll learn", `<ul class="bullets objectives">${a.learn.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul>`)}
           ${a.why ? fold(isStudent, openFolds, "s-why", "star", "Why it matters", `
@@ -862,6 +872,21 @@
             <h2 id="s-vr">${icon("headset")}VR setup for teachers</h2>
             <ul class="bullets">${a.vr.setup.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul>
             <h3>Taking part without a headset</h3><p>${esc(a.vr.nonHeadset)}</p>
+            ${a.safety && !isStudent ? `
+            <h3>Safety protocols (before every session)</h3>
+            <ul class="bullets">${a.safety.teacher.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul>
+            <h3>If a student feels sick</h3>
+            <ol class="steps">${a.safety.sick.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ol>` : ""}
+          </section>` : ""}
+          ${a.schedule && !isStudent ? `
+          <section class="block" aria-labelledby="s-plan">
+            <h2 id="s-plan">${icon("clock")}Session plan (${esc(SE.timeText(a))})</h2>
+            <p class="block__hint">All times are approximate. Adjust for pace and comfort, but never rush the safety briefing or the first headset session.</p>
+            <div class="table-wrap"><table class="plan-table">
+              <caption class="visually-hidden">Session plan, in order</caption>
+              <thead><tr><th scope="col">Time</th><th scope="col">Activity</th><th scope="col">What happens</th></tr></thead>
+              <tbody>${a.schedule.map((r) => `<tr><td class="plan-table__time">${esc(r.time)}</td><th scope="row">${esc(r.title)}</th><td>${esc(r.detail)}</td></tr>`).join("")}</tbody>
+            </table></div>
           </section>` : ""}
           ${a.primm ? `
           <section class="block primm" aria-labelledby="s-primm">

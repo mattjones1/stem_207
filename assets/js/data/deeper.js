@@ -82,7 +82,7 @@ window.STEM = window.STEM || {};
     "snowflake-functions": ["turtle"], "capstone-studio": ["scratchIdeas", "designSquad"], "python-turtle-bridge": ["turtle"], "lab-harbor-python": ["turtle", "maze"], "lab-code-review": ["oceans", "teachable"], "prompt-precision": ["kidbots"], "trust-but-verify": ["oceans", "quickdraw"], "lab-level-designer": ["scratchIdeas", "designSquad"], "playtest-lab": ["designSquad", "scratchIdeas"], "lab-cyber-defender": ["interland", "binary"], "secret-substitution": ["interland", "binary"], "defender-plan": ["interland"], "lab-web-builder": ["mdnHtml"], "wireframe-first": ["mdnHtml", "designSquad"],
     "lobster-trap-logic": ["gmri"], "lab-rover": ["maze"], "lab-dance-party": ["dance", "scratchIdeas"], "lab-space-blob": ["scratchIdeas", "binary"],
     "lab-moon-gate": ["maze"],
-    "ecosystem-field-trip": ["acadia", "gmri"], "notice-and-wonder-360": ["earth"], "acadia-from-above": ["acadia"], "lab-field-station": ["acadia", "gmri"],
+    "ecosystem-field-trip": ["acadia", "gmri"], "notice-and-wonder-360": ["earth"], "vr-first-contact": ["earth"], "acadia-from-above": ["acadia"], "lab-field-station": ["acadia", "gmri"],
     "how-ai-sorts": ["oceans", "quickdraw"], "teachable-machine-classroom": ["quickdraw"], "ai-secret-signals": ["quickdraw", "oceans"],
     "ai-for-oceans": ["quickdraw"], "ai-limits-detectives": ["quickdraw", "oceans"], "pattern-predictors": ["quickdraw"],
     "blueberry-sorter": ["oceans", "teachable"], "lab-pattern-machine": ["teachable", "quickdraw"],

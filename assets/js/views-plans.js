@@ -60,7 +60,7 @@
       const a = actOf(s);
       if (!a) return;
       const miss = grades.filter((g) => !(a.grades || []).includes(g));
-      if (grades.length && miss.length && a.grades && a.grades.length) out.push(`${a.title} is written for ${SE.gradesText(a.grades).toLowerCase()}, not ${miss.map((g) => SE.gradeById[g].name.toLowerCase()).join(" or ")}.`);
+      if (grades.length && miss.length && a.grades && a.grades.length) out.push(`${a.title} is written for ${SE.gradesFor(a).toLowerCase()}, not ${miss.map((g) => SE.gradeById[g].name.toLowerCase()).join(" or ")}.`);
       if (!s.required && SE.content.readiness(a) === "missing-resource") out.push(`${a.title} has no resource yet. It's optional here, so students can skip it.`);
       if (a.access && a.access.account === "required") out.push(`${a.title} needs an account${a.access.accountNote ? `: ${a.access.accountNote}` : "."}`);
       if (a.access && a.access.cost === "paid") out.push(`${a.title} is a paid resource.`);
@@ -547,7 +547,7 @@
     list.innerHTML = hits.length ? hits.map((a) => `
       <li class="pk-card ${inPlan.has(a.id) ? "is-in" : ""}">
         <div class="pk-card__main"><strong>${esc(a.title)}</strong>
-          <span class="pk-card__meta">${areaChip(a)}${a.launch.status === "lab" ? ` <span class="chip">Lab</span>` : ""} <span class="muted small">${SE.timeText(a)} · ${SE.gradesText(a.grades)}</span>${SE.content.readiness(a) === "missing-resource" ? ` <span class="chip chip--soon">No resource yet</span>` : ""}</span></div>
+          <span class="pk-card__meta">${areaChip(a)}${a.launch.status === "lab" ? ` <span class="chip">Lab</span>` : ""} <span class="muted small">${SE.timeText(a)} · ${SE.gradesFor(a)}</span>${SE.content.readiness(a) === "missing-resource" ? ` <span class="chip chip--soon">No resource yet</span>` : ""}</span></div>
         <button type="button" class="btn ${inPlan.has(a.id) ? "btn--ghost" : "btn--primary"} btn--small" data-add="${a.id}" ${inPlan.has(a.id) ? 'aria-disabled="true"' : ""}>${icon(inPlan.has(a.id) ? "check" : "plus")}${inPlan.has(a.id) ? "In the plan" : "Add"}<span class="visually-hidden">: ${esc(a.title)}</span></button></li>`).join("")
       : `<li class="muted">No activities match. Try another category, grade, or word.</li>`;
   }

@@ -30,7 +30,7 @@ Live: https://mattjones1.github.io/stem_207/ (GitHub Pages from `main` of `mattj
 
 | Area | Doc |
 |---|---|
-| Activities, labs, the content linter, standards, simple words, Go deeper, the importer | `docs/content.md` |
+| Activities, labs, the content linter, standards, simple words, Go deeper, the importer, Coliseum VR workshops | `docs/content.md` |
 | Student checks (Pass / Try again), XP, Home, class rewards | `docs/students.md` |
 | Dashboard, classes, Learning Plans, templates, the shared modal | `docs/educators.md` |
 | The Moxie ESP32 course | `docs/moxie.md` |

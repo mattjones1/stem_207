@@ -2626,3 +2626,19 @@ body[data-role="student"] .site-footer__support { display: none; }
 .portfolio small { color: var(--muted); }
 .portfolio p { margin: 0; }
 .code-group { margin-top: 1.5rem; } .code-group__title { font-size: var(--step-1); margin: 0 0 .2rem; } .code-group > .muted { margin: 0 0 .8rem; }
+
+/* ───────── Workshops: safety block and session plan (VR First Contact) ───────── */
+.block--safety { border-left: 5px solid var(--warn); }
+.block--safety h2 svg { color: var(--warn-ink); }
+.plan-table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+.plan-table th, .plan-table td { padding: .65rem .9rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.plan-table tbody tr:last-child > * { border-bottom: 0; }
+.plan-table thead th { font-family: var(--font-display); font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: var(--surface-2); font-weight: 600; }
+.plan-table tbody th { font-weight: 700; min-width: 9rem; }
+.plan-table__time { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--teal); font-weight: 700; }
+@media (max-width: 640px) {
+  .plan-table thead { display: none; }
+  .plan-table, .plan-table tbody, .plan-table tr, .plan-table th, .plan-table td { display: block; }
+  .plan-table tr { padding: .6rem .9rem; border-bottom: 1px solid var(--line); }
+  .plan-table th, .plan-table td { padding: .15rem 0; border: 0; }
+}

@@ -99,6 +99,8 @@
     const nums = ids.map((id) => id.split("-").map(Number)).flat();
     return `Grades ${Math.min(...nums)}–${Math.max(...nums)}`;
   };
+  /* An activity can name its exact grades (e.g. "Grades 5–8") when they don't match the band edges. */
+  SE.gradesFor = (a) => a.gradeText || SE.gradesText(a.grades);
   SE.levelMarkup = (id) => {
     const l = SE.levelById[id];
     const pips = [1, 2, 3].map((n) => `<i class="${n <= l.pips ? "on" : ""}"></i>`).join("");

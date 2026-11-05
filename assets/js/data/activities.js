@@ -2431,6 +2431,153 @@ window.STEM.activities = [
       "This activity is labeled \"Resource coming soon\" until the program selects a 360° scene."
     ]
   },
+  {
+    id: "vr-first-contact",
+    title: "VR First Contact",
+    area: "vr",
+    workshop: { series: "VR / AR Workshops", number: 1, credit: "Written by Luke Peelen for STEM Coliseum, 2025–2026" },
+    summary: "Your first step into a virtual world: set up a safe play space, watch 360° video, visit anywhere on Earth, and see the real room turn into AR.",
+    level: "beginner",
+    grades: ["4-5", "6-8"],
+    gradeText: "Grades 5–8",
+    duration: 45,
+    time: { prep: 60, core: [90, 90], verified: false },
+    format: "teacher-led",
+    equipment: ["vr"],
+    source: "coliseum",
+    delivery: "Headset VR (Meta Quest 3)",
+    skills: ["observation", "responsible-use"],
+    standards: ["2-IC-20"],
+    next: "lab-field-station",
+    keywords: ["vr", "ar", "meta quest", "headset", "360 video", "passthrough", "boundary", "guardian", "workshop", "wander", "youtube vr"],
+    access: {
+      account: "none",
+      accountNote: "Students don't sign in. Headsets use the program's own Meta accounts, set up by an adult.",
+      cost: "paid",
+      supervision: true,
+      hardware: ["Meta Quest 3 headsets, one per student (planned for 10 headsets and 9 students)", "Silicone face covers, microfiber cloths, and lens wipes", "Optional: a TV or monitor for casting"]
+    },
+    launch: {
+      status: "none",
+      label: "Run the workshop",
+      note: "This workshop runs on the program's Meta Quest 3 headsets, led by an instructor. Apps are installed before class, so students never search the store. The full plan, safety protocols, and printable cards are in the STEM 207 repo under missions/vr/vr-first-contact."
+    },
+    vr: {
+      setup: [
+        "Charge all 10 headsets the night before. A Quest 3 needs 2+ hours to fully charge.",
+        "Install YouTube VR, Wander, and Nature Treks VR on every headset. Open each app once so it is signed in and has no updates waiting.",
+        "Set up a pre-approved YouTube VR playlist: an underwater dive, a space station view, and a few student-choice videos.",
+        "Check parental supervision and content limits on every headset before every session. Updates can reset them.",
+        "Tape each play space on the floor: at least 6 × 6 feet of clear space. Clear chairs and bags.",
+        "Attach silicone face covers. Stock microfiber cloths and lens wipes.",
+        "Print the scavenger hunt cards and exit tickets. Post the stop word (PAUSE) where everyone can see it.",
+        "Line the headsets up in sleep mode so you can hand them out fast."
+      ],
+      nonHeadset:
+        "Any student can take the headset off and keep going. Cast a headset to the TV so they can call out landmarks for the scavenger hunt, help a partner find places, and join every discussion. No one has to stay in a headset to take part."
+    },
+    safety: {
+      student: [
+        "Set up your play space boundary before you start. Stay inside it.",
+        "Never walk with the headset on. Sit or stand still.",
+        "Wrist straps on. Hold the controllers firmly.",
+        "Feel dizzy, hot, or sick? Take the headset off right away. That's normal and OK.",
+        "Anyone can call \"PAUSE\" at any time. Everything stops."
+      ],
+      teacher: [
+        "Boundary: every student sets up the boundary (Meta calls it Guardian in older menus) before the headset goes on. Check that each one is at least 6 × 6 feet. Students often make them too small.",
+        "Hygiene: wipe each headset with a microfiber cloth and a lens wipe between every student. No student uses a headset another student wore until it is cleaned.",
+        "Motion sickness: tell students first that mild dizziness is normal. If anyone feels sick, the headset comes off at once. Never pressure a student to keep going, and normalize stopping early.",
+        "Time limits: no more than 30 minutes in a headset in a row. Younger students get 15 minutes at most, in stationary experiences only (360 video, no moving around in the world). Students with known motion sensitivity start with 10–15 minutes.",
+        "Walking: headsets come off before anyone walks. Seated or standing-in-place activities are best for beginners.",
+        "Content: parental supervision on, content limited to E / E10+. Verify before every session.",
+        "Stop word: \"PAUSE.\" Respond right away, every time, with no questions."
+      ],
+      sick: [
+        "Watch for: a student who takes the headset off suddenly, goes quiet, looks pale, holds their stomach, or says they feel dizzy or hot.",
+        "Right away: have them sit in a chair (not on the floor). Take the headset off gently. Don't ask them to do anything yet.",
+        "Recovery: look at a fixed point across the room (not a screen). Offer water. Cool air helps.",
+        "Going back in: only if the student wants to and feels completely better. Use a stationary 360 video or Nature Treks VR. No moving around in the world.",
+        "Write it down: which student, which app, and about how long they were in. Use display names or initials only, and share it only with program staff.",
+        "Prevent it: stationary experiences first, short sessions before long ones. Students who just ate are more likely to feel sick."
+      ]
+    },
+    schedule: [
+      { time: "0:00–0:10", title: "Welcome and hook", detail: "Ask: \"Has anyone ever been somewhere you will never be able to go in real life?\" Show a 30-second clip on a regular screen of what students are about to see in VR." },
+      { time: "0:10–0:20", title: "Safety briefing", detail: "Walk through every safety rule. Demonstrate boundary setup. Set the stop word. Explain the signs of motion sickness. Students set up their play spaces." },
+      { time: "0:20–0:30", title: "Setup: boundary and avatar", detail: "Students power on one at a time. Help each student set up and check their boundary. Students customize their avatar in the Quest home." },
+      { time: "0:30–0:45", title: "Explore: YouTube VR", detail: "Three 360° videos from the approved playlist: an underwater dive, a space station view, and a student choice. Circulate and check comfort." },
+      { time: "0:45–0:55", title: "Explore: Wander", detail: "Each student says out loud one place they have always wanted to see, then visits it. Watch for motion sickness." },
+      { time: "0:55–1:05", title: "Break and discussion", detail: "Headsets off for a 5-minute break. Ask: What surprised you most? What felt real? What felt fake? Could you tell the difference between turning your head and turning your whole body?" },
+      { time: "1:05–1:15", title: "AR mode demo", detail: "Show passthrough mode: virtual objects in the real room. Students take turns. Discuss: what is the difference between VR and AR? Save this until students have had 20+ minutes in VR so the contrast is clear." },
+      { time: "1:15–1:25", title: "VR scavenger hunt", detail: "Students use Wander to find the 5 landmarks on their printed card and take a headset screenshot of each. Make sure Wander works on every headset first." },
+      { time: "1:25–1:35", title: "Reflection and wrap-up", detail: "Exit ticket: 3 words that describe your VR experience. Share out. Preview Workshop 2: \"Next time you will BUILD your own virtual world.\" Clean and store the headsets." }
+    ],
+    why: "VR can take you places you can't go, like the bottom of the ocean or a space station, and AR can add things to the room you're standing in. Knowing how a headset works, and how to use one safely, is your first step to building your own virtual worlds.",
+    realWorld: "Pilots, surgeons, and firefighters practice in VR before doing the real thing. Architects walk clients through buildings before they are built, and museums let people visit places on the other side of the world.",
+    vocab: [
+      { term: "Virtual reality (VR)", def: "A computer-made world that fills your view, so it feels like you are inside it." },
+      { term: "Augmented reality (AR)", def: "Computer-made objects added on top of the real world you can see." },
+      { term: "Passthrough", def: "The headset's cameras show you the real room, so you can see around you." },
+      { term: "Boundary", def: "The safe play space you mark out. The headset warns you when you get close to its edge." },
+      { term: "Tracking", def: "How the headset senses your head and hands moving and updates what you see." }
+    ],
+    mission:
+      "You're a first-time explorer stepping into virtual worlds. Set up a safe play space, visit at least two kinds of VR, see how AR mixes the virtual and real worlds, and find five famous places on the scavenger hunt.",
+    learn: [
+      "Set up the boundary (play space) safely and on your own.",
+      "Move around the Meta Quest 3 home screen and menus.",
+      "Explain the difference between VR and AR on the Quest 3.",
+      "Try two kinds of VR: 360° video and a 3D place you can explore.",
+      "Describe what VR is in your own words, and how the headset tracks your movement.",
+      "Name one thing VR can do that a screen can't."
+    ],
+    before: {
+      materials: ["10 Meta Quest 3 headsets, fully charged", "10 silicone face covers", "Microfiber cloths and lens wipes", "Floor tape for play spaces", "Printed VR scavenger hunt cards", "Printed exit ticket cards", "Pencils", "A pre-approved YouTube VR playlist"],
+      setup: [
+        "Do the full headset checklist in \"VR setup for teachers\" below.",
+        "Read the safety protocols and the motion sickness guide before class.",
+        "Run the scavenger hunt yourself once in Wander so you know every landmark loads."
+      ],
+      prerequisites: "None. This workshop is planned as most students' first time in VR."
+    },
+    steps: [
+      "Listen to the safety rules. Learn the stop word: PAUSE.",
+      "Set up your boundary with your instructor's help. Make it big enough.",
+      "Make your avatar on the Quest home screen.",
+      "Watch three 360° videos in YouTube VR. Look up, down, and behind you.",
+      "Pick one place you've always wanted to see. Tell the group, then visit it in Wander.",
+      "Take a break with your headset off. Talk about what felt real and what felt fake.",
+      "Try AR passthrough mode. See virtual objects in the real room.",
+      "Find all 5 places on your scavenger hunt card in Wander. Take a screenshot of each.",
+      "Write 3 words that describe your VR experience on your exit ticket."
+    ],
+    stopAt: "You've tried a 360° video and Wander, seen AR mode, and handed in your 3-word exit ticket. Finishing the scavenger hunt is a bonus.",
+    check: "Tell your instructor what VR is in your own words, the difference between VR and AR, and one thing VR can do that a screen can't.",
+    evidence: "show",
+    stuck: [
+      "Lost in a menu? Press the Meta button on the right controller to go home.",
+      "Getting the boundary warning? Step back to the middle of your taped space.",
+      "Feeling dizzy? Take the headset off and sit down. You can watch on the TV.",
+      "Can't find a landmark? Ask a partner to help you search for its name."
+    ],
+    reflect: "What's one thing you could do in VR today that you could never do on a regular screen?",
+    extend: "Plan a world you'd like to build in Workshop 2. Draw it, and label one thing a visitor could look at and one thing they could do.",
+    teacherNotes: [
+      "Objective: every student sets up a safe boundary, explores two kinds of VR, compares VR with AR, and can explain how a headset tracks movement.",
+      "Common misconception: \"VR and AR are the same thing.\" Use the AR demo to compare: in VR the real room disappears; in AR the real room stays and virtual things are added.",
+      "Common misconception: \"The headset is a screen strapped to your face.\" Point out that it tracks your head and hands, which is why turning your whole body changes what you see.",
+      "Question to ask afterward: \"What felt real, and what gave it away as fake?\"",
+      "Watch every student closely for their first 5 minutes in a headset. Most motion sickness happens in the first session. If a student feels dizzy in YouTube VR, switch them to a stationary experience such as Nature Treks VR.",
+      "Install and open every app before students arrive. Opening menus mid-session kills momentum.",
+      "Collect the exit tickets. They show you students' comfort levels before Workshop 2.",
+      "Age guidance (check before class): the workshop plan says Meta recommends Quest use for ages 13 and up. Meta lowered its minimum age to 10 in 2023, with parent-managed accounts for ages 10–12. Check Meta's current safety guide, and follow your program's permission policy for headset use.",
+      "Privacy: students never sign in to a headset or app. Use program-managed accounts, and don't ask for students' names in avatars or screenshots. Passthrough shows the real room, so keep headset screenshots in VR (Wander), not of classmates.",
+      "Costs to check: the workshop plan lists Wander as free (basic), but the Quest store listing we found shows $9.99. Nature Treks VR is listed at about $5; confirm the current price. YouTube VR and the Quest home are free.",
+      "Menu names change with Quest updates (for example, Guardian is now usually called the boundary). Rehearse the full flow on one headset the week before.",
+      "Workshop plan by Luke Peelen for STEM Coliseum (Workshop 1 of the VR / AR series). Full materials: missions/vr/vr-first-contact in the STEM 207 repo."
+    ]
+  },
 
   /* ───────────────────────────── Artificial Intelligence ───────────────────────────── */
   {

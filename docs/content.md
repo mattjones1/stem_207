@@ -152,3 +152,9 @@ How an activity record is shaped, how labs are built, and the rules that keep ev
 - Map only reviewed content. Never show empty or draft groups as available curriculum. The candidate mappings in that file are unverified.
 - Use `CS curriculum.pptx` only as a reference. Don't copy Skill Samurai branding, prices, age bands, or certification claims.
 - Don't change AI, VR, Science & Discovery, Creative STEM, the Moxie pathway, or 3D Printing as part of coding-category work.
+
+## STEM Coliseum workshops (VR / AR series)
+- `source: "coliseum"` + `workshop: { series, number, credit }` show a "STEM Coliseum workshop N" tag. `gradeText` overrides the band-based grades label (`SE.gradesFor(a)`, used wherever grades are shown). Durations include a 90-minute "Workshop" filter; keep `duration` ≤ 45 for XP and put the real length in `time.core`.
+- `safety: { student, teacher, sick }`: "Stay safe in VR" for everyone; the protocols and motion sickness guide appear in "VR setup for teachers" for educators only. `schedule: [{ time, title, detail }]` renders the teacher-only "Session plan" table (`.plan-table`). `launch.status: "none"` with `label` + `note` replaces the generic hands-on panel.
+- Workshop 1 is `vr-first-contact` (grades 5–8, Meta Quest 3; pack in `missions/vr/vr-first-contact`). The source plan's age guidance and app prices are flagged as unverified in its teacher notes. Standard `2-IC-20`; Go deeper: Google Earth.
+- Test: `python3 tests/site/test_vr_workshop.py`.
