@@ -93,6 +93,18 @@ window.STEM = window.STEM || {};
       ]
     }),
     ids({
+      id: "tpl-ws-captain-code", group: "workshop", reviewed: false,
+      title: "Captain Code Workshop",
+      essentialQuestion: "How do programmers make a machine do exactly what they mean?",
+      goal: "Program a lobster boat through Casco Bay: sequences, debugging, loops, if / else, a variable, and your own blocks, then see the code in Python.",
+      audience: { grades: ["2-3", "4-5", "6-8"], minutes: 90, equipment: ["computer"], prior: "No experience needed." },
+      workshop: { format: "One 90-minute session", sessions: [{ title: "Captain Code", steps: [1] }, { title: "Early finishers", steps: [2] }] },
+      steps: [
+        m("lab-captain-code", { label: "Workshop", bridge: "Finish Casco Bay, all 10 levels, and earn Casco Bay Certified Captain." }),
+        m("lab-harbor-python", { required: false, bridge: "Done early? Type the same kind of program in real Python." })
+      ]
+    }),
+    ids({
       id: "tpl-maine-coast", reviewed: true,
       title: "Maine Coast Explorers",
       essentialQuestion: "How does a working coast function, and how can we explain it?",

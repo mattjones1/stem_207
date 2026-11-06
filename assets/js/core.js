@@ -83,6 +83,15 @@
   SE.icon = (name, extra = "") =>
     `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" ${extra}>${ICONS[name] || ""}</svg>`;
   SE.iconPaths = (name) => ICONS[name] || "";
+  /* The same icons drawn by CSS (one cached image each, colored by currentColor). For long lists like the
+     catalog, where hundreds of inline SVGs are slow to parse on a Chromebook. Decorative only. */
+  SE.iconMark = (name) => `<i class="ico ico--${name}" aria-hidden="true"></i>`;
+  if (typeof document !== "undefined" && document.head) {
+    const st = document.createElement("style");
+    st.id = "ico-css";
+    st.textContent = Object.keys(ICONS).map((n) => `.ico--${n}{--ico:url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg>`)}")}`).join("");
+    document.head.appendChild(st);
+  }
 
   /* Brand artwork (logo, Maine mark, pine) lives in brand.js. */
 

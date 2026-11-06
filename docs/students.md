@@ -9,7 +9,7 @@ How students send work, how teachers check it, how XP and class rewards are earn
 - **XP comes only from a Pass:** `baseXp(activity)` (`P.xp.mission` plus the level bonus), plus `P.xp.newSector` for the first pass in a category.
   - Sending, lab levels, and old `ican_*` stage events earn nothing.
   - XP is recalculated from the log, so past work counts only if it was passed.
-  - Patches count passes. Lab patches still count lab levels.
+  - Patches count passes. Lab patches still count lab levels. `rule: "labRange"` counts levels `from`..`to` of one `lab` (Captain Code's **Certified Captain**: all 10 Casco Bay levels).
 - `SE.game.statusFor` → `confirmed` "Passed" · `tryagain` "Try again" · `submitted` "Sent" · `started` "In progress" · `none` "Not started" (plus `legacy` for old one-click records).
   - `prof.completedIds` = passed; `prof.sentIds` = sent at least once; `prof.passes` = first passes with their XP.
 - `#/teach/checks` (`SE.views.teachChecks`) is one queue across classes with Pass / Try again inline. `SE.teachChecksWaiting(user)` drives the badge in the top menu.

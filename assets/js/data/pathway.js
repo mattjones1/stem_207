@@ -45,7 +45,7 @@ window.STEM.pathway = [
     project: "Shorten a long dance with loops, then fix a broken animation that uses the wrong kind of loop.",
     debugging: "Compare what the loop should repeat with what it actually repeats. Change one thing, then test.",
     iCan: "I can use a loop to repeat steps, and explain how many times it will run.",
-    activities: ["loop-dance", "debug-animation", "snowstorm-clones", "lab-rover"]
+    activities: ["loop-dance", "debug-animation", "snowstorm-clones", "lab-captain-code", "lab-rover"]
   },
   {
     stage: 4,

@@ -10,7 +10,7 @@ const sandbox = { window: {}, console };
 sandbox.window.SE = { icon: () => "", esc: (s) => String(s), labs: { register() {}, goals(levels, g) { levels.forEach((L, i) => { if (g[i]) [L.learn, L.why] = g[i]; }); } } };
 sandbox.SE = sandbox.window.SE;
 vm.createContext(sandbox);
-for (const f of ["assets/js/labs/minipy.js", "assets/js/labs/lab-coding.js", "assets/js/labs/lab-python.js"]) vm.runInContext(fs.readFileSync(path.join(ROOT, f), "utf8"), sandbox, { filename: f });
+for (const f of ["assets/js/labs/harbor-engine.js", "assets/js/labs/minipy.js", "assets/js/labs/lab-coding.js", "assets/js/labs/lab-python.js"]) vm.runInContext(fs.readFileSync(path.join(ROOT, f), "utf8"), sandbox, { filename: f });
 const { harborPython: HP } = sandbox.window.SE;
 ok("the lab loads with 12 levels", !!HP && HP.LEVELS.length === 12);
 ok("every level has learn, why, two hints, and what was learned", HP.LEVELS.every((L) => L.learn && L.why && L.hints && L.hints.length === 2 && L.learned));

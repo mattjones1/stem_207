@@ -1,6 +1,6 @@
 // Mini-Python (assets/js/labs/minipy.js): it reads the harbor's Python subset, gives friendly errors with the
 // right line, turns block programs into Python (the Python view) and back, and a Python program steers the boat
-// exactly like the same program in blocks (same interpreter: SE.harbor.run in lab-coding.js).
+// exactly like the same program in blocks (same interpreter: SE.harbor.run in harbor-engine.js).
 //   node tests/tools/test_minipy.js
 "use strict";
 const fs = require("fs"), path = require("path"), vm = require("vm");
@@ -13,7 +13,7 @@ const sandbox = { window: {}, console };
 sandbox.window.SE = { icon: () => "", esc: (s) => String(s), labs: { register() {}, goals() {} } };
 sandbox.SE = sandbox.window.SE;
 vm.createContext(sandbox);
-for (const f of ["assets/js/labs/minipy.js", "assets/js/labs/lab-coding.js"]) vm.runInContext(fs.readFileSync(path.join(ROOT, f), "utf8"), sandbox, { filename: f });
+for (const f of ["assets/js/labs/harbor-engine.js", "assets/js/labs/minipy.js", "assets/js/labs/lab-coding.js"]) vm.runInContext(fs.readFileSync(path.join(ROOT, f), "utf8"), sandbox, { filename: f });
 const { minipy, harbor } = sandbox.window.SE;
 ok("minipy and the Harbor engine load", !!minipy && !!harbor && typeof harbor.run === "function");
 

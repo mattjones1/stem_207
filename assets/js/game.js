@@ -41,6 +41,10 @@
       case "labs": return c.labsTouched;
       case "labFull": return c.labsFull;
       case "labLevels": return c.labLevelsDone;
+      case "labRange": {   // levels from..to of one lab (Captain Code: all of Casco Bay)
+        const done = (c.labSets || {})[patch.lab];
+        return done ? [...done].filter((i) => i >= patch.from && i <= patch.to).length : 0;
+      }
       case "crewPass": {   // passes among a crew template's activities
         const t = (STEM.pathwayTemplates || []).find((x) => x.id === patch.crew);
         return t ? t.steps.filter((s) => c.passedIds.has(s.activityId)).length : 0;
@@ -71,6 +75,7 @@
       passedIds: new Set()   // for crew patches
     };
     const labLevels = {}; // labId -> Set of completed level indexes
+    c.labSets = labLevels;
     const labResults = {}; // labId -> { level: latest result }
     const labTimes = [];
     const labStats = {}; // labId -> { runs, hints }

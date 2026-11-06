@@ -12,7 +12,7 @@ const sandbox = { window: {}, console };
 sandbox.window.SE = { icon: () => "", esc: (s) => String(s), labs: { register(l) { if (l.id === "code-review") registered = l; }, goals(levels, g) { levels.forEach((L, i) => { if (g[i]) [L.learn, L.why] = g[i]; }); } } };
 sandbox.SE = sandbox.window.SE;
 vm.createContext(sandbox);
-for (const f of ["assets/js/labs/minipy.js", "assets/js/labs/lab-coding.js", "assets/js/labs/lab-review.js"]) vm.runInContext(fs.readFileSync(path.join(ROOT, f), "utf8"), sandbox, { filename: f });
+for (const f of ["assets/js/labs/harbor-engine.js", "assets/js/labs/minipy.js", "assets/js/labs/lab-coding.js", "assets/js/labs/lab-review.js"]) vm.runInContext(fs.readFileSync(path.join(ROOT, f), "utf8"), sandbox, { filename: f });
 const CR = sandbox.window.SE.codeReview;
 ok("the lab loads with 8 levels and a simulation label", !!CR && CR.LEVELS.length === 8 && /pretend|simulation/i.test(registered.simulation || ""));
 ok("every level has learn, why, two hints, and what was learned", CR.LEVELS.every((L) => L.learn && L.why && L.hints.length === 2 && L.learned));

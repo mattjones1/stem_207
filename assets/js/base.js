@@ -296,7 +296,7 @@
   /* The student's own avatar: a starter explorer until they design one. */
   SE.ownAvatar = (studentId, size, label) => avatar(lookFor(studentId) || {}, size, { label });
 
-  SE.base = { avatar, harbor, unlocks, newUnlocks, customFor, lookFor, isOpen, ITEMS, NAME_A, NAME_B };
+  SE.base = { avatar, harbor, unlocks, newUnlocks, customFor, lookFor, isOpen, ITEMS, NAME_A, NAME_B, HULLS, BUOY_COLORS };
 
   /* ───────── The "My harbor" page ───────── */
   let tab = "look";

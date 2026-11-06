@@ -6279,8 +6279,142 @@ window.STEM.activities = [
     "explain": "In three sentences: what your page is for, what your tester missed, and what you changed in your wireframe."
   },
   {
+    id: "lab-captain-code",
+    group: "labs",
+    primm: {
+      "predict": "Before the first run, tap the square where you think the boat will stop.",
+      "investigate": [
+        "Step through your program. Which block went wrong first?",
+        "How did a loop, a variable, or your own block let you fit the block budget?"
+      ],
+      "modify": "Change one number or one turn. Predict where the boat ends up, then run it.",
+      "make": "Design your own chart in the Captain's Challenge and program a voyage across it."
+    },
+    career: {
+      "role": "Autonomous systems engineer",
+      "industry": "Maine ocean technology",
+      "what": "Programs surface and underwater robots that map the Gulf of Maine, sense hazards, and decide for themselves how to steer around them."
+    },
+    explain: "In three sentences: how your Captain's Challenge program works, which loop, variable, or block of your own made it shorter, and one bug you found by stepping through it.",
+    standards: [
+      "1A-AP-10",
+      "1A-AP-14",
+      "1B-AP-10",
+      "2-AP-17"
+    ],
+    simple: {
+      "mission": "You drive a lobster boat with code. Your boat only goes where your code tells it.",
+      "steps": [
+        "Read what the harbor master says.",
+        "Tap blocks to build your program.",
+        "Guess where the boat will stop. Then press Run.",
+        "Did the boat bump a ledge? Press Step. Find the first wrong block and fix it.",
+        "Too many blocks? Look for a pattern you can loop.",
+        "Finish your level. Then try the next one."
+      ]
+    },
+    skills: [
+      "sequencing",
+      "debugging",
+      "loops",
+      "logic",
+      "data",
+      "functions"
+    ],
+    why: "Programmers plan, test, watch what happens, and fix one thing at a time. Captain Code makes you do all of it: predict before you run, step through to find bugs, and write smarter code when the block budget gets small.",
+    realWorld: "Ocean robots map the Gulf of Maine on their own. Their programmers test every rule on many different situations, like your program sailing at high tide and low tide.",
+    vocab: [
+      {
+        "term": "Sequence",
+        "def": "Instructions that run one after another, in order."
+      },
+      {
+        "term": "Loop",
+        "def": "A block that repeats the steps inside it."
+      },
+      {
+        "term": "Conditional",
+        "def": "An if / else block that chooses what to do from what the boat senses."
+      },
+      {
+        "term": "Variable",
+        "def": "A named number that can change while the program runs."
+      },
+      {
+        "term": "Function",
+        "def": "A block you build yourself: define it once, then call it again and again."
+      }
+    ],
+    check: "Show your Captain's Challenge program. Point to the block that does the most work, and explain one bug you fixed and how you found it.",
+    stopAt: "You finish Casco Bay (10 levels) and earn Casco Bay Certified Captain. Penobscot Bay and Down East are for students who finish early, or later sessions.",
+    stuck: [
+      "Press Step instead of Run, and watch the boat one block at a time.",
+      "Turn your body the way the boat faces. Left and right are the boat's left and right.",
+      "Over the budget? Say the route out loud and listen for what repeats."
+    ],
+    next: "lab-harbor-python",
+    time: {
+      "prep": 10,
+      "core": [
+        75,
+        90
+      ],
+      "verified": false
+    },
+    title: "Captain Code",
+    area: "coding",
+    summary: "The flagship coding workshop: program your own lobster boat through Casco Bay in 10 levels, from first steps to fog, tides, variables, and blocks of your own. Plus 24 levels for early finishers.",
+    level: "beginner",
+    grades: ["2-3", "4-5", "6-8"],
+    duration: 90,
+    format: "independent",
+    equipment: ["computer", "tablet"],
+    source: "original",
+    featured: true,
+    keywords: ["lab", "workshop", "maine", "blocks", "sequence", "loops", "conditionals", "variables", "functions", "debugging", "fog", "lobster boat", "python", "interactive"],
+    access: { account: "none", cost: "free", supervision: false, hardware: [] },
+    launch: { status: "lab", labId: "captain-code", label: "Open Captain Code", note: "Runs inside STEM 207. No outside account or website needed." },
+    mission: "You're the captain of a Maine lobster boat, and your boat only goes where your code tells it. Leave the dock, haul your first trap, fix another captain's broken route, find your mooring in thick fog, and handle a channel that changes with the tide. As your skills grow, you get fewer blocks to use, so you'll need loops, if / else, variables, and blocks of your own. Finish by designing your own voyage, then see your code in Python.",
+    learn: [
+      "Build a program as an exact sequence of steps, and predict what it will do before running it.",
+      "Debug by stepping through a program to find the first block that goes wrong.",
+      "Use loops, if / else, a variable, and your own blocks to write shorter programs that work in more than one situation.",
+      "Connect block code to the same program written in Python."
+    ],
+    before: {
+      materials: ["A laptop, Chromebook, or tablet for each student (or each pair)", "A projector for demos", "Optional: grid paper for planning the Captain's Challenge"],
+      setup: [
+        "Make a class and print login cards so progress saves. Guests can play, but their progress isn't saved.",
+        "Open levels 6 (Fog on the Water) and 7 (The Changing Channel) on the projector computer before class.",
+        "Signed in as an educator, each level has a Demo the solution button. Students never see it."
+      ],
+      prerequisites: "None. Level 1 starts at the very beginning."
+    },
+    steps: [
+      "Open Captain Code and press Start in Casco Bay.",
+      "Read the harbor master's briefing and your goal.",
+      "Tap blocks to build your program. Tap a gap to choose where new blocks go.",
+      "On some levels, guess where the boat will stop, or plot your course, before you run.",
+      "Press Run to watch the boat, or Step to run one block at a time.",
+      "Read the feedback, fix the first thing that went wrong, and run again."
+    ],
+    reflect: "Which level changed how you were thinking about the problem? What did you do differently?",
+    extend: "Design your own chart in level 10 and challenge a partner to beat your block count. Then sail on to Penobscot Bay.",
+    teacherNotes: [
+      "Workshop flow (90 minutes): welcome and captain briefing, 8 minutes (the human-boat warm-up). Levels 1–4, 22 minutes. Levels 5–7, 20 minutes. Levels 8–9, 18 minutes. Captain's Challenge, 15 minutes. Python reveal and reflection, 7 minutes. These times are targets and haven't been tested with classes yet.",
+      "Demo: signed in as an educator, Demo the solution loads a verified reference solution. Step through it on the projector before students try levels 6, 7, and 8. Students never see this button.",
+      "Checkpoints: on your dashboard, check who has finished level 4 by about minute 30, level 7 by minute 50, and level 9 by minute 68. A student with many test runs and no progress needs a conversation, not the answer.",
+      "Grades 2–3: aim for level 5. Turn on Extra help (bigger blocks, and clues after two tries). Older students can skip it and chase Par and the Compass mark.",
+      "Block budgets count every block, including the blocks inside the student's own block. A route that works but runs over the budget still runs; the feedback then asks for a loop, a variable, or their own block. Any program that meets the goal passes: there is no single required answer.",
+      "Common mistakes: using the student's own left and right instead of the boat's, Forward outside a loop that should be inside it, a repeat count that's off by one, and reaching the mooring without hauling. The feedback names each one with the student's numbers.",
+      "Level 7 and other channel levels run the same program on two or three maps. A memorized route can't pass both. Ask: why do real programmers test with more than one case?",
+      "Ask afterward: your boat followed your code exactly. Who did the thinking? (Keep the humanity in technology.)"
+    ]
+  },
+  {
     id: "lab-rover",
     group: "labs",
+    bridge: { from: "lab-captain-code", text: "Finished Captain Code? Harbor Code has 36 more levels: the same ideas, new harbors, at your own pace." },
     primm: {
       "predict": "Before you press Run, trace the program with your finger. Where will the boat end up?",
       "investigate": [
@@ -6395,6 +6529,7 @@ window.STEM.activities = [
     reflect: "Which level made you change how you were thinking about the problem? What did you do differently?",
     extend: "On each voyage's free build, solve the level, then try to beat par by using loops and conditionals to make your program shorter.",
     teacherNotes: [
+      "Running an instructor-led workshop? Use Captain Code: its 10 Casco Bay levels fit 90 minutes, with fog, tides, and an educator Demo button. Harbor Code is self-paced practice with the same ideas and new harbors.",
       "Each voyage follows the Coding Foundations Learning Plan: levels 1–3 sequencing and debugging (step 1), 4–6 loops (step 3), 7–9 actions and conditionals (steps 2 and 4), 10 variables (step 5), 11 functions (step 6), 12 independent creation (step 7).",
       "Voyage 2 (Penobscot Bay) adds Set trap and If at a dashed spot. Voyage 3 (Down East) adds a simple rule: you can only set a trap you have already hauled. Both are actions and conditionals at the same skill level as Voyage 1.",
       "Debug levels vary the kind of bug: a wrong turn, an extra block, a wrong turn inside a loop, and a loop that repeats too few times.",

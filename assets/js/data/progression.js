@@ -81,6 +81,8 @@ window.STEM.progression = {
       how: "Finish a level in 3 different interactive labs." },
     { id: "lab-master", name: "Lab Master", icon: "star", ring: "orange", rule: "labFull", n: 1,
       how: "Finish every level of one interactive lab." },
+    { id: "captain-casco", name: "Certified Captain", icon: "boat", ring: "teal", rule: "labRange", lab: "captain-code", from: 0, to: 9, n: 10,
+      how: "Finish all 10 Casco Bay levels in Captain Code." },
     { id: "lab-legend", name: "Lab Legend", icon: "lighthouse", ring: "navy", rule: "labLevels", n: 30,
       how: "Finish 30 lab levels." },
     { id: "teacher-level", name: "Could Teach It", icon: "bulb", ring: "navy", rule: "confident", n: 3,

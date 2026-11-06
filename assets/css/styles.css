@@ -631,6 +631,10 @@ ul, ol { margin: 0; padding: 0; }
 .meta__item { display: flex; align-items: center; gap: .45rem; min-width: 0; }
 .meta__item > svg { width: 1.05rem; height: 1.05rem; flex: none; fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .meta__item--wide { grid-column: 1 / -1; }
+/* CSS-drawn icons (SE.iconMark): one cached image per icon, tinted with currentColor. */
+.ico { display: inline-block; flex: none; width: 1.05rem; height: 1.05rem; background-color: currentColor; -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat; }
+.meta__item > .ico { color: var(--muted); }
+@media (forced-colors: active) { .ico { forced-color-adjust: none; background-color: CanvasText; } }
 
 .card__foot { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: auto; }
 

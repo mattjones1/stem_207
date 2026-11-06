@@ -50,10 +50,10 @@
         <p class="card__summary">${esc(a.summary)}</p>
         <div class="meta">
           <span class="meta__item"><span class="visually-hidden">Experience level: </span>${SE.levelMarkup(a.level)}</span>
-          <span class="meta__item">${icon("grade")}${SE.gradesFor(a)}</span>
-          <span class="meta__item">${icon("clock")}${SE.timeText(a)}</span>
-          <span class="meta__item">${icon("users")}${esc(formats[a.format].name)}</span>
-          <span class="meta__item meta__item--wide">${icon("tools")}<span><span class="visually-hidden">Equipment: </span>${esc(SE.equipmentText(a.equipment))}</span></span>
+          <span class="meta__item">${SE.iconMark("grade")}${SE.gradesFor(a)}</span>
+          <span class="meta__item">${SE.iconMark("clock")}${SE.timeText(a)}</span>
+          <span class="meta__item">${SE.iconMark("users")}${esc(formats[a.format].name)}</span>
+          <span class="meta__item meta__item--wide">${SE.iconMark("tools")}<span><span class="visually-hidden">Equipment: </span>${esc(SE.equipmentText(a.equipment))}</span></span>
         </div>
         <div class="card__foot">${accessChips(a, prof)}</div>
       </article>`;

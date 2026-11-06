@@ -24,7 +24,8 @@
   const SE = (window.SE = window.SE || {});
 
   const ACTIONS = { move: "move", turn_left: "left", turn_right: "right", haul: "pick", set_trap: "drop" };
-  const CHECKS = { at_buoy: "ifGem", at_spot: "ifSpot", ledge_ahead: "ifWall" };
+  const CHECKS = { at_buoy: "ifGem", at_spot: "ifSpot", ledge_ahead: "ifWall", ledge_left: "ifLedgeLeft", ledge_right: "ifLedgeRight" };
+  const HAS_ELSE = { ifWall: true, ifLedgeLeft: true, ifLedgeRight: true };
   const KNOWN = Object.keys(ACTIONS).concat(Object.keys(CHECKS), ["at_wharf", "range", "steps", "print"]);
 
   /* How close two words are (to suggest "move" for "mvoe"). */
@@ -40,7 +41,9 @@
     return best && best[1] <= 2 ? best[0] : null;
   };
 
-  function parse(src) {
+  /* opts.varName: the variable's name (default steps). opts.goal: "wharf" (default) or "mooring", for the while loop. */
+  function parse(src, opts = {}) {
+    const V = opts.varName || "steps", GOAL = opts.goal || "wharf";
     const errors = [];
     const err = (line, message) => { if (!errors.some((e) => e.line === line)) errors.push({ line, message }); };
     // Lines with their indent; blank and comment-only lines are skipped (but keep their numbers).
@@ -89,18 +92,20 @@
       }
       // for _ in range(N): / range(steps)
       if (/^for\b/.test(t)) {
-        m = t.match(/^for\s+[a-z_][a-z0-9_]*\s+in\s+range\s*\(\s*(\d+|steps)\s*\)\s*:?$/i);
+        m = t.match(/^for\s+[a-z_][a-z0-9_]*\s+in\s+range\s*\(\s*(\d+|[a-z_]+)\s*\)\s*:?$/i);
+        if (m && !/^\d+$/.test(m[1]) && m[1] !== V) m = null;
         if (!m) { err(l.n, `Line ${l.n}: write a loop like this: for i in range(3):`); body(l, indent); return null; }
         colon("for");
         const b = body(l, indent);
-        if (m[1] === "steps") return { type: "repeatVar", body: b };
+        if (m[1] === V) return { type: "repeatVar", body: b };
         const n = Number(m[1]);
         if (n < 1 || n > 20) err(l.n, `Line ${l.n}: use a number from 1 to 20 in range().`);
         return { type: "repeat", n, body: b };
       }
       // while not at_wharf():
       if (/^while\b/.test(t)) {
-        if (!/^while\s+not\s+at_wharf\s*\(\s*\)\s*:?$/.test(t)) { err(l.n, `Line ${l.n}: in this harbor, the while loop is: while not at_wharf():`); body(l, indent); return null; }
+        const wm = t.match(/^while\s+not\s+at_([a-z]+)\s*\(\s*\)\s*:?$/);
+        if (!wm || wm[1] !== GOAL) { err(l.n, `Line ${l.n}: in this harbor, the while loop is: while not at_${GOAL}():`); body(l, indent); return null; }
         colon("while");
         return { type: "untilGoal", body: body(l, indent) };
       }
@@ -117,12 +122,12 @@
         colon("if");
         const type = CHECKS[m[1]];
         const node = { type, body: body(l, indent) };
-        if (type === "ifWall") node.else = [];
+        if (HAS_ELSE[type]) node.else = [];
         const next = lines[i];
         if (next && next.indent === indent && /^else\b/.test(next.text)) {
           i++;
           if (!/^else\s*:$/.test(next.text)) err(next.n, `Line ${next.n}: write else with a colon: else:`);
-          if (type !== "ifWall") { err(next.n, `Line ${next.n}: only if ledge_ahead() has an else in this harbor.`); body(next, indent); }
+          if (!HAS_ELSE[type]) { err(next.n, `Line ${next.n}: only if ledge_ahead() has an else in this harbor.`); body(next, indent); }
           else node.else = body(next, indent);
         }
         return node;
@@ -130,13 +135,13 @@
       if (/^else\b/.test(t)) { err(l.n, `Line ${l.n}: else needs an if right above it, at the same indent.`); body(l, indent); return null; }
       if (t === "pass") return null;   // an empty block (the Python view writes pass)
       // steps = N / steps += N / steps -= N
-      if ((m = t.match(/^steps\s*(=|\+=|-=)\s*(-?\d+)$/))) {
-        const n = Number(m[2]);
-        if (m[1] === "=") return { type: "setVar", n };
-        return { type: "changeVar", n: m[1] === "+=" ? n : -n };
+      if ((m = t.match(/^([a-z_][a-z0-9_]*)\s*(=|\+=|-=)\s*(-?\d+)$/)) && m[1] === V) {
+        const n = Number(m[3]);
+        if (m[2] === "=") return { type: "setVar", n };
+        return { type: "changeVar", n: m[2] === "+=" ? n : -n };
       }
       if (/^[a-z_][a-z0-9_]*\s*(=|\+=|-=)/i.test(t)) {
-        err(l.n, `Line ${l.n}: this harbor has one variable, steps. Try steps = 2 or steps += 1.`);
+        err(l.n, `Line ${l.n}: this harbor has one variable, ${V}. Try ${V} = 2 or ${V} += 1.`);
         return null;
       }
       // name()
@@ -167,32 +172,36 @@
     return { main, fn: fnDef ? fnDef.body : [], fnName: fnDef ? fnDef.name : null, errors };
   }
 
-  /* A block program as Python (the "Python view"). */
+  /* A block program as Python (the "Python view"). opts: varName and goal, as in parse. toPythonLines gives each
+     line with the id of the block it came from, so a lab can highlight the line that's running. */
   const PY = { move: "move()", left: "turn_left()", right: "turn_right()", pick: "haul()", drop: "set_trap()" };
-  const COND = { ifGem: "at_buoy()", ifSpot: "at_spot()", ifWall: "ledge_ahead()" };
-  function toPython(main, fn = [], fnName = "zig") {
+  const COND = { ifGem: "at_buoy()", ifSpot: "at_spot()", ifWall: "ledge_ahead()", ifLedgeLeft: "ledge_left()", ifLedgeRight: "ledge_right()" };
+  function toPythonLines(main, fn = [], fnName = "zig", opts = {}) {
+    const V = (opts && opts.varName) || "steps", GOAL = (opts && opts.goal) || "wharf";
     const out = [];
     const name = String(fnName || "zig").toLowerCase().replace(/[^a-z0-9_]/g, "_");
+    const line = (text, b) => out.push({ text, id: b ? b.id : null });
     const emit = (list, pad) => {
-      if (!list.length) { out.push(`${pad}pass`); return; }
+      if (!list.length) { line(`${pad}pass`); return; }
       list.forEach((b) => {
-        if (PY[b.type]) out.push(pad + PY[b.type]);
-        else if (b.type === "repeat") { out.push(`${pad}for i in range(${b.n}):`); emit(b.body, pad + "    "); }
-        else if (b.type === "repeatVar") { out.push(`${pad}for i in range(steps):`); emit(b.body, pad + "    "); }
-        else if (b.type === "untilGoal") { out.push(`${pad}while not at_wharf():`); emit(b.body, pad + "    "); }
+        if (PY[b.type]) line(pad + PY[b.type], b);
+        else if (b.type === "repeat") { line(`${pad}for i in range(${b.n}):`, b); emit(b.body, pad + "    "); }
+        else if (b.type === "repeatVar") { line(`${pad}for i in range(${V}):`, b); emit(b.body, pad + "    "); }
+        else if (b.type === "untilGoal") { line(`${pad}while not at_${GOAL}():`, b); emit(b.body, pad + "    "); }
         else if (COND[b.type]) {
-          out.push(`${pad}if ${COND[b.type]}:`); emit(b.body, pad + "    ");
-          if (b.type === "ifWall" && b.else && b.else.length) { out.push(`${pad}else:`); emit(b.else, pad + "    "); }
+          line(`${pad}if ${COND[b.type]}:`, b); emit(b.body, pad + "    ");
+          if (HAS_ELSE[b.type] && b.else && b.else.length) { line(`${pad}else:`, b); emit(b.else, pad + "    "); }
         }
-        else if (b.type === "setVar") out.push(`${pad}steps = ${b.n}`);
-        else if (b.type === "changeVar") out.push(b.n < 0 ? `${pad}steps -= ${-b.n}` : `${pad}steps += ${b.n}`);
-        else if (b.type === "call") out.push(`${pad}${name}()`);
+        else if (b.type === "setVar") line(`${pad}${V} = ${b.n}`, b);
+        else if (b.type === "changeVar") line(b.n < 0 ? `${pad}${V} -= ${-b.n}` : `${pad}${V} += ${b.n}`, b);
+        else if (b.type === "call") line(`${pad}${name}()`, b);
       });
     };
-    if (fn && fn.length) { out.push(`def ${name}():`); emit(fn, "    "); out.push(""); }
+    if (fn && fn.length) { line(`def ${name}():`); emit(fn, "    "); line(""); }
     emit(main, "");
-    return out.join("\n");
+    return out;
   }
+  const toPython = (main, fn, fnName, opts) => toPythonLines(main, fn, fnName, opts).map((l) => l.text).join("\n");
 
-  SE.minipy = { parse, toPython, ACTIONS, CHECKS };
+  SE.minipy = { parse, toPython, toPythonLines, ACTIONS, CHECKS };
 })();

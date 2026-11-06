@@ -12,7 +12,9 @@
  *     learn: "What you'll learn" (shown first); why: "Why it matters" (shown first, repeated on the win panel)
  *   simulation (optional): a sentence telling students the lab is a model, not real-world data
  *   chapters (optional): [{ title, short, from, to, blurb }] groups levels (indexes from..to)
+ *   level.briefing (optional): a short story line, shown above the goal (Captain Code's harbor master)
  *   mount(el, levelIndex, api) → optional cleanup function
+ *   landing(el, { user }) (optional): a start screen, shown at #/lab/<id> until the student finishes a level
  *
  * The api passed to mount:
  *   api.win(data, opts)  mark the level complete (data is saved with the event)
@@ -45,6 +47,8 @@
     /* Levels this student has completed, from their activity log. */
     progressFor(userOrProf, labId) {
       if (!userOrProf || userOrProf.role === "guest") return guestProgress[labId] || new Set();
+      // Only students log lab levels, so an educator's progress is always empty (no need to build a profile).
+      if (userOrProf.role && userOrProf.role !== "student") return new Set();
       const prof = userOrProf.labLevels ? userOrProf : SE.game.profile(userOrProf.id);
       return prof.labLevels[labId] || new Set();
     }
@@ -59,6 +63,26 @@
     const area = SE.areaById[lab.area];
     const isStudent = user && user.role === "student";
     const done = SE.labs.progressFor(user, lab.id);
+    // A lab with a landing screen shows it first, until the student has finished a level.
+    if (lab.landing && (levelParam == null || levelParam === "") && !done.size) {
+      const activity = STEM_activityForLab(lab.id), area = SE.areaById[lab.area];
+      app().innerHTML = `
+        <section class="page-top page-top--lab">
+          <div class="wrap page-top__inner">
+            <div class="backbar">
+              ${SE.backLink(`#/activities/${area.id}`, area.short)}
+              ${activity ? `<a class="crumbs" href="#/activity/${activity.id}">Teacher guide and activity page</a>` : ""}
+            </div>
+            <div class="lab-head">
+              <span class="icon-badge">${icon(area.icon)}</span>
+              <div><span class="eyebrow">${esc(area.name)} · Interactive lab</span><h1 tabindex="-1">${esc(lab.title)}</h1></div>
+            </div>
+          </div>
+        </section>
+        <div class="wrap lab-landing" id="lab-landing"></div>`;
+      lab.landing(document.getElementById("lab-landing"), { user });
+      return;
+    }
     // Default to the first unfinished level
     let idx = levelParam != null && !isNaN(Number(levelParam)) ? Math.max(0, Math.min(lab.levels.length - 1, Number(levelParam) - 1)) : lab.levels.findIndex((_, i) => !done.has(i));
     if (idx < 0) idx = 0;
@@ -110,6 +134,7 @@
             ${level.why ? `<p><span class="lab-objective__k">${icon("bulb")}Why it matters</span>${esc(level.why)}</p>` : ""}
           </div>` : ""}
           ${lab.simulation ? `<p class="lab-sim">${icon("alert")}<span><strong>Simulation.</strong> ${esc(lab.simulation)}</span></p>` : ""}
+          ${level.briefing ? `<p class="lab-briefing">${icon("boat")}<span><strong>Harbor master:</strong> ${esc(level.briefing)}</span></p>` : ""}
           <p class="lab-goal"><strong>Your goal:</strong> ${esc(level.goal)}</p>
           ${level.steps ? `<ol class="lab-steps">${level.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>` : ""}
           <div class="lab-brief__tools">
@@ -130,7 +155,8 @@
 
     const readBtn = document.querySelector('[data-read="lab"]');
     if (readBtn) readBtn.addEventListener("click", () => SE.speech.read(readBtn,
-      [{ text: `Your goal: ${level.goal}`, el: document.querySelector(".lab-goal") }]
+      (level.briefing ? [{ text: level.briefing, el: document.querySelector(".lab-briefing") }] : [])
+        .concat([{ text: `Your goal: ${level.goal}`, el: document.querySelector(".lab-goal") }])
         .concat((level.steps || []).map((s, i) => ({ text: `Step ${i + 1}. ${s}`, el: document.querySelectorAll(".lab-steps li")[i] })))));
 
     const hintBtn = document.getElementById("lab-hint-btn");

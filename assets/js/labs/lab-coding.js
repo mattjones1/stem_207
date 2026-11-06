@@ -14,55 +14,7 @@
   const SE = window.SE;
   const { icon, esc } = SE;
 
-  /* ───────── Block catalog ───────── */
-  const BLOCKS = {
-    move: { label: "Forward", kind: "motion", glyph: "arrowRight" },
-    left: { label: "Turn left", kind: "motion", glyph: "refresh", flip: true },
-    right: { label: "Turn right", kind: "motion", glyph: "refresh" },
-    pick: { label: "Haul trap", kind: "action", glyph: "buoy" },
-    drop: { label: "Set trap", kind: "action", glyph: "plus" },
-    repeat: { label: "Repeat", kind: "control", glyph: "refresh", container: true, count: true },
-    untilGoal: { label: "Repeat until at wharf", kind: "control", glyph: "flag", container: true },
-    ifGem: { label: "If at a buoy", kind: "control", glyph: "question", container: true },
-    ifSpot: { label: "If at a dashed spot", kind: "control", glyph: "question", container: true },
-    ifWall: { label: "If ledge ahead", kind: "control", glyph: "question", container: true, hasElse: true },
-    setVar: { label: "Set steps to", kind: "variable", glyph: "box", count: true },
-    changeVar: { label: "Change steps by", kind: "variable", glyph: "plus", count: true },
-    repeatVar: { label: "Repeat steps times", kind: "control", glyph: "refresh", container: true },
-    call: { label: "Zig", kind: "function", glyph: "star" }
-  };
-  let nextId = 1;
-  const make = (type, extra = {}) => {
-    const b = { id: `b${nextId++}`, type, ...extra };
-    if (BLOCKS[type].container) b.body = b.body || [];
-    if (BLOCKS[type].hasElse) b.else = b.else || [];
-    if (BLOCKS[type].count && b.n == null) b.n = type === "changeVar" ? 1 : type === "setVar" ? 1 : 2;
-    return b;
-  };
-  const clone = (list) => list.map((b) => {
-    const c = { ...b, id: `b${nextId++}` };
-    if (b.body) c.body = clone(b.body);
-    if (b.else) c.else = clone(b.else);
-    return c;
-  });
-  const countBlocks = (list) => list.reduce((n, b) => n + 1 + (b.body ? countBlocks(b.body) : 0) + (b.else ? countBlocks(b.else) : 0), 0);
-
-  /* Starter programs written in a tiny shorthand: F L R P D, [n ...] for repeat. */
-  function parse(src) {
-    const tokens = src.match(/\[\d+|\]|F|L|R|P|D/g) || [];
-    let i = 0;
-    const read = () => {
-      const out = [];
-      while (i < tokens.length) {
-        const t = tokens[i++];
-        if (t === "]") return out;
-        if (t[0] === "[") out.push(make("repeat", { n: Number(t.slice(1)), body: read() }));
-        else out.push(make({ F: "move", L: "left", R: "right", P: "pick", D: "drop" }[t]));
-      }
-      return out;
-    };
-    return read();
-  }
+  const { BLOCKS, countBlocks, parse, parseGrid, DIRS, ROT, run } = SE.harbor;
 
   /* ───────── Levels ───────── */
   const BASIC = ["move", "left", "right"];
@@ -359,104 +311,6 @@
     { title: "Voyage 3: Down East", short: "Down East", from: 24, to: 35, blurb: "Out to Schoodic, Lubec, and Eastport, where the tides are huge and every trap counts." }
   ];
 
-  const DIRS = { N: [0, -1], E: [1, 0], S: [0, 1], W: [-1, 0] };
-  const RIGHT = { N: "E", E: "S", S: "W", W: "N" };
-  const LEFT = { N: "W", W: "S", S: "E", E: "N" };
-  const ROT = { N: -90, E: 0, S: 90, W: 180 };
-
-  function parseGrid(rows) {
-    let start = null, goal = null;
-    const gems = [], spots = [];
-    rows.forEach((r, y) => [...r].forEach((ch, x) => {
-      if (ch === "S") start = [x, y];
-      if (ch === "G") goal = [x, y];
-      if (ch === "*") gems.push(`${x},${y}`);
-      if (ch === "o") spots.push(`${x},${y}`);
-    }));
-    return { rows, w: rows[0].length, h: rows.length, start, goal, gems, spots };
-  }
-  const isWall = (g, x, y) => x < 0 || y < 0 || x >= g.w || y >= g.h || g.rows[y][x] === "#";
-
-  /* ───────── Interpreter (a generator, so we can step one block at a time) ───────── */
-  function* run(list, st, ctx) {
-    for (const b of list) {
-      if (st.ops++ > 400) { st.error = "loop"; return; }
-      switch (b.type) {
-        case "move": {
-          const [dx, dy] = DIRS[st.dir];
-          const nx = st.x + dx, ny = st.y + dy;
-          if (isWall(ctx.g, nx, ny)) { st.error = "crash"; yield b; return; }
-          st.x = nx; st.y = ny; yield b; break;
-        }
-        case "left": st.dir = LEFT[st.dir]; yield b; break;
-        case "right": st.dir = RIGHT[st.dir]; yield b; break;
-        case "pick": {
-          const k = `${st.x},${st.y}`;
-          if (st.gems.has(k) && !st.got.has(k)) { st.got.add(k); yield b; }
-          else { st.error = "nogem"; yield b; return; }
-          break;
-        }
-        case "drop": {
-          const k = `${st.x},${st.y}`;
-          if (!st.spots.has(k) || st.dropped.has(k)) { st.error = "nospot"; yield b; return; }
-          if (ctx.carry && st.got.size - st.dropped.size <= 0) { st.error = "empty"; yield b; return; }
-          st.dropped.add(k); yield b;
-          break;
-        }
-        case "repeat":
-          for (let i = 0; i < b.n; i++) { yield* run(b.body, st, ctx); if (st.error || st.done) return; }
-          break;
-        case "repeatVar": {
-          const n = st.vars.steps || 0;
-          for (let i = 0; i < n; i++) { yield* run(b.body, st, ctx); if (st.error || st.done) return; }
-          break;
-        }
-        case "untilGoal": {
-          let guard = 0;
-          while (!(st.x === ctx.g.goal[0] && st.y === ctx.g.goal[1])) {
-            if (guard++ > 120) { st.error = "loop"; return; }
-            const before = st.ops;
-            yield* run(b.body, st, ctx);
-            if (st.error || st.done) return;
-            if (st.ops === before) { st.error = "loop"; return; }
-          }
-          break;
-        }
-        case "ifGem": {
-          const k = `${st.x},${st.y}`;
-          yield { ...b, checking: true };
-          if (st.gems.has(k) && !st.got.has(k)) yield* run(b.body, st, ctx);
-          if (st.error) return;
-          break;
-        }
-        case "ifSpot": {
-          const k = `${st.x},${st.y}`;
-          yield { ...b, checking: true };
-          if (st.spots.has(k) && !st.dropped.has(k)) yield* run(b.body, st, ctx);
-          if (st.error) return;
-          break;
-        }
-        case "ifWall": {
-          const [dx, dy] = DIRS[st.dir];
-          yield { ...b, checking: true };
-          if (isWall(ctx.g, st.x + dx, st.y + dy)) yield* run(b.body, st, ctx);
-          else yield* run(b.else, st, ctx);
-          if (st.error) return;
-          break;
-        }
-        case "setVar": st.vars.steps = b.n; yield b; break;
-        case "changeVar": st.vars.steps = (st.vars.steps || 0) + b.n; yield b; break;
-        case "call":
-          if (ctx.depth > 5) { st.error = "loop"; return; }
-          ctx.depth++;
-          yield { ...b, checking: true };
-          yield* run(ctx.fn, st, ctx);
-          ctx.depth--;
-          if (st.error) return;
-          break;
-      }
-    }
-  }
 
   /* ───────── Drawing ───────── */
   /* Top-down lobster boat, bow pointing east. */
@@ -475,9 +329,6 @@
     const labelOf = (type) => (type === "call" ? fnName : BLOCKS[type].label);
     const g = parseGrid(L.grid);
     const saved = api.saved();
-    let program = L.starter ? parse(L.starter) : [];
-    let fn = [];
-    let cursor = { owner: "root", branch: "body", index: program.length };
     let timer = null, gen = null, st = null, running = false, finished = false;
     let speed = 380;
 
@@ -504,19 +355,7 @@
             </label>
           </div>
         </div>
-        <div class="rover__code">
-          <div class="palette" role="group" aria-label="Blocks you can use">
-            ${L.blocks.map((t) => `<button type="button" class="blk blk--${BLOCKS[t].kind} blk--btn" data-add="${t}">${icon(BLOCKS[t].glyph, BLOCKS[t].flip ? 'style="transform:scaleX(-1)"' : "")}${esc(labelOf(t))}${BLOCKS[t].count ? " #" : ""}</button>`).join("")}
-          </div>
-          ${L.usesFn ? `<div class="prog prog--fn"><div class="prog__head"><strong>${icon("star", 'class="inline-icon"')}${esc(fnName)} =</strong><span class="muted" id="fn-count"></span></div><div id="fn-list"></div></div>` : ""}
-          <div class="prog">
-            <div class="prog__head"><strong>Your program</strong><span id="blk-count" class="blk-count"></span>
-              <button type="button" class="linkish" id="rv-clear">${icon("trash")}Clear</button></div>
-            <div id="prog-list"></div>
-          </div>
-          <p class="field-help">Tap a gap (the dashed line) to choose where new blocks go. Tap ✕ to remove a block.</p>
-          ${SE.minipy ? `<details class="py-view"><summary>${icon("code")}See it in Python</summary><pre class="py-view__code" id="py-view" aria-live="polite"></pre><p class="field-help">The same program, written in Python. Try typing programs like this in the Harbor Python Lab.</p></details>` : ""}
-        </div>
+        <div class="rover__code"></div>
       </div>`;
 
     const bot = el.querySelector("#rover-bot");
@@ -551,111 +390,29 @@
     }
     const setStatus = (t) => { el.querySelector("#rover-status").textContent = t; };
 
-    /* ───────── Program editor ───────── */
-    function listFor(owner, branch) {
-      if (owner === "root") return program;
-      if (owner === "fn") return fn;
-      const find = (list) => {
-        for (const b of list) {
-          if (b.id === owner) return b[branch];
-          for (const k of ["body", "else"]) if (b[k]) { const r = find(b[k]); if (r) return r; }
-        }
-        return null;
-      };
-      return find(program) || find(fn);
-    }
-    function renderList(list, owner, branch) {
-      const slot = (i) => `<button type="button" class="slot ${cursor.owner === owner && cursor.branch === branch && cursor.index === i ? "is-cursor" : ""}" data-owner="${owner}" data-branch="${branch}" data-index="${i}" aria-label="Put new blocks here${cursor.owner === owner && cursor.branch === branch && cursor.index === i ? " (selected)" : ""}"></button>`;
-      let html = `<ol class="blocks">${slot(0)}`;
-      list.forEach((b, i) => {
-        const def = BLOCKS[b.type];
-        html += `<li class="blk blk--${def.kind}" data-bid="${b.id}">
-          <div class="blk__row">
-            ${icon(def.glyph, def.flip ? 'style="transform:scaleX(-1)"' : "")}
-            <span class="blk__label">${esc(labelOf(b.type))}</span>
-            ${def.count ? `<span class="blk__count"><button type="button" data-dec="${b.id}" aria-label="Decrease">−</button><b>${b.n}</b><button type="button" data-inc="${b.id}" aria-label="Increase">+</button>${b.type === "repeat" ? "<span>times</span>" : ""}</span>` : ""}
-            <button type="button" class="blk__del" data-del="${b.id}" aria-label="Remove ${esc(labelOf(b.type))}">✕</button>
-          </div>
-          ${def.container ? `<div class="blk__body">${renderList(b.body, b.id, "body")}</div>` : ""}
-          ${def.hasElse ? `<div class="blk__else"><span>else</span></div><div class="blk__body">${renderList(b.else, b.id, "else")}</div>` : ""}
-        </li>${slot(i + 1)}`;
-      });
-      return html + "</ol>";
-    }
-    function renderProgram() {
-      el.querySelector("#prog-list").innerHTML = program.length || cursor.owner !== "root" ? renderList(program, "root", "body") : `${renderList(program, "root", "body")}<p class="prog__empty">Tap a block above to add it here.</p>`;
-      if (L.usesFn) {
-        el.querySelector("#fn-list").innerHTML = renderList(fn, "fn", "body");
-        el.querySelector("#fn-count").textContent = `${countBlocks(fn)} blocks`;
-      }
-      const n = countBlocks(program);
-      const bc = el.querySelector("#blk-count");
-      bc.textContent = L.maxBlocks ? `${n} / ${L.maxBlocks} blocks` : `${n} blocks${L.par ? ` · par ${L.par}` : ""}`;
-      bc.classList.toggle("is-over", !!(L.maxBlocks && n > L.maxBlocks));
-      const pv = el.querySelector("#py-view");   // the Python view updates as blocks change
-      if (pv) pv.textContent = program.length || fn.length ? SE.minipy.toPython(program, fn, fnName) : "# Add blocks to see them in Python.";
-    }
-    function findAndRemove(list, id) {
-      const i = list.findIndex((b) => b.id === id);
-      if (i >= 0) { list.splice(i, 1); return true; }
-      return list.some((b) => (b.body && findAndRemove(b.body, id)) || (b.else && findAndRemove(b.else, id)));
-    }
-    function findBlock(list, id) {
-      for (const b of list) {
-        if (b.id === id) return b;
-        for (const k of ["body", "else"]) if (b[k]) { const r = findBlock(b[k], id); if (r) return r; }
-      }
-      return null;
-    }
-
-    el.querySelector(".rover__code").addEventListener("click", (e) => {
-      const t = e.target.closest("button");
-      if (!t || running) return;
-      if (t.dataset.add) {
-        const type = t.dataset.add;
-        const list = listFor(cursor.owner, cursor.branch) || program;
-        const b = make(type);
-        list.splice(cursor.index, 0, b);
-        // After adding a container, put the cursor inside it so the next block nests.
-        cursor = BLOCKS[type].container ? { owner: b.id, branch: "body", index: 0 } : { ...cursor, index: cursor.index + 1 };
-      } else if (t.dataset.owner) {
-        cursor = { owner: t.dataset.owner, branch: t.dataset.branch, index: Number(t.dataset.index) };
-      } else if (t.dataset.del) {
-        findAndRemove(program, t.dataset.del) || findAndRemove(fn, t.dataset.del);
-        if (!listFor(cursor.owner, cursor.branch)) cursor = { owner: "root", branch: "body", index: program.length };
-        cursor.index = Math.min(cursor.index, (listFor(cursor.owner, cursor.branch) || []).length);
-      } else if (t.dataset.inc || t.dataset.dec) {
-        const b = findBlock(program, t.dataset.inc || t.dataset.dec) || findBlock(fn, t.dataset.inc || t.dataset.dec);
-        const min = b.type === "changeVar" ? -3 : 1;
-        b.n = Math.max(min, Math.min(12, b.n + (t.dataset.inc ? 1 : -1)));
-      } else if (t.id === "rv-clear") {
-        program = []; fn = L.usesFn ? [] : fn; cursor = { owner: "root", branch: "body", index: 0 };
-      } else return;
-      resetWorld();
-      renderProgram();
-      api.say("");
+    /* ───────── Program editor (shared: harbor-editor.js) ───────── */
+    const ed = SE.harbor.editor(el.querySelector(".rover__code"), {
+      blocks: L.blocks, labelOf, usesFn: L.usesFn, fnName, maxBlocks: L.maxBlocks, par: L.par,
+      starter: L.starter ? parse(L.starter) : [],
+      isBusy: () => running,
+      onEdit: () => { resetWorld(); api.say(""); }
     });
 
     /* ───────── Running ───────── */
     function stop() { clearInterval(timer); timer = null; running = false; el.classList.remove("is-running"); }
-    function highlight(b) {
-      el.querySelectorAll(".blk.is-active").forEach((n) => n.classList.remove("is-active"));
-      const node = el.querySelector(`[data-bid="${b.id}"]`);
-      if (node) node.classList.add("is-active");
-    }
     function stepOnce() {
       if (!gen) {
-        if (L.maxBlocks && countBlocks(program) > L.maxBlocks) {
-          api.say(`Your program has ${countBlocks(program)} blocks, but this level allows ${L.maxBlocks}. Look for a pattern you can loop or reuse.`, "warn");
+        if (L.maxBlocks && countBlocks(ed.program) > L.maxBlocks) {
+          api.say(`Your program has ${countBlocks(ed.program)} blocks, but this level allows ${L.maxBlocks}. Look for a pattern you can loop or reuse.`, "warn");
           stop(); return false;
         }
-        if (!program.length) { api.say("Your program is empty. Tap a block to add it.", "warn"); stop(); return false; }
-        gen = run(program, st, { g, fn, depth: 0, carry: !!L.carry });
-        api.log("lab_test_run", { blocks: countBlocks(program) });
+        if (!ed.program.length) { api.say("Your program is empty. Tap a block to add it.", "warn"); stop(); return false; }
+        gen = run(ed.program, st, { g, fn: ed.fn, depth: 0, carry: !!L.carry });
+        api.log("lab_test_run", { blocks: countBlocks(ed.program) });
       }
       const r = gen.next();
       if (!r.done) {
-        highlight(r.value);
+        ed.highlight(r.value);
         place(st.x, st.y, st.dir);
         readouts();
         el.querySelectorAll("[data-gem]").forEach((n) => n.classList.toggle("is-got", st.got.has(n.dataset.gem)));
@@ -694,9 +451,9 @@
         api.say("The boat got stuck going in circles forever. Make sure something inside the loop moves the boat closer to the wharf.", "warn");
       } else if (atGoal && (!L.needGems || allGems) && (!L.needDrops || allSpots)) {
         setStatus("Level complete");
-        const n = countBlocks(program);
+        const n = countBlocks(ed.program);
         api.say(L.par ? `You did it in ${n} blocks${n <= L.par ? ". That's at or under par!" : `. Par is ${L.par}. Can you find a shorter program?`}` : "The boat made it home to the wharf!", "good");
-        api.win({ blocks: n, program: summarize(program) });
+        api.win({ blocks: n, program: summarize(ed.program) });
       } else if (atGoal && L.needGems && !allGems) {
         setStatus("Traps missing");
         api.say(`The boat reached the wharf, but it only hauled ${st.got.size} of ${g.gems.length} traps.`, "warn");
@@ -728,7 +485,6 @@
     el.querySelector("#rv-speed").addEventListener("change", (e) => { speed = Number(e.target.value); });
 
     resetWorld();
-    renderProgram();
     if (L.debug) api.say("This program was written by another captain. Run it to see what goes wrong.", "info");
     if (saved && saved.blocks) api.say(`Last time you solved this with ${saved.blocks} blocks.`, "info");
     return () => stop();
@@ -745,6 +501,6 @@
     chapters: VOYAGES,
     mount
   });
-  SE.harbor = { LEVELS, BLOCKS, parseGrid, run }; // exposed for tests and teacher tools
+  SE.harbor.LEVELS = LEVELS; // with the engine (harbor-engine.js), for tests and teacher tools
   SE.roverLevels = LEVELS; // used by the pathway page to link stages to levels
 })();
