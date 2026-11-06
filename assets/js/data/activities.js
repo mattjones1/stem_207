@@ -6022,6 +6022,135 @@ window.STEM.activities = [
     "explain": "In three sentences: the biggest risk you found, the defense you chose for it, and why people will follow your plan."
   },
   {
+    id: "lab-build-your-first-website",
+    group: "web",
+    bridge: { from: "wireframe-first", text: "You sketched a wireframe and tested it in five seconds. Now turn a plan like that into a real website, step by step." },
+    primm: {
+      "predict": "Before you change a tag or a color, say what you think the preview will do.",
+      "investigate": [
+        "Tap part of your page with Find it. Which code made it?",
+        "Which color change raised the contrast number the most?"
+      ],
+      "modify": "Change one CSS value and predict whether your text is still readable.",
+      "make": "Build and ship a web page for your made-up Maine business."
+    },
+    career: {
+      "role": "Web developer",
+      "industry": "Maine schools, towns, hospitals, and tourism businesses",
+      "what": "Plans pages with real people, builds them in HTML and CSS, and tests them so they work for everyone."
+    },
+    explain: "In three sentences: what your website helps people do, one bug Check my page found and how you fixed it, and how you made the page easier for more people to use.",
+    standards: [
+      "1B-AP-15",
+      "2-AP-15"
+    ],
+    simple: {
+      "mission": "Make a real web page for a made-up Maine business. Plan it, code it, and check it.",
+      "steps": [
+        "Pick a business. Draw your page on paper.",
+        "Show a partner for five seconds. Change one thing.",
+        "Type HTML to build your page.",
+        "Add CSS to pick your colors.",
+        "Press Check my page. Fix what it finds.",
+        "Fix the broken page. Then build your own."
+      ]
+    },
+    skills: [
+      "design-iteration",
+      "debugging",
+      "communication"
+    ],
+    why: "Websites are built by people, for people. Planning with a real person, writing clear HTML, and checking that everyone can read and use the page is what web developers do every day.",
+    realWorld: "Web developers build the websites of Maine schools, towns, and businesses, and many organizations are required to make their pages accessible to people with disabilities.",
+    vocab: [
+      {
+        "term": "Wireframe",
+        "def": "A simple drawing that shows where the important parts of a website will go."
+      },
+      {
+        "term": "HTML",
+        "def": "The code that tells a browser what each part of a page means: a heading, a paragraph, a list."
+      },
+      {
+        "term": "CSS",
+        "def": "The code that says how a page looks: colors, sizes, and spacing."
+      },
+      {
+        "term": "Alt text",
+        "def": "Words that describe a picture for people who can't see it."
+      },
+      {
+        "term": "Contrast",
+        "def": "How different the text color is from the background. More contrast is easier to read."
+      }
+    ],
+    check: "Show your finished page. Point to its main heading, its alt text, its link, and its contrast number, and say who each one helps.",
+    stopAt: "You finish Ship Your First Website (stage 8). Grades 2–3 can stop after Give Your Website Style (stage 5).",
+    stuck: [
+      "Check that every opening tag has a closing tag, like <p> and </p>.",
+      "Tap the part of your page that looks wrong. Find it shows you its code.",
+      "Read the first Needs a fix message. Fix only that one, then check again."
+    ],
+    next: "lab-web-builder",
+    time: {
+      "prep": 10,
+      "core": [
+        75,
+        90
+      ],
+      "verified": false
+    },
+    title: "Build Your First Website",
+    area: "coding",
+    summary: "Plan, code, test, and launch a webpage for a fictional Maine business using real HTML and CSS.",
+    level: "beginner",
+    grades: ["2-3", "4-5", "6-8"],
+    duration: 90,
+    format: "collaborative",
+    equipment: ["computer"],
+    source: "original",
+    featured: false,
+    keywords: ["lab", "workshop", "web development", "html", "css", "wireframe", "accessibility", "alt text", "contrast", "debugging", "website", "maine", "interactive"],
+    access: { account: "none", cost: "free", supervision: false, hardware: [] },
+    launch: { status: "lab", labId: "build-your-first-website", label: "Open Build Your First Website", note: "Runs inside STEM 207. The preview can't run scripts or reach the internet, and student code stays on the device." },
+    mission: "A made-up Maine business needs a website, and you're the web developer. Plan it on paper and test it with a partner. Then write real HTML and CSS, check that everyone can read and use it, fix a broken website another developer left behind, and ship a page of your own.",
+    learn: [
+      "Plan a web page with a wireframe, and improve it from what a tester noticed.",
+      "Write HTML for headings, paragraphs, lists, pictures, and links.",
+      "Write CSS rules that change colors and spacing.",
+      "Check and fix headings, alt text, link words, and color contrast."
+    ],
+    before: {
+      materials: ["A Chromebook or laptop with a keyboard for each student", "Paper and pencils for the wireframe", "A projector for demos"],
+      setup: [
+        "Make a class and print login cards so drafts save on each student's device. Guests can work, but their drafts last only for the browser session.",
+        "Open stage 2 and stage 7 on the projector before class.",
+        "Student code and plans stay on the device. To review a page, look at the student's screen, or ask them to show you."
+      ],
+      prerequisites: "None. Comfortable typing helps; the Tag Shelf types tags for students who need it."
+    },
+    steps: [
+      "Pick a business and sketch a wireframe on paper.",
+      "Show your sketch to a partner for five seconds, then write what they noticed and one change.",
+      "Build the page in HTML: heading, paragraph, list, picture, and link.",
+      "Style it with CSS in the CSS tab.",
+      "Press Check my page and fix what it finds, then fix the broken website.",
+      "Build your own page, look at it on the Phone preview, and mark it ready for review."
+    ],
+    reflect: "What does your website help people do? What changed after you tested your design, and how did you make the page easier for more people to use?",
+    extend: "Turn on Challenge mode: add a store hours section with a second link that jumps to it, a second picture, and a color theme where all the text has 7 to 1 contrast.",
+    teacherNotes: [
+      "Workshop flow (90 minutes): welcome, what is a website? 8 minutes. Wireframe and five-second partner test, 12. HTML: headings, paragraphs, lists, pictures, links (stages 2–4), 17. CSS (stage 5), 12. Accessibility and contrast (stage 6), 10. Debug the broken page (stage 7), 10. Build and ship (stage 8), 16. Showcase and reflection, 5. These are targets and haven't been tested with classes yet; nothing times students out.",
+      "No web experience needed to teach it. Demo stage 2 on the projector: type <h1>, the business name, </h1>, and watch the preview. Then show the Tag Shelf, which types the same real tags for students who need it.",
+      "Find it: tapping part of the preview selects the code that made it. It's the fastest way to help a student who says \"it's broken\": ask them to tap the part that looks wrong.",
+      "Common problems: a missing closing tag (the rest of the page changes style); a picture that doesn't show (use muffins.svg, kayak.svg, or tackle.svg exactly); CSS that doesn't apply (check the selector name and the { } and ;); text color and background color mixed up (color is the words, background-color is behind them); link words like \"click here\"; and a low contrast number (make the words darker or the background lighter).",
+      "Stage 7 answer guide: change <p class=\"title\"> to <h1> (or <h1 class=\"title\">); add alt text to the picture, like alt=\"A lighthouse by the harbor\"; change \"click here\" to words like \"See all our flavors\"; and make the body text darker, like color: #333333. Any valid fix passes.",
+      "Check my page gives three outcomes: Looks good, Needs a fix, and Check with a person. It can tell that alt text and link words exist and aren't generic, but only a person can judge whether they're good. The contrast check uses WCAG's formula and asks for 4.5 to 1 for all text (WCAG allows 3 to 1 for large text). Passing these checks doesn't mean a page is fully accessible.",
+      "Rubric for the final page: Structure (one h1, a paragraph, a list); Media (a picture with meaningful alt text, a link with clear words); Style (background, text color, one more choice); Access (readable contrast, fits a phone); Process (plan, tester feedback, and fixes the student can explain).",
+      "Grades 2–3: aim for stage 5, with Extra help on (bigger Tag Shelf and Show an example). Grades 5–8 can turn on Challenge mode for more sections, links, and a stronger color theme. Ask afterward: who did your website help, and what did you change because of a real person's feedback?"
+    ]
+  },
+  {
     "id": "lab-web-builder",
     "title": "Web Builder Lab",
     "area": "coding",
@@ -6109,6 +6238,7 @@ window.STEM.activities = [
     "reflect": "Who would have trouble using a page with no alt text or low contrast? What would you check on your school's website?",
     "extend": "Look at three real websites you use. For each one, find one thing that helps people use it and one thing that could be better. Share your list.",
     "teacherNotes": [
+      "Running an instructor-led session? Use Build Your First Website: a 90-minute workshop with planning, a Tag Shelf, Find it, a color helper, and a final page. This lab is self-paced practice with the same ideas.",
       "Objective: write HTML structure and CSS styles, and test a page for three accessibility basics (alt text, link words, contrast 4.5 to 1, the WCAG minimum for normal text).",
       "Safety: the preview is a sandboxed frame with no scripts, and a content policy blocks every outside request, so students can't load outside images or sites. Code isn't sent anywhere; it stays on the device.",
       "Common misconceptions: alt text is the file name; any link words are fine; colors that look OK to me are OK for everyone.",

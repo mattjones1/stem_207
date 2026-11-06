@@ -105,6 +105,19 @@ window.STEM = window.STEM || {};
       ]
     }),
     ids({
+      id: "tpl-ws-first-website", group: "workshop", reviewed: false,
+      title: "Build Your First Website Workshop",
+      essentialQuestion: "How do web developers make a page that real people can understand and use?",
+      goal: "Plan, code, test, and ship a web page for a made-up Maine business in real HTML and CSS.",
+      audience: { grades: ["2-3", "4-5", "6-8"], minutes: 90, equipment: ["computer"], prior: "No experience needed. Comfortable typing helps." },
+      workshop: { format: "One 90-minute session", sessions: [{ title: "Plan on paper", steps: [1] }, { title: "Build Your First Website", steps: [2] }, { title: "Early finishers", steps: [3] }] },
+      steps: [
+        m("wireframe-first", { required: false, bridge: "Optional warm-up: sketch and test a wireframe on paper. Stage 1 of the workshop covers this too." }),
+        m("lab-build-your-first-website", { label: "Workshop", bridge: "Finish all 8 stages and ship your website." }),
+        m("lab-web-builder", { required: false, bridge: "Done early? Practice HTML and CSS in the Web Builder Lab." })
+      ]
+    }),
+    ids({
       id: "tpl-maine-coast", reviewed: true,
       title: "Maine Coast Explorers",
       essentialQuestion: "How does a working coast function, and how can we explain it?",

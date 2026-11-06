@@ -4,6 +4,7 @@
  *   Structure (1–4): headline, paragraph and list, a link people can trust, a picture with alt text
  *   Style (5–6):     CSS colors, then colors everyone can read (contrast 4.5 to 1)
  *   Ship (7–8):      fix a broken page, then build a page for a made-up Maine business
+ * Shares its preview, pictures, and page reader with Build Your First Website (web-kit.js).
  * Safety: the preview is a sandboxed iframe with no scripts, no forms, and no navigation. A
  * Content-Security-Policy blocks every outside request, so only the lab's own pictures load. Links
  * are shown, never followed. Student code isn't logged.
@@ -14,58 +15,12 @@
   const SE = window.SE;
   const { icon, esc } = SE;
 
-  /* The lab's own pictures, drawn as SVG so they work offline and need no outside request. */
-  const svg = (body) => "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120">${body}</svg>`);
-  const PICTURES = {
-    "lighthouse.svg": svg(`<rect width="160" height="120" fill="#cde8f2"/><rect y="92" width="160" height="28" fill="#03968f"/><polygon points="68,92 92,92 86,34 74,34" fill="#f7f6f0" stroke="#012d2b" stroke-width="2"/><rect x="74" y="50" width="12" height="8" fill="#c0392b"/><rect x="74" y="70" width="12" height="8" fill="#c0392b"/><rect x="72" y="22" width="16" height="12" fill="#f4d35e" stroke="#012d2b" stroke-width="2"/><polygon points="70,22 90,22 80,12" fill="#012d2b"/><polygon points="88,26 150,10 150,40" fill="#f4d35e" opacity=".5"/>`),
-    "lobster-boat.svg": svg(`<rect width="160" height="120" fill="#cde8f2"/><rect y="80" width="160" height="40" fill="#03968f"/><polygon points="20,74 140,74 128,94 32,94" fill="#f7f6f0" stroke="#012d2b" stroke-width="2"/><rect x="40" y="52" width="34" height="22" fill="#f7f6f0" stroke="#012d2b" stroke-width="2"/><rect x="46" y="58" width="10" height="8" fill="#cde8f2"/><rect x="100" y="64" width="18" height="10" fill="#c0392b"/><line x1="58" y1="52" x2="58" y2="36" stroke="#012d2b" stroke-width="3"/>`),
-  };
-  const CSP = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'">`;
+  /* The preview, pictures, contrast math, and page reader are shared (web-kit.js). */
+  const { PICTURES, contrast, summarize, srcdoc, rgb } = SE.webKit;
   const GENERIC_LINK = /^(click here|here|link|this|click|more|read more)$/i;
-  const GENERIC_ALT = /^(image|picture|photo|pic|img|graphic|lighthouse\.svg|lobster-boat\.svg)$/i;
-
-  /* Colors and contrast (WCAG relative luminance). */
-  function rgb(c) {
-    const m = String(c || "").match(/rgba?\(([^)]+)\)/);
-    if (!m) return null;
-    const p = m[1].split(/[\s,/]+/).filter(Boolean).map(Number);
-    return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 };
-  }
-  function lum({ r, g, b }) {
-    const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
-    return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
-  }
-  function contrast(a, b) {
-    const x = rgb(a), y = rgb(b);
-    if (!x || !y) return 21;
-    const [hi, lo] = [lum(x), lum(y)].sort((m, n) => n - m);
-    return Math.round(((hi + 0.05) / (lo + 0.05)) * 10) / 10;
-  }
+  const GENERIC_ALT = /^(image|picture|photo|pic|img|graphic|lighthouse.svg|lobster-boat.svg)$/i;
   const isWhite = (c) => { const x = rgb(c); return !x || x.a === 0 || (x.r === 255 && x.g === 255 && x.b === 255); };
   const isBlack = (c) => { const x = rgb(c); return !!x && x.r === 0 && x.g === 0 && x.b === 0; };
-
-  /* What the page has, read from the rendered document (so CSS is what the browser really applied). */
-  function summarize(doc) {
-    const win = doc.defaultView;
-    const cs = (el) => win.getComputedStyle(el);
-    const h1 = doc.querySelector("h1");
-    const bgOf = () => {
-      for (const el of [doc.body, doc.documentElement]) { const c = el && rgb(cs(el).backgroundColor); if (c && c.a > 0) return cs(el).backgroundColor; }
-      return "rgb(255, 255, 255)";   // nothing set: the browser shows white
-    };
-    const textEl = doc.querySelector("p") || doc.body;
-    return {
-      h1: h1 ? h1.textContent.trim() : null,
-      p: doc.querySelectorAll("p").length,
-      lists: doc.querySelectorAll("ul, ol").length,
-      li: doc.querySelectorAll("ul > li, ol > li").length,
-      links: [...doc.querySelectorAll("a")].map((a) => ({ href: a.getAttribute("href") || "", text: a.textContent.trim() })),
-      imgs: [...doc.querySelectorAll("img")].map((i) => ({ src: i.getAttribute("data-name") || i.getAttribute("data-src") || i.getAttribute("src") || "", alt: i.hasAttribute("alt") ? i.getAttribute("alt").trim() : null })),
-      h1Color: h1 ? cs(h1).color : null,
-      bg: bgOf(),
-      text: textEl ? cs(textEl).color : "rgb(0, 0, 0)",
-    };
-  }
 
   /* One rule per need. Each failure names what the student wrote, never the answer. */
   const RULES = {
@@ -86,7 +41,7 @@
     img: (s) => {
       if (!s.imgs.length) return "Add a picture: <img src=\"lighthouse.svg\" alt=\"...\">.";
       for (const i of s.imgs) {
-        if (!PICTURES[i.src]) return `"${i.src || "(no src)"}" isn't one of the lab's pictures. Use lighthouse.svg or lobster-boat.svg.`;
+        if (!PICTURES[i.src] || !/^(lighthouse|lobster-boat).svg$/.test(i.src)) return `"${i.src || "(no src)"}" isn't one of the lab's pictures. Use lighthouse.svg or lobster-boat.svg.`;
         if (i.alt === null || !i.alt) return `Your picture ${i.src} has no alt text. Add alt="..." that says what's in the picture, for people who can't see it.`;
         if (GENERIC_ALT.test(i.alt) || i.alt.length < 8) return `Alt text "${i.alt}" doesn't say what's in the picture. Describe it in a few words.`;
       }
@@ -151,21 +106,6 @@
   function check(idx, s) {
     for (const n of LEVELS[idx].need) { const why = RULES[n](s); if (why) return { ok: false, reason: why, rule: n }; }
     return { ok: true };
-  }
-
-  /* Build the preview document: the CSP first, then the student's code with the lab's pictures swapped in.
-     Belt and braces: anything that could fetch from outside is also defused before the browser sees it
-     (other src values, srcset, background and poster attributes, CSS url() and @import, embedding tags). */
-  const pic = (src, q = '"') => PICTURES[src] ? `src=${q}${PICTURES[src]}${q} data-name=${q}${src}${q}` : `data-src=${q}${src}${q}`;
-  function srcdoc(code) {
-    const safe = String(code)
-      .replace(/<\/?(meta|base|link|iframe|frame|object|embed|video|audio|source|track|script|portal)\b[^>]*>/gi, "")
-      .replace(/\b(srcset|background|poster|data|action|formaction)\s*=/gi, "data-off-$1=")
-      .replace(/\bsrc\s*=\s*(["'])([^"']*)\1/gi, (m, q, src) => pic(src, q))
-      .replace(/\bsrc\s*=\s*([^\s>"']+)/gi, (m, src) => pic(src))
-      .replace(/url\s*\(/gi, "url-off(")
-      .replace(/@import/gi, "@import-off");
-    return `<!doctype html><html lang="en"><head>${CSP}<meta charset="utf-8"></head><body>${safe}</body></html>`;
   }
 
   function mount(el, idx, api) {

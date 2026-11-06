@@ -9,7 +9,7 @@ const ok = (n, c, x = "") => { R.push(!!c); console.log((c ? "PASS " : "FAIL ") 
 const sandbox = { window: {}, console, encodeURIComponent };
 sandbox.window.SE = { icon: () => "", esc: (s) => String(s), labs: { register() {}, goals(levels, g) { levels.forEach((L, i) => { if (g[i]) [L.learn, L.why] = g[i]; }); } } };
 vm.createContext(sandbox);
-vm.runInContext(fs.readFileSync(path.join(ROOT, "assets/js/labs/lab-web.js"), "utf8"), sandbox, { filename: "lab-web.js" });
+for (const f of ["web-kit.js", "lab-web.js"]) vm.runInContext(fs.readFileSync(path.join(ROOT, "assets/js/labs", f), "utf8"), sandbox, { filename: f });
 const W = sandbox.window.SE.webBuilder;
 ok("the lab loads with 8 levels", !!W && W.LEVELS.length === 8);
 ok("every level has learn, why, two hints, what was learned, and starting code", W.LEVELS.every((L) => L.learn && L.why && L.hints.length === 2 && L.learned && typeof L.start === "string"));

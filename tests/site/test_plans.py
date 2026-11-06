@@ -31,7 +31,7 @@ async def local(b):
     await educator(pg, S)
     await go(pg, S + "#/teach/plans")
     ok("Learning Plans is in the top menu", await pg.locator('#site-nav a[href="#/teach/plans"]').count() == 1)
-    ok("14 templates (Moxie course, 4 workshops, 6 classroom, 3 crews), each with Use this template", await pg.locator("[data-use^=tpl-]").count() == 14)
+    ok("15 templates (Moxie course, 5 workshops, 6 classroom, 3 crews), each with Use this template", await pg.locator("[data-use^=tpl-]").count() == 15)
     ok("Current / Finished toggle", await pg.locator("[data-mode=current]").count() == 1 and await pg.locator("[data-mode=finished]").count() == 1)
     tpl = await pg.evaluate("JSON.stringify(SE.plans.template('tpl-maine-coast'))")
 

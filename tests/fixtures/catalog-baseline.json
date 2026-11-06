@@ -472,6 +472,10 @@
   {
    "id": "lab-captain-code",
    "plan": "Captain Code workshop (November 5, 2026)"
+  },
+  {
+   "id": "lab-build-your-first-website",
+   "plan": "Build Your First Website workshop (November 5, 2026)"
   }
  ]
 }

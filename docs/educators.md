@@ -15,6 +15,7 @@ The teacher side. Read before changing the Dashboard, classes, Learning Plans, t
   - `classByCode`/`findClass` skip archived classes.
   - Cloud mode needs `supabase/update-9-classes.sql` (`classes.archived_at`, and `class_roster`/`student_sign_in` skip archived classes).
 - After sign-up, a new educator lands on their class page.
+- Build Your First Website keeps student code on the device. Review a finished page by looking at the student's screen (they can choose "will show you" when they send the activity) or from their printed project summary.
 - Labs: signed in as an educator, Captain Code shows **Demo the solution** on every level. It loads the level's verified reference solution for stepping through on a projector. Students and guests never see it.
 - Test: `python3 tests/site/test_classes.py`.
 
