@@ -343,7 +343,7 @@
     const tabs = [["activities", "Activities"], ["students", "Students"], ["checks", `Checks${checks.count ? ` (${checks.count})` : ""}`]];
     let main = "";
     if (tab === "students") main = studentsTab(p, assignedClasses);
-    else if (tab === "checks") main = checks.count ? `<section class="wrap section">${checks.html}</section>` : `<section class="wrap section"><div class="empty">${icon("message")}<h3>Nothing waiting</h3><p>When students send reflections for this plan's activities, they show up here.</p></div></section>`;
+    else if (tab === "checks") main = checks.count ? `<section class="wrap section">${checks.html}</section>` : `<section class="wrap section"><div class="empty">${icon("message")}<h2>Nothing waiting</h2><p>When students send reflections for this plan's activities, they show up here.</p></div></section>`;
     else main = `
       <div class="wrap pw-layout">
         <div class="pw-main">
