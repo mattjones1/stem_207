@@ -15,10 +15,13 @@
  *   level.briefing (optional): a short story line, shown above the goal (Captain Code's harbor master)
  *   mount(el, levelIndex, api) → optional cleanup function
  *   landing(el, { user }) (optional): a start screen, shown at #/lab/<id> until the student finishes a level
+ *   briefFirst (optional): the brief leads with the goal and Need a hint?, then the briefing and steps; "What you'll learn"
+ *     and "Why it matters" fold into "Why this level?" (Captain Code)
  *
  * The api passed to mount:
  *   api.win(data, opts)  mark the level complete (data is saved with the event)
  *                        opts.extra: HTML shown at the top of the win panel; opts.title: its heading
+ *                        opts.after: HTML shown right under the heading
  *   api.say(text, kind)  show feedback ("info" | "good" | "warn")
  *   api.log(type, data)  record a lab action (e.g. "lab_test_run")
  *   api.saved()          data from this student's last completion of this level
@@ -94,6 +97,26 @@
     const inView = (i) => !chapters || (i >= chapters[ch].from && i <= chapters[ch].to);
     const firstOpen = (c) => { for (let i = c.from; i <= c.to; i++) if (!done.has(i)) return i; return c.from; };
 
+    // The brief's parts. Most labs show them in this order: objective, simulation, briefing, goal, steps, tools.
+    // briefFirst labs lead with the goal and fold the objective into "Why this level?".
+    const objectiveInner = `${level.learn ? `<p><span class="lab-objective__k">${icon("target")}What you'll learn</span>${esc(level.learn)}</p>` : ""}
+            ${level.why ? `<p><span class="lab-objective__k">${icon("bulb")}Why it matters</span>${esc(level.why)}</p>` : ""}`;
+    const objectiveHtml = !(level.learn || level.why) ? ""
+      : lab.briefFirst ? `<details class="lab-objective lab-objective--fold"><summary>Why this level?</summary>${objectiveInner}</details>`
+      : `<div class="lab-objective">
+            ${objectiveInner}
+          </div>`;
+    const simHtml = lab.simulation ? `<p class="lab-sim">${icon("alert")}<span><strong>Simulation.</strong> ${esc(lab.simulation)}</span></p>` : "";
+    const briefingHtml = level.briefing ? `<p class="lab-briefing">${icon("boat")}<span><strong>Harbor master:</strong> ${esc(level.briefing)}</span></p>` : "";
+    const goalHtml = `<p class="lab-goal${lab.briefFirst ? " lab-goal--lead" : ""}"><strong>Your goal:</strong> ${esc(level.goal)}</p>`;
+    const stepsHtml = level.steps ? `<ol class="lab-steps">${level.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>` : "";
+    const toolsHtml = `<div class="lab-brief__tools">
+            ${SE.speech.button("lab")}
+            <button type="button" class="btn btn--ghost btn--small" id="lab-hint-btn" aria-expanded="false" aria-controls="lab-hint">${icon("question")}Need a hint?</button>
+            ${done.has(idx) ? `<span class="chip chip--done">${icon("check")}You finished this level</span>` : ""}
+          </div>
+          ${level.hints ? `<div class="lab-hint" id="lab-hint" hidden>${level.hints.map((h, i) => `<p data-hint="${i}" ${i ? "hidden" : ""}><strong>Hint ${i + 1} of ${level.hints.length}:</strong> ${esc(h)}</p>`).join("")}</div>` : `<p class="lab-hint" id="lab-hint" hidden>${esc(level.hint)}</p>`}`;
+
     app().innerHTML = `
       <section class="page-top page-top--lab">
         <div class="wrap page-top__inner">
@@ -126,23 +149,10 @@
 
       <div class="wrap lab-body">
         <section class="lab-brief" aria-labelledby="lvl-title">
-          ${chapters ? `<p class="lab-voyage">${esc(chapters[ch].title)} · level ${idx - chapters[ch].from + 1} of ${chapters[ch].to - chapters[ch].from + 1}</p>${idx === chapters[ch].from ? `<p class="lab-voyage__blurb">${esc(chapters[ch].blurb)}</p>` : ""}` : ""}
+          ${chapters ? `<p class="lab-voyage">${esc(chapters[ch].title)} · level ${idx - chapters[ch].from + 1} of ${chapters[ch].to - chapters[ch].from + 1}</p>${idx === chapters[ch].from && !lab.briefFirst ? `<p class="lab-voyage__blurb">${esc(chapters[ch].blurb)}</p>` : ""}` : ""}
           <span class="lab-concept">${icon("bulb")}${esc(level.concept)}</span>
           <h2 id="lvl-title">Level ${idx + 1}: ${esc(level.title)}</h2>
-          ${level.learn || level.why ? `<div class="lab-objective">
-            ${level.learn ? `<p><span class="lab-objective__k">${icon("target")}What you'll learn</span>${esc(level.learn)}</p>` : ""}
-            ${level.why ? `<p><span class="lab-objective__k">${icon("bulb")}Why it matters</span>${esc(level.why)}</p>` : ""}
-          </div>` : ""}
-          ${lab.simulation ? `<p class="lab-sim">${icon("alert")}<span><strong>Simulation.</strong> ${esc(lab.simulation)}</span></p>` : ""}
-          ${level.briefing ? `<p class="lab-briefing">${icon("boat")}<span><strong>Harbor master:</strong> ${esc(level.briefing)}</span></p>` : ""}
-          <p class="lab-goal"><strong>Your goal:</strong> ${esc(level.goal)}</p>
-          ${level.steps ? `<ol class="lab-steps">${level.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>` : ""}
-          <div class="lab-brief__tools">
-            ${SE.speech.button("lab")}
-            <button type="button" class="btn btn--ghost btn--small" id="lab-hint-btn" aria-expanded="false" aria-controls="lab-hint">${icon("question")}Need a hint?</button>
-            ${done.has(idx) ? `<span class="chip chip--done">${icon("check")}You finished this level</span>` : ""}
-          </div>
-          ${level.hints ? `<div class="lab-hint" id="lab-hint" hidden>${level.hints.map((h, i) => `<p data-hint="${i}" ${i ? "hidden" : ""}><strong>Hint ${i + 1} of ${level.hints.length}:</strong> ${esc(h)}</p>`).join("")}</div>` : `<p class="lab-hint" id="lab-hint" hidden>${esc(level.hint)}</p>`}
+          ${lab.briefFirst ? goalHtml + toolsHtml + briefingHtml + stepsHtml + objectiveHtml : objectiveHtml + simHtml + briefingHtml + goalHtml + stepsHtml + toolsHtml}
         </section>
 
         <section class="lab-stage" aria-label="Lab workspace">
@@ -215,6 +225,7 @@
               <h2 tabindex="-1" id="lab-win-title">${opts.title ? esc(opts.title) : `Level ${idx + 1} complete${allDone && next === null ? ". Lab finished!" : "!"}`}</h2>
             </div>
           </div>
+          ${opts.after || ""}
           <div class="lab-win__learned"><span class="eyebrow">What you just learned</span><p>${esc(level.learned)}</p>${level.why ? `<p class="lab-win__why"><strong>Why it matters:</strong> ${esc(level.why)}</p>` : ""}</div>
           ${newPatches.length ? `<div class="patch-row">${newPatches.map((p) => `<figure class="patch-tile patch-tile--new">${SE.patchArt(p.patch, true, 76)}<figcaption><strong>${esc(p.patch.name)}</strong></figcaption></figure>`).join("")}</div>` : ""}
           ${isStudent ? SE.base.unlockStrip(SE.base.newUnlocks(before, after)) : ""}

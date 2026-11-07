@@ -12,7 +12,7 @@ def ok(n, c, x=""): R.append(bool(c)); print(("PASS " if c else "FAIL ") + n, x)
 async def level(pg, n, fast=True):
     await pg.goto(S + "#/activities"); await pg.wait_for_timeout(120)
     await pg.goto(S + f"#/lab/captain-code/{n}"); await pg.wait_for_timeout(500)
-    if fast: await pg.select_option("#cc-speed", "140")
+    if fast: await pg.click('#cc-speed [data-speed="140"]')
 async def won(pg):
     await pg.wait_for_timeout(150)
     return await pg.locator("#lab-win:not([hidden])").count() == 1
@@ -56,6 +56,12 @@ async def main():
     # Level 1: empty program, then a prediction is required before the first run.
     await level(pg, 1)
     ok("level 1 shows the harbor master's briefing", await pg.locator(".lab-briefing").count() == 1)
+    order = await pg.evaluate("[...document.querySelector('.lab-brief').children].map((n) => n.className).join(' | ')")
+    ok("the brief leads with the goal, before the briefing", order.index("lab-goal") < order.index("lab-briefing"), order)
+    ok("learn and why fold into 'Why this level?'", await pg.locator("details.lab-objective--fold summary:has-text('Why this level?')").count() == 1)
+    hb = await pg.locator("#lab-hint-btn").bounding_box()
+    ok("Need a hint? is on the first screen at 1366x650", hb and hb["y"] + hb["height"] <= 650, hb)
+    ok("a predict level says so before the first Run", "guess where the boat stops" in await pg.inner_text("#cc-modepanel"))
     await pg.click("#cc-run")
     ok("an empty program is named", "empty" in await feedback(pg), await feedback(pg))
     await add(pg, "move", "move", "move", "move")
@@ -66,10 +72,22 @@ async def main():
     await run(pg)
     ok("level 1 wins with 4 Forwards", await won(pg), await feedback(pg))
     ok("a right prediction is named and earns the Compass", "predicted exactly" in await feedback(pg) and await pg.locator("#lab-win .cc-mark.is-on").count() == 2, await feedback(pg))
+    ok("the Compass says what it checked", await pg.locator('#lab-win .cc-mark:has-text("Compass: exact guess")').count() == 1)
+    marks_y = (await pg.locator("#lab-win .cc-marks").bounding_box())["y"]; head_y = (await pg.locator("#lab-win-title").bounding_box())["y"]
+    ok("the marks sit under the Level complete heading", marks_y > head_y, (marks_y, head_y))
+
+    # A wrong guess is described from the guess, not with grid numbers.
+    await level(pg, 1)
+    await add(pg, "move", "move", "move")
+    await predict(pg, 5, 1)
+    await run(pg)
+    ok("a wrong guess says how far off it was", "1 square from your guess" in await feedback(pg) and "row" not in await feedback(pg), await feedback(pg))
+    ok("the guess ring stays on the chart after the run", await pg.locator(".cc-guess").count() == 1)
 
     # Level 3: Captain Dot's program crashes; the feedback names the turn; fixing the first turn wins.
     await level(pg, 3)
     ok("level 3 starts with the broken program", (await count(pg)).startswith("9 blocks"), await count(pg))
+    ok("with a program to read, the chart is ready for a guess", await pg.locator("#cc-gridwrap button.cc-cell").count() > 10)
     await predict(pg, 6, 3)
     await pg.click("#cc-step"); await pg.wait_for_timeout(60)
     ok("Step highlights one block and its Python line", await pg.locator("#cc-code .blk.is-active").count() == 1)
@@ -88,6 +106,9 @@ async def main():
     await predict(pg, 10, 1)
     await run(pg)
     ok("over budget still runs, then asks for a loop", "Your route works! It uses 13 blocks, and this level allows 5" in await feedback(pg) and "loop" in await feedback(pg), await feedback(pg))
+    ok("over budget is said in words, not only color", "too many" in await count(pg), await count(pg))
+    ok("budget = par shows one number, not a Par chip", await pg.locator("#cc-par").count() == 0)
+    ok("the toolbox says 'Repeat … times', not '#'", (await pg.inner_text('#cc-code [data-add="repeat"]')).strip() == "Repeat … times")
     ok("a working but long route doesn't win", not await won(pg))
     await pg.click("#rv-undo")
     ok("Undo takes back the last block", (await count(pg)).startswith("12 /"), await count(pg))
@@ -152,6 +173,9 @@ async def main():
     py = await pg.inner_text("#cc-py-code")
     ok("See your code in Python shows def and three calls", "def haul_and_turn():" in py and py.count("haul_and_turn()") == 4, py)
     ok("the Python view explains the boat's commands aren't built into Python", "not built into Python" in (await pg.text_content(".cc-py__help")))
+    ok("the toolbox stays while Python is open", await pg.locator('#cc-code [data-add="move"]').is_visible())
+    rb = await pg.locator("#cc-run").bounding_box()
+    ok("Run stays on the first screen with Python open", rb and rb["y"] + rb["height"] <= 650, rb)
     await pg.click("#cc-step"); await pg.wait_for_timeout(60)
     ok("stepping highlights the matching Python line", await pg.locator(".cc-py__line.is-active").count() == 1)
     await run(pg)
@@ -160,13 +184,15 @@ async def main():
     # Level 10: design a chart. A chart the boat can't sail is refused; a good one is accepted.
     await level(pg, 10)
     await pg.click("#cc-design")
+    db = await pg.locator("#cc-design-done").bounding_box(); gb = await pg.locator(".cc__grid").bounding_box()
+    ok("the designer opens with the chart and Done: test my chart on one screen", db and gb and gb["y"] >= 0 and db["y"] + db["height"] <= 650, (gb, db))
     await pg.click('[data-tool="#"]')
     for x, y in [(2, 1), (1, 2)]: await pg.click(f'#cc-gridwrap button.cc-cell[data-x="{x}"][data-y="{y}"]')
     await pg.click("#cc-design")
     ok("a chart with the dock walled in is refused", "can't reach" in await feedback(pg), await feedback(pg))
     await pg.click('[data-tool="."]')
     await pg.click('#cc-gridwrap button.cc-cell[data-x="2"][data-y="1"]')
-    await pg.click("#cc-design")
+    await pg.click("#cc-design-done")
     ok("a chart that works is accepted with its best route", "Your chart works" in await feedback(pg), await feedback(pg))
 
     # Keyboard only: level 1 again, by Tab/Enter and arrow keys.
@@ -191,6 +217,9 @@ async def main():
     rb = await pg.locator("#cc-run").bounding_box()
     ok("Run is on the first screen at 1366x650", rb and rb["y"] + rb["height"] <= 650, rb)
     ok("guests don't see the Demo button", await pg.locator("#cc-demo").count() == 0)
+    await pg.click("#cc-big")
+    ok("Bigger blocks makes the toolbox bigger without Extra help", await pg.locator("#cc.cc--big:not(.cc--help)").count() == 1 and (await pg.locator('#cc-code [data-add="move"]').bounding_box())["height"] >= 52)
+    await pg.click("#cc-big")
 
     # Phone width: no sideways scroll.
     ph = await b.new_context(viewport={"width": 390, "height": 800}, reduced_motion="reduce")

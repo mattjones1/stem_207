@@ -50,14 +50,16 @@ Every level has a briefing from the harbor master, a goal, three hints (notice, 
 | 8 | The Growing Spiral | Variables | Search in a spiral whose sides grow 1, 2, 3, 4, 5, using a variable called distance. | 6 | |
 | 9 | The Captain's Custom Maneuver | Functions | Build a Haul and Turn block and use it at least twice. | 9 | |
 | | **Part 4: Your voyage** | | | | **15** |
-| 10 | Captain's Challenge: Design Your Voyage | Create | Haul every trap, try to beat par (27), then press Design my chart and make a new voyage. | par 27 | |
+| 10 | Captain's Challenge: Design Your Voyage | Create | Haul every trap, try to beat par (27), then press Design my chart, make a new voyage, and press Done: test my chart. | par 27 | |
 
-**How the block budget works:** every block counts once, including nested ones and the blocks inside the student's own block. A call to their own block counts as 1. A route that works but runs over the budget **still runs**, but it doesn't win. The feedback then asks for a loop, a variable, or the student's own block.
+**How the block budget works:** every block counts once, including nested ones and the blocks inside the student's own block. A call to their own block counts as 1. The counter above the program shows it ("7 / 5 blocks · too many"). A route that works but runs over the budget **still runs**, but it doesn't win. The feedback then asks for a loop, a variable, or the student's own block. Where the budget and par are the same, students see only the budget; a Par chip ("an expert's block count") appears only on levels 4 and 10.
 
 **Marks on each win** (none depends on speed):
 - **Made it:** the boat reached the goal.
 - **Par:** at or under the level's par.
-- **Compass:** a correct prediction, a stretch target, or no failed runs.
+- **Compass:** depends on the level, and the mark says which: an exact guess (levels 1, 3, 5), the first run (level 4), or 26 blocks or fewer (level 10).
+
+**Predict levels (1, 3, 5):** the chart says so before the first run. On level 3, the chart is ready for a guess as soon as it opens. After a wrong guess the feedback says how many squares off it was, and the guess ring stays on the chart.
 
 ## Before class
 
@@ -127,13 +129,14 @@ One working approach for each level. Any program that meets the goal passes. Pyt
 
 ## Differentiation
 - **Extra help** (a button on the landing screen and every level; it lasts only for the session):
-  - bigger blocks;
+  - Plot your course opens on each level (not in fog);
   - par and stretch targets hidden;
   - a nudge toward Need a hint? after two failed runs.
 
   Turn it on for grades 2–3 and for any student who needs it.
+- **Bigger blocks** (next to Extra help, also for the session): larger blocks and tap targets for anyone, with no other change.
 - **Grades 2–3:** aim for level 5. Read the briefings aloud. Pairs work well: one taps, one predicts.
-- **Grades 6–8:** chase Par and the Compass mark on every level, and finish level 10 under 27 blocks.
+- **Grades 6–8:** chase Par and the Compass mark on every level, and finish level 10 in 26 blocks or fewer.
 - **Early finishers:**
   - Penobscot Bay (12 levels) and Down East (12 levels): the same ideas, combined in new ways, including nested loops and a foggy grand challenge.
   - Harbor Python: type real Python.

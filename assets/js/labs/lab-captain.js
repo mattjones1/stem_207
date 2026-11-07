@@ -29,6 +29,9 @@
   const HELP_KEY = "stem207.captain.help";
   const helpOn = () => { try { return sessionStorage.getItem(HELP_KEY) === "1"; } catch (e) { return false; } };
   const setHelp = (on) => { try { sessionStorage.setItem(HELP_KEY, on ? "1" : "0"); } catch (e) { /* private mode */ } };
+  const BIG_KEY = "stem207.captain.big";   // Bigger blocks: larger targets for anyone, separate from Extra help
+  const bigOn = () => { try { return sessionStorage.getItem(BIG_KEY) === "1"; } catch (e) { return false; } };
+  const setBig = (on) => { try { sessionStorage.setItem(BIG_KEY, on ? "1" : "0"); } catch (e) { /* private mode */ } };
 
   /* Block words for a level: the mooring, the level's variable and its own block. */
   const labeler = (L) => (type) => {
@@ -40,6 +43,18 @@
     if (type === "repeatVar") return `Repeat ${v} times`;
     return H.BLOCKS[type].label;
   };
+  /* Toolbox words: a number the student sets shows as "…" ("Repeat … times"), not "#". */
+  const paletteLabeler = (L) => (type) => {
+    const v = L.varName || "steps";
+    if (type === "repeat") return "Repeat … times";
+    if (type === "setVar") return `Set ${v} to …`;
+    if (type === "changeVar") return `Change ${v} by …`;
+    return labeler(L)(type);
+  };
+  /* The block counter: the budget when there is one ("too many" in words, not only color), else par. */
+  const countText = (L, help) => (n) => L.budget
+    ? `${n} / ${L.budget} blocks${n > L.budget ? " · too many" : ""}`
+    : `${n} blocks${L.par && !help ? ` · par ${L.par}` : ""}`;
 
   /* ───────── The student's own boat (My harbor), or the standard one ───────── */
   function boatFor(user) {
@@ -120,8 +135,13 @@
     { k: "par", label: "Par", glyph: "star" },
     { k: "compass", label: "Compass", glyph: "compass" }
   ];
-  const markRow = (m) => `<ul class="cc-marks" aria-label="Your marks">${MARKS.filter((x) => m[x.k] !== null && m[x.k] !== undefined).map((x) =>
-    `<li class="cc-mark ${m[x.k] ? "is-on" : ""}">${icon(x.glyph)}<span>${x.label}${m[x.k] ? "" : " (not yet)"}</span></li>`).join("")}</ul>`;
+  /* What each mark checked on this level, in words ("Compass: exact guess"). */
+  const markWhat = (L) => ({
+    par: L.par ? `${L.par} blocks or fewer` : "",
+    compass: L.predict ? "exact guess" : L.stretch && L.stretch.blocks ? `${L.stretch.blocks} blocks or fewer` : L.stretch ? "first run" : ""
+  });
+  const markRow = (m, what = {}) => `<ul class="cc-marks" aria-label="Your marks">${MARKS.filter((x) => m[x.k] !== null && m[x.k] !== undefined).map((x) =>
+    `<li class="cc-mark ${m[x.k] ? "is-on" : ""}">${icon(x.glyph)}<span>${x.label}${what[x.k] ? `: ${esc(what[x.k])}` : ""}${m[x.k] ? "" : " (not yet)"}</span></li>`).join("")}</ul>`;
   const compassText = (L) => L.predict ? "Compass: predict exactly where the boat stops." : L.stretch ? `Compass: ${L.stretch.text}` : "";
 
   /* ───────── Python: side by side, highlighted, explained ───────── */
@@ -159,7 +179,7 @@
     const isTeacher = !!(api.user && api.user.role === "educator");
     const boat = boatFor(api.user);
     const reduce = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-    let help = helpOn();
+    let help = helpOn(), big = bigOn();
     let grids = L.grids.map((g) => g.slice());
     let dir = L.dir;
     let w = 0, g = H.parseGrid(grids[0]);
@@ -175,14 +195,14 @@
     if (bad.length) { el.innerHTML = `<p class="lab-feedback is-warn">This level's map has a problem: ${esc(bad[0])}</p>`; return () => {}; }
 
     el.innerHTML = `
-      <div class="cc ${help ? "cc--help" : ""}" id="cc">
+      <div class="cc ${help ? "cc--help" : ""} ${big ? "cc--big" : ""}" id="cc">
         <div class="cc__bar">
           <div class="cc__goalchips">
-            ${L.budget ? `<span class="var-chip">Budget <b>${L.budget}</b> blocks</span>` : ""}
-            ${L.par ? `<span class="var-chip cc-hide-help" id="cc-par">Par <b>${L.par}</b></span>` : ""}
+            ${L.par && L.par !== L.budget ? `<span class="var-chip cc-hide-help" id="cc-par">Par <b>${L.par}</b>: an expert's block count</span>` : ""}
             ${compassText(L) ? `<span class="cc-compass cc-hide-help">${icon("compass")}${esc(compassText(L))}</span>` : ""}
           </div>
           <div class="cc__bartools">
+            <button type="button" class="btn btn--ghost btn--small" id="cc-big" aria-pressed="${big}">${icon("plus")}Bigger blocks</button>
             <button type="button" class="btn btn--ghost btn--small" id="cc-help" aria-pressed="${help}">${icon("bulb")}Extra help</button>
             ${isTeacher ? `<button type="button" class="btn btn--ghost btn--small" id="cc-demo">${icon("eye")}Demo the solution</button>` : ""}
           </div>
@@ -203,7 +223,7 @@
           <div class="cc__chart">
             ${grids.length > 1 ? `<div class="cc-tabs" role="tablist" aria-label="Channels">${grids.map((_, i) => `<button type="button" role="tab" class="cc-tab" id="cc-tab-${i}" data-world="${i}" aria-selected="${i === 0}"><span>${esc(worldName(i))}</span><b class="cc-tab__ok" data-ok="${i}"></b></button>`).join("")}</div>` : ""}
             <div class="cc__gridwrap" id="cc-gridwrap"></div>
-            <div class="cc__readout rover__readout" aria-live="polite">
+            <div class="cc__readout rover__readout">
               <span id="cc-status">Ready</span>
               <span id="cc-chips"></span>
             </div>
@@ -212,17 +232,16 @@
               <button type="button" class="btn btn--ghost" id="cc-step">${icon("arrowRight")}Step</button>
               <button type="button" class="btn btn--ghost" id="cc-reset">${icon("refresh")}Reset</button>
               ${grids.length > 1 ? `<button type="button" class="btn btn--ghost" id="cc-all">${icon("check")}Test ${grids.length === 2 ? "both" : "all"} ${L.worlds && /tide/i.test(L.worlds[0]) ? "tides" : "channels"}</button>` : ""}
-              <label class="speed"><span>Speed</span>
-                <select id="cc-speed" class="input input--small"><option value="700">Slow</option><option value="380" ${speed === 380 ? "selected" : ""}>Normal</option><option value="140" ${speed === 140 ? "selected" : ""}>Fast</option></select>
-              </label>
-            </div>
-            <div class="cc__modes">
-              ${L.fog ? "" : `<button type="button" class="btn btn--ghost btn--small" id="cc-plan" aria-pressed="false">${icon("map")}Plot your course</button>`}
-              ${L.predict ? `<button type="button" class="btn btn--ghost btn--small" id="cc-predict" aria-pressed="false">${icon("target")}Guess where it stops</button>` : ""}
-              <button type="button" class="btn btn--ghost btn--small" id="cc-pybtn" aria-pressed="false" aria-controls="cc-py">${icon("code")}See your code in Python</button>
-              ${L.design ? `<button type="button" class="btn btn--ghost btn--small" id="cc-design" aria-pressed="false">${icon("palette")}Design my chart</button>` : ""}
             </div>
             <div class="cc__modepanel" id="cc-modepanel" aria-live="polite"></div>
+            <div class="cc__modes" role="group" aria-labelledby="cc-tools-title">
+              <span class="cc__modes-title" id="cc-tools-title">Captain's tools</span>
+              ${L.fog ? "" : `<button type="button" class="btn btn--ghost btn--small" id="cc-plan" aria-pressed="false">${icon("map")}Plot your course</button>`}
+              ${L.predict ? `<button type="button" class="btn btn--ghost btn--small" id="cc-predict" aria-pressed="false">${icon("target")}Guess where it stops</button>` : ""}
+              <button type="button" class="btn btn--ghost btn--small" id="cc-pybtn" aria-pressed="false" aria-controls="cc-py">${icon("code")}See it in Python</button>
+              ${L.design ? `<button type="button" class="btn btn--ghost btn--small" id="cc-design" aria-pressed="false">${icon("palette")}Design my chart</button>` : ""}
+              <span class="cc-speed" role="group" aria-label="Speed" id="cc-speed"><span aria-hidden="true">Speed</span>${[["700", "Slow"], ["380", "Normal"], ["140", "Fast"]].map(([v, t]) => `<button type="button" class="cc-speed__b" data-speed="${v}" aria-pressed="${Number(v) === speed}">${t}</button>`).join("")}</span>
+            </div>
           </div>
         </div>
       </div>`;
@@ -232,7 +251,7 @@
     const fb = document.getElementById("lab-feedback");
     if (fb) $(".cc__readout").after(fb);
     const ed = H.editor($("#cc-code"), {
-      blocks: L.blocks, labelOf, usesFn: L.usesFn, fnName: L.fnName || "My Move", maxBlocks: L.budget, par: help ? null : L.par,
+      blocks: L.blocks, labelOf, paletteLabel: paletteLabeler(L), countText: countText(L, help), usesFn: L.usesFn, fnName: L.fnName || "My Move", maxBlocks: L.budget, par: help ? null : L.par,
       starter, countFn: true, undo: true, python: false, varName: L.varName, goal: "mooring",
       isBusy: () => running,
       onEdit: () => { passed.clear(); markTabs(); resetWorld(); api.say(""); renderPy(); }
@@ -341,7 +360,7 @@
     function begin() {
       if (!ed.program.length) { api.say("Your program is empty. Tap a block to add it.", "warn"); return false; }
       if (!predicted && !demo) {
-        setMode("predict");
+        if (mode !== "predict") setMode("predict");
         api.say("Before you run it: tap the square where you think the boat will stop. Then press Run.", "info");
         return false;
       }
@@ -380,7 +399,8 @@
       if (prediction && !demo) {
         const [px, py] = prediction.split(",").map(Number);
         predictedRight = px === st.x && py === st.y;
-        note = predictedRight ? " You predicted exactly where it stopped!" : ` You guessed row ${py}, column ${px}. It stopped at row ${st.y}, column ${st.x}.`;
+        const off = Math.abs(px - st.x) + Math.abs(py - st.y);
+        note = predictedRight ? " You predicted exactly where it stopped!" : ` It stopped ${plural(off, "square", "squares")} from your guess. Your guess is the ring on the chart.`;
         prediction = null; refreshPredict();
       }
       if (planBroke) note += " The red square is where the boat left your plan.";
@@ -393,7 +413,7 @@
           api.log("lab_bug", { kind: "crash" });
         }
         setStatus({ crash: "Bump!", loop: "Going in circles", short: "Stopped", traps: "Traps missing", marks: "Marks missed", calls: "Use your block" }[res.reason] || "Try again");
-        api.say(feedback(L, res, ctx) + note + (help && failedRuns >= 2 ? " Need a clue? Press Need a hint? above." : ""), "warn");
+        api.say(feedback(L, res, ctx) + note + (help && failedRuns >= 2 ? " Need a clue? Press Need a hint? under your goal." : ""), "warn");
         return;
       }
       if (L.budget && count > L.budget) { testingAll = false; setStatus("Works, but too long"); api.say(feedback(L, { reason: "budget", values: res.values }, ctx) + note, "warn"); return; }
@@ -431,11 +451,12 @@
       if (L.design) Object.assign(result, { grid: grids[0], dir, custom });
       const done = new Set(SE.labs.progressFor(api.user, "captain-code")); done.add(idx);
       const regionDone = (r) => { for (let i = r.from; i <= r.to; i++) if (!done.has(i)) return false; return true; };
-      let extra = `<div class="cc-win">${markRow(m)}${demo ? `<p class="muted">Demo run: the reference solution.</p>` : ""}</div>`;
+      const after = `<div class="cc-win">${markRow(m, markWhat(L))}${demo ? `<p class="muted">Demo run: the reference solution.</p>` : ""}</div>`;
+      let extra = "";
       if (L.design) extra += voyageCard(python, count, m);
       const r = REGIONS.findIndex((x) => idx === x.to);
       if (r >= 0 && regionDone(REGIONS[r])) extra += graduation(r);
-      api.win(result, { extra });
+      api.win(result, { extra, after });
       wireWinPanel(python);
     }
     function voyageCard(python, count, m) {
@@ -445,7 +466,7 @@
         <p class="cc-card__who">${esc(api.user && api.user.displayName ? `Captain ${api.user.displayName}` : "Captain ____________")}${boat.name ? ` · the ${esc(boat.name)}` : ""}</p>
         <div class="cc-card__body"><div class="cc-mini" role="img" aria-label="${custom ? "The chart you designed" : "The Casco Bay chart"}">${mini}</div>
           <pre class="cc-py__code">${esc(python)}</pre></div>
-        <p>${custom ? "A chart I designed myself." : "The Captain's Challenge chart."} ${count} blocks. ${markRow(m)}</p>
+        <p>${custom ? "A chart I designed myself." : "The Captain's Challenge chart."} ${count} blocks.</p>${markRow(m, markWhat(L))}
         <button type="button" class="btn btn--ghost" id="cc-card-print">${icon("print")}Print my Voyage Card</button>
       </section>`;
     }
@@ -505,7 +526,7 @@
       const p = $("#cc-modepanel");
       if (mode === "plan") p.innerHTML = `<p>${icon("map", 'class="inline-icon"')}Tap the squares your boat will sail through, in order, starting next to the boat. Tap the last one again to take it back.</p><button type="button" class="linkish" id="cc-plan-clear">${icon("trash")}Clear my plan</button>`;
       else if (mode === "predict") p.innerHTML = `<p>${icon("target", 'class="inline-icon"')}Read your program. Tap the square where you think the boat will stop.</p>`;
-      else if (mode === "design") p.innerHTML = `<div class="cc-tools" role="group" aria-label="Chart tools">${[["#", "Ledge"], [".", "Water"], ["*", "Trap buoy"], ["S", "Boat start"], ["G", "Mooring"]].map(([t, n]) => `<button type="button" class="btn btn--ghost btn--small" data-tool="${t}" aria-pressed="${tool === t}">${esc(n)}</button>`).join("")}<button type="button" class="btn btn--ghost btn--small" id="cc-turnboat">${icon("refresh")}Boat faces ${DIR_WORD[dir]}</button></div><p class="field-help">Pick a tool, then tap squares. The edge stays granite. Press Design my chart again when you're done.</p>`;
+      else if (mode === "design") p.innerHTML = `<div class="cc-tools" role="group" aria-label="Chart tools">${[["#", "Ledge"], [".", "Water"], ["*", "Trap buoy"], ["S", "Boat start"], ["G", "Mooring"]].map(([t, n]) => `<button type="button" class="btn btn--ghost btn--small" data-tool="${t}" aria-pressed="${tool === t}">${esc(n)}</button>`).join("")}<button type="button" class="btn btn--ghost btn--small" id="cc-turnboat">${icon("refresh")}Boat faces ${DIR_WORD[dir]}</button><button type="button" class="btn btn--primary btn--small" id="cc-design-done">${icon("check")}Done: test my chart</button></div><p class="field-help">Pick a tool, then tap squares. The edge stays granite.</p>`;
       else p.innerHTML = "";
       renderGrid();
     }
@@ -556,7 +577,18 @@
     $("#cc-run").addEventListener("click", () => { if (running) { stop(); return; } go(); });
     $("#cc-step").addEventListener("click", () => { if (running) stop(); if (finished || (st && st.error)) resetWorld(); stepOnce(); });
     $("#cc-reset").addEventListener("click", () => { testingAll = false; resetWorld(); api.say(""); });
-    $("#cc-speed").addEventListener("change", (e) => { speed = Number(e.target.value); });
+    $("#cc-speed").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-speed]");
+      if (!b) return;
+      speed = Number(b.dataset.speed);
+      el.querySelectorAll("[data-speed]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      if (running) { clearInterval(timer); timer = setInterval(() => { if (!stepOnce()) stop(); }, speed); }
+    });
+    $("#cc-big").addEventListener("click", () => {
+      big = !big; setBig(big);
+      $("#cc").classList.toggle("cc--big", big);
+      $("#cc-big").setAttribute("aria-pressed", String(big));
+    });
     const all = $("#cc-all");
     if (all) all.addEventListener("click", () => { testingAll = true; passed.clear(); markTabs(); switchWorld(0); go(); });
     el.querySelectorAll(".cc-tab").forEach((t) => t.addEventListener("click", () => { testingAll = false; switchWorld(Number(t.dataset.world)); }));
@@ -571,13 +603,14 @@
     $("#cc-copy").addEventListener("click", () => {
       const text = SE.minipy.toPython(ed.program, ed.fn, L.fnName || "My Move", pyOpts(L));
       const done = () => api.say("Copied your Python.", "good");
-      if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, () => api.say("Your browser didn't allow copying. Select the code and copy it instead.", "warn"));
+      const no = () => api.say("Your browser didn't allow copying. Select the code and copy it instead.", "warn");
+      if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, no); else no();
     });
     $("#cc-help").addEventListener("click", () => {
       help = !help; setHelp(help);
       $("#cc").classList.toggle("cc--help", help);
       $("#cc-help").setAttribute("aria-pressed", String(help));
-      api.say(help ? "Extra help is on: bigger blocks, and clues when you're stuck." : "Extra help is off.", "info");
+      api.say(help ? "Extra help is on: Plot your course opens on each level, and you get clues when you're stuck." : "Extra help is off.", "info");
     });
     const demoBtn = $("#cc-demo");
     if (demoBtn) demoBtn.addEventListener("click", () => {
@@ -591,6 +624,7 @@
       const t = e.target.closest("button");
       if (!t) return;
       if (t.id === "cc-plan-clear") { plan = []; planBroke = null; renderGrid(); }
+      else if (t.id === "cc-design-done") setMode("design");
       else if (t.dataset.tool) { tool = t.dataset.tool; el.querySelectorAll("[data-tool]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tool === tool))); }
       else if (t.id === "cc-turnboat") { dir = H.RIGHT[dir]; t.innerHTML = `${icon("refresh")}Boat faces ${DIR_WORD[dir]}`; custom = true; resetWorld(); }
     });
@@ -611,7 +645,12 @@
     renderPy();
     const startMode = mode; mode = null;
     if (startMode) setMode(startMode);
-    if (L.starter) api.say("This program was written by another captain. Press Step to watch it one block at a time.", "info");
+    if (L.predict && !startMode) {
+      // Predict levels say so up front: with a program to read (a starter), the chart is ready for a guess now.
+      if (L.starter) setMode("predict");
+      else $("#cc-modepanel").innerHTML = `<p>${icon("target", 'class="inline-icon"')}On this level: build your program, then guess where the boat stops before you run it.</p>`;
+    }
+    if (L.starter) api.say("This program was written by another captain. Read it, tap where you think the boat will stop, then press Step to watch it one block at a time.", "info");
     const best = bestFor(api, idx);
     if (best) api.say(`Your best so far: ${best} blocks.${L.par ? ` Par is ${L.par}.` : ""}`, "info");
     return () => { testingAll = false; stop(); };
@@ -666,7 +705,8 @@
     id: "captain-code",
     area: "coding",
     title: "Captain Code",
-    tagline: "Program a lobster boat along the Maine coast. Your boat only goes where your code tells it: 10 workshop levels in Casco Bay, plus 24 more Down East.",
+    tagline: "Program a lobster boat along the Maine coast. Your boat only goes where your code tells it: 10 workshop levels in Casco Bay, plus 24 more along the coast.",
+    briefFirst: true,
     levels: LEVELS,
     chapters: REGIONS,
     mount,

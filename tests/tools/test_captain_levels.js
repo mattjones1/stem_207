@@ -37,6 +37,12 @@ for (const L of ALL) {
     maps.add(k);
   });
   if (L.grids.length > 1) ok(`${id}: names each channel`, L.worlds && L.worlds.length === L.grids.length);
+  if (L.stretch && L.stretch.blocks) {
+    const sp = PY.parse(L.stretchRef || "", opts);
+    const sn = H.countBlocks(sp.main) + H.countBlocks(sp.fn);
+    ok(`${id}: the Compass block target is reachable (stretchRef)`, L.stretchRef && sn <= L.stretch.blocks && L.grids.every((g) => H.sail(L, g, sp.main, sp.fn).result.ok), sn);
+  }
+  if (L.stretch) ok(`${id}: the Compass text names what it checks`, L.stretch.blocks ? L.stretch.text.includes(`${L.stretch.blocks} blocks`) : /first run/.test(L.stretch.text), L.stretch.text);
   const p = PY.parse(L.reference, opts);
   ok(`${id}: reference compiles`, !p.errors.length, JSON.stringify(p.errors));
   if (p.errors.length) continue;

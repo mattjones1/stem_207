@@ -30,6 +30,12 @@
 .lab-concept { display: inline-flex; align-items: center; gap: .4rem; justify-self: start; padding: .25rem .7rem; border-radius: 999px; background: var(--teal-soft); color: var(--teal); font-family: var(--font-display); font-weight: 700; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; }
 .lab-concept svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 2; }
 .lab-goal { font-size: 1.05rem; }
+/* briefFirst labs (Captain Code): the goal leads, boxed; the objective folds into "Why this level?". */
+.lab-goal--lead { margin: .2rem 0 .7rem; padding: .6rem .75rem; border: 2px solid var(--navy); border-radius: var(--radius-sm); background: var(--surface); font-size: 1.08rem; }
+.lab-objective--fold { display: block; margin-top: .8rem; padding: .5rem .8rem; }
+.lab-objective--fold > summary { cursor: pointer; min-height: 32px; display: flex; align-items: center; font-family: var(--font-display); font-weight: 700; color: var(--orange-ink); }
+.lab-objective--fold[open] > summary { margin-bottom: .4rem; }
+.lab-objective--fold > p + p { margin-top: .5rem; }
 .lab-steps { display: grid; gap: .35rem; padding-left: 1.2rem; color: var(--muted); }
 .lab-brief__tools { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
 .lab-hint { padding: .75rem .9rem; background: var(--orange-soft); border-radius: var(--radius-sm); font-size: .95rem; }
@@ -986,16 +992,17 @@
 .cc--help .cc-hide-help { display: none; }
 .cc__bartools .btn[aria-pressed="true"], .cc__modes .btn[aria-pressed="true"], .cc-tools .btn[aria-pressed="true"] { background: var(--teal-soft); border-color: var(--teal); color: var(--fg); }
 .cc__panes { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: .9rem; align-items: start; }
-.cc--py .cc__panes { grid-template-columns: minmax(0, .9fr) minmax(0, .9fr) minmax(0, 1fr); }
+/* Python view: the Python sits under the program, so the toolbox stays and the chart keeps its column. */
+.cc--py .cc__panes { grid-template-rows: auto auto; }
+.cc--py .cc__code { grid-column: 1; grid-row: 1; }
+.cc--py .cc__py { grid-column: 1; grid-row: 2; }
+.cc--py .cc__chart { grid-column: 2; grid-row: 1 / span 2; }
 .cc__code { display: grid; grid-template-columns: minmax(8rem, 9.5rem) minmax(0, 1fr); gap: .6rem; align-items: start; }
 .cc__code > .palette { grid-row: 1 / span 4; flex-direction: column; flex-wrap: nowrap; }
 .cc__code > .palette .blk--btn { width: 100%; justify-content: flex-start; text-align: left; }
 .cc__code > .prog, .cc__code > .field-help { grid-column: 2; }
-.cc--py .cc__code { grid-template-columns: minmax(0, 1fr); }
-.cc--py .cc__code > .palette { display: none; }
-.cc--py .cc__code > .prog, .cc--py .cc__code > .field-help { grid-column: 1; }
-.cc--help .blk--btn { min-height: 52px; font-size: 1rem; }
-.cc--help .blk__row { min-height: 46px; font-size: 1.02rem; }
+.cc--big .blk--btn { min-height: 52px; font-size: 1rem; }
+.cc--big .blk__row { min-height: 46px; font-size: 1.02rem; }
 .cc__code .prog { max-height: 340px; overflow-y: auto; }
 .cc__chart { display: grid; gap: .5rem; background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius); padding: .7rem; min-width: 0; }
 .cc-tabs { display: flex; gap: .3rem; }
@@ -1035,11 +1042,19 @@ button.cc-cell:focus-visible { outline: 3px solid #b4006a; outline-offset: -3px;
 .cc-boat { position: absolute; left: 0; top: 0; display: grid; place-items: center; pointer-events: none; z-index: 1; }
 .cc-boat > svg { width: 82%; height: 82%; }
 .cc__readout { min-height: 2rem; }
-.cc__modes { display: flex; flex-wrap: wrap; gap: .4rem; }
+.cc__modes { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; padding-top: .45rem; border-top: 1.5px solid var(--line); }
+.cc__modes-title { width: 100%; font-family: var(--font-display); font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.cc-speed { display: inline-flex; align-items: center; gap: .25rem; margin-left: auto; font-size: .88rem; color: var(--muted); }
+.cc-speed__b { min-height: 36px; min-width: 44px; padding: .2rem .55rem; border: 1.5px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--fg); font: inherit; font-weight: 700; font-size: .85rem; cursor: pointer; }
+.cc-speed__b[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); color: #fff; }
+.cc-speed__b:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .cc__modepanel:empty { display: none; }
 .cc__modepanel { display: grid; gap: .4rem; font-size: .92rem; padding: .5rem .6rem; border-radius: var(--radius-sm); background: var(--surface-2); }
 .cc__modepanel p { margin: 0; }
 .cc-tools { display: flex; flex-wrap: wrap; gap: .3rem; }
+/* Secondary tools are compact chips (36px), so the tools and the designer fit under the chart; Run stays 44px+. */
+.cc__bartools .btn--small, .cc__modes .btn--small, .cc-tools .btn--small, #cc-design-done { min-height: 36px; padding: .3rem .7rem; font-size: .85rem; gap: .3rem; }
+.cc__modepanel .field-help { margin: 0; }
 .cc__py { display: grid; gap: .5rem; align-content: start; min-width: 0; }
 .cc__py[hidden] { display: none; }
 .cc__pyhead { display: flex; align-items: center; gap: .5rem; }
@@ -1095,9 +1110,9 @@ button.cc-cell:focus-visible { outline: 3px solid #b4006a; outline-offset: -3px;
 .cc-land__regions a { display: grid; gap: .2rem; padding: .9rem 1rem; min-height: 44px; border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--fg); text-decoration: none; }
 .cc-land__regions a:hover { border-color: var(--teal); }
 .cc-land__regions a:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-@media (max-width: 1150px) { .cc--py .cc__panes { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .cc--py .cc__chart { grid-column: 1 / -1; } }
 @media (max-width: 860px) {
-  .cc__panes, .cc--py .cc__panes { grid-template-columns: minmax(0, 1fr); }
+  .cc__panes, .cc--py .cc__panes { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; }
+  .cc--py .cc__code, .cc--py .cc__py, .cc--py .cc__chart { grid-column: 1; grid-row: auto; }
   .cc__chart { order: -1; }
   .cc__code { grid-template-columns: minmax(0, 1fr); }
   .cc__code > .palette { grid-row: auto; flex-direction: row; flex-wrap: wrap; }

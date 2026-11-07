@@ -11,6 +11,7 @@
  *     opts.undo         show Undo and Redo (Ctrl+Z, Ctrl+Y)    opts.pythonNote     text under the Python view
  *     opts.python       false hides the Python view            opts.varName        the variable's name in Python
  *     opts.isBusy()     true while the boat sails (edits wait) opts.onEdit()       after every change
+ *     opts.paletteLabel(type)  a toolbox button's words    opts.countText(n)   the counter's words
  *   ed.program, ed.fn   the current lists        ed.count()  blocks that count against the budget
  *   ed.set(main, fn)    replace the program      ed.highlight(b) / ed.clearHighlight()   the running block
  * Harbor Code calls it with its old options, so its markup and behavior stay the same.
@@ -32,7 +33,7 @@
 
     box.innerHTML = `
           <div class="palette" role="group" aria-label="Blocks you can use">
-            ${o.blocks.map((t) => `<button type="button" class="blk blk--${BLOCKS[t].kind} blk--btn" data-add="${t}">${icon(BLOCKS[t].glyph, BLOCKS[t].flip ? 'style="transform:scaleX(-1)"' : "")}${esc(labelOf(t))}${BLOCKS[t].count ? " #" : ""}</button>`).join("")}
+            ${o.blocks.map((t) => `<button type="button" class="blk blk--${BLOCKS[t].kind} blk--btn" data-add="${t}">${icon(BLOCKS[t].glyph, BLOCKS[t].flip ? 'style="transform:scaleX(-1)"' : "")}${esc(o.paletteLabel ? o.paletteLabel(t) : labelOf(t) + (BLOCKS[t].count ? " #" : ""))}</button>`).join("")}
           </div>
           ${o.usesFn ? `<div class="prog prog--fn"><div class="prog__head"><strong>${icon("star", 'class="inline-icon"')}${esc(o.fnName)} =</strong><span class="muted" id="fn-count"></span></div><div id="fn-list"></div></div>` : ""}
           <div class="prog">
@@ -83,7 +84,7 @@
       }
       const n = count();
       const bc = box.querySelector("#blk-count");
-      bc.textContent = o.maxBlocks ? `${n} / ${o.maxBlocks} blocks` : `${n} blocks${o.par ? ` · par ${o.par}` : ""}`;
+      bc.textContent = o.countText ? o.countText(n) : o.maxBlocks ? `${n} / ${o.maxBlocks} blocks` : `${n} blocks${o.par ? ` · par ${o.par}` : ""}`;
       bc.classList.toggle("is-over", !!(o.maxBlocks && n > o.maxBlocks));
       const pv = box.querySelector("#py-view");   // the Python view updates as blocks change
       if (pv) pv.textContent = program.length || fn.length ? SE.minipy.toPython(program, fn, o.fnName, { varName: o.varName, goal: o.goal }) : "# Add blocks to see them in Python.";

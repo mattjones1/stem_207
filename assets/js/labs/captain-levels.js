@@ -9,7 +9,8 @@
  *   id, title, concept, briefing (the harbor master), goal, hints: [notice, idea, scaffold], learned
  *   grids: [map, map…] (two or more = channels the same program must handle), worlds: names for them
  *   dir, blocks, fog (squares the captain can see), needGems, needDrops, carry, minCalls, fnName, varName
- *   budget (most blocks allowed), par (the reference's block count), stretch: { blocks, text }
+ *   budget (most blocks allowed), par (the reference's block count), stretch: { blocks?, text } (no blocks = a first-run win)
+ *   stretchRef (Python): a program that meets stretch.blocks, so the Compass is reachable (tests)
  *   predict (guess where the boat stops first), plan (plot your course), starter (a broken program, in Python)
  *   reference (Python), wrong: [{ src, reason }] programs that must fail, and why (tests)
  * Block count: every block counts once, nested ones too, and the blocks inside your own block. Calling it is 1.
@@ -59,7 +60,7 @@
       hints: ["Before each turn, picture yourself at the wheel facing the way the boat faces.", "The passage steps down like stairs: forward, turn, forward, turn back.", "Count each straight stretch. Write the route down: 1 east, 2 south, 2 east, 2 south, 3 east."],
       learned: "Precise programs track state. The boat's direction is part of its state, and every turn changes it.",
       grids: [["#########", "#S.######", "##.######", "##...####", "####.####", "####...G#", "#########"]], dir: "E", blocks: MOVE, par: 14,
-      stretch: { text: "Solve it with no crashes on your first run." },
+      stretch: { text: "Solve it on your first run." },
       reference: "move()\nturn_right()\nmove()\nmove()\nturn_left()\nmove()\nmove()\nturn_right()\nmove()\nmove()\nturn_left()\nmove()\nmove()\nmove()",
       wrong: [{ src: "move()\nturn_left()\nmove()", reason: "crash" }]
     },
@@ -133,7 +134,33 @@
       learned: "You planned, built, tested, debugged, and improved your own program. That's what programmers do every day.",
       grids: [["#########", "#S..*...#", "#.##.##.#", "#.*.....#", "#.##.##*#", "#...*..G#", "#########"]], dir: "E",
       blocks: [...MOVE, "pick", "repeat", "untilGoal", "ifGem", "ifWall", "setVar", "repeatVar", "changeVar", "call"], usesFn: true, needGems: true,
-      fnName: "My Move", par: 27, stretch: { text: "Beat par: finish in fewer than 27 blocks." },
+      fnName: "My Move", par: 27, stretch: { blocks: 26, text: "Finish in 26 blocks or fewer." },
+      stretchRef: `turn_right()
+for i in range(2):
+    move()
+turn_left()
+move()
+haul()
+for i in range(2):
+    move()
+turn_left()
+for i in range(2):
+    move()
+haul()
+turn_left()
+turn_left()
+for i in range(4):
+    move()
+haul()
+turn_left()
+for i in range(3):
+    move()
+turn_left()
+move()
+haul()
+turn_left()
+turn_left()
+move()`,
       reference: `for i in range(3):
     move()
 haul()
@@ -237,7 +264,7 @@ move()`,
       hints: ["You end up sailing the opposite way you started. How many turns does that take?", "Two turns the same way make a U-turn.", "Forward 3, Turn right, Forward 2, Turn right, Forward 3."],
       learned: "Two right turns face the boat backward. Keeping track of direction through every turn is how you write a precise route.",
       grids: [["#######", "#S...##", "####.##", "#G...##", "#######"]], dir: "E", blocks: MOVE, par: 10,
-      stretch: { text: "Solve it with no crashes along the way." },
+      stretch: { text: "Solve it on your first run." },
       reference: `move()
 move()
 move()
@@ -614,7 +641,7 @@ for i in range(3):
       learned: "Three decisions in one loop did a whole day's work. Short, general programs are what master programmers aim for.",
       grids: [["#########", "#S*.*.*.#", "#######o#", "#G.o..o.#", "#########"]], dir: "E",
       blocks: [...MOVE, "pick", "drop", "untilGoal", "ifGem", "ifSpot", "ifWall"], needGems: true, needDrops: true, par: 8,
-      stretch: { text: "Solve it without a single crash." },
+      stretch: { text: "Solve it on your first run." },
       reference: `while not at_mooring():
     if at_buoy():
         haul()
