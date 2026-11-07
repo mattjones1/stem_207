@@ -7157,7 +7157,7 @@ window.STEM.activities = [
       materials: ["A Chromebook, laptop, or tablet for each student (pairs work too)", "A projector for the group moments"],
       setup: [
         "Make a class and print login cards so work saves on each student's device. Guests can work, but their work lasts only for the browser session.",
-        "Open stages 3, 5, and 6 on the projector before class so you can demo Show why, the error log, and the threshold slider.",
+        "Open stages 3, 5, and 6 on the projector before class so you can demo Inside the Machine, the error log, and the threshold slider.",
         "Read the dataset notes in the teacher notes below so you know what each experiment is built to show."
       ],
       prerequisites: "None. No coding. “How Does an AI Sort?” is a helpful unplugged warm-up."
@@ -7183,7 +7183,7 @@ window.STEM.activities = [
     schedule: [
       { time: "0:00–0:05", title: "Welcome", detail: "Introduce the AI Research Crew and the big idea: a machine can find patterns; people decide whether they're useful, fair, and trustworthy. Students choose a mode." },
       { time: "0:05–0:15", title: "Be the Machine (stage 1)", detail: "Group moment after the tricky example: why did the color rule seem right? Several rules can fit a few examples." },
-      { time: "0:15–0:30", title: "Build and train (stages 2–3)", detail: "Demo Show why on the projector. Group moment after students first classify a creature: the machine compares; it doesn't understand." },
+      { time: "0:15–0:30", title: "Build and train (stages 2–3)", detail: "Demo Inside the Machine on the projector (step through one prediction). Group moment after students first classify a creature: the machine compares; it doesn't understand." },
       { time: "0:30–0:43", title: "Accuracy experiment (stage 4)", detail: "Group moment: compare charts. Did anyone's accuracy go down? Why is training accuracy not proof?" },
       { time: "0:43–0:58", title: "Bias Detective (stage 5)", detail: "Group moment: the Talk about it questions. Who should notice and fix a model that fails one group?" },
       { time: "0:58–1:10", title: "Confidence (stage 6)", detail: "Demo the slider. Ask: did raising the threshold always make it more accurate? Why were the purple creatures wrong at 100%?" },

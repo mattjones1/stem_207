@@ -42,7 +42,7 @@ Every stage has a goal, steps, three hints (notice, then an idea, then a small e
 | 1 | Be the Machine | Learning from examples | Predict a new creature from labeled examples, then revise a color rule when a blue Norp breaks it. Play the rule game, on their own or with a partner. | A rule that fits every example, and one solved game round | |
 | 2 | Build the Training Set | Examples and labels | Pick a secret rule the machine never sees, then label creatures to build a training set. | At least 8 examples (6 in Explorer), both labels, labels that match their rule, and a reason for the mix | |
 | | **Part 2: Train and test** | | | | **28** |
-| 3 | Train and Inspect | How the model predicts | Train, test 3 new creatures, and read **Show why** (the closest examples and their votes). Then change one example so a prediction flips. | The flip really happened, and they tapped the example responsible | |
+| 3 | Train and Inspect | How the model predicts | Train and test 3 new creatures. Step through **Inside the Machine** (features → distances → nearest neighbors → the vote → predict right or wrong, then reveal). Try **Change One Thing** (change one trait, ask again). Then change a training example so a prediction flips. | All four tasks: 3 tests, the walkthrough with a prediction before the reveal, one Change One Thing, and a real flip with the example responsible tapped. Training edits are saved. | |
 | 4 | The Accuracy Experiment | Data quality and generalization | Predict, then run "More of the same" and "More variety" in batches of 3 on the same 16 test creatures. Compare the two lines. | Both runs finished, and an explanation that matches their measured numbers | |
 | | **Part 3: When it goes wrong** | | | | **27** |
 | 5 | Bias Detective | Bias in data | Group the error log by a trait, find the problem group, inspect the training data, fix it, and test again. | Group accuracy really improves, or, after 2 attempts that didn't help, an explanation and a next step | |
@@ -69,7 +69,7 @@ Every stage has a goal, steps, three hints (notice, then an idea, then a small e
 
 **Setup checklist**
 - [ ] Make a class and print login cards so work saves on each student's device. Guests can work ("Look around as a guest"), but their work lasts only for the browser session.
-- [ ] Open stages 3, 5, and 6 on the projector so you can demo **Show why**, the error log, and the threshold slider.
+- [ ] Open stages 3, 5, and 6 on the projector so you can demo **Inside the Machine**, the error log, and the threshold slider.
 - [ ] Read the answer guide below so you know what each experiment is built to show.
 - [ ] Print the cards in [02-printable-cards.md](02-printable-cards.md): the Be the Machine card, the Decision Room discussion card, and the exit ticket.
 
@@ -86,7 +86,7 @@ Every stage has a goal, steps, three hints (notice, then an idea, then a small e
 | --- | --- | --- |
 | 0:00–0:05 | Welcome | Introduce the AI Research Crew and the big idea. Students choose a mode. |
 | 0:05–0:15 | Be the Machine (stage 1) | **Group moment** after the tricky example: why did the color rule seem right? Several rules can fit a few examples. |
-| 0:15–0:30 | Build and train (stages 2–3) | Demo **Show why** on the projector. **Group moment** after students first classify a creature: the machine compares; it doesn't understand. |
+| 0:15–0:30 | Build and train (stages 2–3) | Demo **Inside the Machine** on the projector: step through one prediction. **Group moment** after students first classify a creature: the machine compares; it doesn't understand. |
 | 0:30–0:43 | The Accuracy Experiment (stage 4) | **Group moment:** compare charts. Did anyone's accuracy go down? Why isn't training accuracy proof? |
 | 0:43–0:58 | Bias Detective (stage 5) | **Group moment:** the Talk about it questions. Who should notice and fix a model that fails one group? |
 | 0:58–1:10 | Confidence (stage 6) | Demo the slider. Did raising the threshold always make it more accurate? Why were the purple creatures wrong at 100%? |
@@ -97,7 +97,7 @@ Times are targets and haven't been tested with classes yet. Nothing times studen
 
 ## Running it
 - **Say it early and often:** "This machine doesn't understand creatures. It counts different traits and lets the closest examples vote." k-NN is only one kind of AI.
-- **"Why did it say that?"** Send the student to **Show why**. The table lists each neighbor, its vote, and which traits differ. Ask: which example misled it?
+- **"Why did it say that?"** Send the student to **Inside the Machine** (stage 3, or Inspect in stage 8). Step 2 shows each training example's distance, step 3 the nearest neighbors, step 4 their votes. Ask: which example misled it? Then try **Change One Thing**.
 - **"It's broken."** It's not. The model only knows the examples. Ask: what's in your training set, and what's missing?
 - **Stage 4:** both runs use the same 16 test creatures, so the chart is a fair comparison. Turn on training accuracy to show why it's nearly always 100%.
 - **Stage 5:** have students group the results by color before they guess. The overall score hides the problem.
@@ -150,7 +150,7 @@ Make sure students notice that even 100% didn't catch the purple creatures.
 | What students say | What's really going on | What to ask |
 | --- | --- | --- |
 | "More data always helps." | Stage 4: copies can make accuracy dip. | "Follow the More of the same line. Does it ever go down?" |
-| "The machine understands." | It counts different traits. | "Open Show why. What did it actually compare?" |
+| "The machine understands." | It counts different traits. | "Open Inside the Machine. What did it actually compare?" |
 | "High confidence means right." | Stage 6: 5 of 5 agreed, and it was still wrong. | "Were any purple creatures in the training data?" |
 | "Equal numbers of each label makes it fair." | Covering different kinds of creatures matters too. | "Which kinds aren't in your training set yet?" |
 | "A higher threshold is always safer." | It also answers less, and it doesn't catch new kinds of cases. | "What happens to the people the machine won't answer?" |

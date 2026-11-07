@@ -15,11 +15,12 @@
   "use strict";
   const SE = window.SE;
   const { icon, esc } = SE;
-  const M = SE.mlKit, D = SE.pmData;
+  const M = SE.mlKit, D = SE.pmData, X = SE.pmExplain, K_ = SE.pmKnow;
+  const { pct, tag, b, chips, card, paint, delegate } = SE.pmUI;
   const LAB = "pattern-machine";
   const JOURNEY = ["Be the machine", "Training set", "Train", "Accuracy", "Bias", "Confidence", "Decide", "Report"];
-  const pct = (x) => (x == null ? "–" : `${Math.round(x * 100)}%`);
   const TRAIT_KEYS = M.KEYS;
+  const fgLine = (...ids) => `<p class="pm-fgline">${icon("bulb")}<span>Field Guide:</span> ${ids.map(K_.contextButton).join(" ")}</p>`;
 
   /* ───────── Saving (this device only) and modes ───────── */
   function storeFor(user) {
@@ -37,17 +38,7 @@
   function getMode() { try { const m = localStorage.getItem("stem207.pm.mode"); return MODES[m] ? m : "investigator"; } catch (e) { return "investigator"; } }
   function setMode(m) { try { localStorage.setItem("stem207.pm.mode", m); } catch (e) { /* ignore */ } }
 
-  /* ───────── Small pieces ───────── */
-  const tag = (label) => `<b class="pm-tag pm-tag--${label === "Glim" ? "glim" : "norp"}"><span aria-hidden="true">${label === "Glim" ? "▲" : "●"}</span> ${esc(label)}</b>`;
-  const b = (act, id, label, cls = "btn btn--ghost btn--small", extra = "") => `<button type="button" class="${cls}" data-act="${act}" data-id="${esc(id)}" data-k="${act}:${esc(id)}" ${extra}>${label}</button>`;
-  const chips = (act, opts, picked, multi = false) => `<div class="pm-chips" role="group">${opts.map(([id, text]) => {
-    const on = multi ? (picked || []).includes(id) : picked === id;
-    return b(act, id, esc(text), "pm-chip", `aria-pressed="${on}"`);
-  }).join("")}</div>`;
-  function card(ex, o = {}) {
-    const size = o.size || 64;
-    return `<figure class="pm-card ${o.cls || ""}" data-card="${esc(ex.id)}">${M.creature(ex.traits, size)}${o.label ? `<figcaption>${tag(o.label)}${o.body || ""}</figcaption>` : o.body ? `<figcaption>${o.body}</figcaption>` : ""}</figure>`;
-  }
+  /* ───────── Small pieces (the shared ones are in pm-ui.js) ───────── */
   const traitCells = (t) => TRAIT_KEYS.map((k) => `<td>${esc(M.traitText(k, t[k]))}</td>`).join("");
   function table(set, o = {}) {
     return `<div class="pm-tablewrap"><table class="pm-table"><caption>${esc(o.caption || "Examples")}</caption>
@@ -109,23 +100,6 @@
   }
   const bar = (n, of) => `<span class="pm-bar"><span class="pm-bar__fill" style="width:${of ? Math.round((n / of) * 100) : 0}%"></span><b>${n}</b></span>`;
 
-  /* Feedback and focus-safe re-rendering. */
-  function paint(box, html) {
-    const a = document.activeElement;
-    const k = a && box.contains(a) ? a.getAttribute("data-k") : null;
-    const opened = [...box.querySelectorAll("details[data-k]")].map((d) => [d.getAttribute("data-k"), d.open]);
-    box.innerHTML = html;
-    opened.forEach(([dk, open]) => { const d = [...box.querySelectorAll("details[data-k]")].find((x) => x.getAttribute("data-k") === dk); if (d) d.open = open; });
-    if (k) { const n = [...box.querySelectorAll("[data-k]")].find((x) => x.getAttribute("data-k") === k); if (n && !n.disabled) n.focus({ preventScroll: true }); }
-  }
-  function delegate(el, handlers) {
-    el.addEventListener("click", (e) => {
-      const t = e.target.closest("[data-act]");
-      if (!t || !el.contains(t) || t.disabled) return;
-      const h = handlers[t.dataset.act];
-      if (h) h(t.dataset.id, t, e);
-    });
-  }
 
   /* ───────── The frame around every stage: progress, mode, and the AI Research Notebook ───────── */
   function frame(el, api, idx, S, st) {
@@ -136,9 +110,11 @@
         <nav class="pm-journey" aria-label="Workshop progress"><ol>${JOURNEY.map((j, i) => `<li class="${i === idx ? "is-here" : ""} ${done.has(i) ? "is-done" : ""}"><a href="#/lab/${LAB}/${i + 1}" ${i === idx ? 'aria-current="step"' : ""}>${done.has(i) ? icon("check") : `<b>${i + 1}</b>`}<span>${j}</span>${done.has(i) ? '<span class="visually-hidden"> (done)</span>' : ""}</a></li>`).join("")}</ol></nav>
         <div class="pm-tools">
           <label class="pm-mode">Mode <select class="input input--small" id="pm-mode">${Object.entries(MODES).map(([k, v]) => `<option value="${k}" ${k === mode ? "selected" : ""}>${v}: ${MODE_NOTE[k]}</option>`).join("")}</select></label>
+          <button type="button" class="btn btn--ghost btn--small" id="pm-fg-btn" aria-expanded="false" aria-controls="pm-fg">${icon("bulb")}Field Guide</button>
           <button type="button" class="btn btn--ghost btn--small" id="pm-nb-btn" aria-expanded="false" aria-controls="pm-nb">${icon("list")}Notebook <span class="pm-count">${(S.notebook || []).length}</span></button>
         </div>
       </div>
+      <section class="pm-nb pm-fg" id="pm-fg" hidden aria-label="AI Field Guide"></section>
       <section class="pm-nb" id="pm-nb" hidden aria-label="AI Research Notebook"></section>
       <div class="pm-body" id="pm-body"></div>
     </div>`;
@@ -159,6 +135,18 @@
       if (!t) return;
       const entry = S.notebook.find((n) => n.key === t.dataset.nbt);
       if (entry) { entry.text = t.value.slice(0, 280); st.save(S); }
+    });
+    // The AI Field Guide: a panel like the notebook. Context buttons ([data-fg]) anywhere in the stage open a card.
+    const fgBtn = el.querySelector("#pm-fg-btn"), fgBox = el.querySelector("#pm-fg");
+    const guide = K_.mount(fgBox, S, () => st.save(S), { stage: idx, mode, log: (t, d) => api.log(t, d) });
+    const showGuide = (on) => { fgBox.hidden = !on; fgBtn.setAttribute("aria-expanded", String(on)); if (on) guide.render(); };
+    fgBtn.addEventListener("click", () => showGuide(fgBox.hidden));
+    el.addEventListener("click", (e) => {
+      const q = e.target.closest("[data-fg]");
+      if (!q || !el.contains(q)) return;
+      guide.open(q.dataset.fg); showGuide(true);
+      fgBox.scrollIntoView({ block: "nearest" });
+      const h = fgBox.querySelector("#pm-fg-h"); if (h) { h.setAttribute("tabindex", "-1"); h.focus({ preventScroll: true }); }
     });
     return {
       body: el.querySelector("#pm-body"),
@@ -214,6 +202,7 @@
       paint(F.body, `
         <section class="lab-panel pm-sec">
           <h3><span class="pm-step">1</span>Find the rule</h3>
+          ${fgLine("A", "C")}
           <p>A scientist sorted these creatures into <strong>Glims</strong> and <strong>Norps</strong>. Study them. What makes a Glim?</p>
           <div class="pm-row">${D.A.start.map((e) => card(e, { label: e.label })).join("")}<span class="pm-arrow" aria-hidden="true">→</span>${card(D.A.next, { cls: "is-new", body: s.revealed ? tag(D.A.next.label) : `<span class="pm-tag">?</span>` })}</div>
           <div class="pm-q">
@@ -311,6 +300,7 @@
         <section class="lab-panel pm-sec">
           <h3><span class="pm-step">1</span>Invent the secret rule</h3>
           <p>You decide what makes a Glim. The machine will <strong>never</strong> see your rule. It only gets the examples you label.</p>
+          ${fgLine("B")}
           ${chips("rule", rules.map((x) => [x.id, ex ? x.simple : x.text]), s.rule)}
           ${s.picking && s.labels.length ? `<p class="muted pm-small">Picking a different rule starts a new training set. Picking the same rule keeps your labels.</p>` : ""}
         </section>` : `
@@ -319,7 +309,7 @@
             <div class="pm-head"><h3><span class="pm-step">2</span>Label creatures for the training set</h3>
               <div class="seg" role="group" aria-label="View">${b("view", "cards", "Cards", "", `aria-pressed="${s.view === "cards"}"`)}${b("view", "table", "Table", "", `aria-pressed="${s.view === "table"}"`)}</div></div>
             <p class="pm-secret">${icon("lock")}<span>Your secret rule: <strong>${esc(ex ? r.simple : r.text)}</strong> ${b("change", "x", "Change", "btn btn--ghost btn--small pm-link")}</span></p>
-            <p class="muted">Label a creature to add it to the training set. Label at least ${need}, with some of each kind.</p>
+            <p class="muted">Label a creature to add it to the training set. Label at least ${need}, with some of each kind. ${K_.contextButton("B")}</p>
             ${s.view === "cards" ? `<div class="pm-row pm-row--pool">${pool.map((c) => { const l = labelOf(c.id); return card(c, { size: 56, cls: `${l ? "is-in" : ""} ${breaks(c.id) ? "is-flag" : ""}`, body: `<span class="seg seg--tiny" role="group" aria-label="Label for creature ${D.POOL.indexOf(c) + 1}">${["Glim", "Norp"].map((x) => b("label", `${c.id}|${x}`, x, "", `aria-pressed="${l === x}"`)).join("")}</span>${l ? b("remove", c.id, `${icon("trash")}<span class="visually-hidden">Remove from training set</span>`, "pm-x") : ""}${breaks(c.id) ? `<span class="pm-flag">${icon("alert")}Check this label</span>` : ""}` }); }).join("")}</div>`
               : table(pool.map((c) => ({ ...c, label: labelOf(c.id) })), { caption: "Creatures to label", extraHead: "Label it", extra: (c) => `<span class="seg seg--tiny" role="group" aria-label="Label for creature ${D.POOL.indexOf(c) + 1}">${["Glim", "Norp"].map((x) => b("label", `${c.id}|${x}`, x, "", `aria-pressed="${c.label === x}"`)).join("")}</span>${breaks(c.id) ? ` <span class="pm-flag">${icon("alert")}Check this label</span>` : ""}` })}
           </section>
@@ -375,63 +365,82 @@
     render();
   }
 
-  /* ───────── Stage 3: Train and Inspect ───────── */
+  /* ───────── Stage 3: Train and Inspect ─────────
+     The training edits, the trained model, and K are saved (s3.train / s3.model as [id, label] pairs), so
+     changes survive leaving the stage. Older saves without s3.train start from the stage 2 set, as before.
+     Required: test 3 creatures, step through Inside the Machine once, run Change One Thing once, and change a
+     training example so a prediction flips (then name it). */
   function mountInspect(el, api) {
     const st = storeFor(api.user), S = st.load(); const F = frame(el, api, 2, S, st);
-    let train = trainingFromS2(S), sample = false;
     const rule = D.SECRET_RULES.find((r) => r.id === (S.s2 && S.s2.rule)) || D.SECRET_RULES[0];
-    if (train.length < 4 || new Set(train.map((e) => e.label)).size < 2) { train = D.labelWith(rule, D.POOL.slice(0, 10)); sample = true; }
-    const s = (S.s3 = Object.assign({ whys: [], flip: null, found: false, edits: 0 }, S.s3 || {}));
+    const fromS2 = trainingFromS2(S);
+    const sample = fromS2.length < 4 || new Set(fromS2.map((e) => e.label)).size < 2;
+    const base = sample ? D.labelWith(rule, D.POOL.slice(0, 10)) : fromS2;
+    const s = (S.s3 = Object.assign({ whys: [], flip: null, found: false, edits: 0, train: null, model: null, K: 3, ivDone: false, cfDone: false }, S.s3 || {}));
     s.whys = s.whys || [];
+    const pairs = (list) => list.map((e) => [e.id, e.label]);
+    const resolve = (p) => (p || []).map(([id, label]) => { const c = D.POOL.find((x) => x.id === id); return c && { id, traits: c.traits, label }; }).filter(Boolean);
+    if (!Array.isArray(s.train) || !s.train.length) { s.train = pairs(base); st.save(S); }
+    let train = resolve(s.train);
     const tests = D.labelWith(rule, D.TESTPOOL.slice(0, F.mode === "explorer" ? 8 : 12));
-    let K = 3, trained = null, dirty = true, sel = null, current = null, last = {}, pending = [], chosen = null;
-    const save = () => st.save(S);
+    let K = [1, 3, 5].includes(s.K) ? s.K : 3;
+    let trained = s.model && s.model.length ? resolve(s.model) : null;
+    let dirty = !trained || JSON.stringify(s.model) !== JSON.stringify(s.train);
+    let sel = null, current = null, last = {}, pending = [], chosen = null, iv = {}, cf = {};
+    const save = () => { s.train = pairs(train); s.K = K; st.save(S); };
+    const sameAsBase = () => JSON.stringify(pairs(train)) === JSON.stringify(pairs(base));
     function doTrain() {
       const before = last;
       trained = train.map((e) => ({ id: e.id, traits: e.traits, label: e.label }));
+      s.model = pairs(trained);
       dirty = false;
       last = {};
       Object.keys(before).forEach((id) => {
         const t = tests.find((x) => x.id === id), p = M.knn(trained, t.traits, { K });
         last[id] = { label: p.label, near: p.neighbors.map((n) => n.ex.id) };
-        if (before[id].label !== p.label && pending.length && !s.flip) {
-          s.flip = { test: id, from: before[id].label, to: p.label, edits: pending.slice(), near: before[id].near };
-          save();
-        }
+        if (before[id].label !== p.label && pending.length && !s.flip) s.flip = { test: id, from: before[id].label, to: p.label, edits: pending.slice(), near: before[id].near };
       });
       pending = [];
+      save();
       api.log("lab_test_run", { examples: trained.length, k: K });
     }
+    const tasks = () => [
+      ["Test 3 new creatures", s.whys.length >= 3],
+      ["Step through Inside the Machine", !!s.ivDone],
+      ["Change One Thing about a creature", !!s.cfDone],
+      ["Change a training example so a prediction flips, then find it", !!s.found]
+    ];
     function render() {
       const x = current && tests.find((t) => t.id === current);
       const p = x && trained ? M.knn(trained, x.traits, { K }) : null;
       const flipT = s.flip && tests.find((t) => t.id === s.flip.test);
+      const T = tasks();
       paint(F.body, `
         ${sample ? `<p class="pm-result">${icon("alert")}You haven't built a training set in stage 2 yet, so this uses a sample one (rule: ${esc(rule.text)}).</p>` : ""}
-        <div class="pm-bench">
+        <div class="pm-bench pm-bench--two">
           <section class="lab-panel pm-sec" aria-labelledby="pm-tr-h">
             <h3 id="pm-tr-h">${icon("box")}Training examples <span class="muted">(${train.length})</span></h3>
             <div class="pm-row pm-row--mini">${train.map((e) => `<button type="button" class="pm-mini ${sel === e.id ? "is-sel" : ""}" data-act="sel" data-id="${e.id}" data-k="sel:${e.id}" aria-pressed="${sel === e.id}" aria-label="${esc(M.describe(e.traits))}, labeled ${e.label}">${M.creature(e.traits, 40, " ")}${tag(e.label)}</button>`).join("")}</div>
-            ${sel ? `<div class="pm-row">${b("relabel", sel, `${icon("refresh")}Change label`)}${b("drop", sel, `${icon("trash")}Remove`)}</div>` : `<p class="muted">Tap an example to change its label or remove it.</p>`}
+            ${sel ? `<div class="pm-row">${b("relabel", sel, `${icon("refresh")}Change label`)}${b("drop", sel, `${icon("trash")}Remove`)}</div>` : `<p class="muted pm-small">Tap an example to change its label or remove it. Your changes are saved.</p>`}
             <div class="pm-row">${b("train", "x", `${icon("ai")}${trained ? "Update the model" : "Train the model"}`, `btn ${dirty ? "btn--primary" : "btn--ghost"}`)}${F.mode === "researcher" ? `<label class="pm-field pm-field--inline">Neighbors (K) <select class="input input--small" id="pm-k">${[1, 3, 5].map((k) => `<option ${k === K ? "selected" : ""}>${k}</option>`).join("")}</select></label>` : ""}</div>
-            <p class="muted pm-small">${trained ? (dirty ? "You changed the examples. Update the model to use them." : "Training this kind of machine means storing your examples so it can compare new creatures with them.") : "Press Train: the machine stores your examples."}</p>
+            <p class="muted pm-small">${trained ? (dirty ? "You changed the examples. Update the model to use them." : "Training this kind of machine means storing your examples so it can compare new creatures with them.") : "Press Train: the machine stores your examples."} ${K_.contextButton("D")}</p>
+            ${!sameAsBase() ? `<p class="pm-small">${b("reseed", "x", `${icon("refresh")}Start again from my ${sample ? "sample" : "stage 2"} set`, "btn btn--ghost btn--small pm-link")}</p>` : ""}
           </section>
           <section class="lab-panel pm-sec" aria-labelledby="pm-te-h">
             <h3 id="pm-te-h">${icon("search")}New creatures</h3>
             <p class="muted pm-small">The machine has never seen these.</p>
             <div class="pm-row pm-row--mini">${tests.map((t, i) => `<button type="button" class="pm-mini ${current === t.id ? "is-sel" : ""}" data-act="pick" data-id="${t.id}" data-k="pick:${t.id}" aria-pressed="${current === t.id}" aria-label="New creature ${i + 1}: ${esc(M.describe(t.traits))}${last[t.id] ? `, machine said ${last[t.id].label}` : ""}">${M.creature(t.traits, 40, " ")}${last[t.id] ? tag(last[t.id].label) : `<span class="pm-tag">?</span>`}</button>`).join("")}</div>
-            ${x ? `<div class="pm-test">${M.creature(x.traits, 80)}<div>${p ? `<p class="pm-big">The machine predicts ${tag(p.label)}</p>
-              ${s.revealAll || last[x.id] && last[x.id].revealed ? `<p>Your rule says: ${tag(x.label)} ${p.label === x.label ? `<span class="pm-ok">${icon("check")}Match</span>` : `<span class="pm-no">${icon("alert")}Doesn't match</span>`}</p>` : b("truth", x.id, `${icon("eye")}Check with my rule`)}`
-              : `<p>${trained ? "" : "Train the model first."}</p>`}</div></div>` : `<p>Pick a new creature to test.</p>`}
-          </section>
-          <section class="lab-panel pm-sec pm-evidence" aria-labelledby="pm-ev-h">
-            <h3 id="pm-ev-h">${icon("bulb")}Machine's reasoning</h3>
-            ${p ? why(p, x) : `<p class="muted">Test a creature to see which examples it compared.</p>`}
+            ${x ? `<div class="pm-test">${M.creature(x.traits, 72)}<div>${p ? `<p class="pm-big">The machine predicts ${tag(p.label)}</p>${b("goiv", "x", `${icon("search")}Step inside the machine`, "btn btn--primary btn--small")}` : `<p>${trained ? "" : "Train the model first."}</p>`}</div></div>` : `<p>Pick a new creature to test.</p>`}
           </section>
         </div>
+        ${x && p ? `<div class="pm-split pm-split--iv">
+          <div class="lab-panel pm-sec pm-evidence">${X.insideHtml(Object.assign({}, iv, { train: trained, x, truth: x.label, K }))}</div>
+          <div class="lab-panel pm-sec">${X.cfHtml(Object.assign({}, cf, { train: trained, x, K }))}</div>
+        </div>` : ""}
         <section class="lab-panel pm-sec">
-          <h3>${icon("target")}Checkpoint: change one example, change the answer</h3>
-          <p>Test some creatures and look at why (${Math.min(3, s.whys.length)} of 3 so far). Then change the label of an example, or remove one, and update the model. Can you make a prediction change?</p>
+          <h3>${icon("target")}Checkpoint</h3>
+          <ol class="pm-tasks">${T.map(([t, done], i) => `<li class="${done ? "is-done" : ""}">${done ? icon("check") : `<b>${i + 1}</b>`}<span>${esc(t)}${i === 0 ? ` (${Math.min(3, s.whys.length)} of 3)` : ""}</span>${done ? '<span class="visually-hidden"> (done)</span>' : ""}</li>`).join("")}</ol>
+          <p class="muted pm-small">For the last one: change the label of an example (or remove one), then update the model. Did a prediction change?</p>
           ${s.flip && flipT ? `<div class="pm-flipbox"><p class="pm-result is-good">${icon("refresh")}Your change flipped a prediction: this creature went from ${tag(s.flip.from)} to ${tag(s.flip.to)}.</p>
             <div class="pm-row">${card(flipT, { size: 64 })}<p>Which training example caused the change?</p></div>
             <div class="pm-row">${uniq(s.flip.edits.concat(s.flip.near)).map((id) => { const e = D.POOL.find((c) => c.id === id); return e ? `<button type="button" class="pm-mini ${chosen === id ? "is-sel" : ""}" data-act="cause" data-id="${id}" data-k="cause:${id}" aria-pressed="${chosen === id}" aria-label="${esc(M.describe(e.traits))}">${M.creature(e.traits, 40, " ")}</button>` : ""; }).join("")}</div>
@@ -439,39 +448,62 @@
           <p class="muted pm-small">This lab shows one kind of machine learning: comparing with examples. Other AI systems, like chatbots, work in different ways.</p>
         </section>`);
       const kSel = el.querySelector("#pm-k");
-      if (kSel) kSel.addEventListener("change", (e) => { K = Number(e.target.value); dirty = true; render(); api.say(`The machine will now use the ${K} closest example${K > 1 ? "s" : ""}. Update the model.`, "info"); });
+      if (kSel) kSel.addEventListener("change", (e) => { K = Number(e.target.value); dirty = true; save(); render(); api.say(`The machine will now use the ${K} closest example${K > 1 ? "s" : ""}. Update the model.`, "info"); });
     }
     const uniq = (a) => [...new Set(a)];
     function finish() {
-      if (s.whys.length >= 3 && s.found) {
-        F.note("s3", "Train and inspect", [["Training examples", String(train.length)], ["Creatures I inspected", String(s.whys.length)], ["Prediction that flipped", `${s.flip.from} → ${s.flip.to}`]]);
-        api.win({ inspected: s.whys.length, edits: s.edits });
+      if (tasks().every((t) => t[1])) {
+        F.note("s3", "Train and inspect", [["Training examples", String(train.length)], ["Creatures I inspected", String(s.whys.length)], ["One Thing I changed", s.cfLast || "–"], ["Prediction that flipped", `${s.flip.from} → ${s.flip.to}`]]);
+        api.win({ inspected: s.whys.length, edits: s.edits, iv: 1, cf: 1 });
       }
     }
-    delegate(el, {
+    const handlers = {
       sel: (id) => { sel = sel === id ? null : id; render(); },
+      goiv: () => { const p = el.querySelector(".pm-iv"); if (p) { p.scrollIntoView({ block: "start" }); const h = p.querySelector("h4"); h.setAttribute("tabindex", "-1"); h.focus({ preventScroll: true }); } },
       relabel: (id) => { const e = train.find((t) => t.id === id); e.label = e.label === "Glim" ? "Norp" : "Glim"; pending.push(id); s.edits++; dirty = true; save(); render(); api.say(`You changed that example to ${e.label}. Update the model to use it.`, "info"); },
       drop: (id) => { if (train.length <= 2) return api.say("Keep at least 2 examples.", "warn"); train = train.filter((t) => t.id !== id); pending.push(id); s.edits++; sel = null; dirty = true; save(); render(); },
+      reseed: () => { train = base.map((e) => ({ ...e })); sel = null; dirty = true; save(); render(); api.say("Your training set is back to how it started. Update the model to use it.", "info"); },
       train: () => {
         doTrain(); render();
         if (s.flip && !s.found) api.say("A prediction changed! Which example caused it?", "good");
         else api.say(`The model stored ${trained.length} examples. Test a new creature.`, "info");
       },
       pick: (id) => {
-        current = id;
+        current = id; iv = { step: 1, reached: 1 }; cf = {};
         if (!trained) { render(); return api.say("Train the model first, then test.", "info"); }
         const t = tests.find((x) => x.id === id), p = M.knn(trained, t.traits, { K });
         last[id] = Object.assign(last[id] || {}, { label: p.label, near: p.neighbors.map((n) => n.ex.id) });
         if (!s.whys.includes(id)) { s.whys.push(id); save(); }
         render(); finish();
       },
-      truth: (id) => { last[id] = Object.assign(last[id] || {}, { revealed: true }); const t = tests.find((x) => x.id === id); render(); api.say(last[id].label === t.label ? "The machine matched your rule." : "The machine got this one wrong. Look at the examples it compared. What might be missing?", last[id].label === t.label ? "good" : "info"); },
       cause: (id) => {
         chosen = id;
         if (s.flip.edits.includes(id)) { s.found = true; save(); render(); api.say("You found it. One training example can change what the machine predicts.", "good"); finish(); }
         else { render(); api.say("That example didn't change. Which one did you edit?", "warn"); }
       }
+    };
+    ["iv-step", "iv-feat", "iv-guess", "iv-reveal", "iv-reset"].forEach((a) => {
+      handlers[a] = (id) => {
+        X.act(iv, a, id);
+        if (iv.done && !s.ivDone) { s.ivDone = true; save(); api.say("You followed the whole decision: features, distances, nearest neighbors, and the vote.", "good"); }
+        render(); finish();
+      };
     });
+    ["cf-trait", "cf-value", "cf-run", "cf-reset"].forEach((a) => {
+      handlers[a] = (id) => {
+        const x = tests.find((t) => t.id === current);
+        Object.assign(cf, { train: trained, x, K });
+        X.cfAct(cf, a, id);
+        if (a === "cf-run" && cf.result) {
+          const r = cf.result;
+          s.cfDone = true; s.cfLast = `${M.TRAIT_NAME[r.trait]}: ${M.traitText(r.trait, r.from)} → ${M.traitText(r.trait, r.to)} (${r.changed ? "prediction changed" : "no change"})`; save();
+          api.log("lab_test_run", { cf: r.trait, changed: r.changed ? 1 : 0 });
+          api.say(r.changed ? `Changing ${M.TRAIT_NAME[r.trait].toLowerCase()} flipped the prediction to ${r.after.label}.` : `Changing ${M.TRAIT_NAME[r.trait].toLowerCase()} didn't change the prediction. Try another trait.`, "info");
+        }
+        render(); finish();
+      };
+    });
+    delegate(el, handlers);
     render();
   }
 
@@ -512,6 +544,7 @@
         <section class="lab-panel pm-sec">
           <h3><span class="pm-step">1</span>Predict</h3>
           <p>Both runs start with the same 4 examples, and both take the same 16-creature test the machine never trains on. Which will help more?</p>
+          ${fgLine("E")}
           ${chips("pred", [["same", "9 more of the same"], ["variety", "9 different ones"], ["tie", "About the same"]], s.pred)}
           <details class="pm-vocab" data-k="vocab"><summary>Words to know</summary><dl>
             <div><dt>Training examples</dt><dd>The labeled examples the model learns from.</dd></div>
@@ -590,6 +623,7 @@
         <section class="lab-panel pm-sec">
           <h3>${icon("search")}The case</h3>
           <p>The AI Research Crew has a problem. The machine keeps getting some creatures wrong. The real rule is simple: <strong>pointy horns make a Glim</strong>. Investigate the training data and find out what went wrong.</p>
+          ${fgLine("F")}
           ${!s.tested ? b("test", "x", `${icon("flask")}Test the model`, "btn btn--primary") : ""}
         </section>
         ${s.tested ? `<div class="pm-split">
@@ -691,6 +725,7 @@
           <h3>${icon("bulb")}Confidence is not the same as being right</h3>
           <p>This machine checks the <strong>${K}</strong> closest examples. Its <strong>model confidence score</strong> is how many of them agree: 3 of 5 is 60%, 4 of 5 is 80%, 5 of 5 is 100%. It's the model's own number, not a promise that it's right.</p>
           <p>You choose a <strong>threshold</strong>. Below it, the machine says: <em>“I'm not sure. Ask a human to check.”</em></p>
+          ${fgLine("G")}
           <div class="range"><label for="pm-th">Minimum confidence to answer <b>${s.th}%</b></label><input type="range" id="pm-th" min="50" max="100" step="10" value="${s.th}" aria-valuetext="${s.th} percent"></div>
           ${sameAs.length ? `<p class="muted pm-small">With ${K} neighbors, only 60%, 80%, and 100% are possible, so ${s.th}% works the same as ${sameAs.map((t) => t + "%").join(" and ")}.</p>` : ""}
           ${F.mode === "researcher" ? `<label class="pm-check"><input type="checkbox" id="pm-nov" ${s.novelty ? "checked" : ""}> Also ask a human when the closest example differs in 3 or more traits (“never seen anything like it”)</label>` : ""}
@@ -786,6 +821,7 @@
         <section class="lab-panel pm-sec">
           <h3>${icon("users")}Should we use AI for this?</h3>
           <p>You've seen how a machine learns, and how it goes wrong. Now decide. For each idea, choose what you think and your best reason.</p>
+          ${fgLine("H")}
           <details class="pm-vocab" data-k="vocab"><summary>Questions to ask yourself</summary><ul>
             <li>What patterns would the AI need to find?</li><li>What training examples might be missing?</li><li>Who could be affected by a mistake? Would it cause serious harm?</li>
             <li>Could the model be unfair to some people?</li><li>Who should check the result? Should the machine be allowed to say “I'm not sure”?</li></ul></details>
@@ -835,7 +871,7 @@
     const st = storeFor(api.user), S = st.load(); const F = frame(el, api, 7, S, st);
     const s = (S.s8 = Object.assign({ train: START_G.slice(), first: null, latest: null, changes: 0, changesTested: 0, investigated: "", th: null, ans: {}, txt: "", finished: false, K: 3 }, S.s8 || {}));
     const save = () => st.save(S);
-    let K = s.K, view = null;
+    let K = s.K, view = null, iv8 = {};
     const byId = (id) => D.G.pool.find((e) => e.id === id);
     const set = () => s.train.map(byId);
     const evalNow = (th) => M.evaluate(set(), D.G.test, { K, threshold: th || 0 });
@@ -877,7 +913,7 @@
           </section>
           <section class="lab-panel pm-sec pm-evidence">
             <h3>${icon("bulb")}Evidence</h3>
-            ${inspect ? `<p>Said ${tag(inspect.label)}, really ${tag(inspect.truth)}.</p>${why(M.knn(set(), inspect.ex.traits, { K }), inspect.ex.traits)}` : `<p class="muted">Inspect a prediction to see the examples behind it.</p>`}
+            ${inspect ? `<p>Said ${tag(inspect.label)}, really ${tag(inspect.truth)}.</p>${X.insideHtml(Object.assign({}, iv8, { train: set(), x: inspect.ex, truth: inspect.truth, K }))}` : `<p class="muted">Inspect a prediction to see the examples behind it.</p>`}
           </section>
         </div>
         <section class="lab-panel pm-sec">
@@ -914,7 +950,8 @@
         save(); render(); api.log("lab_test_run", { acc: Math.round(r.overall * 100), n: s.train.length });
         api.say(s.latest ? (s.latest.acc > s.first.acc ? `Accuracy went from ${pct(s.first.acc)} to ${pct(s.latest.acc)}.` : s.latest.acc < s.first.acc ? `Accuracy went down, from ${pct(s.first.acc)} to ${pct(s.latest.acc)}. What changed?` : `Accuracy stayed at ${pct(s.latest.acc)}.`) : `${pct(r.overall)} on 20 new creatures. Now find a mistake and inspect it.`, "info");
       },
-      inspect: (id) => { view = id; s.investigated = id; save(); render(); },
+      inspect: (id) => { view = id; iv8 = { step: 1, reached: 1 }; s.investigated = id; save(); render(); },
+      ...Object.fromEntries(["iv-step", "iv-feat", "iv-guess", "iv-reveal", "iv-reset"].map((a) => [a, (id) => { X.act(iv8, a, id); render(); }])),
       th: (t) => { s.th = Number(t); save(); render(); },
       q2: (id) => { s.ans.q2 = toggle(s.ans.q2, id); save(); render(); },
       q4: (id) => { s.ans.q4 = id; save(); render(); },

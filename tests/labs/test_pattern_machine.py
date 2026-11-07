@@ -24,6 +24,7 @@ async def state(pg):
 async def stage1(pg):
     await go(pg, 1)
     ok("S1: Reveal waits for a prediction and a trait", await pg.is_disabled('[data-act="reveal"]'))
+    ok("S1: the Field Guide offers What is AI? and patterns", await pg.locator('[data-fg="A"]').count() == 1 and await pg.locator('[data-fg="C"]').count() == 1)
     await act(pg, "guess", "Norp"); await act(pg, "trait", "color"); await act(pg, "reveal")
     t = await pg.inner_text("#pm-body")
     ok("S1: reveal names the real rule and the student's traits", "pointy horns" in t and "color" in t.lower(), t[:200])
@@ -66,36 +67,71 @@ async def stage2(pg):
     await act(pg, "view", "table")
     ok("S2: a table view lists every creature with its traits", await pg.locator(".pm-table tbody tr").count() >= 24)
 
+TRAIN3 = """(() => { const s = JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k => /^stem207\\.pm\\.(?!mode)/.test(k))));
+  return s.s3.train.map(([id, l]) => ({ id, traits: SE.pmData.POOL.find(c => c.id === id).traits, label: l })); })()"""
 async def stage3(pg):
     await go(pg, 3)
+    st = await state(pg)
+    ok("S3: the first visit starts from the stage 2 training set", st["s3"]["train"] == st["s2"]["labels"], (st["s3"]["train"][:3], st["s2"]["labels"][:3]))
     await act(pg, "pick", "q-01")
     ok("S3: testing before training asks to train", "Train the model first" in await say(pg))
     await act(pg, "train")
     for q in ["q-01", "q-02", "q-03"]:
         await act(pg, "pick", q)
-    why = await pg.inner_text(".pm-evidence")
-    ok("S3: Show why names the closest examples and the vote", "closest examples" in why and "Model confidence score" in why, why[:200])
-    # The explanation matches the model.
-    match = await pg.evaluate("""(() => { const s = JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k => /^stem207\\.pm\\.(?!mode)/.test(k))));
-      const tr = s.s2.labels.map(([id, l]) => ({ id, traits: SE.pmData.POOL.find(c => c.id === id).traits, label: l }));
-      const p = SE.mlKit.knn(tr, SE.pmData.TESTPOOL.find(c => c.id === 'q-03').traits);
-      return { label: p.label, n: p.neighbors.length, agree: Math.round(p.agree * 100) }; })()""")
-    ok("S3: the reasoning panel shows the model's real result", f"{match['agree']}%" in why and f"predicted {match['label']}" in why, (match, why[:120]))
-    # Find an example whose label flip changes a tested prediction.
-    flip = await pg.evaluate("""(() => { const s = JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k => /^stem207\\.pm\\.(?!mode)/.test(k))));
-      const tr = s.s2.labels.map(([id, l]) => ({ id, traits: SE.pmData.POOL.find(c => c.id === id).traits, label: l }));
-      for (const q of ['q-01','q-02','q-03']) { const t = SE.pmData.TESTPOOL.find(c => c.id === q).traits, p = SE.mlKit.knn(tr, t);
+    ok("S3: three tests don't finish the stage by themselves", not await won(pg))
+    # Inside the Machine: every step shows the model's real numbers.
+    m = await pg.evaluate("""((tr) => { const t = SE.pmData.TESTPOOL.find(c => c.id === 'q-03').traits, p = SE.mlKit.knn(tr, t);
+      return { label: p.label, agree: Math.round(p.agree * 100), g: p.votes.Glim || 0, n: p.votes.Norp || 0, d1: SE.mlKit.distance(tr[0].traits, t), near: p.neighbors.length }; })(""" + TRAIN3 + ")")
+    await act(pg, "iv-feat", "horns")
+    ok("S3: Examine highlights the chosen feature on the creature", await pg.locator(".pm-hl--horns").count() == 1)
+    await act(pg, "iv-step", "next")
+    t = await pg.inner_text(".pm-iv")
+    ok("S3: Compare shows example 1's real distance", f"Its distance is {m['d1']}" in t, (m, t[:200]))
+    await pg.locator('.pm-iv [data-act="iv-step"][data-id="next"]').focus(); await pg.keyboard.press("Enter"); await pg.wait_for_timeout(150)
+    ok("S3: steps work from the keyboard", "Step 3 of 5" in await pg.inner_text(".pm-iv"))
+    ok("S3: Nearest marks exactly K neighbors", await pg.locator(".pm-iv__rank li.is-near").count() == m["near"])
+    await act(pg, "iv-step", "next")
+    t = await pg.inner_text(".pm-iv")
+    ok("S3: the vote equals the model's (votes, label, agreement)", f"{m['g']} vote" in t and f"{m['n']} vote" in t and f"Model agreement: {m['agree']}%" in t and "isn't the chance" in t, (m, t[:300]))
+    await act(pg, "iv-step", "next")
+    ok("S3: Reveal waits for the student's prediction", await pg.is_disabled('[data-act="iv-reveal"]'))
+    await act(pg, "iv-guess", "right"); await act(pg, "iv-reveal")
+    ok("S3: the walkthrough is recorded", (await state(pg))["s3"]["ivDone"] is True)
+    # Change One Thing: pick a change the model says flips the prediction, and check the page agrees.
+    cf = await pg.evaluate("""((tr) => { const x = SE.pmData.TESTPOOL.find(c => c.id === 'q-03').traits;
+      for (const k of SE.mlKit.KEYS) for (const v of SE.mlKit.TRAITS[k]) { if (v === x[k]) continue; const r = SE.pmExplain.counterfactual(tr, x, k, v, { K: 3 });
+        if (r.changed) return { k, v: String(v), to: r.after.label }; } return null; })(""" + TRAIN3 + ")")
+    ok("S3: some single-trait change flips this prediction", cf is not None)
+    await act(pg, "cf-trait", cf["k"]); await act(pg, "cf-value", cf["v"]); await act(pg, "cf-run")
+    out = await pg.inner_text(".pm-cf__out")
+    ok("S3: Change One Thing shows the flip the model makes", "changed" in out and cf["to"] in out and "sensitive" in out, out[:200])
+    # Change a training example so a prediction flips. The edit is saved, even after leaving the stage.
+    flip = await pg.evaluate("""((tr) => { for (const q of ['q-01','q-02','q-03']) { const t = SE.pmData.TESTPOOL.find(c => c.id === q).traits, p = SE.mlKit.knn(tr, t);
         for (const n of p.neighbors) { const t2 = tr.map(e => e.id === n.ex.id ? { ...e, label: e.label === 'Glim' ? 'Norp' : 'Glim' } : e);
-          if (SE.mlKit.knn(t2, t).label !== p.label) return n.ex.id; } } return null; })()""")
+          if (SE.mlKit.knn(t2, t).label !== p.label) return n.ex.id; } } return null; })(""" + TRAIN3 + ")")
     ok("S3: some example can flip a prediction", flip is not None)
+    before = dict((await state(pg))["s3"]["train"])[flip]
     await act(pg, "sel", flip); await act(pg, "relabel", flip); await act(pg, "train")
     ok("S3: the flip is noticed", "changed" in await say(pg), await say(pg))
+    await go(pg, 3)
+    after = dict((await state(pg))["s3"]["train"])[flip]
+    ok("S3: a training edit survives leaving the stage", after != before and await pg.locator(f'[data-act="sel"][data-id="{flip}"][aria-label$="labeled {after}"]').count() == 1, (before, after))
     other = await pg.evaluate(f"[...document.querySelectorAll('[data-act=cause]')].map(b => b.dataset.id).find(id => id !== '{flip}')")
     if other:
         await act(pg, "cause", other)
         ok("S3: the wrong cause is refused", "didn't change" in await say(pg) and not await won(pg))
     await act(pg, "cause", flip)
-    ok("S3: naming the changed example wins", await won(pg))
+    ok("S3: with every task done, naming the changed example wins", await won(pg))
+    # The AI Field Guide: stage 3 unlocks card D (not E), and its demo is the real model.
+    await pg.locator('[data-fg="D"]').first.click(); await pg.wait_for_timeout(150)
+    fg = await pg.inner_text("#pm-fg")
+    ok("Field Guide: a context button opens its card", not await pg.is_hidden("#pm-fg") and "How does it predict?" in fg)
+    ok("Field Guide: later cards stay locked", await pg.locator('#pm-fg [data-act="fg-card"][data-id="E"]').count() == 0 and "E. Locked" in fg)
+    await act(pg, "fg-k", "1")
+    k1 = await pg.evaluate("SE.mlKit.knn(SE.pmData.A.start, SE.pmData.A.next.traits, { K: 1 }).label")
+    ok("Field Guide: the demo shows the model's real prediction", f"Prediction ▲ {k1}" in (await pg.inner_text("#pm-fg")).replace("\n", " ") or f"Prediction ● {k1}" in (await pg.inner_text("#pm-fg")).replace("\n", " "), k1)
+    await act(pg, "fg-q", "D|store")
+    ok("Field Guide: a prediction question gives feedback", "storing labeled examples" in await pg.inner_text("#pm-fg"))
 
 async def stage4(pg):
     await go(pg, 4)
@@ -186,7 +222,7 @@ async def stage8(pg, student=True):
     ok("S8: the first test is the model's real score", abs(s["first"]["acc"] - model) < 1e-9, (s["first"], model))
     ok("S8: finish waits for every task", await pg.is_disabled('[data-act="finish"]'))
     await pg.locator('[data-act="inspect"]').first.click(); await pg.wait_for_timeout(120)
-    ok("S8: inspecting shows the real neighbors", "closest examples" in await pg.inner_text(".pm-evidence"))
+    ok("S8: inspecting opens Inside the Machine on that creature", "Inside the Machine" in await pg.inner_text(".pm-evidence") and await pg.locator(".pm-evidence .pm-iv").count() == 1)
     await pg.evaluate("document.querySelector('details[data-k=gpool]').open = true")
     ok("S8: the add list stays open after testing", await pg.evaluate("document.querySelector('details[data-k=gpool]').open"))
     for cid in ["g-p05", "g-p06", "g-p07", "g-p08", "g-p09", "g-p10"]:

@@ -12,6 +12,9 @@
  *               With K = 3 it can only be 33%, 67%, or 100% (two labels: 67% or 100%).
  * Training examples are { id, traits, label } and nothing else: the rule that made the labels is never
  * given to the model. Everything runs in the browser; nothing is sent anywhere.
+ *
+ * Advanced (Researcher mode only): opts.features, a list of traits the distance counts. Left out, all six
+ * count, so every default result is exactly the same as before. A trait left out is ignored entirely.
  */
 (function () {
   "use strict";
@@ -79,7 +82,9 @@
     const feet = `<rect x="${cx - 14}" y="${cy + r - 5}" width="9" height="8" rx="3" fill="${INK}"/><rect x="${cx + 5}" y="${cy + r - 5}" width="9" height="8" rx="3" fill="${INK}"/>`;
     const mouth = `<path d="M${cx - 6} ${cy + 6} q6 5 12 0" fill="none" stroke="${INK}" stroke-width="2" stroke-linecap="round"/>`;
     const a11y = label === " " ? 'aria-hidden="true" focusable="false"' : `role="img" aria-label="${esc(label || describe(t))}"`;   // " ": decorative, inside a labeled button
-    return `<svg class="creature" viewBox="0 0 100 100" width="${size}" height="${size}" ${a11y}>${tail}${ant}${feet}${body}${horns}${eyes}${mouth}</svg>`;
+    // Each part is grouped by the trait it shows, so a lesson can highlight one feature ([data-trait~="horns"]).
+    const g = (traits, svg) => (svg ? `<g data-trait="${traits}">${svg}</g>` : "");
+    return `<svg class="creature" viewBox="0 0 100 100" width="${size}" height="${size}" ${a11y}>${g("tail", tail)}${g("antennae", ant)}${feet}${g("shape color", body)}${g("horns", horns)}${g("eyes", eyes)}${mouth}</svg>`;
   }
 
   /* ───────── The model ───────── */
@@ -91,13 +96,15 @@
     check(e.traits);
     return e;
   }
-  const diffs = (a, b) => KEYS.filter((k) => a[k] !== b[k]);
-  const distance = (a, b) => diffs(a, b).length;
+  /* The traits the distance counts: all six unless a valid, non-empty subset is given. */
+  const featuresOf = (f) => (Array.isArray(f) && f.length && f.every((k) => KEYS.includes(k)) ? KEYS.filter((k) => f.includes(k)) : KEYS);
+  const diffs = (a, b, features) => featuresOf(features).filter((k) => a[k] !== b[k]);
+  const distance = (a, b, features) => diffs(a, b, features).length;
 
   /* Rank every training example by distance; ties keep training order. */
-  function ranked(train, traits) {
+  function ranked(train, traits, opts = {}) {
     check(traits);
-    return train.map((e, i) => { asExample(e, i); return { ex: e, order: i, diffs: diffs(e.traits, traits) }; })
+    return train.map((e, i) => { asExample(e, i); return { ex: e, order: i, diffs: diffs(e.traits, traits, opts.features) }; })
       .map((n) => ({ ...n, distance: n.diffs.length }))
       .sort((a, b) => a.distance - b.distance || a.order - b.order);
   }
@@ -106,7 +113,7 @@
   function knn(train, traits, opts = {}) {
     const K = [1, 3, 5].includes(opts.K) ? opts.K : 3;
     if (train.length > MAX_TRAIN) throw new RangeError(`Training sets hold up to ${MAX_TRAIN} examples.`);
-    const all = ranked(train, traits);
+    const all = ranked(train, traits, opts);
     if (!all.length) return null;
     const neighbors = all.slice(0, K);
     // Was an example left out only because it was added later? (it had the same distance as the last one used)
@@ -119,8 +126,8 @@
     return { label, votes, agree: votes[label] / neighbors.length, K, used: neighbors.length, neighbors, tieAtEdge };
   }
   /* Distance to the nearest training example (for "never seen anything like it"). */
-  function closest(train, traits) {
-    const all = ranked(train, traits);
+  function closest(train, traits, opts = {}) {
+    const all = ranked(train, traits, opts);
     return all.length ? all[0].distance : Infinity;
   }
 
@@ -171,8 +178,38 @@
         });
         Object.values(g).forEach((s) => { s.accuracy = s.correct / s.n; });
         return g;
+      },
+      /* Groups by two (or more) traits at once, e.g. ["color", "horns"] → "blue|pointy": { values, n, correct, accuracy }. */
+      byCombo(traits) {
+        const g = {};
+        items.forEach((r) => {
+          const values = traits.map((t) => r.ex.traits[t]), k = values.join("|");
+          const s = (g[k] = g[k] || { values, n: 0, correct: 0, accuracy: null });
+          s.n++; if (r.correct) s.correct++;
+        });
+        Object.values(g).forEach((s) => { s.accuracy = s.correct / s.n; });
+        return g;
       }
     };
+  }
+  /* Right and wrong by true label, for every test creature with a prediction (threshold ignored):
+     GG = really Glim, said Glim; GN = really Glim, said Norp; NG; NN. */
+  function confusion(res) {
+    const c = { GG: 0, GN: 0, NG: 0, NN: 0 };
+    res.items.forEach((r) => { if (r.label) c[(r.truth === "Glim" ? "G" : "N") + (r.label === "Glim" ? "G" : "N")]++; });
+    return c;
+  }
+  /* Accuracy on the training examples themselves (each one is its own nearest neighbor, so this runs high). */
+  function trainAccuracy(train, opts = {}) {
+    if (!train.length) return null;
+    return train.filter((e) => knn(train, e.traits, opts).label === e.label).length / train.length;
+  }
+  /* Examples with exactly the same traits but different labels: [{ key, ids, labels }]. */
+  function contradictions(set) {
+    const by = {};
+    set.forEach((e) => { const k = key(e.traits); (by[k] = by[k] || []).push(e); });
+    return Object.entries(by).filter(([, list]) => new Set(list.map((e) => e.label)).size > 1)
+      .map(([k, list]) => ({ key: k, ids: list.map((e) => e.id), labels: list.map((e) => e.label) }));
   }
 
   /* Counts by label, and by trait value × label. */
@@ -199,5 +236,5 @@
     return out;
   }
 
-  SE.mlKit = { TRAITS, KEYS, TRAIT_NAME, COLORS, MAX_TRAIN, MAX_TEST, parse, check, valid, traitText, describe, creature, distance, diffs, knn, closest, leaks, evaluate, distribution, missingCombos, possibleAgreements, key };
+  SE.mlKit = { TRAITS, KEYS, TRAIT_NAME, COLORS, MAX_TRAIN, MAX_TEST, parse, check, valid, traitText, describe, creature, distance, diffs, rank: ranked, featuresOf, knn, closest, leaks, evaluate, confusion, trainAccuracy, contradictions, distribution, missingCombos, possibleAgreements, key };
 })();

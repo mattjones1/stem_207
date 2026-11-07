@@ -144,6 +144,56 @@ ok("high-stakes cases rule out AI deciding alone", ["discipline", "medical", "sc
 const svg = M.creature(M.parse("purple spiky 3 pointy 2 long"));
 ok("the picture's label names every trait", ["purple", "spiky", "3 eyes", "pointy horns", "2 antennae", "long tail"].every((w) => svg.includes(w)));
 
+/* ───────── Pattern Machine 2.0: the model's new options, Inside the Machine, Change One Thing, the Field Guide ───────── */
+["assets/js/labs/pm-ui.js", "assets/js/labs/pm-explain.js", "assets/js/labs/pm-knowledge.js"].forEach((f) => vm.runInContext(fs.readFileSync(path.join(ROOT, f), "utf8"), sandbox, { filename: f }));
+const X = sandbox.window.SE.pmExplain, KN = sandbox.window.SE.pmKnow;
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+// features: left out (or all six) gives exactly the legacy result on every dataset.
+const sets = [[D.CD.base.concat(D.CD.variety), D.CD.test, 3], [D.E.train, D.E.test, 3], [D.F.train, D.F.test, 5], [D.G.pool, D.G.test, 3]];
+ok("features = all six gives exactly the default results on every dataset", sets.every(([tr, te, K]) => same(M.evaluate(tr, te, { K }).items.map((i) => [i.label, i.agree]), M.evaluate(tr, te, { K, features: M.KEYS.slice() }).items.map((i) => [i.label, i.agree]))));
+ok("an invalid features list falls back to all six", same(M.featuresOf(["wings"]), M.KEYS) && same(M.featuresOf([]), M.KEYS));
+ok("with features, distance counts only those traits", M.distance(M.parse("blue round 2 pointy 1 short"), M.parse("orange spiky 2 pointy 1 short"), ["horns", "eyes"]) === 0);
+ok("features change predictions only through distance (horns only: pointy → its pointy neighbors)", M.knn(D.E.train, M.parse("blue round 2 pointy 1 short"), { features: ["horns"] }).label === "Glim" && M.knn(D.E.train, M.parse("blue round 2 pointy 1 short")).label === "Norp");
+// rank: exported, deterministic, the same order knn uses.
+const r1 = M.rank(T, target), r2 = M.rank(T, target);
+ok("rank is deterministic and knn's neighbors are its first K", same(r1.map((r) => r.ex.id), r2.map((r) => r.ex.id)) && same(M.knn(T, target).neighbors.map((n) => n.ex.id), r1.slice(0, 3).map((r) => r.ex.id)));
+ok("K = 1, 3, 5 use 1, 3, 5 neighbors when there are enough", [1, 3, 5].every((k) => M.knn(D.G.pool, D.G.test[0].traits, { K: k }).used === k));
+// byCombo, confusion, trainAccuracy, contradictions.
+const eE = M.evaluate(D.E.train, D.E.test);
+const combo = eE.byCombo(["color", "horns"]);
+ok("byCombo counts every test creature once", Object.values(combo).reduce((s, g) => s + g.n, 0) === D.E.test.length);
+ok("byCombo finds the failing group (blue + pointy: 0 right)", combo["blue|pointy"] && combo["blue|pointy"].correct === 0 && combo["blue|pointy"].n === 3, JSON.stringify(combo["blue|pointy"]));
+const cm = M.confusion(eE);
+ok("the confusion counts add up to the test set, and match the right answers", cm.GG + cm.GN + cm.NG + cm.NN === eE.total && cm.GG + cm.NN === eE.items.filter((i) => i.correct).length, JSON.stringify(cm));
+ok("training accuracy is measured on the training examples themselves", M.trainAccuracy(D.CD.base) === D.CD.base.filter((e) => M.knn(D.CD.base, e.traits).label === e.label).length / D.CD.base.length);
+ok("contradictions: same traits, different labels", M.contradictions([ex("c1", "blue round 1 none 0 short", "Glim"), ex("c2", "blue round 1 none 0 short", "Norp"), ex("c3", "green round 1 none 0 short", "Glim")]).length === 1 && M.contradictions(D.G.pool).length === 0);
+// Inside the Machine: the steps are the model.
+const ivS = X.steps(D.CD.base, D.CD.test[0].traits, { K: 3 });
+ok("Inside the Machine's steps are knn's result", same(ivS.p.neighbors.map((n) => n.ex.id), M.knn(D.CD.base, D.CD.test[0].traits).neighbors.map((n) => n.ex.id)) && ivS.ranked.length === D.CD.base.length);
+const html4 = X.insideHtml({ train: D.CD.base, x: D.CD.test[0], truth: D.CD.test[0].label, K: 3, step: 4 });
+ok("step 4 states the model's real agreement, not as a probability", html4.includes(`Model agreement: ${Math.round(ivS.p.agree * 100)}%`) && html4.includes("isn't the chance"));
+const v = { step: 1, reached: 1, truth: "Glim" };
+["next", "next", "next", "next"].forEach((d) => X.act(v, "iv-step", d));
+X.act(v, "iv-reveal"); const doneEarly = v.done;
+X.act(v, "iv-guess", "right"); X.act(v, "iv-reveal");
+ok("the walkthrough is done only after a prediction and the reveal", v.step === 5 && !doneEarly && v.done === true);
+// Change One Thing.
+const cfx = X.counterfactual(D.A.start, D.A.next.traits, "horns", "none", { K: 3 });
+ok("Change One Thing compares before and after with the real model", cfx.before.label === M.knn(D.A.start, D.A.next.traits).label && cfx.after.label === M.knn(D.A.start, Object.assign({}, D.A.next.traits, { horns: "none" })).label && cfx.changed === (cfx.before.label !== cfx.after.label));
+ok("Change One Thing changes exactly one trait", M.distance(cfx.traits, D.A.next.traits) === 1);
+ok("neighbors in and out are the real differences", same(cfx.neighborsIn, cfx.after.neighbors.map((n) => n.ex.id).filter((id) => !cfx.before.neighbors.some((n) => n.ex.id === id))));
+// The Field Guide's demos show what they say.
+const f = KN.demoFacts();
+ok("Field Guide B: with only Glims, the answer is Glim", f.onlyGlims.label === "Glim" && Object.keys(f.onlyGlims.votes).join() === "Glim");
+ok("Field Guide E: training accuracy is higher than test accuracy for the stage 4 baseline", f.trainAcc > f.testAcc, [f.trainAcc, f.testAcc]);
+ok("Field Guide F: there is a blue Glim the biased model gets wrong", !!f.bias && f.bias.truth === "Glim" && f.bias.label === "Norp");
+ok("Field Guide G: a purple creature is wrong with 5 of 5 agreeing", !!f.trap && f.trap.agree === 1 && !f.trap.correct && f.trap.ex.traits.color === "purple");
+ok("Field Guide: 8 cards, each with every part", KN.CARDS.length === 8 && KN.CARDS.every((c) => c.def && c.analogy && c.demo && c.q && c.q[1].some((o) => o[0] === c.q[2]) && c.miscon && c.world && c.deeper));
+ok("Field Guide A: the sort has rule-based and learned examples", KN.SORT.some((s) => s[2] === "rule") && KN.SORT.some((s) => s[2] === "learned"));
+const svg2 = M.creature(M.parse("blue round 2 pointy 1 short"));
+ok("the creature art groups each trait for highlighting", ["horns", "eyes", "tail", "antennae", "shape color"].every((t) => svg2.includes(`data-trait="${t}"`)));
+
 const failed = R.filter((x) => !x).length;
 console.log(`\n${R.length - failed}/${R.length} passed`);
 process.exit(failed ? 1 : 0);
