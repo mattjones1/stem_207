@@ -4,7 +4,7 @@
  *   SE.certificate.button(info, label)  a button that opens the certificate
  *   SE.certificate.open(info)           show it in an overlay with Print and Close
  *
- * info: { award, course, detail, name, className, at }
+ * info: { award, course, detail, skills?: [], name, className, at }
  * Only the student's display name and class name appear: no other personal information.
  * For guests, the name is a blank line to write on.
  */
@@ -27,6 +27,7 @@
           <p class="cert__lead">completed</p>
           <p class="cert__course">${esc(info.course)}</p>
           ${info.detail ? `<p class="cert__detail">${esc(info.detail)}</p>` : ""}
+          ${info.skills && info.skills.length ? `<ul class="cert__skills">${info.skills.map((k) => `<li>${esc(k)}</li>`).join("")}</ul>` : ""}
           <div class="cert__foot">
             <div><span class="cert__line">${esc(date)}</span><small>Date</small></div>
             <div class="cert__pine" aria-hidden="true">${SE.pine(56, "", "#94c93d")}</div>

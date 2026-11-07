@@ -1,0 +1,267 @@
+# Pattern Machine Lab: Train the Machine. All 8 stages played through real clicks (wrong paths refused with
+# specific feedback, right paths win), the chart's numbers match the model, the report and certificate,
+# guest mode, no outside requests, and Chromebook size.
+#   LOCAL_MODE=1 PORT=8767 node tests/backend/mock-supabase.js ; python3 tests/labs/test_pattern_machine.py [url]
+import asyncio, sys, json
+from playwright.async_api import async_playwright
+S = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8767/"
+R = []
+def ok(n, c, x=""): R.append(bool(c)); print(("PASS " if c else "FAIL ") + n, "" if c else x)
+L = "#/lab/pattern-machine/"
+
+async def go(pg, n):
+    await pg.goto(S + "#/activities/ai"); await pg.wait_for_timeout(150)   # leave first, so the lab re-mounts
+    await pg.goto(S + L + str(n)); await pg.wait_for_timeout(450)
+async def act(pg, a, i=None):
+    sel = f'[data-act="{a}"]' + (f'[data-id="{i}"]' if i is not None else "")
+    await pg.locator(sel).first.click(); await pg.wait_for_timeout(120)
+async def say(pg): return await pg.inner_text("#lab-feedback")
+async def won(pg): return await pg.is_visible("#lab-win")
+async def state(pg):
+    return await pg.evaluate("""(() => { const k = Object.keys(localStorage).concat(Object.keys(sessionStorage)).find(k => /^stem207\\.pm\\.(?!mode)/.test(k));
+      return JSON.parse(localStorage.getItem(k) || sessionStorage.getItem(k) || '{}'); })()""")
+
+async def stage1(pg):
+    await go(pg, 1)
+    ok("S1: Reveal waits for a prediction and a trait", await pg.is_disabled('[data-act="reveal"]'))
+    await act(pg, "guess", "Norp"); await act(pg, "trait", "color"); await act(pg, "reveal")
+    t = await pg.inner_text("#pm-body")
+    ok("S1: reveal names the real rule and the student's traits", "pointy horns" in t and "color" in t.lower(), t[:200])
+    await act(pg, "first", "blue"); await act(pg, "more")
+    ok("S1: the new example breaks the color rule", "breaks" in await say(pg), await say(pg))
+    await act(pg, "more"); await act(pg, "final", "blue")
+    ok("S1: a rule that doesn't fit all six is flagged", "breaks that rule" in await pg.inner_text("#pm-body"))
+    await act(pg, "final", "pointy"); await act(pg, "whyfirst", "happened")
+    await act(pg, "game", "solo")
+    rule = (await state(pg))["s1"]["game"]["rule"]
+    wrong = next(r for r in ["tail", "ant2", "spiky", "pointy", "eyes3"] if r != rule)
+    await act(pg, "gguess", wrong)
+    fb = await say(pg)
+    ok("S1: a wrong rule guess is refused with a reason", "doesn't fit" in fb or "isn't the secret rule" in fb, fb)
+    await act(pg, "gguess", rule)
+    ok("S1: the right rule solves the game", "Solved" in await pg.inner_text("#pm-body"))
+    await act(pg, "check", "prove")
+    ok("S1: a wrong checkpoint answer doesn't win", not await won(pg))
+    await act(pg, "check", "many")
+    ok("S1: wins after the checkpoint", await won(pg))
+
+async def stage2(pg):
+    await go(pg, 2)
+    await act(pg, "rule", "horns")
+    pool = await pg.evaluate("SE.pmData.POOL.map(c => [c.id, c.traits.horns === 'pointy' ? 'Glim' : 'Norp'])")
+    await act(pg, "check")
+    ok("S2: too few examples is refused with the count", "has 0 examples" in await say(pg), await say(pg))
+    # One wrong label first
+    first = pool[0]; bad = "Glim" if first[1] == "Norp" else "Norp"
+    await act(pg, "label", f"{first[0]}|{bad}")
+    ok("S2: a label that breaks the rule is flagged", await pg.locator(".pm-flag").count() >= 1)
+    for cid, lab in pool[:10]: await act(pg, "label", f"{cid}|{lab}")
+    ok("S2: fixing the label counts as a correction", (await state(pg))["s2"]["fixes"] == 1)
+    t = await pg.inner_text(".pm-stats")
+    ok("S2: counts and the rule's trait table are shown", "10" in t and "Horns and label" in t, t[:200])
+    await act(pg, "check")
+    ok("S2: the prediction questions are required", "Make a prediction" in await say(pg), await say(pg))
+    await act(pg, "hyp", "moreglim"); await act(pg, "reason", "both"); await act(pg, "check")
+    ok("S2: a valid training set wins", await won(pg))
+    await act(pg, "view", "table")
+    ok("S2: a table view lists every creature with its traits", await pg.locator(".pm-table tbody tr").count() >= 24)
+
+async def stage3(pg):
+    await go(pg, 3)
+    await act(pg, "pick", "q-01")
+    ok("S3: testing before training asks to train", "Train the model first" in await say(pg))
+    await act(pg, "train")
+    for q in ["q-01", "q-02", "q-03"]:
+        await act(pg, "pick", q)
+    why = await pg.inner_text(".pm-evidence")
+    ok("S3: Show why names the closest examples and the vote", "closest examples" in why and "Model confidence score" in why, why[:200])
+    # The explanation matches the model.
+    match = await pg.evaluate("""(() => { const s = JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k => /^stem207\\.pm\\.(?!mode)/.test(k))));
+      const tr = s.s2.labels.map(([id, l]) => ({ id, traits: SE.pmData.POOL.find(c => c.id === id).traits, label: l }));
+      const p = SE.mlKit.knn(tr, SE.pmData.TESTPOOL.find(c => c.id === 'q-03').traits);
+      return { label: p.label, n: p.neighbors.length, agree: Math.round(p.agree * 100) }; })()""")
+    ok("S3: the reasoning panel shows the model's real result", f"{match['agree']}%" in why and f"predicted {match['label']}" in why, (match, why[:120]))
+    # Find an example whose label flip changes a tested prediction.
+    flip = await pg.evaluate("""(() => { const s = JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k => /^stem207\\.pm\\.(?!mode)/.test(k))));
+      const tr = s.s2.labels.map(([id, l]) => ({ id, traits: SE.pmData.POOL.find(c => c.id === id).traits, label: l }));
+      for (const q of ['q-01','q-02','q-03']) { const t = SE.pmData.TESTPOOL.find(c => c.id === q).traits, p = SE.mlKit.knn(tr, t);
+        for (const n of p.neighbors) { const t2 = tr.map(e => e.id === n.ex.id ? { ...e, label: e.label === 'Glim' ? 'Norp' : 'Glim' } : e);
+          if (SE.mlKit.knn(t2, t).label !== p.label) return n.ex.id; } } return null; })()""")
+    ok("S3: some example can flip a prediction", flip is not None)
+    await act(pg, "sel", flip); await act(pg, "relabel", flip); await act(pg, "train")
+    ok("S3: the flip is noticed", "changed" in await say(pg), await say(pg))
+    other = await pg.evaluate(f"[...document.querySelectorAll('[data-act=cause]')].map(b => b.dataset.id).find(id => id !== '{flip}')")
+    if other:
+        await act(pg, "cause", other)
+        ok("S3: the wrong cause is refused", "didn't change" in await say(pg) and not await won(pg))
+    await act(pg, "cause", flip)
+    ok("S3: naming the changed example wins", await won(pg))
+
+async def stage4(pg):
+    await go(pg, 4)
+    ok("S4: runs wait for a prediction", await pg.is_disabled('[data-act="start"][data-id="same"]'))
+    await act(pg, "pred", "variety")
+    await act(pg, "start", "same")
+    for _ in range(3): await act(pg, "add", "same")
+    await act(pg, "start", "variety")
+    for _ in range(3): await act(pg, "add", "variety")
+    model = await pg.evaluate("[SE.patternMachine.curveFor('same', 3).map(v => Math.round(v.test*100)), SE.patternMachine.curveFor('variety', 3).map(v => Math.round(v.test*100))]")
+    rows = await pg.evaluate("[...document.querySelectorAll('.pm-numbers table tbody tr')].map(r => [...r.querySelectorAll('td')].map(td => td.textContent))")
+    table = [[int(r[0].rstrip('%')) for r in rows], [int(r[1].rstrip('%')) for r in rows]]
+    ok("S4: the chart's table equals the model's real accuracy", table == model, (table, model))
+    ok("S4: variety ends higher, as measured", model[1][3] > model[0][3], model)
+    await act(pg, "explain", "same"); await act(pg, "down", "yes"); await act(pg, "q20", "depends"); await act(pg, "done")
+    ok("S4: an explanation that contradicts the data is refused with the numbers", "%" in await say(pg) and not await won(pg), await say(pg))
+    await act(pg, "explain", "variety"); await act(pg, "down", "no"); await act(pg, "done")
+    ok("S4: 'never went down' is refused when it did", "step down" in await say(pg), await say(pg))
+    await act(pg, "down", "yes"); await act(pg, "done")
+    ok("S4: matching the evidence wins", await won(pg))
+    await pg.check("#pm-train-acc"); await pg.wait_for_timeout(150)
+    ok("S4: training accuracy can be shown, with a warning", "not proof" in await pg.inner_text("#pm-body"))
+
+async def stage5(pg):
+    await go(pg, 5)
+    await act(pg, "test")
+    t = await pg.inner_text("#pm-body")
+    ok("S5: the flawed model gets 10 of 16", "10 of 16" in t, t[:160])
+    await act(pg, "group", "color|green")
+    ok("S5: a group doing well is refused with its numbers", "2 of 2" in await say(pg) or "too small" in await say(pg), await say(pg))
+    await act(pg, "group", "color|blue")
+    ok("S5: a group below overall is accepted", "4 of 7" in await say(pg), await say(pg))
+    await act(pg, "hyp", "broken")
+    ok("S5: a weak hypothesis gets a pointer", "compared with its examples" in await pg.inner_text("#pm-body"))
+    await act(pg, "hyp", "shortcut")
+    for cid in ["e-p07", "e-p08"]: await act(pg, "addc", cid)
+    await act(pg, "retest")
+    ok("S5: adding only green examples doesn't help and doesn't win", "still 0 of 6" in await say(pg) and not await won(pg), await say(pg))
+    for cid in ["e-p01", "e-p02", "e-p03", "e-p04", "e-p05", "e-p06"]: await act(pg, "addc", cid)
+    await act(pg, "retest")
+    t = await pg.inner_text(".pm-ba")
+    ok("S5: before/after shows the real change", "63%" in t and "94%" in t, t)
+    ok("S5: an evidence-based fix wins", await won(pg))
+
+async def stage6(pg):
+    await go(pg, 6)
+    async def slide(v):
+        await pg.evaluate(f"(() => {{ const r = document.querySelector('#pm-th'); r.value = '{v}'; r.dispatchEvent(new Event('input', {{ bubbles: true }})); }})()"); await pg.wait_for_timeout(120)
+    await slide(80)
+    t = await pg.inner_text(".pm-metrics")
+    ok("S6: at 80%: 9 answered, 3 wrong, 75% coverage", "9" in t and "75%" in t, t)
+    await act(pg, "tap", "f-x09"); await act(pg, "explain", "new"); await act(pg, "done")
+    ok("S6: needs 3 thresholds before recording", "at least 3" in await say(pg), await say(pg))
+    await slide(70)
+    ok("S6: says when two settings behave the same", "works the same as" in await pg.inner_text("#pm-body"))
+    await act(pg, "tap", "f-x06")
+    ok("S6: a low-agreement mistake isn't a confident mistake", "Only 3 of 5" in await pg.inner_text("#pm-body"))
+    await act(pg, "tap", "f-x09")
+    ok("S6: the purple confident mistake is recognized", "Found one" in await pg.inner_text("#pm-body"))
+    await slide(100)
+    await act(pg, "sth", "game|100"); await act(pg, "swhy", "game|cover"); await act(pg, "sth", "bite|50"); await act(pg, "swhy", "bite|safe"); await act(pg, "purple", "both")
+    await act(pg, "done")
+    ok("S6: a lower bar for bites than for the game is questioned", "Is that what you meant" in await say(pg), await say(pg))
+    await act(pg, "sth", "game|50"); await act(pg, "sth", "bite|80"); await act(pg, "done")
+    ok("S6: consistent thresholds win", await won(pg))
+
+async def stage7(pg):
+    await go(pg, 7)
+    uses = await pg.evaluate("SE.patternMachine.USES.map(u => ({ floor: u.floor, fits: u.fits }))")
+    ok("S7: score waits for all 10", await pg.is_disabled('[data-act="score"]'))
+    for i, u in enumerate(uses):
+        d = "help" if (i < 4 and u["floor"]) or (not u["floor"] and i >= 4) else ("review" if u["floor"] else "help")
+        d = "help" if u["floor"] else d   # every floored case gets the ruled-out answer: fails
+        await act(pg, "d", f"{i}|{d}")
+        await pg.select_option(f'[data-r="{i}"]', u["fits"][0]); await pg.wait_for_timeout(60)
+    await act(pg, "score")
+    ok("S7: 6 of 10 doesn't pass and says what's needed", "need 7" in await say(pg) and not await won(pg), await say(pg))
+    for i, u in enumerate(uses):
+        if u["floor"]: await act(pg, "d", f"{i}|review")
+    await act(pg, "score")
+    ok("S7: 10 of 10 passes", await won(pg) and "10 of 10" in await pg.inner_text("#lab-win-title"))
+
+async def stage8(pg, student=True):
+    await go(pg, 8)
+    await act(pg, "test")
+    s = (await state(pg))["s8"]
+    model = await pg.evaluate("SE.mlKit.evaluate(SE.pmData.G.pool.slice(0,4).concat(SE.pmData.G.pool.slice(12,16)), SE.pmData.G.test).overall")
+    ok("S8: the first test is the model's real score", abs(s["first"]["acc"] - model) < 1e-9, (s["first"], model))
+    ok("S8: finish waits for every task", await pg.is_disabled('[data-act="finish"]'))
+    await pg.locator('[data-act="inspect"]').first.click(); await pg.wait_for_timeout(120)
+    ok("S8: inspecting shows the real neighbors", "closest examples" in await pg.inner_text(".pm-evidence"))
+    await pg.evaluate("document.querySelector('details[data-k=gpool]').open = true")
+    ok("S8: the add list stays open after testing", await pg.evaluate("document.querySelector('details[data-k=gpool]').open"))
+    for cid in ["g-p05", "g-p06", "g-p07", "g-p08", "g-p09", "g-p10"]:
+        await pg.locator(f'[data-act="add"][data-id="{cid}"]').click(); await pg.wait_for_timeout(60)
+    ok("S8: the add list stays open while adding", await pg.evaluate("document.querySelector('details[data-k=gpool]').open"))
+    await act(pg, "test")
+    await act(pg, "th", "67")
+    for k, v in [("q2", "both"), ("q4", "addmissing"), ("q6", "newkind"), ("q7", "costly")]: await act(pg, k, v)
+    await pg.fill("#pm-lesson", "More kinds of examples beat more copies."); await pg.dispatch_event("#pm-lesson", "change")
+    await act(pg, "finish")
+    ok("S8: the challenge wins", await won(pg))
+    rep = await pg.inner_text("#pm-report")
+    s = (await state(pg))["s8"]
+    a, b = round(s["first"]["acc"] * 100), round(s["latest"]["acc"] * 100)
+    expect = f"Improved from {a}% to {b}%" if b > a else (f"Stayed at {b}%" if a == b else f"Went down from {a}% to {b}%")
+    ok("S8: the report states the measured before/after honestly", expect in rep, (expect, rep[:300]))
+    ok("S8: the report has every section", all(x in rep for x in ["Model purpose", "Training examples", "Feature coverage", "Test accuracy", "A mistake I investigated", "Confidence threshold", "When a person should check", "Keep the humanity in technology"]))
+    ok("S8: the report includes notebook results from stages 4–6", "accuracy experiment" in rep.lower() and "bias detective" in rep.lower())
+    if student:
+        ok("S8: the certificate is offered after all stages", await pg.locator("#lab-win [data-cert]").count() == 1)
+        await pg.locator("#lab-win [data-cert]").click(); await pg.wait_for_timeout(250)
+        ct = await pg.inner_text(".cert")
+        ok("certificate: award, name, workshop, skills, mission", all(x in ct for x in ["Responsible AI Explorer", "Ava R.", "Train the Machine", "Found and fixed biased data", "Keep the humanity in technology."]), ct[:200])
+        await pg.keyboard.press("Escape"); await pg.wait_for_timeout(150)
+
+async def main():
+  async with async_playwright() as p:
+    b = await p.chromium.launch(); errs = []; outside = []
+    ctx = await b.new_context(viewport={"width": 1366, "height": 650}); pg = await ctx.new_page()
+    pg.on("pageerror", lambda e: errs.append(f"{pg.url}: {e}"))
+    pg.on("request", lambda r: outside.append(r.url) if not r.url.startswith(S.rstrip("/")) and not r.url.startswith("data:") and "fonts.g" not in r.url else None)
+    await pg.goto(S); await pg.evaluate("localStorage.clear(); sessionStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400)
+
+    # Guest: landing, mode choice, and the lab works without an account
+    await pg.click("text=Look around as a guest"); await pg.wait_for_timeout(400)
+    await pg.goto(S + "#/lab/pattern-machine"); await pg.wait_for_timeout(500)
+    ok("guest: landing shows the big idea and modes", "People decide whether those patterns are useful" in await pg.inner_text("#app") and await pg.locator('[name="pm-mode"]').count() == 3)
+    await pg.check('[name="pm-mode"][value="explorer"]')
+    await go(pg, 2)
+    ok("guest: Explorer mode shows 16 creatures and 3 rules", await pg.locator('[data-act="rule"]').count() == 3)
+    await act(pg, "rule", "horns")
+    ok("guest: work is kept in sessionStorage only", await pg.evaluate("!!sessionStorage.getItem('stem207.pm.guest') && !localStorage.getItem('stem207.pm.guest')"))
+    await pg.evaluate("localStorage.setItem('stem207.pm.mode', 'investigator')")
+
+    # Student
+    await pg.goto(S + "#/signin/student"); await pg.wait_for_timeout(300)
+    await pg.fill("#class-code", "MOOSE7"); await pg.click("#code-form button[type=submit]"); await pg.wait_for_timeout(400)
+    await pg.click("text=Ava R."); await pg.wait_for_timeout(200)
+    for x in ["pine", "lighthouse", "moon"]: await pg.click(f"[data-pic={x}]")
+    await pg.wait_for_timeout(800)
+    await pg.evaluate("Object.keys(localStorage).filter(k => k.startsWith('stem207.pm.') && k !== 'stem207.pm.mode').forEach(k => localStorage.removeItem(k))")
+    for f in [stage1, stage2, stage3, stage4, stage5, stage6, stage7]:
+        try: await f(pg)
+        except Exception as e: ok(f"{f.__name__} ran without error", False, str(e)[:300])
+    try: await stage8(pg)
+    except Exception as e: ok("stage8 ran without error", False, str(e)[:300])
+
+    # Chromebook: the stage and its main button are on the first screen
+    for n, sel in [(1, '[data-act="guess"]'), (4, '[data-act="pred"]'), (8, '[data-act="test"]')]:
+        await go(pg, n)
+        box = await pg.locator(sel).first.bounding_box()
+        ok(f"Chromebook: stage {n}'s first control is on the first screen", box and box["y"] + box["height"] <= 650, box)
+
+    # Notebook holds real results and opens from any stage
+    await pg.click("#pm-nb-btn"); await pg.wait_for_timeout(150)
+    nb = await pg.inner_text("#pm-nb")
+    ok("notebook: entries with real numbers from earlier stages", "The accuracy experiment" in nb and "94%" in nb, nb[:200])
+    logged = await pg.evaluate("JSON.stringify(SE.store.eventsFor(SE.store.currentUser ? SE.store.currentUser().id : null) || [])") if False else ""
+    ok("no requests leave the site", not outside, outside[:5])
+    ok("no page errors", not errs, errs[:5])
+    await pg.set_viewport_size({"width": 390, "height": 844})
+    for n in [3, 5, 8]:
+        await go(pg, n)
+        w = await pg.evaluate("document.documentElement.scrollWidth")
+        ok(f"phone: stage {n} has no sideways scroll", w <= 390, w)
+    print(f"\n{sum(R)}/{len(R)} passed"); await b.close()
+    sys.exit(0 if all(R) else 1)
+asyncio.run(main())

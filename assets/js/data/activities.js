@@ -7107,88 +7107,98 @@ window.STEM.activities = [
   },
   {
     id: "lab-pattern-machine",
-    standards: [
-      "2-DA-09",
-      "2-IC-21"
-    ],
-    skills: [
-      "data",
-      "training-data",
-      "responsible-use"
-    ],
-    why: "AI doesn't think. It finds patterns in the examples people give it. If the examples are too few or lopsided, the AI learns the wrong lesson, so people have to check its work.",
-    realWorld: "Apps that sort photos, spam filters, and tools that help doctors read X-rays all learn from labeled examples, and all of them can make mistakes a person needs to catch.",
-    vocab: [
-      {
-        "term": "Training data",
-        "def": "The labeled examples an AI learns from."
-      },
-      {
-        "term": "Label",
-        "def": "The right answer attached to an example."
-      },
-      {
-        "term": "Bias",
-        "def": "When lopsided examples make an AI favor wrong answers."
-      },
-      {
-        "term": "Confidence",
-        "def": "How sure the model's output says it is. It can be confident and still wrong."
-      }
-    ],
-    check: "Show a moment when the machine got something wrong. Explain what in its training examples caused it, and how you fixed it.",
-    stopAt: "You finish level 6 and decide which uses of AI are responsible. Earning the certificate is a bonus.",
-    stuck: [
-      "Look at the training examples, not the new one. What do most of them have in common?",
-      "Add examples that are different from each other, not more of the same.",
-      "A high confidence score is a model output, not a guarantee. Ask: would a person need to check this?"
-    ],
-    next: "teachable-machine-classroom",
-    time: {
-      "prep": 5,
-      "core": [
-        35,
-        45
-      ],
-      "verified": false
-    },
-    title: "Pattern Machine Lab",
+    title: "Train the Machine: How AI Learns, and When It Gets It Wrong",
     area: "ai",
-    summary: "Train a real machine-learning model with examples, then find out how it learns, where it goes wrong, and why.",
-    level: "intermediate",
-    grades: ["4-5", "6-8"],
+    workshop: { series: "AI Workshops", number: 1, credit: "STEM Coliseum AI workshop, built for STEM 207, 2026" },
+    summary: "Become an AI trainer: build a training set, train a real machine-learning model, catch it learning the wrong lesson, and decide when people should check its answers.",
+    level: "beginner",
+    grades: ["2-3", "4-5", "6-8"],
     duration: 45,
+    time: { prep: 10, core: [85, 90], verified: false },
     format: "independent",
     equipment: ["computer", "tablet"],
-    source: "original",
-    keywords: ["lab", "machine learning", "training data", "bias", "confidence", "responsible ai", "classifier", "interactive"],
+    source: "coliseum",
+    standards: ["1B-DA-07", "2-DA-09", "2-IC-21"],
+    skills: ["data", "training-data", "responsible-use"],
+    next: "teachable-machine-classroom",
+    keywords: ["lab", "workshop", "pattern machine", "machine learning", "training data", "test data", "accuracy", "bias", "confidence", "threshold", "responsible ai", "classifier", "k-nearest neighbors", "glims", "norps", "interactive"],
     access: { account: "none", cost: "free", supervision: true, hardware: [] },
-    launch: { status: "lab", labId: "pattern-machine", label: "Open the Pattern Machine Lab", note: "Runs inside STEM 207. Uses made-up creatures only: no cameras, photos, or personal information." },
-    mission: "Teach a machine to sort creatures, then put it to the test. You'll see how the number and variety of examples change what it learns, catch it learning the wrong lesson, and decide when AI should and shouldn't be trusted.",
+    launch: { status: "lab", labId: "pattern-machine", label: "Open Train the Machine", note: "Runs inside STEM 207 (the Pattern Machine Lab). A real model runs in the browser on made-up creatures only: no cameras, microphones, photos, or personal information, and student work stays on the device." },
+    why: "AI doesn't think like a person. It finds patterns in the examples people give it, and sometimes those examples teach it the wrong lesson. People choose the examples, test the results, and decide when a person must check.",
+    realWorld: "Photo sorters, spam filters, and tools that help doctors read X-rays all learn from labeled examples. Teams that build them test on new data, look for groups the tool gets wrong, and decide when a person reviews the answer.",
+    vocab: [
+      { term: "Training data", def: "The labeled examples a model learns from." },
+      { term: "Test data", def: "New examples used to check a model. It never trains on them." },
+      { term: "Accuracy", def: "How many test predictions the model got right." },
+      { term: "Bias", def: "When lopsided examples make a model get some kinds of cases wrong again and again." },
+      { term: "Confidence score", def: "The model's own number for how much its nearby examples agree. It can be high and still wrong." }
+    ],
+    mission: "AI doesn't think like a person. It learns patterns from examples, and sometimes those examples teach it the wrong lesson. Become an AI researcher: build a training set, teach a real machine-learning model to sort made-up creatures, and investigate its mistakes. Find out why different examples matter, how biased data causes problems, and why a confident prediction can still be wrong. Then decide when AI should help people, and when humans should make the final call. Finish to earn your Responsible AI Explorer certificate.",
+    simple: {
+      mission: "Train a real machine to sort made-up creatures. Then check its mistakes.",
+      steps: [
+        "Look at Glims and Norps. Find the rule.",
+        "Make a secret rule. Label creatures for the machine.",
+        "Train the machine. See which examples it compared.",
+        "Add examples. Watch the score on the chart.",
+        "Find the creatures it gets wrong. Fix the examples.",
+        "Choose when a person should check. Make your report."
+      ]
+    },
     learn: [
-      "Explain that AI learns patterns from labeled training examples.",
-      "Show how too few or lopsided examples lead to wrong predictions (bias).",
-      "Decide when an AI's answer needs a human to check it."
+      "Explain how training examples shape what a machine-learning model predicts.",
+      "Build, label, and change a training set, then train and test a real model.",
+      "Compare repetitive and varied examples using accuracy on a separate test set.",
+      "Find a group a model gets wrong, explain the biased data behind it, and fix it with evidence.",
+      "Explain why a confidence score is not a guarantee, and choose a threshold for a job.",
+      "Decide when AI should help, help with a person reviewing, or not decide at all."
     ],
     before: {
-      materials: ["Laptop, Chromebook, or tablet"],
-      setup: ["Preview levels 4 and 6 so you're ready to lead a short discussion on bias and responsible use."],
-      prerequisites: "“How Does an AI Sort?” is a helpful unplugged warm-up."
+      materials: ["A Chromebook, laptop, or tablet for each student (pairs work too)", "A projector for the group moments"],
+      setup: [
+        "Make a class and print login cards so work saves on each student's device. Guests can work, but their work lasts only for the browser session.",
+        "Open stages 3, 5, and 6 on the projector before class so you can demo Show why, the error log, and the threshold slider.",
+        "Read the dataset notes in the teacher notes below so you know what each experiment is built to show."
+      ],
+      prerequisites: "None. No coding. “How Does an AI Sort?” is a helpful unplugged warm-up."
     },
     steps: [
-      "Open the lab and find the pattern in labeled examples.",
-      "Invent your own rule and train the machine with examples.",
-      "Add examples and watch accuracy change on the chart.",
-      "Find and fix a biased training set.",
-      "Set a confidence threshold, then decide which uses of AI are responsible."
+      "Be the machine: find the rule that sorts Glims from Norps, and change it when a new example breaks it.",
+      "Invent a secret rule and label creatures to build a training set.",
+      "Train the model, test new creatures, and read why it predicted each one.",
+      "Compare more of the same with more variety on a fixed test set.",
+      "Find the group a biased model gets wrong, then fix the training data.",
+      "Set a confidence threshold, decide when AI should be used, and make your AI Model Report."
     ],
-    reflect: "The machine never knew the rule, only the examples. What does that mean for AI tools you use in real life?",
-    extend: "Think of an AI tool you've seen (like autocomplete). What examples do you think it learned from? What might be missing from them?",
+    check: "Show your AI Model Report. Point to one mistake your model made, the examples that caused it, what you changed, and whether the test score really went up.",
+    stopAt: "You finish the Responsible AI Challenge (stage 8) and print your report. Grades 2–3 can stop after Bias Detective (stage 5).",
+    stuck: [
+      "Look at the training examples, not the new creature. What do the closest ones have in common?",
+      "Add examples that are different from each other, not more copies.",
+      "Group the test results by a trait. Which group does the worst?",
+      "A high confidence score is the model's own number. Ask: would a person need to check this?"
+    ],
+    reflect: "The machine never knew the rule, only the examples. What does that mean for AI tools people use in real life, and who should check them?",
+    extend: "Early finishers: change the number of neighbors (Researcher mode) and see which predictions change; make the model say “I'm not sure” a lot; or find a change that raises overall accuracy while one group gets worse.",
+    schedule: [
+      { time: "0:00–0:05", title: "Welcome", detail: "Introduce the AI Research Crew and the big idea: a machine can find patterns; people decide whether they're useful, fair, and trustworthy. Students choose a mode." },
+      { time: "0:05–0:15", title: "Be the Machine (stage 1)", detail: "Group moment after the tricky example: why did the color rule seem right? Several rules can fit a few examples." },
+      { time: "0:15–0:30", title: "Build and train (stages 2–3)", detail: "Demo Show why on the projector. Group moment after students first classify a creature: the machine compares; it doesn't understand." },
+      { time: "0:30–0:43", title: "Accuracy experiment (stage 4)", detail: "Group moment: compare charts. Did anyone's accuracy go down? Why is training accuracy not proof?" },
+      { time: "0:43–0:58", title: "Bias Detective (stage 5)", detail: "Group moment: the Talk about it questions. Who should notice and fix a model that fails one group?" },
+      { time: "0:58–1:10", title: "Confidence (stage 6)", detail: "Demo the slider. Ask: did raising the threshold always make it more accurate? Why were the purple creatures wrong at 100%?" },
+      { time: "1:10–1:25", title: "Human Decision Room (stage 7)", detail: "Before students start, read two cases aloud and model a reason. Discuss the judgment calls afterward." },
+      { time: "1:25–1:30", title: "Report and recognition (stage 8)", detail: "Students finish the challenge, print the AI Model Report, and earn the certificate. In a 90-minute session, start stage 8 early or assign it as the next session's opener." }
+    ],
     teacherNotes: [
-      "The machine is a real k-nearest-neighbors classifier. It shows the 3 training examples it compared against, so its reasoning is visible, not magic.",
-      "Pause the class after level 4 (bias) for a whole-group discussion: where could real AI training data be lopsided?",
-      "Level 6 has no single “correct” answer for every case. The explanations model good reasoning; welcome thoughtful disagreement.",
-      "No student data, images, or text leave the page. Creatures are generated from simple features."
+      "Timing (90 minutes): welcome 5, Be the Machine 10, build and train 15, accuracy experiment 13, Bias Detective 15, confidence 12, Human Decision Room 15, report and recognition 5. These are targets and haven't been tested with classes yet; nothing times students out. Stage 8 takes most groups 10–15 minutes, so many classes finish it in a second session.",
+      "The model is real: a k-nearest-neighbors classifier. Distance is the number of traits (out of 6) that differ; the 3 closest examples vote (5 in stage 6); ties go to the example added first. The confidence score is just the share of neighbors that agree, so with 3 neighbors it can only be 67% or 100%. It is not a probability of being right. The secret rule is never given to the model.",
+      "What each experiment is built to show (checked by automated tests): Stage 4, more of the same goes 69% → 63% → 75% → 69% while more variety goes 69% → 81% → 81% → 88% on the same 16 test creatures. Stage 5, the flawed model gets typical creatures 10 of 10 but blue Glims and orange Norps 0 of 6 (63% overall); adding the six blue-Glim and orange-Norp candidates brings it to 94%, while the green ones change nothing. Stage 6, raising the bar from 0 to 80% raises accuracy (58% → 67%), but 100% drops it to 50%: three purple creatures, a kind the training data never had, are wrong with 5 of 5 agreeing.",
+      "Common misconceptions: “more data always helps” (stage 4 shows it can dip); “the machine understands” (it counts different traits); “high confidence means right” (stage 6); “equal numbers of each label makes data fair” (coverage of different kinds matters too); “a higher threshold is always safer” (it also answers less, and doesn't catch new kinds of cases).",
+      "Modes, not grade labels: Explorer (grades 2–4: fewer cards, simpler rules), Investigator (5–6, the default), Researcher (7–8: choose the number of neighbors, the never-seen check, written reasons). Students can switch any time; nothing asks their grade.",
+      "Stage 7 rubric (a draft for your review): a case is sound when the decision is allowed and the reason fits. Discipline, medical images, scholarships, and emergency help rule out “AI can help with this” on its own; the other six are judgment calls where any decision with a fitting reason passes and is flagged for discussion. 7 of 10 passes. Written reasons are never scored by the computer; read them in the printed report.",
+      "The certificate needs stages 3–6, a pass in stage 7, and stage 8. It is separate from Pass / Try again: Activity XP still comes from your teacher check. The certificate uses the display name only.",
+      "Privacy: everything is made up, the model runs in the browser, and nothing is sent anywhere. Training sets, notebook notes, and the report stay on the device; only numbers (accuracy, counts, thresholds) are logged. Ask afterward: what could happen if a real AI system worked better for some people than others, and who should catch it?"
     ]
   },
   {

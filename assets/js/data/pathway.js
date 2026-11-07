@@ -122,7 +122,7 @@ window.STEM.aiRoute = [
   { step: 4, title: "Testing with new examples", idea: "Training examples and test examples are different. Variety in the data matters more than amount.",
     activities: ["teachable-machine-classroom", "ai-secret-signals"] },
   { step: 5, title: "Uncertainty and limits", idea: "A confidence score is the model's own number, and it can be high when the model is wrong. Some answers should go to a person.",
-    activities: ["lab-pattern-machine"], note: "Pattern Machine Lab levels 5 and 6." },
+    activities: ["lab-pattern-machine"], note: "Train the Machine (Pattern Machine Lab) stages 6 and 7." },
   { step: 6, title: "Checking and responsibility", idea: "People decide when to use AI, check its work, and fix the data when it's unfair.",
     activities: ["ai-limits-detectives"] }
 ];
