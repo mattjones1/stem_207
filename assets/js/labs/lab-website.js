@@ -45,7 +45,7 @@
     ul: "<ul> is a bullet list. Put <li> items inside it.",
     ol: "<ol> is a numbered list. Put <li> items inside it.",
     li: "<li> is one item in a list.",
-    img: "<img> shows a picture. src picks the picture; alt describes it for people who can't see it.",
+    img: `<img> shows a picture. src picks the picture (${BIZ_PICS.join(", ")}); alt describes it for people who can't see it.`,
     a: "<a> is a link. href says where it goes; the words between the tags should say where, too.",
     strong: "<strong> marks words as important.",
     em: "<em> adds emphasis, like when you say a word louder.",
@@ -123,7 +123,7 @@
       else if (weak) fix("alt", `Alt text "${weak.getAttribute("alt").trim()}" doesn't say what's in the picture. Describe it in a few words.`, wkOf(weak));
       else {
         good("alt", "Every picture has alt text.", wkOf(imgs[0]));
-        imgs.forEach((i) => person.push({ msg: `Read your alt text out loud: "${i.getAttribute("alt").trim()}". Does it tell someone what's in the picture?`, wk: wkOf(i) }));
+        imgs.forEach((i) => person.push({ key: `alt:${i.getAttribute("alt").trim()}`, msg: `Read your alt text out loud: "${i.getAttribute("alt").trim()}". Does it tell someone what's in the picture?`, wk: wkOf(i) }));
       }
     }
     // Link
@@ -144,7 +144,7 @@
       if (problem) fix("link", problem[0], wkOf(problem[1]));
       else {
         good("link", `Your link "${links[0].textContent.trim().slice(0, 40)}" works.`, wkOf(links[0]));
-        links.forEach((a) => person.push({ msg: `Read just your link words: "${a.textContent.trim()}". Would someone know where it goes?`, wk: wkOf(a) }));
+        links.forEach((a) => person.push({ key: `link:${a.textContent.trim()}`, msg: `Read just your link words: "${a.textContent.trim()}". Would someone know where it goes?`, wk: wkOf(a) }));
       }
     }
     // CSS style
@@ -178,6 +178,42 @@
     const all = doc.body.textContent.replace(/\s+/g, " ").trim();
     words(all) >= 20 ? good("own", "Your page has your own words.") : fix("own", `Your page has ${words(all)} words. Tell customers more: aim for 20 or more.`);
     return { results: R, person };
+  }
+
+  /* The page the way a screen reader moves through it: headings, paragraphs, lists, pictures, and links, in order.
+     Returns [{ kind, say, wk }]. A picture with no alt text is read by its file name, as many screen readers do. */
+  function readOut(doc) {
+    const out = [], clip = (t, n = 80) => (t.length > n ? `${t.slice(0, n - 1)}…` : t);
+    const text = (el) => el.textContent.replace(/\s+/g, " ").trim();
+    const one = (el) => {
+      const tag = el.tagName.toLowerCase(), wk = wkOf(el);
+      if (tag === "img") {
+        const alt = el.getAttribute("alt"), file = el.getAttribute("data-name") || el.getAttribute("data-src") || "picture";
+        out.push({ kind: "image", say: alt && alt.trim() ? `Image: ${alt.trim()}` : `Image: ${file} (no alt text, so it's read by its file name)`, wk });
+      } else if (tag === "a") out.push({ kind: "link", say: `Link: ${text(el) || "(no words)"}`, wk });
+    };
+    const walk = (node) => {
+      for (const el of node.children) {
+        const tag = el.tagName.toLowerCase(), wk = wkOf(el);
+        if (/^h[1-6]$/.test(tag)) { out.push({ kind: "heading", say: `Heading level ${tag[1]}: ${clip(text(el)) || "(empty)"}`, wk }); continue; }
+        if (tag === "ul" || tag === "ol") {
+          const items = [...el.querySelectorAll(":scope > li")];
+          out.push({ kind: "list", say: `List, ${items.length} item${items.length === 1 ? "" : "s"}`, wk });
+          items.forEach((li) => { out.push({ kind: "item", say: `• ${clip(text(li))}`, wk: wkOf(li) }); li.querySelectorAll("a, img").forEach(one); });
+          continue;
+        }
+        if (tag === "img" || tag === "a") { one(el); continue; }
+        if (tag === "p") {
+          const words = [...el.childNodes].filter((n) => n.nodeType === 3 || !/^(A|IMG)$/.test(n.tagName)).map((n) => n.textContent).join(" ").replace(/\s+/g, " ").trim();
+          if (words) out.push({ kind: "text", say: clip(words), wk });
+          el.querySelectorAll("a, img").forEach(one);
+          continue;
+        }
+        walk(el);
+      }
+    };
+    if (doc && doc.body) walk(doc.body);
+    return out;
   }
 
   /* Extra goals for early finishers (Challenge mode). They never block a stage. */
@@ -226,6 +262,8 @@
     const st = storeFor(api.user), state = st.load();
     const plan = Object.assign({ message: "", sections: [], noticed: "", improve: "", alone: false }, state.plan || {});
     const SECTIONS = ["Website title", "Main heading", "Short description", "List of products or services", "Picture", "A link"];
+    const body = el.closest(".lab-body");
+    if (body) body.classList.add("lab-body--wide");
     el.innerHTML = `
       <div class="ws ws--plan">
         ${journey(api, idx)}
@@ -315,62 +353,88 @@
     state.fixes = state.fixes || [];
     st.save(state);
     const work = state[bucket];
-    let help = flag("stem207.website.help"), challenge = flag("stem207.website.challenge");
-    let tab = "html", phone = false, map = [], timer = null, ready = Promise.resolve(), checks2 = 0, failed = 0, confirmReset = false;
+    let help = flag("stem207.website.help"), challenge = flag("stem207.website.challenge"), big = flag("stem207.website.big");
+    let tab = "html", phone = false, reader = false, map = [], timer = null, ready = Promise.resolve(), checks2 = 0, failed = 0, confirmReset = false, shipReady = null;
+    state.confirmed = state.confirmed || {};
+    const confirmed = (state.confirmed[idx] = state.confirmed[idx] || {});   // "Check with a person" items the student said yes to, keyed by their words
+    const needsPeople = !!S.confirm;   // stage 6: the person items must be confirmed too
+    const body = el.closest(".lab-body");
+    if (body) body.classList.add("lab-body--wide");   // a narrower brief, so code and preview get more room
+    const hasProject = !!(state.project && state.project.html && state.project.html.replace(/<h1><\/h1>|\s/g, ""));
+    const askStart = S.source === "ship" && !state.shipFrom && hasProject;
     const prev = {};   // last state of each check, to notice a fix
     const tags = TAGS(S.source === "debug" ? { pic: "lighthouse.svg", section: "flavors" } : b);   // the broken page has its own picture and section
 
     el.innerHTML = `
-      <div class="ws ${help ? "ws--help" : ""}" id="ws">
+      <div class="ws ${help ? "ws--help" : ""} ${big ? "ws--big" : ""}" id="ws">
         ${journey(api, idx)}
         <div class="ws__bar">
-          <label class="ws-bizpick">Business <select class="input input--small" id="ws-biz" ${S.source === "debug" ? "disabled" : ""}>${Object.values(BUSINESSES).map((x) => `<option value="${x.id}" ${x.id === b.id ? "selected" : ""}>${esc(x.name)}</option>`).join("")}</select></label>
+          <p class="ws-bizline">${S.source === "debug"
+            ? `${icon("alert")}<span>This page belongs to another developer: <strong>Puffin Point Ice Cream</strong>.</span>`
+            : `<span>Your business: <strong>${esc(b.name)}</strong></span> <a href="#/lab/${LAB}/1">Change on stage 1</a>`}</p>
           <div class="ws__toggles">
+            <button type="button" class="btn btn--ghost btn--small" id="ws-big" aria-pressed="${big}">${icon("plus")}Bigger code</button>
             <button type="button" class="btn btn--ghost btn--small" id="ws-help" aria-pressed="${help}">${icon("bulb")}Extra help</button>
             <button type="button" class="btn btn--ghost btn--small" id="ws-challenge" aria-pressed="${challenge}">${icon("star")}Challenge mode</button>
           </div>
         </div>
         <div class="ws__panes">
           <section class="ws__edit" aria-label="Your code">
-            <div class="ws-tabs" role="tablist" aria-label="Code">
-              <button type="button" role="tab" id="ws-tab-html" aria-selected="true" aria-controls="ws-panel-html">HTML</button>
-              ${S.css ? `<button type="button" role="tab" id="ws-tab-css" aria-selected="false" aria-controls="ws-panel-css">CSS</button>` : ""}
+            ${askStart ? `<div class="ws-start" id="ws-start" role="group" aria-labelledby="ws-start-h">
+              <p id="ws-start-h"><strong>How do you want to start?</strong> The checks are the same either way.</p>
+              <div class="ws-start__btns">
+                <button type="button" class="btn btn--primary btn--small" id="ws-start-mine">${icon("refresh")}Start from my page</button>
+                <button type="button" class="btn btn--ghost btn--small" id="ws-start-blank">${icon("star")}Start blank (challenge)</button>
+              </div>
+            </div>` : ""}
+            <div class="ws-tabrow">
+              <div class="ws-tabs" role="tablist" aria-label="Code">
+                <button type="button" role="tab" id="ws-tab-html" aria-selected="true" aria-controls="ws-panel-html">HTML</button>
+                ${S.css ? `<button type="button" role="tab" id="ws-tab-css" aria-selected="false" aria-controls="ws-panel-css">CSS</button>` : ""}
+              </div>
+              <div class="ws-undo">
+                <button type="button" class="linkish" id="ws-undo">${icon("refresh", 'style="transform:scaleX(-1)"')}Undo</button>
+                <button type="button" class="linkish" id="ws-redo">${icon("refresh")}Redo</button>
+              </div>
             </div>
             <div id="ws-panel-html" role="tabpanel" aria-labelledby="ws-tab-html">
-              ${S.tags && S.tags.length ? `<div class="ws-shelf" role="group" aria-label="Tag Shelf: type a tag at the cursor">${S.tags.map((t) => `<button type="button" class="ws-tag" data-tag="${t}"><span>${esc(tags[t].label)}</span><code>${esc(tags[t].open.split("\n")[0].replace(/"#?[^"]*"$/, '"…"'))}</code></button>`).join("")}</div>` : ""}
+              ${S.tags && S.tags.length ? `<div class="ws-shelf" role="group" aria-label="Tag Shelf: type a tag at the cursor">${S.tags.map((t) => `<button type="button" class="ws-tag" data-tag="${t}" ${t === "img" ? `title="Pictures you can use: ${BIZ_PICS.join(", ")}"` : ""}><span>${esc(tags[t].label)}</span><code>${esc(t === "id" ? 'id="…"' : `<${t}>`)}</code></button>`).join("")}</div>` : ""}
               <label class="visually-hidden" for="ws-html">Your HTML</label>
               <textarea id="ws-html" class="ws-code" rows="11" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="ws-coach">${esc(work.html)}</textarea>
-              <p class="ws-pics">Pictures: ${BIZ_PICS.map((p) => `<code>${p}</code>`).join(" ")}</p>
             </div>
             ${S.css ? `<div id="ws-panel-css" role="tabpanel" aria-labelledby="ws-tab-css" hidden>
               <div class="ws-colors" id="ws-colors" aria-label="Color helper"></div>
               <label class="visually-hidden" for="ws-css">Your CSS</label>
               <textarea id="ws-css" class="ws-code" rows="11" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="ws-coach">${esc(work.css)}</textarea>
             </div>` : ""}
-            <p class="ws-coach" id="ws-coach" aria-live="polite"></p>
+            <p class="ws-coach" id="ws-coach"></p>
             <div class="ws-actions">
-              <button type="button" class="btn btn--launch" id="ws-check">${icon("check")}${S.source === "ship" ? "Mark ready for review" : "Check my page"}</button>
-              <button type="button" class="btn btn--ghost btn--small" id="ws-undo">${icon("refresh", 'style="transform:scaleX(-1)"')}Undo</button>
-              <button type="button" class="btn btn--ghost btn--small" id="ws-redo">${icon("refresh")}Redo</button>
+              <button type="button" class="btn btn--launch" id="ws-check">${icon("check")}<span class="ws-check__label">Check my page</span></button>
+              ${S.source === "ship" ? `<button type="button" class="btn btn--primary" id="ws-ship" hidden>${icon("rocket")}Mark ready for review</button>` : ""}
               ${S.example ? `<button type="button" class="btn btn--ghost btn--small ws-help-only" id="ws-example">${icon("plus")}Show an example</button>` : ""}
               ${S.source === "ship" ? `<button type="button" class="btn btn--ghost btn--small" id="ws-earlier" aria-expanded="false" aria-controls="ws-earlier-code">${icon("eye")}Show my earlier page</button>` : ""}
-              <button type="button" class="btn btn--ghost btn--small" id="ws-reset">Start this stage over</button>
+              <button type="button" class="btn btn--ghost btn--small" id="ws-reset">Start over</button>
             </div>
             ${S.source === "ship" ? `<pre class="ws-earlier" id="ws-earlier-code" hidden tabindex="0" aria-label="Your earlier page (read only)">${esc((state.project && state.project.html) || "You haven't built an earlier page yet.")}</pre>` : ""}
           </section>
           <section class="ws__view" aria-label="Preview">
             <div class="ws-viewbar">
               <span class="ws-viewbar__h" id="ws-prev-h">Preview</span>
-              <div class="ws-size" role="group" aria-label="Preview size">
+              <div class="ws-size" role="group" aria-label="Preview">
                 <button type="button" class="btn btn--ghost btn--small" id="ws-desk" aria-pressed="true">Desktop</button>
                 <button type="button" class="btn btn--ghost btn--small" id="ws-phone" aria-pressed="false">Phone</button>
+                <button type="button" class="btn btn--ghost btn--small" id="ws-sr" aria-pressed="false" aria-controls="ws-reader">${icon("sound")}Screen reader</button>
               </div>
             </div>
             <div class="ws-framebox" id="ws-framebox"><iframe id="ws-frame" class="ws-frame" title="Preview of your website" sandbox="allow-same-origin" aria-describedby="ws-prev-h ws-findhelp"></iframe></div>
+            <section class="ws-reader" id="ws-reader" hidden aria-labelledby="ws-reader-h">
+              <div class="ws-reader__head"><h3 id="ws-reader-h">How a screen reader moves through your page</h3>${SE.speech.button("ws-reader")}</div>
+              <ol class="ws-reader__list" id="ws-reader-list"></ol>
+            </section>
             <p class="field-help" id="ws-findhelp">Find it: tap any part of your page to find the code that made it.</p>
-            ${S.css ? `<div class="ws-meter" id="ws-meter" aria-live="polite"></div>` : ""}
+            ${S.css ? `<div class="ws-meter" id="ws-meter"></div>` : ""}
             <div class="ws-feedback-slot"></div>
-            <section class="ws-checks" id="ws-checks" aria-live="polite" aria-label="Check my page results"></section>
+            <section class="ws-checks" id="ws-checks" aria-label="Check my page results"></section>
           </section>
         </div>
       </div>`;
@@ -426,6 +490,7 @@
             });
           }
           meter();
+          if (reader) readerView();
           res();
         };
       });
@@ -442,7 +507,7 @@
       area.scrollTop = Math.max(0, line * 22 - 40);
       outline(wk);
       coach();
-      api.say(`Found it: line ${line + 1}, the <${m.tag}> tag.`, "info");
+      api.say(`Found it: the <${m.tag}> tag. It's selected in your code.`, "info");
     }
     function outline(wk) {
       const d = frame.contentDocument;
@@ -469,6 +534,15 @@
         out.textContent = prop && CSS_COACH[prop.toLowerCase()] ? CSS_COACH[prop.toLowerCase()]
           : sel ? `${sel.trim()} { } picks ${sel.trim() === "body" ? "the whole page" : `every <${sel.trim()}>`} to style.` : "";
       }
+    }
+    function readerView() {
+      const list = $("#ws-reader-list"), d = frame.contentDocument;
+      if (!list || !d) return;
+      const items = readOut(d);
+      list.innerHTML = items.length ? items.map((it, i) => `<li class="ws-reader__i ws-reader__i--${it.kind}" data-ri="${i}"><span>${esc(it.say)}</span>${it.wk != null ? `<button type="button" class="linkish" data-find="${it.wk}">Find it</button>` : ""}</li>`).join("")
+        : `<li class="ws-reader__i">Your page has nothing to read yet.</li>`;
+      const btn = el.querySelector('[data-read="ws-reader"]');
+      if (btn) btn.onclick = () => SE.speech.read(btn, items.map((it, i) => ({ text: it.say.replace(/^• /, ""), el: list.querySelector(`[data-ri="${i}"]`) })));
     }
     function meter() {
       const box = $("#ws-meter"), d = frame.contentDocument;
@@ -517,12 +591,19 @@
     function showChecks(res, mode) {
       const need = S.checks.map((id) => ({ id, ...res.results[id] }));
       const fixes = need.filter((c) => c.state === "fix"), goods = need.filter((c) => c.state === "good"), persons = need.filter((c) => c.state === "person").map((c) => ({ msg: c.msg, wk: c.wk })).concat(res.person);
-      const item = (c, st, detail = true) => `<li class="ws-check ws-check--${st}">${icon(st === "good" ? "check" : st === "fix" ? "alert" : "users")}<span><strong>${STATE_TEXT[st]}${c.id ? `: ${esc(LABEL[c.id])}` : ""}.</strong> ${detail ? esc(c.msg) : ""}</span>${detail && c.wk != null ? `<button type="button" class="linkish" data-find="${c.wk}">Find it</button>` : ""}</li>`;
+      // Alt text and link words: the student answers "Yes, it's clear" (stage 6 needs every one) or Change it (Find it).
+      const ask = (c) => c.key && /^(alt|link):/.test(c.key)
+        ? (confirmed[c.key] ? `<span class="ws-check__ok">${icon("check")}You checked this</span>`
+          : `<span class="ws-check__ask"><button type="button" class="btn btn--ghost btn--small" data-ok="${esc(c.key)}">Yes, it's clear</button>${c.wk != null ? `<button type="button" class="linkish" data-find="${c.wk}">Change it</button>` : ""}</span>`)
+        : (c.wk != null ? `<button type="button" class="linkish" data-find="${c.wk}">Find it</button>` : "");
+      const item = (c, st, detail = true) => `<li class="ws-check ws-check--${st}">${icon(st === "good" ? "check" : st === "fix" ? "alert" : "users")}<span><strong>${STATE_TEXT[st]}${c.id ? `: ${esc(LABEL[c.id])}` : ""}.</strong> ${detail ? esc(c.msg) : ""}</span>${!detail ? "" : st === "person" ? ask(c) : c.wk != null ? `<button type="button" class="linkish" data-find="${c.wk}">Find it</button>` : ""}</li>`;
       let html = "";
       if (mode === "summary") {
         html = `<p class="ws-checks__h">Check found ${fixes.length} problem${fixes.length === 1 ? "" : "s"}: ${fixes.map((c) => esc(LABEL[c.id])).join(", ")}. Press Check my page again to find where they are.</p><ul class="ws-checklist">${fixes.map((c) => item(c, "fix", false)).join("")}</ul>`;
       } else {
-        html = `<ul class="ws-checklist">${fixes.map((c) => item(c, "fix")).join("")}${goods.map((c) => item(c, "good")).join("")}${persons.map((c) => item(c, "person")).join("")}</ul>`;
+        // What to do comes first: fixes, then person checks. Passed checks fold into one line while there's work left.
+        const goodLine = `<li class="ws-check ws-check--good">${icon("check")}<span><strong>Looks good:</strong> ${goods.map((c) => esc(LABEL[c.id])).join(", ")}.</span></li>`;
+        html = `<ul class="ws-checklist">${fixes.map((c) => item(c, "fix")).join("")}${persons.map((c) => item(c, "person")).join("")}${!goods.length ? "" : fixes.length || persons.length ? goodLine : goods.map((c) => item(c, "good")).join("")}</ul>`;
       }
       if (challenge) html += `<div class="ws-challenge"><p class="ws-checks__h">${icon("star")}Challenge mode goals</p><ul>${res.challenges.map((c) => `<li class="${c.done ? "is-done" : ""}">${icon(c.done ? "check" : "target")}${esc(c.label)}${c.done ? " (done)" : ""}</li>`).join("")}</ul></div>`;
       $("#ws-checks").innerHTML = html;
@@ -544,11 +625,29 @@
       st.save(state);
       api.log("lab_test_run", { stage: idx, failing });   // check names only, never the code
       checks2++;
-      showChecks(res, S.source === "debug" && checks2 === 1 && failing.length ? "summary" : "full");
+      const summary = S.source === "debug" && checks2 === 1 && failing.length;
+      showChecks(res, summary ? "summary" : "full");
+      // Stage 7 checks in steps: the button says what the next press does.
+      $(".ws-check__label").textContent = summary ? "Show where they are" : "Check my page";
+      const list = $("#ws-checks");
+      if (list.scrollIntoView) list.scrollIntoView({ block: "nearest", behavior: "auto" });
       if (failing.length) {
         failed++;
-        api.say(S.source === "debug" && checks2 === 1 ? `This page has ${failing.length} problems. Press Check my page again to find where they are.`
-          : `${res.results[failing[0]].msg}${help && failed >= 2 ? " Stuck? Press Need a hint? above, or Show an example." : ""}`, "warn");
+        const names = failing.map((id) => LABEL[id]).join(", ");
+        api.say(summary ? `This page has ${failing.length} problems. Press Show where they are to find each one.`
+          : `${failing.length === 1 ? "1 thing" : `${failing.length} things`} to fix: ${names}. Start with the first one in the list.${help && failed >= 2 ? " Stuck? Press Need a hint? under your goal, or Show an example." : ""}`, "warn");
+        return;
+      }
+      const open = needsPeople ? res.person.filter((p) => p.key && /^(alt|link):/.test(p.key) && !confirmed[p.key]) : [];
+      if (open.length) {
+        if (!reader) setView("reader");
+        api.say(`Your page passes the automatic checks. Now check with a person: read ${open.length === 1 ? "the item" : `the ${open.length} items`} marked Check with a person out loud, then press Yes, it's clear (or Change it).`, "info");
+        return;
+      }
+      if (S.source === "ship") {
+        shipReady = res;
+        $("#ws-ship").hidden = false;
+        api.say("Every check passed. When you're happy with it, press Mark ready for review.", "good");
         return;
       }
       win(res);
@@ -564,7 +663,7 @@
       const info = { award: "First Website Shipped", course: "Build Your First Website", detail: `A web page for ${b.name}, checked for structure, style, and access`, name: api.user && api.user.role === "student" ? api.user.displayName : "", className: api.user && api.user.cls ? api.user.cls.name : "", at: Date.now() };
       const extra = `<section class="ws-done" id="ws-done" aria-labelledby="ws-done-h">
         <h3 id="ws-done-h">${icon("rocket")}Your First Website Is Ready!</h3>
-        <p class="ws-done__biz">A website for <strong>${esc(b.name)}</strong> (a made-up Maine business)</p>
+        <p class="ws-done__biz">A website for <strong>${esc(b.name)}</strong> (a made-up Maine business). ${state.shipFrom === "project" ? "Started from my earlier page." : "Built from a blank page."}</p>
         <div class="ws-done__cols">
           <iframe class="ws-done__frame" title="Your finished website" sandbox srcdoc="${esc(doc)}"></iframe>
           <div>
@@ -583,11 +682,12 @@
         </div>
       </section>`;
       api.say("Your website passed every check. It's ready for review!", "good");
-      api.win({ checks: passed, business: b.id, fixes: state.fixes.length }, { extra, title: "Ship Your First Website: complete!" });
+      api.win({ checks: passed, business: b.id, fixes: state.fixes.length, from: state.shipFrom === "project" ? "project" : "blank" }, { extra, title: "Ship Your First Website: complete!" });
       const copy = document.getElementById("ws-copy");
       if (copy) copy.addEventListener("click", () => {
         const text = exportPage(ta.html.value, ta.css.value, b.name);
-        if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => api.say("Copied your HTML and CSS.", "good"), () => api.say("Your browser didn't allow copying.", "warn"));
+        const no = () => api.say("Your browser didn't allow copying. Print your project summary instead.", "warn");
+        if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => api.say("Copied your HTML and CSS.", "good"), no); else no();
       });
       const pr = document.getElementById("ws-print");
       if (pr) pr.addEventListener("click", () => { document.body.classList.add("ws-printing"); window.print(); setTimeout(() => document.body.classList.remove("ws-printing"), 500); });
@@ -613,19 +713,42 @@
     });
     Object.values(ta).forEach((area) => area && area.addEventListener("input", () => {
       save(); clearTimeout(timer); timer = setTimeout(() => { render(); if (area === ta.css) colors(); }, 300);
-      confirmReset = false; $("#ws-reset").textContent = "Start this stage over";
+      confirmReset = false; $("#ws-reset").textContent = "Start over";
+      if (shipReady) { shipReady = null; $("#ws-ship").hidden = true; }   // an edit means checking again
     }));
     Object.values(ta).forEach((area) => area && ["click", "keyup"].forEach((ev) => area.addEventListener(ev, coach)));
     el.querySelectorAll("[data-tag]").forEach((bt) => bt.addEventListener("click", () => shelf(bt.dataset.tag)));
     $("#ws-check").addEventListener("click", check);
     $("#ws-undo").addEventListener("click", () => { ta[tab].focus(); document.execCommand("undo"); });
     $("#ws-redo").addEventListener("click", () => { ta[tab].focus(); document.execCommand("redo"); });
-    $("#ws-checks").addEventListener("click", (e) => { const f = e.target.closest("[data-find]"); if (f) findCode(f.dataset.find); });
+    $("#ws-checks").addEventListener("click", (e) => {
+      const f = e.target.closest("[data-find]");
+      if (f) { findCode(f.dataset.find); return; }
+      const ok = e.target.closest("[data-ok]");
+      if (ok) { confirmed[ok.dataset.ok] = true; st.save(state); api.log("lab_test_run", { stage: idx, confirmed: true }); check(); }
+    });
+    $("#ws-reader").addEventListener("click", (e) => { const f = e.target.closest("[data-find]"); if (f) findCode(f.dataset.find); });
+    if (S.source === "ship") $("#ws-ship").addEventListener("click", () => { if (shipReady) win(shipReady); });
+    const start = $("#ws-start");
+    if (start) start.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+      if (btn.id === "ws-start-mine") {
+        ta.html.value = state.project.html; if (ta.css) ta.css.value = state.project.css || "";
+        state.snap[idx] = { html: ta.html.value, css: ta.css ? ta.css.value : "" };
+        state.shipFrom = "project";
+        api.say("Your page from stages 2 to 6 is in the editor. Improve it, check it, and ship it.", "info");
+      } else {
+        state.shipFrom = "blank";
+        api.say("Blank page: build it your way. Show my earlier page lets you look back.", "info");
+      }
+      save(); render(); colors(); start.remove(); ta.html.focus();
+    });
     $("#ws-reset").addEventListener("click", (e) => {
-      if (!confirmReset) { confirmReset = true; e.currentTarget.textContent = "Yes, start this stage over"; api.say("This puts your code back the way it was when you started this stage. Press again to do it.", "info"); return; }
+      if (!confirmReset) { confirmReset = true; e.currentTarget.textContent = "Yes, start over"; api.say("This puts your code back the way it was when you started this stage. Press again to do it.", "info"); return; }
       const snap = state.snap[idx];
       ta.html.value = snap.html; if (ta.css) ta.css.value = snap.css;
-      save(); render(); colors(); confirmReset = false; e.currentTarget.textContent = "Start this stage over";
+      save(); render(); colors(); confirmReset = false; e.currentTarget.textContent = "Start over";
       api.say("Your code is back to the start of this stage.", "info");
     });
     const exBtn = $("#ws-example");
@@ -637,21 +760,30 @@
     });
     const earlier = $("#ws-earlier");
     if (earlier) earlier.addEventListener("click", () => { const p = $("#ws-earlier-code"); p.hidden = !p.hidden; earlier.setAttribute("aria-expanded", String(!p.hidden)); });
-    const size = (ph) => {
-      phone = ph;
-      $("#ws-framebox").classList.toggle("is-phone", ph);
-      $("#ws-phone").setAttribute("aria-pressed", String(ph)); $("#ws-desk").setAttribute("aria-pressed", String(!ph));
-      if (ph) { state.viewed[idx] = true; st.save(state); }
-    };
-    $("#ws-desk").addEventListener("click", () => size(false));
-    $("#ws-phone").addEventListener("click", () => size(true));
-    $("#ws-biz").addEventListener("change", (e) => { state.business = e.target.value; st.save(state); SE.route(true); });
+    /* The preview: Desktop, Phone, or the Screen reader view (the page still renders behind it, for checks). */
+    function setView(v) {
+      phone = v === "phone"; reader = v === "reader";
+      $("#ws-framebox").classList.toggle("is-phone", phone);
+      $("#ws-framebox").classList.toggle("is-behind", reader);
+      $("#ws-reader").hidden = !reader;
+      $("#ws-findhelp").hidden = reader;
+      $("#ws-desk").setAttribute("aria-pressed", String(v === "desk"));
+      $("#ws-phone").setAttribute("aria-pressed", String(phone));
+      $("#ws-sr").setAttribute("aria-pressed", String(reader));
+      if (phone) { state.viewed[idx] = true; st.save(state); }
+      if (reader) readerView(); else SE.speech.stop();
+    }
+    $("#ws-desk").addEventListener("click", () => setView("desk"));
+    $("#ws-phone").addEventListener("click", () => setView("phone"));
+    $("#ws-sr").addEventListener("click", () => setView(reader ? "desk" : "reader"));
+    $("#ws-big").addEventListener("click", (e) => { big = !big; flag("stem207.website.big", big); $("#ws").classList.toggle("ws--big", big); e.currentTarget.setAttribute("aria-pressed", String(big)); });
     $("#ws-help").addEventListener("click", (e) => { help = !help; flag("stem207.website.help", help); $("#ws").classList.toggle("ws--help", help); e.currentTarget.setAttribute("aria-pressed", String(help)); });
     $("#ws-challenge").addEventListener("click", (e) => { challenge = !challenge; flag("stem207.website.challenge", challenge); e.currentTarget.setAttribute("aria-pressed", String(challenge)); api.say(challenge ? "Challenge mode is on. Press Check my page to see the extra goals." : "Challenge mode is off.", "info"); });
 
     render();
+    if (S.cssFirst) showTab("css");   // a stage about CSS opens on the CSS tab
     if (S.source === "debug") api.say("Another developer left this page with four problems. Press Check my page to start investigating.", "info");
-    return () => clearTimeout(timer);
+    return () => { clearTimeout(timer); SE.speech.stop(); };
   }
 
   /* The student's page as one HTML file to copy: the same allowlist, pictures named (not embedded), no outside requests. */
@@ -677,6 +809,7 @@
     title: "Build Your First Website",
     tagline: "Launch your first website: plan, code, test, and ship a real web page for a made-up Maine business, in HTML and CSS.",
     levels: STAGES,
+    briefFirst: true,
     chapters: [
       { title: "Plan", short: "Plan", from: 0, to: 0, blurb: "Meet your business and plan on paper. Then test your plan with a real person." },
       { title: "Build", short: "Build", from: 1, to: 3, blurb: "Real HTML: headings, paragraphs, lists, pictures, and links." },
@@ -685,5 +818,5 @@
     ],
     mount: (el, idx, api) => (STAGES[idx].kind === "plan" ? mountPlan(el, idx, api) : mountCode(el, idx, api))
   });
-  SE.website = { checks, challenges, TAGS, STAGES, BUSINESSES, exportPage, seed };
+  SE.website = { checks, challenges, readOut, TAGS, STAGES, BUSINESSES, exportPage, seed };
 })();

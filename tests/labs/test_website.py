@@ -16,6 +16,7 @@ async def won(pg):
     await pg.wait_for_timeout(200)
     return await pg.locator("#lab-win:not([hidden])").count() == 1
 async def feedback(pg): return (await pg.inner_text("#lab-feedback")).strip()
+async def results(pg): return (await pg.inner_text("#ws-checks")).strip()   # each check's full message lives in the list
 async def check(pg):
     await pg.click("#ws-check"); await pg.wait_for_timeout(700)
 async def code(pg, sel, text):
@@ -71,6 +72,17 @@ async def main():
     ok("contrast uses the nearest background behind the words", nest["contrast"] == "fix", nest["_msg"]["contrast"])
     ln = await pg.evaluate(AUDIT, [PAGE.replace('href="#rentals"', 'href="#trips"'), CSS, {}])
     ok("a link to a missing id is named", ln["link"] == "fix" and 'id="trips"' in ln["_msg"]["link"], ln["_msg"]["link"])
+    READ = """async ([html]) => {
+      const f = document.createElement('iframe'); f.setAttribute('sandbox', 'allow-same-origin');
+      f.style.cssText = 'position:fixed;left:-9999px;top:0;width:900px;height:600px'; document.body.appendChild(f);
+      await new Promise((r) => { f.onload = r; f.srcdoc = SE.webKit.srcdoc(html, { map: true }).doc; });
+      const out = SE.website.readOut(f.contentDocument).map((x) => x.say); f.remove(); return out; }"""
+    ro = await pg.evaluate(READ, [PAGE])
+    ok("the screen reader view reads headings, the list, the picture's alt, and the link words, in order",
+       ro[0] == "Heading level 1: Pine Coast Kayak Rentals" and "List, 3 items" in ro and "Image: An orange kayak on calm water near a pine shore" in ro and "Link: Explore kayak rentals" in ro
+       and ro.index("Heading level 2: Rentals") < ro.index("List, 3 items"), ro)
+    ro2 = await pg.evaluate(READ, ['<h1>Shop</h1><img src="kayak.svg">'])
+    ok("a picture with no alt is read by its file name", any("kayak.svg" in x and "no alt text" in x for x in ro2), ro2)
 
     # ── Security: hostile code in the preview ──
     hostile = """<h1>Test</h1><script>parent.PWNED = 1; alert(1)</script><img src="x" onerror="parent.PWNED = 2">
@@ -104,7 +116,9 @@ async def main():
 
     # ── Stage 2: Tag Shelf by keyboard, then type ──
     await stage(pg, 2)
-    ok("the business carries over", (await pg.input_value("#ws-biz")) == "kayak")
+    ok("the business carries over, shown as words (changed only on stage 1)", "Your business: Pine Coast Kayak Rentals" in await pg.inner_text(".ws-bizline") and await pg.locator("#ws-biz").count() == 0)
+    order = await pg.evaluate("[...document.querySelector('.lab-brief').children].map((n) => n.className).join(' | ')")
+    ok("the brief leads with the goal and Need a hint?", order.index("lab-goal") < order.index("lab-brief__tools") < order.index("lab-steps"), order)
     await code(pg, "#ws-html", "<h1>Pine Coast Kayak Rentals</h1>\n")
     await pg.evaluate("(() => { const t = document.getElementById('ws-html'); t.focus(); t.setSelectionRange(t.value.length, t.value.length); })()")
     await pg.locator('[data-tag="p"]').focus(); await pg.keyboard.press("Enter"); await pg.wait_for_timeout(50)
@@ -113,6 +127,14 @@ async def main():
     ok("the preview shows the student's heading", (await pg.frame_locator("#ws-frame").locator("h1").inner_text()) == "Pine Coast Kayak Rentals")
     cb = await pg.locator("#ws-check").bounding_box()
     ok("Check my page is on the first screen at 1366x650", cb and cb["y"] + cb["height"] <= 650, cb)
+    await code(pg, "#ws-html", "<h1>Pine Coast Kayak Rentals</h1>\n<p></p>\n")
+    await check(pg)
+    ok("the feedback sums up what to fix; the details are in the list, once", "1 thing to fix: Paragraph" in await feedback(pg) and (await results(pg)).count("Add a paragraph") + (await results(pg)).count("very short") == 1, await feedback(pg))
+    fr = await pg.locator("#ws-checks li").first.bounding_box()
+    ok("the first result is on screen after Check my page", fr and fr["y"] >= 0 and fr["y"] + 40 <= 650, fr)
+    await pg.locator("#ws-checks [data-find]").first.click(); await pg.wait_for_timeout(100)
+    ok("Find it names the tag, not a line number nobody can see", "the <p> tag" in await feedback(pg) and "line" not in await feedback(pg), await feedback(pg))
+    await code(pg, "#ws-html", "<h1>Pine Coast Kayak Rentals</h1>\n<p>Paddle the calm Maine coast with friendly guides.</p>\n")
     await check(pg)
     ok("stage 2 completes", await won(pg), await feedback(pg))
 
@@ -122,7 +144,7 @@ async def main():
     ok("stage 3 starts from the student's own page", "Paddle the calm" in v, v)
     await code(pg, "#ws-html", v + '<h2 id="rentals">Rentals</h2>\n<ul>\n  <li>Single kayaks</li>\n</ul>\n')
     await check(pg)
-    ok("a one-item list is named", "1 item" in await feedback(pg), await feedback(pg))
+    ok("a one-item list is named", "1 item" in await results(pg), await results(pg))
     await code(pg, "#ws-html", (await pg.input_value("#ws-html")).replace("</ul>", "  <li>Tandem kayaks</li>\n</ul>"))
     await check(pg)
     ok("stage 3 completes", await won(pg), await feedback(pg))
@@ -132,10 +154,10 @@ async def main():
     v = await pg.input_value("#ws-html")
     await code(pg, "#ws-html", v + '<img src="kayak.svg">\n<p><a href="#rentals">click here</a></p>\n')
     await check(pg)
-    ok("a missing alt is named", "no alt text" in await feedback(pg), await feedback(pg))
+    ok("a missing alt is named", "no alt text" in await results(pg), await results(pg))
     await code(pg, "#ws-html", (await pg.input_value("#ws-html")).replace('<img src="kayak.svg">', '<img src="kayak.svg" alt="An orange kayak on calm water">'))
     await check(pg)
-    ok("\"click here\" is named", "click here" in await feedback(pg), await feedback(pg))
+    ok("\"click here\" is named", "click here" in await results(pg), await results(pg))
     await code(pg, "#ws-html", (await pg.input_value("#ws-html")).replace("click here", "Explore kayak rentals"))
     await pg.frame_locator("#ws-frame").locator("h2").click(); await pg.wait_for_timeout(150)
     sel = await pg.evaluate("(() => { const t = document.getElementById('ws-html'); return t.value.slice(t.selectionStart, t.selectionEnd); })()")
@@ -149,10 +171,10 @@ async def main():
 
     # ── Stage 5: CSS, and the color helper rewrites the code ──
     await stage(pg, 5)
-    await pg.click("#ws-tab-css")
+    ok("the CSS stage opens on the CSS tab", (await pg.get_attribute("#ws-tab-css", "aria-selected")) == "true")
     await code(pg, "#ws-css", "body {\n  background-color: #fff7e8;\n  color: #213547;\n}\n")
     await check(pg)
-    ok("colors alone ask for one more style choice", "one more style choice" in await feedback(pg), await feedback(pg))
+    ok("colors alone ask for one more style choice", "one more style choice" in await results(pg), await results(pg))
     await pg.wait_for_timeout(300)
     await pg.evaluate("(() => { const i = document.querySelector('#ws-colors [data-ci=\"1\"]'); i.value = '#145b72'; i.dispatchEvent(new Event('change', { bubbles: true })); })()")
     await pg.wait_for_timeout(450)
@@ -166,17 +188,26 @@ async def main():
     await pg.click("#ws-tab-css")
     await code(pg, "#ws-css", (await pg.input_value("#ws-css")).replace("#145b72", "#b0b0b0"))
     await check(pg)
-    ok("low contrast needs a fix, with the student's ratio", "to 1" in await feedback(pg) and "4.5" in await feedback(pg), await feedback(pg))
+    ok("low contrast needs a fix, with the student's ratio", "to 1" in await results(pg) and "4.5" in await results(pg), await results(pg))
     ok("the contrast meter says Needs a fix in words", "Needs a fix" in await pg.inner_text("#ws-meter"))
     await code(pg, "#ws-css", (await pg.input_value("#ws-css")).replace("#b0b0b0", "#213547"))
     await check(pg)
-    ok("stage 6 completes", await won(pg), await feedback(pg))
+    ok("passing the automatic checks isn't enough on stage 6: a person checks alt text and link words", not await won(pg) and "check with a person" in (await feedback(pg)).lower() and await pg.locator("#ws-checks [data-ok]").count() == 2, await feedback(pg))
+    ok("the screen reader view opens and reads the page", await pg.locator("#ws-reader:not([hidden])").count() == 1 and "Heading level 1: Pine Coast Kayak Rentals" in await pg.inner_text("#ws-reader-list"))
+    ok("the person checks come before the passed checks", (await pg.locator("#ws-checks li").first.get_attribute("class")).endswith("ws-check--person"))
+    await pg.locator("#ws-checks [data-ok]").first.click(); await pg.wait_for_timeout(700)
+    ok("one confirmation isn't all of them", not await won(pg) and await pg.locator("#ws-checks [data-ok]").count() == 1)
+    await pg.locator("#ws-checks [data-ok]").first.click(); await pg.wait_for_timeout(700)
+    ok("stage 6 completes after the person checks", await won(pg), await feedback(pg))
 
     # ── Stage 7: staged debugging, fixed in a different valid way ──
     await stage(pg, 7)
+    ok("the debug page says whose it is", "another developer" in await pg.inner_text(".ws-bizline"))
     await check(pg)
     ok("the first check names the kinds of problems, not the fixes", "Check found 4 problems" in await pg.inner_text("#ws-checks") and await pg.locator("#ws-checks [data-find]").count() == 0, await pg.inner_text("#ws-checks"))
+    ok("the button says what the next press does", (await pg.inner_text("#ws-check")).strip() == "Show where they are", await pg.inner_text("#ws-check"))
     await check(pg)
+    ok("then it's Check my page again", (await pg.inner_text("#ws-check")).strip() == "Check my page")
     ok("the second check locates them (Find it)", await pg.locator("#ws-checks [data-find]").count() == 4)
     h = (await pg.input_value("#ws-html")).replace('<p class="title">Puffin Point Ice Cream</p>', '<h1 class="title">Puffin Point Ice Cream</h1>').replace('<img src="lighthouse.svg">', '<img src="lighthouse.svg" alt="A lighthouse beside the ice cream shop">').replace("click here", "See all our flavors")
     await code(pg, "#ws-html", h)
@@ -187,19 +218,29 @@ async def main():
 
     # ── Stage 8: ship. Clicking isn't enough; the page must pass, and be looked at on a phone ──
     await stage(pg, 8)
+    ok("stage 8 asks how to start: from my page, or blank", await pg.locator("#ws-start-mine").count() == 1 and await pg.locator("#ws-start-blank").count() == 1)
+    await pg.click("#ws-start-blank"); await pg.wait_for_timeout(300)
+    ok("starting blank keeps the clean starter", (await pg.input_value("#ws-html")).strip() == "<h1></h1>" and await pg.locator("#ws-start").count() == 0)
     await check(pg)
     ok("an empty starter can't ship", not await won(pg) and "Needs a fix" in await pg.inner_text("#ws-checks"))
     await code(pg, "#ws-html", PAGE)
     await pg.click("#ws-tab-css"); await code(pg, "#ws-css", CSS)
     await check(pg)
-    ok("shipping asks for the Phone preview first", "Phone" in await feedback(pg), await feedback(pg))
+    ok("shipping asks for the Phone preview first", "Phone" in await results(pg), await results(pg))
     await pg.click("#ws-phone"); await pg.wait_for_timeout(200)
     await check(pg)
-    ok("stage 8 ships", await won(pg), await feedback(pg))
+    ok("passing every check shows Mark ready for review, but doesn't ship by itself", not await won(pg) and await pg.locator("#ws-ship:not([hidden])").count() == 1, await feedback(pg))
+    await pg.click("#ws-ship")
+    ok("stage 8 ships when the student marks it ready", await won(pg), await feedback(pg))
     done = await pg.inner_text("#lab-win")
-    ok("the finished screen: Your First Website Is Ready!", "Your First Website Is Ready!" in done and "Pine Coast Kayak Rentals" in done, done[:300])
+    ok("the finished screen: Your First Website Is Ready!", "Your First Website Is Ready!" in done and "Pine Coast Kayak Rentals" in done and "Built from a blank page" in done, done[:300])
     ok("it lists the accessibility fixes the student made", "readable" in done.lower() or "alt text" in done.lower(), done[:600])
     ok("it offers the certificate and a copy of the code", await pg.locator("#lab-win button:has-text('Print my certificate')").count() == 1 and await pg.locator("#ws-copy").count() == 1)
+    # Start from my page: the stages 2-6 project comes into stage 8.
+    await pg.evaluate("(() => { const k = 'stem207.website.guest'; const s = JSON.parse(sessionStorage.getItem(k)); delete s.shipFrom; delete s.ship; delete s.snap['7']; sessionStorage.setItem(k, JSON.stringify(s)); })()")
+    await stage(pg, 8)
+    await pg.click("#ws-start-mine"); await pg.wait_for_timeout(300)
+    ok("Start from my page brings in the student's page from stages 2-6", "Paddle the calm" in await pg.input_value("#ws-html"), await pg.input_value("#ws-html"))
 
     # ── Progress, drafts, and the original lab ──
     ok("Web Builder's progress is separate", await pg.evaluate("SE.labs.progressFor(null, 'web-builder').size") == 0 and await pg.evaluate(f"SE.labs.progressFor(null, '{LAB}').size") == 8)

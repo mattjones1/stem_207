@@ -50,15 +50,17 @@ Stages 2–6 grow one project.
 | 4 | Connect and Illustrate | Links and images | Add an `<img>` with alt text, and a link that jumps to the `<h2>`'s id. | adds a picture, alt text, and a link | |
 | | **Part 3: Style and access** | | | | **22** |
 | 5 | Give Your Website Style | CSS | In the CSS tab: background color, text color, and one more style. | a style choice | |
-| 6 | Build for Everyone | Accessibility | Fix what Check finds, and raise contrast to at least 4.5 to 1. | `h1`, alt text, link words, contrast | |
+| 6 | Build for Everyone | Accessibility | Fix what Check finds, and raise contrast to at least 4.5 to 1. Then open the **Screen reader** view and confirm each alt text and link out loud (**Yes, it's clear** or **Change it**). | `h1`, alt text, link words, contrast, plus each alt text and link confirmed by the student | |
 | | **Part 4: Debug and ship** | | | | **26** |
-| 7 | Fix the Broken Website | Debugging | Find and fix four bugs on another developer's page (Puffin Point Ice Cream). | All four bugs fixed | |
-| 8 | Ship Your First Website | Create | Build the page again from a clean start, look at it on the Phone preview, and press **Mark ready for review**. | Every check, plus it fits a phone, the Phone preview was used, and 20+ of their own words | |
+| 7 | Fix the Broken Website | Debugging | Find and fix four bugs on another developer's page (Puffin Point Ice Cream). The first Check names the kinds of problems; the button then reads **Show where they are**. | All four bugs fixed | |
+| 8 | Ship Your First Website | Create | Choose **Start from my page** or **Start blank (challenge)**, look at it on the Phone preview, press **Check my page**, and when every check passes, press **Mark ready for review**. | Every check, plus it fits a phone, the Phone preview was used, and 20+ of their own words | |
 
 **Check my page** gives each check one of three results:
 - **Looks good**
 - **Needs a fix**
-- **Check with a person:** the computer can tell that alt text and link words exist and aren't generic, but only a person can judge whether they're good. Students read these aloud to a partner.
+- **Check with a person:** the computer can tell that alt text and link words exist and aren't generic, but only a person can judge whether they're good. Students read these aloud to a partner, then press **Yes, it's clear** or **Change it**. On stage 6, every one must be confirmed. A confirmation resets if the words change.
+
+The feedback line sums up what to fix ("2 things to fix: Alt text, Link"). The full message for each check is in the list, with fixes and person checks first and the passed checks folded into one line. The **Screen reader** view (next to Desktop and Phone) lists the page the way a screen reader moves through it, with **Read it to me**.
 
 **The helpers.** Each one puts real code in front of the student:
 - **Tag Shelf:** types a real tag pair at the cursor, so the browser's Undo works.
@@ -92,7 +94,7 @@ Stages 2–6 grow one project.
 | 0:37–0:49 | CSS (stage 5) | Demo a `body { }` rule and the color helper. |
 | 0:49–0:59 | Accessibility and contrast (stage 6) | **Group moment:** who can't read low-contrast text? (Someone on a sunny screen, or someone with low vision.) |
 | 0:59–1:09 | Debug the broken page (stage 7) | Students find the four bugs. Remind them to fix one at a time and check again. |
-| 1:09–1:25 | Build and ship (stage 8) | Students rebuild their page on their own, check the Phone preview, and mark it ready. |
+| 1:09–1:25 | Build and ship (stage 8) | Students start from their page (or blank, as a challenge), check the Phone preview, and mark it ready. |
 | 1:25–1:30 | Showcase and reflection | Two or three students show their page. Exit tickets. |
 
 Times are targets and haven't been tested with classes yet. Nothing times students out.
@@ -102,7 +104,7 @@ Times are targets and haven't been tested with classes yet. Nothing times studen
 - **"It's broken."** Ask the student to tap the part that looks wrong with **Find it**. The code that made it is selected.
 - **The rest of the page went big or bold.** A closing tag is missing. Ask them to find the tag that opens and doesn't close.
 - **Read the first Needs a fix.** Students fix one thing, then check again. Don't let them try to fix everything at once.
-- **Stage 8 starts clean** on purpose: students show they can build the page without the scaffold. **Show my earlier page** lets them look back.
+- **Stage 8 asks how to start.** **Start from my page** brings in the stages 2–6 page to improve and ship. That's the right choice for most grades 4–5 students and for anyone short on time. **Start blank (challenge)** is the independent build; **Show my earlier page** lets them look back. The checks are the same either way, and the project summary says which they chose.
 
 ## Answer guide
 
@@ -153,7 +155,8 @@ Stage 7 reveals the bugs in three steps: the first Check names the kinds of prob
 - "Bigger words make a heading." An `<h1>` tells browsers and screen readers what the page is about. Big text in a `<p>` doesn't.
 
 ## Differentiation
-- **Extra help:** a bigger Tag Shelf and **Show an example** for the student's business.
+- **Extra help:** **Show an example** for the student's business, and a nudge toward Need a hint? after two tries.
+- **Bigger code** (next to Extra help): a larger Tag Shelf and code text for anyone, with no other change.
 - **Grades 2–3:** aim for stage 5, with Extra help on. Plan stage 1 together as a class.
 - **Challenge mode** (grades 5–8 and early finishers). Its goals never block a stage:
   - two sections with `<h2>` headings;

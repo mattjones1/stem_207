@@ -5,6 +5,7 @@
  * A stage: title, concept, kind ("plan" | "code"), source ("project" | "debug" | "ship"), goal, steps,
  *   hints: [notice, idea, scaffold], learned, tags (Tag Shelf buttons), css (show the CSS tab),
  *   checks (check ids that must be "good" to finish), example(biz) (an Extra help snippet: real code to edit)
+ *   cssFirst (open on the CSS tab), confirm (the alt text and link words must also be confirmed by the student)
  * Check ids are defined in lab-website.js: h1 p list h2 img alt link style contrast narrow phone own.
  */
 (function () {
@@ -72,22 +73,22 @@
       title: "Connect and Illustrate", concept: "Links and images", kind: "code", source: "project",
       goal: "Add a picture with alt text, and a link with clear words that jumps to a part of your page.",
       steps: ["Add a picture: <img src=\"muffins.svg\" alt=\"…\">. Pick the picture for your business.", "Write alt text that says what's in the picture.", "Give your <h2> an id, like <h2 id=\"menu\">.", "Add a link to it: <a href=\"#menu\">See our bakery menu</a>."],
-      hints: ["The pictures you can use are listed under the code: muffins.svg, kayak.svg, and tackle.svg.", "Alt text is read aloud for people who can't see the picture. Link words should say where the link goes, not \"click here\".", "<a href=\"#menu\"> jumps to the part of the page with id=\"menu\"."],
+      hints: ["The pictures you can use are muffins.svg, kayak.svg, and tackle.svg. The Picture button types yours.", "Alt text is read aloud for people who can't see the picture. Link words should say where the link goes, not \"click here\".", "<a href=\"#menu\"> jumps to the part of the page with id=\"menu\"."],
       learned: "Images need alt text, and links need words that say where they go. Those two habits make the web work for more people.",
       tags: ["img", "a", "id"], checks: ["h1", "p", "list", "img", "alt", "link"], example: (b) => ex.media(b)
     },
     {
-      title: "Give Your Website Style", concept: "CSS", kind: "code", source: "project", css: true,
+      title: "Give Your Website Style", concept: "CSS", kind: "code", source: "project", css: true, cssFirst: true,
       goal: "In the CSS tab, set the page's background color and text color, and make one more style choice.",
-      steps: ["Open the CSS tab.", "Write a rule for body: background-color and color.", "Add one more style, like padding, a font, or a border.", "Try the color helper: pick a color and watch the code change."],
+      steps: ["You're in the CSS tab. Your HTML is still there in the HTML tab.", "Write a rule for body: background-color and color.", "Add one more style, like padding, a font, or a border.", "Try the color helper: pick a color and watch the code change."],
       hints: ["A CSS rule is: a selector, then { property: value; }.", "HTML is what the parts are. CSS is how they look. body { … } styles the whole page.", "body {\n  background-color: #fff7e8;\n  color: #213547;\n  padding: 1em;\n}"],
       learned: "CSS controls how a page looks: selectors pick parts of the page, and properties and values change them.",
       tags: [], checks: ["style"], example: () => ex.style()
     },
     {
-      title: "Build for Everyone", concept: "Accessibility", kind: "code", source: "project", css: true,
-      goal: "Make your page work for more people: a main heading, alt text, clear links, and text with a contrast of at least 4.5 to 1.",
-      steps: ["Press Check my page.", "Fix anything that says Needs a fix.", "Use the contrast meter: make the text darker or the background lighter until it says Readable.", "Read Check with a person items out loud to a partner."],
+      title: "Build for Everyone", concept: "Accessibility", kind: "code", source: "project", css: true, confirm: true,
+      goal: "Make your page work for more people: a main heading, alt text, clear links, and readable colors. Then hear it the way a screen reader does.",
+      steps: ["Press Check my page, and fix anything that says Needs a fix.", "Use the contrast meter: make the text darker or the background lighter until it says Readable.", "Press Screen reader to see your page the way a screen reader moves through it.", "Read each Check with a person item out loud to a partner. Press Yes, it's clear, or Change it."],
       hints: ["Look at the contrast meter under the preview.", "Text needs to stand out from its background so more people can read it, like someone on a sunny screen or with low vision.", "Dark text on a light background works well: color: #213547 on background-color: #fff7e8."],
       learned: "Accessibility is part of good design. Headings, alt text, clear links, and readable colors help people with different needs use your page.",
       tags: ["h1", "img", "a"], checks: ["h1", "alt", "link", "contrast"]
@@ -95,15 +96,15 @@
     {
       title: "Fix the Broken Website", concept: "Debugging", kind: "code", source: "debug", css: true,
       goal: "Another developer left this page with four problems. Use Check my page to find them, then fix all four.",
-      steps: ["Press Check my page to see what kinds of problems there are.", "Press it again to find where each one is.", "Fix them one at a time, and check again."],
+      steps: ["Press Check my page to see what kinds of problems there are.", "Press Show where they are to find each one.", "Fix them one at a time, and check again."],
       hints: ["Check names four areas: the heading, the picture, the link, and the colors.", "Tap Find it on a problem to jump to its code.", "The title is a <p> made to look big. A real main heading uses <h1>."],
       learned: "Professional developers test pages against a checklist and fix problems one at a time. You found and fixed four real bugs.",
       tags: ["h1", "img", "a"], checks: ["h1", "alt", "link", "contrast"]
     },
     {
       title: "Ship Your First Website", concept: "Create", kind: "code", source: "ship", css: true,
-      goal: "Build your business's page on your own: heading, paragraph, list, picture with alt text, a clear link, your own styles, and readable colors. Check it on a phone, then mark it ready.",
-      steps: ["Look back at your wireframe and your earlier page.", "Write the HTML, then the CSS.", "Look at the Phone preview.", "Press Check my page and fix what it finds.", "Press Mark ready for review."],
+      goal: "Build your business's page: heading, paragraph, list, picture with alt text, a clear link, your own styles, and readable colors. Check it on a phone, then mark it ready.",
+      steps: ["Choose: start from your page, or start blank for a challenge.", "Look back at your wireframe. Write the HTML, then the CSS.", "Look at the Phone preview.", "Press Check my page and fix what it finds.", "When every check passes, press Mark ready for review."],
       hints: ["Start with the bones: <h1> and <p>. Then add the rest one piece at a time.", "Check often. Each check tells you the next thing the page needs.", "Look back at your earlier page with Show my earlier page. You can type the same tags again."],
       learned: "You planned a website, wrote the code, tested it, fixed mistakes, and made a page other people can understand and use.",
       tags: ["h1", "h2", "p", "ul", "li", "img", "a", "id"], checks: ["h1", "p", "list", "img", "alt", "link", "style", "contrast", "narrow", "phone", "own"]

@@ -6147,7 +6147,7 @@ window.STEM.activities = [
       "Stage 7 answer guide: change <p class=\"title\"> to <h1> (or <h1 class=\"title\">); add alt text to the picture, like alt=\"A lighthouse by the harbor\"; change \"click here\" to words like \"See all our flavors\"; and make the body text darker, like color: #333333. Any valid fix passes.",
       "Check my page gives three outcomes: Looks good, Needs a fix, and Check with a person. It can tell that alt text and link words exist and aren't generic, but only a person can judge whether they're good. The contrast check uses WCAG's formula and asks for 4.5 to 1 for all text (WCAG allows 3 to 1 for large text). Passing these checks doesn't mean a page is fully accessible.",
       "Rubric for the final page: Structure (one h1, a paragraph, a list); Media (a picture with meaningful alt text, a link with clear words); Style (background, text color, one more choice); Access (readable contrast, fits a phone); Process (plan, tester feedback, and fixes the student can explain).",
-      "Grades 2–3: aim for stage 5, with Extra help on (bigger Tag Shelf and Show an example). Grades 5–8 can turn on Challenge mode for more sections, links, and a stronger color theme. Ask afterward: who did your website help, and what did you change because of a real person's feedback?"
+      "Grades 2–3: aim for stage 5, with Extra help on (Show an example, and clues after two tries); Bigger code makes the Tag Shelf and code larger for anyone. On stage 8, most grades 4–5 students should choose Start from my page. Grades 5–8 can turn on Challenge mode for more sections, links, and a stronger color theme. Ask afterward: who did your website help, and what did you change because of a real person's feedback?"
     ]
   },
   {
