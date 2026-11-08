@@ -1540,3 +1540,54 @@ button.cc-cell:focus-visible { outline: 3px solid #b4006a; outline-offset: -3px;
 .pm-cf__pair figcaption { display: grid; justify-items: center; gap: .1rem; text-align: center; }
 .pm-iv__ex svg { width: 32px; height: 32px; flex: none; }
 .pm-iv__cmp th, .pm-iv__cmp td { padding: .2rem .3rem; }
+
+/* ───────── Pattern Machine 2.0, phase 2: Studio, experiment bench, Bias 2.0, Trust Dashboard ───────── */
+.pm-opt { display: inline-flex; gap: .2rem; align-items: center; padding: .05rem .5rem; border-radius: 999px; border: 1.5px dashed var(--teal); color: var(--teal); font-size: .75rem; font-weight: 700; font-family: var(--font-body, inherit); letter-spacing: 0; text-transform: none; }
+.pm-opt svg { width: .85em; height: .85em; fill: none; stroke: currentColor; stroke-width: 2; }
+.pm-ext > summary { display: flex; flex-wrap: wrap; gap: .3rem .7rem; align-items: center; cursor: pointer; min-height: 44px; font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; }
+.pm-ext > summary > span:first-child { display: inline-flex; gap: .4rem; align-items: center; }
+.pm-ext > summary svg { width: 1.05em; height: 1.05em; fill: none; stroke: currentColor; stroke-width: 2; }
+.pm-ext[open] > summary { margin-bottom: .5rem; }
+.pm-ext h4 { margin: .4rem 0 .2rem; font-size: 1rem; }
+.pm-build { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .7rem; align-items: start; }
+.pm-build__pic { display: grid; justify-items: center; gap: .2rem; max-width: 9rem; text-align: center; }
+.pm-build__pic p { margin: 0; }
+.pm-build__traits { display: grid; gap: .3rem; }
+.pm-build__row { display: flex; flex-wrap: wrap; gap: .25rem; align-items: center; }
+.pm-build__k { min-width: 4.8rem; font-weight: 700; font-size: .88rem; }
+.pm-chip--sm { min-height: 32px; padding: .15rem .55rem; font-size: .85rem; border-radius: 10px; }
+.pm-chip--sm[aria-pressed="true"]::before { content: "✓ "; }
+.pm-dash { display: grid; gap: .45rem; }
+.pm-dash__tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .35rem; }
+.pm-dash__tiles p { margin: 0; display: grid; gap: .1rem; justify-items: center; padding: .35rem; border-radius: var(--radius-sm); background: var(--bg); text-align: center; font-size: .82rem; }
+.pm-dash__tiles strong { font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+.pm-dash__cover { margin: .3rem 0 0; padding-left: 1.1rem; display: grid; gap: .15rem; font-size: .88rem; }
+.pm-dash__cover svg, .pm-chlist svg, .pm-evid h4 svg { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2; vertical-align: -.12em; }
+.pm-exp { margin: 0; padding-left: 1.1rem; display: grid; gap: .2rem; }
+.pm-chlist { list-style: none; margin: 0; padding: 0; display: grid; gap: .3rem; font-size: .9rem; }
+.pm-chlist li { display: flex; gap: .4rem; align-items: flex-start; padding: .35rem .5rem; border-radius: var(--radius-sm); background: var(--bg); }
+.pm-chlist li.is-done { background: var(--teal-soft); }
+.pm-table tr.is-err th { color: var(--warn-ink); }
+.pm-babars { margin: .5rem 0 0; display: grid; gap: .3rem; }
+.pm-babars figcaption { font-weight: 700; }
+.pm-babars__row { display: grid; grid-template-columns: minmax(7rem, auto) minmax(0, 1fr) minmax(0, 1fr); gap: .5rem; align-items: center; font-size: .85rem; }
+.pm-babars__b { position: relative; display: block; height: 1.5rem; border-radius: 6px; background: var(--surface-2); overflow: hidden; }
+.pm-babars__b > span:last-child { position: relative; padding-left: .4rem; line-height: 1.5rem; font-weight: 700; }
+.pm-babars__bar { position: absolute; inset: 0 auto 0 0; }
+.pm-babars__bar.is-before { background: color-mix(in srgb, var(--pm-s1) 35%, transparent); }
+.pm-babars__bar.is-after { background: color-mix(in srgb, var(--pm-s0) 40%, transparent); }
+.pm-evid { margin-top: .5rem; padding: .5rem .7rem; border-radius: var(--radius-sm); border: 1.5px solid var(--line); }
+.pm-evid h4 { margin: 0 0 .3rem; display: flex; gap: .35rem; align-items: center; }
+.pm-gauges { display: grid; gap: .35rem; }
+.pm-gauge { display: grid; grid-template-columns: 13rem minmax(0, 1fr) 3.5rem; gap: .5rem; align-items: center; font-size: .9rem; }
+.pm-gauge__track { display: block; height: .9rem; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.pm-gauge__track > span { display: block; height: 100%; background: var(--pm-s0); }
+.pm-gauge--cov .pm-gauge__track > span { background: var(--pm-s1); }
+.pm-gauge strong { font-variant-numeric: tabular-nums; }
+@media (max-width: 860px) {
+  .pm-build { grid-template-columns: minmax(0, 1fr); }
+  .pm-dash__tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pm-babars__row, .pm-gauge { grid-template-columns: minmax(0, 1fr); }
+}
+.pm-qsum { align-items: center; flex-wrap: wrap; }
+.pm-qsum .pm-link { margin-left: auto; }

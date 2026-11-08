@@ -15,7 +15,7 @@
   "use strict";
   const SE = window.SE;
   const { icon, esc } = SE;
-  const M = SE.mlKit, D = SE.pmData, X = SE.pmExplain, K_ = SE.pmKnow;
+  const M = SE.mlKit, D = SE.pmData, X = SE.pmExplain, K_ = SE.pmKnow, ST = SE.pmStudio;
   const { pct, tag, b, chips, card, paint, delegate } = SE.pmUI;
   const LAB = "pattern-machine";
   const JOURNEY = ["Be the machine", "Training set", "Train", "Accuracy", "Bias", "Confidence", "Decide", "Report"];
@@ -277,11 +277,15 @@
   }
 
   /* ───────── Stage 2: Build the Training Set ───────── */
-  const s2Defaults = () => ({ rule: "", labels: [], fixes: 0, hyp: "", reason: "", view: "cards", picking: false });
-  function trainingFromS2(S) { return (S.s2 && S.s2.labels || []).map(([id, label]) => { const c = D.POOL.find((p) => p.id === id); return c && { id, traits: c.traits, label }; }).filter(Boolean); }
+  const s2Defaults = () => ({ rule: "", labels: [], fixes: 0, hyp: "", reason: "", view: "cards", picking: false, custom: [], studio: {} });
+  /* A creature by id: the stage 2 pool, or one the student designed in the Creature Studio (ids "u-1", "u-2", …). */
+  const findCreature = (S, id) => D.POOL.find((p) => p.id === id) || ((S.s2 && S.s2.custom) || []).find((c) => c.id === id);
+  function trainingFromS2(S) { return (S.s2 && S.s2.labels || []).map(([id, label]) => { const c = findCreature(S, id); return c && { id, traits: c.traits, label }; }).filter(Boolean); }
+  const optional = `<span class="pm-opt">${icon("star")}Optional</span>`;
   function mountTrainingSet(el, api) {
     const st = storeFor(api.user), S = st.load(); const F = frame(el, api, 1, S, st);
     const s = (S.s2 = Object.assign(s2Defaults(), S.s2 || {}));
+    s.custom = s.custom || []; s.studio = s.studio || {};
     const ex = F.mode === "explorer";
     const rules = ex ? D.SECRET_RULES.slice(0, 3) : D.SECRET_RULES;
     const pool = ex ? D.POOL.slice(0, 16) : D.POOL;
@@ -289,7 +293,8 @@
     const save = () => st.save(S);
     const rule = () => D.SECRET_RULES.find((r) => r.id === s.rule);
     const labelOf = (id) => (s.labels.find((x) => x[0] === id) || [])[1];
-    const breaks = (id) => { const l = labelOf(id), r = rule(); const c = D.POOL.find((p) => p.id === id); return l && r && (r.test(c.traits) ? "Glim" : "Norp") !== l; };
+    const breaks = (id) => { const l = labelOf(id), r = rule(); const c = findCreature(S, id); return l && r && c && (r.test(c.traits) ? "Glim" : "Norp") !== l; };
+    const lastAcc = () => { const l = (S.snaps || []).filter((x) => x.stage === 2).pop(); return l ? l.acc : null; };
     function render() {
       const r = rule();
       const set = trainingFromS2(S);
@@ -321,9 +326,16 @@
             ${set.length ? r.traits.map((t) => crossTab(set, t)).join("") : ""}
             ${set.length && missing.length ? `<p class="pm-result">${icon("search")}Not in your training set yet: ${missing.map(esc).join(", ")}.</p>` : ""}
             ${s.fixes ? `<p class="muted">Labels you corrected: ${s.fixes}</p>` : ""}
-            <p class="muted">Equal numbers of Glims and Norps is one thing to check. Covering different kinds of creatures matters too.</p>
+            ${ST.dashboardHtml(set, { ruleTraits: r.traits, lastAcc: lastAcc() })}
           </section>
         </div>
+        <section class="lab-panel pm-sec" aria-labelledby="pm-studio-h">
+          <h3 id="pm-studio-h">${icon("palette")}Creature Studio ${optional}</h3>
+          <p>Design your own creature, label it, and add it to your training set. Try one your set is missing.</p>
+          ${ST.builderHtml(s.studio, { labels: true, note: "The machine will learn whatever label you give it, mistakes too." })}
+          <div class="pm-row">${b("st-add", "x", `${icon("plus")}Add to my training set`, "btn btn--primary btn--small", s.studio.label ? "" : "disabled")}${s.custom.length ? `<span class="muted pm-small">You've designed ${s.custom.length}.</span>` : ""}</div>
+          ${s.custom.length ? `<div class="pm-row pm-row--mini">${s.custom.map((c) => { const l = labelOf(c.id); return `<span class="pm-mini pm-mini--static ${breaks(c.id) ? "is-flag" : ""}">${M.creature(c.traits, 40)}${l ? tag(l) : `<span class="pm-tag">not in set</span>`}${l ? b("remove", c.id, `${icon("trash")}<span class="visually-hidden">Remove from training set</span>`, "pm-x") : ""}</span>`; }).join("")}</div>` : ""}
+        </section>
         <section class="lab-panel pm-sec">
           <h3><span class="pm-step">3</span>Make a prediction</h3>
           <p>What do you think would happen if the machine trained on <strong>lots of Glims and only a few Norps</strong>?</p>
@@ -358,6 +370,20 @@
         save(); render();
       },
       remove: (id) => { s.labels = s.labels.filter((x) => x[0] !== id); save(); render(); },
+      "st-trait": (id) => { ST.act(s.studio, "st-trait", id); save(); render(); },
+      "st-label": (id) => { ST.act(s.studio, "st-label", id); save(); render(); },
+      "st-add": () => {
+        const t = ST.traitsOf(s.studio);
+        if (ST.isTestCopy(t, D.TESTPOOL)) return api.say("That creature is exactly one of the new creatures the machine will be tested on. Testing on its own training examples wouldn't be fair, so change at least one trait.", "warn");
+        if (s.labels.length >= M.MAX_TRAIN) return api.say(`Training sets hold up to ${M.MAX_TRAIN} examples.`, "warn");
+        const same = trainingFromS2(S).find((e) => M.key(e.traits) === M.key(t));
+        const c = { id: `u-${s.custom.length + 1}`, traits: t };
+        s.custom.push(c); s.labels.push([c.id, s.studio.label]);
+        if (breaks(c.id)) s.studio.flagged = (s.studio.flagged || 0) + 1;
+        save(); render();
+        api.log("lab_test_run", { studio: 1 });
+        api.say(same ? `Added. It looks exactly like an example you already have${same.label !== s.studio.label ? ", but with a different label. The machine can't tell them apart." : ". Copies don't teach the machine anything new."}` : `Added your ${M.describe(t)} as a ${s.studio.label}.`, same && same.label !== s.studio.label ? "warn" : "info");
+      },
       hyp: (id) => { s.hyp = id; save(); render(); },
       reason: (id) => { s.reason = id; save(); render(); },
       check
@@ -379,7 +405,9 @@
     const s = (S.s3 = Object.assign({ whys: [], flip: null, found: false, edits: 0, train: null, model: null, K: 3, ivDone: false, cfDone: false }, S.s3 || {}));
     s.whys = s.whys || [];
     const pairs = (list) => list.map((e) => [e.id, e.label]);
-    const resolve = (p) => (p || []).map(([id, label]) => { const c = D.POOL.find((x) => x.id === id); return c && { id, traits: c.traits, label }; }).filter(Boolean);
+    const resolve = (p) => (p || []).map(([id, label]) => { const c = findCreature(S, id); return c && { id, traits: c.traits, label }; }).filter(Boolean);
+    s.ch = s.ch || {}; s.sandbox = s.sandbox || {};
+    let measured = null, snapName = "", sandboxX = null;
     if (!Array.isArray(s.train) || !s.train.length) { s.train = pairs(base); st.save(S); }
     let train = resolve(s.train);
     const tests = D.labelWith(rule, D.TESTPOOL.slice(0, F.mode === "explorer" ? 8 : 12));
@@ -410,10 +438,15 @@
       ["Change One Thing about a creature", !!s.cfDone],
       ["Change a training example so a prediction flips, then find it", !!s.found]
     ];
+    const ruleLabel = (t) => (rule.test(t) ? "Glim" : "Norp");
+    const missingValues = () => rule.traits.flatMap((k) => M.TRAITS[k].filter((v) => !train.some((e) => e.traits[k] === v)).map((v) => [k, v]));
+    const addable = () => D.POOL.filter((c) => !train.some((e) => e.id === c.id));
     function render() {
-      const x = current && tests.find((t) => t.id === current);
+      const x = current === "sandbox" ? sandboxX : current && tests.find((t) => t.id === current);
       const p = x && trained ? M.knn(trained, x.traits, { K }) : null;
       const flipT = s.flip && tests.find((t) => t.id === s.flip.test);
+      const miss = missingValues();
+      const CH = [["fool", "Fool the Machine", "Design a creature the machine gets wrong. Predict first, then test it."], ["missing", "Find the Missing Example", "Add an example with a kind your training set is missing, then measure again."], ["flip1", "The One-Trait Flip", "Use Change One Thing to find a change that flips the prediction."]];
       const T = tasks();
       paint(F.body, `
         ${sample ? `<p class="pm-result">${icon("alert")}You haven't built a training set in stage 2 yet, so this uses a sample one (rule: ${esc(rule.text)}).</p>` : ""}
@@ -434,16 +467,42 @@
           </section>
         </div>
         ${x && p ? `<div class="pm-split pm-split--iv">
-          <div class="lab-panel pm-sec pm-evidence">${X.insideHtml(Object.assign({}, iv, { train: trained, x, truth: x.label, K }))}</div>
+          <div class="lab-panel pm-sec pm-evidence">${current === "sandbox" ? `<p class="pm-small">${icon("palette")}Your designed creature. Its real label comes from the rule: ${tag(x.label)}.</p>` : ""}${X.insideHtml(Object.assign({}, iv, { train: trained, x, truth: x.label, K }))}</div>
           <div class="lab-panel pm-sec">${X.cfHtml(Object.assign({}, cf, { train: trained, x, K }))}</div>
         </div>` : ""}
+        <details class="lab-panel pm-sec pm-ext" data-k="bench3">
+          <summary><span>${icon("flask")}Experiment bench ${optional}</span><span class="muted pm-small">Measure, change the data, measure again. Fool the Machine.</span></summary>
+          <div class="pm-split">
+            <section aria-labelledby="pm-meas-h">
+              <h4 id="pm-meas-h">Measure on all ${tests.length} new creatures</h4>
+              <p class="muted pm-small">The same held-out creatures every time, so the numbers are a fair comparison. They are never added to training.</p>
+              ${b("measure", "x", `${icon("chart")}Measure`, "btn btn--primary btn--small", trained && !dirty ? "" : "disabled")}${trained && dirty ? `<span class="muted pm-small"> Update the model first.</span>` : ""}
+              ${measured ? `<p class="pm-big">${measured.correct} of ${measured.total} right: <strong>${pct(measured.overall)}</strong></p>
+                <p>Name this experiment:</p>${chips("snapname", [["Baseline", "Baseline"], ["More examples", "More examples"], ["Better variety", "Better variety"], ["Wrong label", "Wrong label"], ["Fixed label", "Fixed the label"]], snapName)}
+                ${b("snap", "x", `${icon("check")}Save snapshot`, "btn btn--ghost btn--small", snapName ? "" : "disabled")}` : ""}
+              ${ST.snapsHtml(S, 2)}
+              <h4>Change the data</h4>
+              <ul class="pm-small pm-exp"><li><strong>A. More examples:</strong> add a few, measure again.</li><li><strong>B. Better variety:</strong> add a kind that's missing${miss.length ? ` (missing: ${miss.slice(0, 4).map(([k, v]) => esc(M.traitText(k, v))).join(", ")})` : ""}, measure again.</li><li><strong>C. Wrong label:</strong> change one label on purpose, update, measure. Then fix it.</li></ul>
+              <details class="pm-numbers" data-k="add3"><summary>Labeled creatures you can add (${addable().length})</summary><p class="muted pm-small">A teammate labeled these with your rule.</p>
+                <div class="pm-row pm-row--mini">${addable().map((c) => `<span class="pm-mini pm-mini--static">${M.creature(c.traits, 40)}${tag(ruleLabel(c.traits))}${b("add3", c.id, `${icon("plus")}<span class="visually-hidden">Add</span>`, "pm-x pm-x--add")}</span>`).join("")}</div></details>
+            </section>
+            <section aria-labelledby="pm-fool-h">
+              <h4 id="pm-fool-h">Design a creature to test</h4>
+              ${ST.builderHtml(s.sandbox, { note: "Your rule gives its real label. It isn't added to training." })}
+              <p>Your prediction: will the machine get it right?</p>${chips("fool-guess", [["right", "It'll be right"], ["wrong", "It'll be wrong"]], s.sandbox.guess || "")}
+              ${b("fool", "x", `${icon("ai")}Test my creature`, "btn btn--primary btn--small", trained && s.sandbox.guess ? "" : "disabled")}
+              <h4>Challenges ${optional}</h4>
+              <ul class="pm-chlist">${CH.map(([id, t, d]) => `<li class="${s.ch[id] ? "is-done" : ""}">${s.ch[id] ? icon("check") : icon("target")}<span><strong>${esc(t)}</strong> ${esc(d)}</span>${s.ch[id] ? '<span class="visually-hidden"> (done)</span>' : ""}</li>`).join("")}</ul>
+            </section>
+          </div>
+        </details>
         <section class="lab-panel pm-sec">
           <h3>${icon("target")}Checkpoint</h3>
           <ol class="pm-tasks">${T.map(([t, done], i) => `<li class="${done ? "is-done" : ""}">${done ? icon("check") : `<b>${i + 1}</b>`}<span>${esc(t)}${i === 0 ? ` (${Math.min(3, s.whys.length)} of 3)` : ""}</span>${done ? '<span class="visually-hidden"> (done)</span>' : ""}</li>`).join("")}</ol>
           <p class="muted pm-small">For the last one: change the label of an example (or remove one), then update the model. Did a prediction change?</p>
           ${s.flip && flipT ? `<div class="pm-flipbox"><p class="pm-result is-good">${icon("refresh")}Your change flipped a prediction: this creature went from ${tag(s.flip.from)} to ${tag(s.flip.to)}.</p>
             <div class="pm-row">${card(flipT, { size: 64 })}<p>Which training example caused the change?</p></div>
-            <div class="pm-row">${uniq(s.flip.edits.concat(s.flip.near)).map((id) => { const e = D.POOL.find((c) => c.id === id); return e ? `<button type="button" class="pm-mini ${chosen === id ? "is-sel" : ""}" data-act="cause" data-id="${id}" data-k="cause:${id}" aria-pressed="${chosen === id}" aria-label="${esc(M.describe(e.traits))}">${M.creature(e.traits, 40, " ")}</button>` : ""; }).join("")}</div>
+            <div class="pm-row">${uniq(s.flip.edits.concat(s.flip.near)).map((id) => { const e = findCreature(S, id); return e ? `<button type="button" class="pm-mini ${chosen === id ? "is-sel" : ""}" data-act="cause" data-id="${id}" data-k="cause:${id}" aria-pressed="${chosen === id}" aria-label="${esc(M.describe(e.traits))}">${M.creature(e.traits, 40, " ")}</button>` : ""; }).join("")}</div>
             ${s.found ? `<p class="pm-result is-good">${icon("check")}Yes. That example was one of the closest ones, so changing it changed the vote.</p>` : ""}</div>` : ""}
           <p class="muted pm-small">This lab shows one kind of machine learning: comparing with examples. Other AI systems, like chatbots, work in different ways.</p>
         </section>`);
@@ -480,7 +539,43 @@
         chosen = id;
         if (s.flip.edits.includes(id)) { s.found = true; save(); render(); api.say("You found it. One training example can change what the machine predicts.", "good"); finish(); }
         else { render(); api.say("That example didn't change. Which one did you edit?", "warn"); }
-      }
+      },
+      measure: () => {
+        if (!trained || dirty) return;
+        measured = M.evaluate(trained, tests, { K }); snapName = "";
+        if (s.addedMissing && !s.ch.missing) { s.ch.missing = true; save(); api.say(`You added a kind that was missing and measured again: ${pct(measured.overall)}. Compare it with your earlier snapshots.`, "good"); }
+        else api.say(`${measured.correct} of ${measured.total} new creatures right (${pct(measured.overall)}).`, "info");
+        api.log("lab_test_run", { measure: Math.round(measured.overall * 100), n: trained.length });
+        render();
+      },
+      snapname: (id) => { snapName = id; render(); },
+      snap: () => {
+        if (!measured || !snapName) return;
+        ST.snap(S, { stage: 2, name: snapName, n: trained.length, glims: trained.filter((e) => e.label === "Glim").length, acc: measured.overall });
+        snapName = ""; save(); render(); api.say("Snapshot saved on this device. Change the data and measure again to compare.", "good");
+      },
+      add3: (id) => {
+        if (train.length >= M.MAX_TRAIN) return api.say(`Training sets hold up to ${M.MAX_TRAIN} examples.`, "warn");
+        const c = D.POOL.find((x) => x.id === id); if (!c) return;
+        const was = missingValues().some(([k, v]) => c.traits[k] === v);
+        train.push({ id: c.id, traits: c.traits, label: ruleLabel(c.traits) }); pending.push(c.id); s.edits++; dirty = true;
+        if (was) s.addedMissing = true;
+        save(); render(); api.say(`Added. ${was ? "It has a kind your set was missing. " : ""}Update the model, then measure again.`, "info");
+      },
+      "fool-guess": (id) => { s.sandbox.guess = id; save(); render(); },
+      fool: () => {
+        if (!trained) return;
+        const t = ST.traitsOf(s.sandbox);
+        if (ST.isTestCopy(t, tests)) return api.say("That's exactly one of the new creatures already in the test list. Design a different one.", "warn");
+        sandboxX = { id: "sandbox", traits: t, label: ruleLabel(t) };
+        current = "sandbox"; iv = { step: 1, reached: 1 }; cf = {};
+        const pr = M.knn(trained, t, { K }), wrong = pr.label !== sandboxX.label;
+        if (wrong && !s.ch.fool) { s.ch.fool = true; save(); }
+        api.log("lab_test_run", { fool: wrong ? 1 : 0 });
+        api.say(`The machine said ${pr.label}; your rule says ${sandboxX.label}. ${wrong ? "You fooled it! Step inside to see which examples misled it." : "It got this one. Which kind of creature might it miss?"} You predicted it would be ${s.sandbox.guess}.`, wrong ? "good" : "info");
+        render();
+      },
+      "st-trait": (id) => { ST.act(s.sandbox, "st-trait", id); save(); render(); }
     };
     ["iv-step", "iv-feat", "iv-guess", "iv-reveal", "iv-reset"].forEach((a) => {
       handlers[a] = (id) => {
@@ -491,11 +586,12 @@
     });
     ["cf-trait", "cf-value", "cf-run", "cf-reset"].forEach((a) => {
       handlers[a] = (id) => {
-        const x = tests.find((t) => t.id === current);
+        const x = current === "sandbox" ? sandboxX : tests.find((t) => t.id === current);
         Object.assign(cf, { train: trained, x, K });
         X.cfAct(cf, a, id);
         if (a === "cf-run" && cf.result) {
           const r = cf.result;
+          if (r.changed) s.ch.flip1 = true;
           s.cfDone = true; s.cfLast = `${M.TRAIT_NAME[r.trait]}: ${M.traitText(r.trait, r.from)} → ${M.traitText(r.trait, r.to)} (${r.changed ? "prediction changed" : "no change"})`; save();
           api.log("lab_test_run", { cf: r.trait, changed: r.changed ? 1 : 0 });
           api.say(r.changed ? `Changing ${M.TRAIT_NAME[r.trait].toLowerCase()} flipped the prediction to ${r.after.label}.` : `Changing ${M.TRAIT_NAME[r.trait].toLowerCase()} didn't change the prediction. Try another trait.`, "info");
@@ -607,16 +703,27 @@
   const HYPS = [["shortcut", "In the training data, the Glims were all orange and the Norps were all blue, so color became a shortcut"], ["broken", "The machine is broken"], ["few", "There weren't enough examples in total"], ["hard", "Blue creatures are harder to tell apart"]];
   function mountBias(el, api) {
     const st = storeFor(api.user), S = st.load(); const F = frame(el, api, 4, S, st);
-    const s = (S.s5 = Object.assign({ tested: false, trait: "color", group: null, hyp: "", train: D.E.train.map((e) => e.id), attempts: 0, after: null, explain: "", next: "" }, S.s5 || {}));
+    const s = (S.s5 = Object.assign({ tested: false, trait: "color", trait2: "", group: null, hyp: "", train: D.E.train.map((e) => e.id), attempts: 0, after: null, explain: "", next: "", trade: false, tradeWhy: "" }, S.s5 || {}));
     const save = () => st.save(S);
     const byId = (id) => D.E.train.concat(D.E.candidates).find((e) => e.id === id);
     const trainSet = () => s.train.map(byId);
     const before = M.evaluate(D.E.train, D.E.test);
     const groupStats = (res) => { const c = res.items.filter((i) => D.E.counter(i.ex)); return { n: c.length, correct: c.filter((i) => i.correct).length }; };
     const bg = groupStats(before);
+    /* Group rows for one trait or two: test creatures (n), right, accuracy, and how many training examples are in
+       that group. Groups with fewer than 3 test creatures are marked too few to tell. */
+    function groupRows(res, trainList) {
+      const keys = s.trait2 && s.trait2 !== s.trait ? [s.trait, s.trait2] : [s.trait];
+      const g = res.byCombo(keys);
+      const word = (vals) => vals.map((v, i) => M.traitText(keys[i], v)).join(" + ");
+      return Object.entries(g).map(([k, x]) => ({ k, keys, values: x.values, label: word(x.values), n: x.n, correct: x.correct, accuracy: x.accuracy,
+        inTrain: trainList.filter((e) => keys.every((t, i) => e.traits[t] === x.values[i])).length })).sort((a, b2) => a.accuracy - b2.accuracy || b2.n - a.n);
+    }
+    const tradeSet = () => D.E.train.filter((e) => !D.E.tradeoff.remove.includes(e.id)).concat(D.E.tradeoff.add.map(byId));
     function render() {
       const res = s.after ? M.evaluate(trainSet(), D.E.test) : before;
       const groups = res.byGroup(s.trait);
+      const rows = groupRows(res, s.after ? trainSet() : D.E.train);
       const mistakes = res.items.filter((i) => !i.correct);
       const hypOk = s.hyp === "shortcut";
       paint(F.body, `
@@ -633,10 +740,11 @@
           </section>
           <section class="lab-panel pm-sec">
             <h3><span class="pm-step">2</span>Error log: filter by trait</h3>
-            <label class="pm-field">Group the test creatures by <select class="input input--small" id="pm-trait">${TRAIT_KEYS.map((k) => `<option value="${k}" ${k === s.trait ? "selected" : ""}>${esc(M.TRAIT_NAME[k])}</option>`).join("")}</select></label>
-            <div class="pm-tablewrap"><table class="pm-table"><caption>Accuracy by ${esc(M.TRAIT_NAME[s.trait].toLowerCase())}</caption><thead><tr><th scope="col">Group</th><th scope="col">Right</th><th scope="col">Accuracy</th><th scope="col"><span class="visually-hidden">Choose</span></th></tr></thead>
-              <tbody>${Object.entries(groups).map(([v, g]) => `<tr><th scope="row">${esc(M.traitText(s.trait, isNaN(v) ? v : Number(v)))}</th><td>${g.correct} of ${g.n}</td><td>${pct(g.accuracy)}</td><td>${s.after ? "" : b("group", `${s.trait}|${v}`, "Problem group?", "btn btn--ghost btn--small", `aria-pressed="${!!s.group && s.group.join("|") === `${s.trait}|${v}`}"`)}</td></tr>`).join("")}</tbody></table></div>
-            <p class="muted pm-small">${mistakes.length} mistakes. Overall accuracy can look OK while one group does badly.</p>
+            <div class="pm-row"><label class="pm-field pm-field--inline">Group the test creatures by <select class="input input--small" id="pm-trait">${TRAIT_KEYS.map((k) => `<option value="${k}" ${k === s.trait ? "selected" : ""}>${esc(M.TRAIT_NAME[k])}</option>`).join("")}</select></label>
+              <label class="pm-field pm-field--inline">and <select class="input input--small" id="pm-trait2"><option value="">(nothing else)</option>${TRAIT_KEYS.filter((k) => k !== s.trait).map((k) => `<option value="${k}" ${k === s.trait2 ? "selected" : ""}>${esc(M.TRAIT_NAME[k])}</option>`).join("")}</select></label></div>
+            <div class="pm-tablewrap"><table class="pm-table"><caption>Accuracy by ${esc(rows[0] ? rows[0].keys.map((k) => M.TRAIT_NAME[k].toLowerCase()).join(" and ") : "")}, worst first</caption><thead><tr><th scope="col">Group</th><th scope="col">Test creatures</th><th scope="col">Right</th><th scope="col">Accuracy</th><th scope="col">Training examples like it</th>${s.after || rows[0].keys.length > 1 ? "" : `<th scope="col"><span class="visually-hidden">Choose</span></th>`}</tr></thead>
+              <tbody>${rows.map((r) => `<tr class="${r.correct < r.n ? "is-err" : ""}"><th scope="row">${esc(r.label)}</th><td>${r.n}</td><td>${r.correct} of ${r.n}</td><td>${r.n < 3 ? `<span class="muted">too few to tell</span>` : `<strong>${pct(r.accuracy)}</strong>`}</td><td>${r.inTrain === 0 ? `<span class="pm-flag">${icon("search")}none</span>` : r.inTrain}</td>${s.after || r.keys.length > 1 ? "" : `<td>${b("group", `${s.trait}|${r.values[0]}`, "Problem group?", "btn btn--ghost btn--small", `aria-pressed="${!!s.group && s.group.join("|") === `${s.trait}|${r.values[0]}`}"`)}</td>`}</tr>`).join("")}</tbody></table></div>
+            <p class="muted pm-small">${mistakes.length} mistakes. Overall accuracy can look OK while one group does badly. A group with only 1 or 2 test creatures is too small to judge.</p>
           </section>
         </div>` : ""}
         ${s.group ? `<div class="pm-split">
@@ -664,18 +772,52 @@
             <tr><th scope="row">Overall accuracy</th><td>${pct(before.overall)}</td><td>${pct(s.after.overall)}</td></tr>
             <tr><th scope="row">Blue Glims and orange Norps</th><td>${bg.correct} of ${bg.n}</td><td>${s.after.group} of ${bg.n}</td></tr>
             <tr><th scope="row">Mistakes</th><td>${before.total - before.correct}</td><td>${s.after.mistakes}</td></tr>
-            <tr><th scope="row">Training examples</th><td>${D.E.train.length}</td><td>${s.after.n}</td></tr></tbody></table></div>` : ""}
+            <tr><th scope="row">Training examples</th><td>${D.E.train.length}</td><td>${s.after.n}</td></tr></tbody></table></div>
+            ${baBars(before, M.evaluate(trainSet(), D.E.test))}
+            <div class="pm-evid"><h4>${icon("list")}Evidence</h4><dl class="pm-facts">
+              <div><dt>Hypothesis</dt><dd>${esc((HYPS.find((h) => h[0] === s.hyp) || [, "–"])[1])}</dd></div>
+              <div><dt>What I changed</dt><dd>${diffWords()}</dd></div>
+              <div><dt>Result</dt><dd>Problem group ${bg.correct} → ${s.after.group} of ${bg.n}; overall ${pct(before.overall)} → ${pct(s.after.overall)}</dd></div></dl>
+              <p class="muted pm-small">A better score on this test is evidence, not proof that the model is fair. Check other groups too.</p></div>` : ""}
           ${s.after && s.after.group <= bg.correct && s.attempts >= 2 ? `<div class="pm-q"><p>Your changes didn't help that group yet. That's useful evidence too. Why not?</p>
             ${chips("explain", [["wrongkind", "I added examples that weren't like the problem group"], ["removed", "I removed examples the machine needed"], ["notenough", "I didn't add enough of the missing kind"]], s.explain)}
             <p>What would you try next?</p>${chips("next", [["blueglim", "Add blue creatures with pointy horns"], ["orangenorp", "Add orange creatures without pointy horns"], ["both", "Both"]], s.next)}</div>` : ""}
         </section>
+        <details class="lab-panel pm-sec pm-ext" data-k="trade5" ${s.trade ? "open" : ""}>
+          <summary><span>${icon("refresh")}Fix One Problem, Create Another ${optional}</span><span class="muted pm-small">A budget challenge</span></summary>
+          <p>Your team's device can only hold <strong>${D.E.tradeoff.budget} examples</strong>. A teammate suggests a swap: take out 4 blue Norps, put in 4 of the missing kinds.</p>
+          ${!s.trade ? b("trade", "x", `${icon("flask")}Try the swap and test`, "btn btn--primary btn--small") : (() => {
+            const r = M.evaluate(tradeSet(), D.E.test), g = groupStats(r), lost = r.items.find((i) => i.ex.id === D.E.tradeoff.lost), lostBefore = before.items.find((i) => i.ex.id === D.E.tradeoff.lost);
+            return `<div class="pm-pair"><p>Problem group<strong>${bg.correct} → ${g.correct} of ${bg.n}</strong></p><p>Overall<strong>${pct(before.overall)} → ${pct(r.overall)}</strong></p></div>
+              <div class="pm-row">${M.creature(lost.ex.traits, 56)}<p>But this blue Norp was <strong>${lostBefore.correct ? "right" : "wrong"}</strong> before and is <strong>${lost.correct ? "right" : "wrong"}</strong> now (it said ${tag(lost.label)}).</p></div>
+              <p>Why did fixing one group hurt this creature?</p>
+              ${chips("tradewhy", [["removed", "The swap removed blue Norps like it, so its nearest neighbors changed"], ["random", "The machine is random"], ["more", "Adding examples always makes things worse"]], s.tradeWhy)}
+              ${s.tradeWhy ? `<p class="pm-result ${s.tradeWhy === "removed" ? "is-good" : "is-warn"}">${icon(s.tradeWhy === "removed" ? "check" : "alert")}<span>${s.tradeWhy === "removed" ? "Yes. Its closest examples used to be blue Norps; with them gone, closer blue Glims outvoted them. Improving one number can quietly change another, so check every group." : "The machine is never random: same examples, same answer. Look at which examples were taken out."}</span></p>` : ""}`;
+          })()}
+        </details>
         <section class="lab-panel pm-sec pm-talk">
           <h3>${icon("users")}Talk about it</h3>
           <ul><li>What could happen if a real AI system worked better for some people than for others?</li><li>Who should be responsible for noticing and fixing the problem?</li></ul>
           <p class="muted pm-small">Made-up creature colors are a simple model. Fairness for real people is much more complicated, and it needs people to check data, test results, and think about who could be harmed.</p>
         </section>` : ""}`);
       const ts = el.querySelector("#pm-trait");
-      if (ts) ts.addEventListener("change", (e) => { s.trait = e.target.value; save(); render(); });
+      if (ts) ts.addEventListener("change", (e) => { s.trait = e.target.value; if (s.trait2 === s.trait) s.trait2 = ""; save(); render(); });
+      const ts2 = el.querySelector("#pm-trait2");
+      if (ts2) ts2.addEventListener("change", (e) => { s.trait2 = e.target.value; save(); render(); });
+    }
+    /* Before/after accuracy for each value of the chosen trait, as paired bars with the numbers written in. */
+    function baBars(r0, r1) {
+      const a = r0.byGroup(s.trait), z = r1.byGroup(s.trait);
+      return `<figure class="pm-babars"><figcaption>Accuracy by ${esc(M.TRAIT_NAME[s.trait].toLowerCase())}: before and after</figcaption>
+        ${Object.keys(a).map((v) => { const x = a[v], y = z[v]; const name = M.traitText(s.trait, isNaN(v) ? v : Number(v));
+          return `<div class="pm-babars__row"><span class="pm-babars__k">${esc(name)} <span class="muted">(${x.n})</span></span>
+            <span class="pm-babars__b"><span class="pm-babars__bar is-before" style="width:${Math.round(x.accuracy * 100)}%"></span><span>Before ${pct(x.accuracy)}</span></span>
+            <span class="pm-babars__b"><span class="pm-babars__bar is-after" style="width:${Math.round(y.accuracy * 100)}%"></span><span>After ${pct(y.accuracy)}</span></span></div>`; }).join("")}
+      </figure>`;
+    }
+    function diffWords() {
+      const added = s.train.filter((id) => !D.E.train.some((e) => e.id === id)).length, removed = D.E.train.filter((e) => !s.train.includes(e.id)).length;
+      return `${added ? `Added ${added}` : ""}${added && removed ? ", " : ""}${removed ? `removed ${removed}` : ""}${!added && !removed ? "No change yet" : ""} (now ${s.train.length} examples)`;
     }
     function win(how) {
       const a = s.after;
@@ -701,6 +843,8 @@
         if (g.correct > bg.correct) { api.say(`The problem group went from ${bg.correct} to ${g.correct} of ${bg.n} right. Your data fix worked.`, "good"); win("improved"); }
         else api.say(`The problem group is still ${g.correct} of ${bg.n}. Which kinds of creatures were missing from the training data?`, "info");
       },
+      trade: () => { s.trade = true; save(); render(); const r = M.evaluate(tradeSet(), D.E.test); api.log("lab_test_run", { trade: Math.round(r.overall * 100) }); api.say(`The swap: problem group ${bg.correct} → ${groupStats(r).correct} of ${bg.n}, overall ${pct(r.overall)}. But look at the blue Norp below.`, "info"); },
+      tradewhy: (id) => { s.tradeWhy = id; save(); render(); },
       explain: (id) => { s.explain = id; save(); render(); if (s.explain && s.next) win("explained"); },
       next: (id) => { s.next = id; save(); render(); if (s.explain && s.next) win("explained"); }
     });
@@ -710,33 +854,49 @@
   /* ───────── Stage 6: When the Machine Doesn't Know ───────── */
   function mountConfidence(el, api) {
     const st = storeFor(api.user), S = st.load(); const F = frame(el, api, 5, S, st);
-    const s = (S.s6 = Object.assign({ th: 50, tried: [], tapped: "", explain: "", scen: {}, novelty: false, purple: "" }, S.s6 || {}));
-    const save = () => st.save(S);
     const K = D.F.K;
+    // Only thresholds that can change anything: "always answer" plus the agreements K neighbors can give (60, 80, 100).
+    const THS = [0].concat(M.possibleAgreements(K));
+    const s = (S.s6 = Object.assign({ th: 0, tried: [], tapped: "", explain: "", scen: {}, novelty: false, purple: "", trust: "" }, S.s6 || {}));
+    if (!THS.includes(s.th)) s.th = THS.filter((t) => t <= s.th).pop() || 0;   // older saves used 50–100 in steps of 10
+    s.tried = [...new Set((s.tried || []).map((t) => THS.filter((x) => x <= t).pop() || 0))];
+    const save = () => st.save(S);
     const run = (th) => M.evaluate(D.F.train, D.F.test, { K, threshold: th, novelty: s.novelty && F.mode === "researcher" ? 3 : null });
-    const same = (a, b) => JSON.stringify(run(a).items.map((i) => i.answered)) === JSON.stringify(run(b).items.map((i) => i.answered));
+    const thName = (t) => (t === 0 ? "Always answer" : `${t}% (${Math.round((t / 100) * K)} of ${K})`);
+    const trap = run(0).items.find((i) => i.agree === 1 && !i.correct);
     function render() {
       const r = run(s.th);
       const tapped = s.tapped && r.items.find((i) => i.ex.id === s.tapped);
-      const ths = [50, 60, 70, 80, 90, 100];
-      const sameAs = ths.filter((t) => t !== s.th && same(t, s.th));
       paint(F.body, `
         <section class="lab-panel pm-sec">
           <h3>${icon("bulb")}Confidence is not the same as being right</h3>
           <p>This machine checks the <strong>${K}</strong> closest examples. Its <strong>model confidence score</strong> is how many of them agree: 3 of 5 is 60%, 4 of 5 is 80%, 5 of 5 is 100%. It's the model's own number, not a promise that it's right.</p>
           <p>You choose a <strong>threshold</strong>. Below it, the machine says: <em>“I'm not sure. Ask a human to check.”</em></p>
           ${fgLine("G")}
-          <div class="range"><label for="pm-th">Minimum confidence to answer <b>${s.th}%</b></label><input type="range" id="pm-th" min="50" max="100" step="10" value="${s.th}" aria-valuetext="${s.th} percent"></div>
-          ${sameAs.length ? `<p class="muted pm-small">With ${K} neighbors, only 60%, 80%, and 100% are possible, so ${s.th}% works the same as ${sameAs.map((t) => t + "%").join(" and ")}.</p>` : ""}
+        </section>
+        <section class="lab-panel pm-sec pm-trap">
+          <h3><span class="pm-step">1</span>Would you trust this answer?</h3>
+          <div class="pm-row">${M.creature(trap.ex.traits, 72)}<div><p class="pm-big">The machine says ${tag(trap.label)}. <strong>Five out of five</strong> nearby examples agree.</p>
+            ${chips("trust", [["trust", "I'd trust it"], ["check", "I'd want a person to check"], ["unsure", "I'm not sure"]], s.trust)}</div></div>
+          ${s.trust ? `<p class="pm-result is-warn">${icon("alert")}<span>It's really a ${tag(trap.truth)}. ${s.trust === "trust" ? "Five neighbors agreed, and they were all wrong together." : "Good instinct: five neighbors agreed, and they were all wrong together."} Find out why below.</span></p>` : ""}
+        </section>
+        ${s.trust ? `<section class="lab-panel pm-sec pm-trust" aria-labelledby="pm-trust-h">
+          <h3 id="pm-trust-h">${icon("chart")}Trust Dashboard</h3>
+          <div class="seg seg--wrap" role="group" aria-label="Minimum agreement to answer">${THS.map((t) => b("th", String(t), esc(thName(t)), "", `aria-pressed="${s.th === t}"`)).join("")}</div>
+          <p class="muted pm-small">With ${K} neighbors, agreement can only be ${M.possibleAgreements(K).map((t) => t + "%").join(", ")}, so these are the only settings that change anything.</p>
           ${F.mode === "researcher" ? `<label class="pm-check"><input type="checkbox" id="pm-nov" ${s.novelty ? "checked" : ""}> Also ask a human when the closest example differs in 3 or more traits (“never seen anything like it”)</label>` : ""}
-          <div class="pm-tablewrap"><table class="pm-table pm-metrics"><caption>At ${s.th}%${s.novelty && F.mode === "researcher" ? ", with the never-seen check" : ""} (12 test creatures)</caption><tbody>
+          <div class="pm-gauges">
+            <div class="pm-gauge"><span>Accuracy of its answers</span><span class="pm-gauge__track"><span style="width:${Math.round((r.accuracy || 0) * 100)}%"></span></span><strong>${pct(r.accuracy)}</strong></div>
+            <div class="pm-gauge pm-gauge--cov"><span>Coverage (share it answers)</span><span class="pm-gauge__track"><span style="width:${Math.round(r.coverage * 100)}%"></span></span><strong>${pct(r.coverage)}</strong></div>
+          </div>
+          <div class="pm-tablewrap"><table class="pm-table pm-metrics"><caption>${esc(thName(s.th))}${s.novelty && F.mode === "researcher" ? ", with the never-seen check" : ""} (12 test creatures)</caption><tbody>
             <tr><th scope="row">Answered</th><td>${r.answered}</td><th scope="row">Withheld (ask a human)</th><td>${r.withheld}</td></tr>
             <tr><th scope="row">Right answers</th><td>${r.correct}</td><th scope="row">Wrong answers</th><td>${r.wrong}</td></tr>
             <tr><th scope="row">Accuracy of its answers</th><td>${pct(r.accuracy)}</td><th scope="row">Coverage (share answered)</th><td>${pct(r.coverage)}</td></tr></tbody></table></div>
-          <p class="muted pm-small">Thresholds tried: ${s.tried.map((t) => t + "%").join(", ") || "none yet"}.</p>
+          <p class="muted pm-small">Settings tried: ${s.tried.map((t) => thName(t)).join(", ") || "none yet"}.</p>
         </section>
         <section class="lab-panel pm-sec">
-          <h3><span class="pm-step">1</span>Find a confident mistake</h3>
+          <h3><span class="pm-step">2</span>Find a confident mistake</h3>
           <p>Tap a creature where <strong>all 5</strong> nearby examples agreed, and the answer was still wrong.</p>
           <div class="pm-grid">${r.items.map((i, n) => `<button type="button" class="pm-res pm-res--btn ${i.answered ? (i.correct ? "is-right" : "is-wrong") : "is-unsure"} ${s.tapped === i.ex.id ? "is-sel" : ""}" data-act="tap" data-id="${i.ex.id}" data-k="tap:${i.ex.id}" aria-pressed="${s.tapped === i.ex.id}">
             ${M.creature(i.ex.traits, 44)}<span>${i.answered ? `Said ${tag(i.label)}` : "I'm not sure. Ask a human."}<br>Really ${tag(i.truth)}</span><span class="pm-meter" aria-hidden="true"><span style="width:${Math.round(i.agree * 100)}%"></span></span><b>${Math.round(i.agree * K)} of ${K} agree</b><b>${!i.answered ? "Withheld" : i.correct ? `${icon("check")}Right` : `${icon("alert")}Wrong`}</b></button>`).join("")}</div>
@@ -747,40 +907,41 @@
             : `<p class="pm-result is-warn">${icon("alert")}${tapped.correct ? "That one was right." : `Only ${Math.round(tapped.agree * K)} of ${K} agreed on that one.`} Look for a wrong answer where all 5 agreed.</p>`) : ""}
         </section>
         ${s.explain === "new" ? `<section class="lab-panel pm-sec">
-          <h3><span class="pm-step">2</span>Choose a threshold for the job</h3>
+          <h3><span class="pm-step">3</span>Choose a threshold for the job</h3>
           <p>There isn't one right threshold. It depends on what a mistake costs.</p>
           ${D.F.scenarios.map((sc) => { const v = s.scen[sc.id] || {}; return `<div class="pm-scen"><p><strong>${esc(sc.text)}</strong></p>
-            <div class="seg" role="group" aria-label="Threshold for: ${esc(sc.text)}">${[50, 60, 80, 100].map((t) => b("sth", `${sc.id}|${t}`, `${t}%`, "", `aria-pressed="${v.th === t}"`)).join("")}</div>
-            ${v.th ? `<p class="muted pm-small">At ${v.th}%: answers ${pct(run(v.th).coverage)} of creatures, ${run(v.th).wrong} wrong.</p>` : ""}
+            <div class="seg seg--wrap" role="group" aria-label="Threshold for: ${esc(sc.text)}">${THS.map((t) => b("sth", `${sc.id}|${t}`, t === 0 ? "Always answer" : `${t}%`, "", `aria-pressed="${v.th === t}"`)).join("")}</div>
+            ${v.th != null ? `<p class="muted pm-small">${esc(thName(v.th))}: answers ${pct(run(v.th).coverage)} of creatures, ${run(v.th).wrong} wrong.</p>` : ""}
             ${chips("swhy", [[`${sc.id}|cover`, "Answering more creatures matters more here"], [`${sc.id}|safe`, "Avoiding wrong answers matters more here"]], v.why ? `${sc.id}|${v.why}` : "")}</div>`; }).join("")}
           <p>Even at 100%, the purple creatures are answered wrong. What else would help?</p>
           ${chips("purple", [["data", "Add purple creatures to the training data"], ["human", "Have a person check any new kind of creature"], ["both", "Both"]], s.purple)}
           ${b("done", "x", `${icon("check")}Record my thresholds`, "btn btn--primary")}
-        </section>` : ""}`);
-      el.querySelector("#pm-th").addEventListener("input", (e) => {
-        s.th = Number(e.target.value);
-        if (!s.tried.includes(s.th)) s.tried.push(s.th);
-        save(); render(); el.querySelector("#pm-th").focus();
-        const x = run(s.th);
-        api.say(`At ${s.th}%, it answers ${x.answered} of 12 with ${x.wrong} wrong. ${s.th === 100 ? "Did it get more accurate, or just answer fewer?" : ""}`, "info");
-      });
+        </section>` : ""}` : ""}`);
       const nv = el.querySelector("#pm-nov");
       if (nv) nv.addEventListener("change", (e) => { s.novelty = e.target.checked; save(); render(); });
     }
     function done() {
       const g = s.scen.game || {}, bt = s.scen.bite || {};
-      if (s.tried.length < 3) return api.say(`Try at least 3 different thresholds first (you've tried ${s.tried.length}).`, "warn");
-      if (!g.th || !bt.th || !g.why || !bt.why || !s.purple) return api.say("Choose a threshold and a reason for both jobs, and answer the last question.", "warn");
+      if (!s.trust) return api.say("Answer the first question: would you trust the 5-of-5 answer?", "warn");
+      if (s.tried.length < 3) return api.say(`Try at least 3 different settings on the Trust Dashboard first (you've tried ${s.tried.length}).`, "warn");
+      if (g.th == null || bt.th == null || !g.why || !bt.why || !s.purple) return api.say("Choose a threshold and a reason for both jobs, and answer the last question.", "warn");
       if (bt.th < g.th) return api.say(`You set ${bt.th}% for the pet shop and ${g.th}% for the game. A bite is worse than losing a point. Is that what you meant?`, "warn");
       if (bt.why !== "safe") return api.say("For the pet shop, which matters more: answering lots of creatures, or avoiding a bite?", "warn");
       const rg = run(g.th), rb = run(bt.th);
-      F.note("s6", "When the machine doesn't know", [["Thresholds tried", s.tried.sort((a, b2) => a - b2).map((t) => t + "%").join(", ")], ["Game threshold", `${g.th}%: ${pct(rg.coverage)} answered, ${rg.wrong} wrong`], ["Pet shop threshold", `${bt.th}%: ${pct(rb.coverage)} answered, ${rb.wrong} wrong`], ["Confident mistake", "A purple creature: a kind the training data never had"]]);
+      F.note("s6", "When the machine doesn't know", [["Would I trust 5 of 5?", { trust: "Yes, at first", check: "I'd want a person to check", unsure: "Not sure" }[s.trust]], ["Settings tried", s.tried.sort((a, b2) => a - b2).map(thName).join(", ")], ["Game threshold", `${thName(g.th)}: ${pct(rg.coverage)} answered, ${rg.wrong} wrong`], ["Pet shop threshold", `${thName(bt.th)}: ${pct(rb.coverage)} answered, ${rb.wrong} wrong`], ["Confident mistake", "A purple creature: a kind the training data never had"]]);
       api.log("lab_test_run", { game: g.th, bite: bt.th });
       S.s6.chosen = bt.th; save();
       api.say("A threshold trades how much the machine answers for how often it's wrong. People decide that trade, and new kinds of cases still need a person.", "good");
       api.win({ game: g.th, bite: bt.th, tried: s.tried.length });
     }
     delegate(el, {
+      trust: (id) => { s.trust = id; save(); render(); api.log("lab_test_run", { trust: id === "trust" ? 1 : 0 }); },
+      th: (v) => {
+        s.th = Number(v); if (!s.tried.includes(s.th)) s.tried.push(s.th);
+        save(); render();
+        const x = run(s.th);
+        api.say(`${thName(s.th)}: it answers ${x.answered} of 12, with ${x.wrong} wrong. ${s.th === 100 ? "Did it get more accurate, or just answer fewer?" : ""}`, "info");
+      },
       tap: (id) => { s.tapped = id; save(); render(); },
       explain: (id) => { s.explain = id; save(); render(); },
       sth: (v) => { const [id, t] = v.split("|"); s.scen[id] = Object.assign(s.scen[id] || {}, { th: Number(t) }); save(); render(); },
@@ -861,6 +1022,10 @@
 
   /* ───────── Stage 8: The Responsible AI Challenge ───────── */
   const START_G = D.G.pool.slice(0, 4).concat(D.G.pool.slice(12, 16)).map((e) => e.id);
+  const RQ = [["improve", "Can I make it more accurate on new creatures?"], ["group", "Which kinds of creatures does it get wrong, and why?"], ["confident", "When is it confident and still wrong?"]];
+  const RH = [["missing", "Some kinds of creatures are missing from the training data"], ["lopsided", "There are too few examples of one label"], ["few", "There aren't enough examples overall"], ["fine", "It will already do well"]];
+  const WHY8 = [["notmissing", "I added examples that weren't the missing kind"], ["removed", "I removed examples it needed"], ["toofew", "I didn't add enough of the missing kind"], ["already", "It was already as good as this data allows"]];
+  const NEXT8 = [["addmissing", "Add creatures like the ones it got wrong"], ["balance", "Even out the labels in the groups it misses"], ["k", "Try a different number of neighbors"]];
   const Q = {
     q2: ["What kinds of examples did I use?", [["both", "Both Glims and Norps"], ["antennae", "Different numbers of antennae"], ["tails", "Long and short tails"], ["other", "Different colors, bodies, and horns"]], true],
     q4: ["What did I change?", [["addmissing", "I added kinds of creatures that were missing"], ["remove", "I removed examples that were misleading"], ["both", "Both"]]],
@@ -869,19 +1034,24 @@
   };
   function mountChallenge(el, api) {
     const st = storeFor(api.user), S = st.load(); const F = frame(el, api, 7, S, st);
-    const s = (S.s8 = Object.assign({ train: START_G.slice(), first: null, latest: null, changes: 0, changesTested: 0, investigated: "", th: null, ans: {}, txt: "", finished: false, K: 3 }, S.s8 || {}));
+    const s = (S.s8 = Object.assign({ train: START_G.slice(), first: null, latest: null, changes: 0, changesTested: 0, investigated: "", th: null, ans: {}, txt: "", finished: false, K: 3, rq: "", rh: "", rhTxt: "", firstTrain: null, why8: "", next8: "" }, S.s8 || {}));
     const save = () => st.save(S);
-    let K = s.K, view = null, iv8 = {};
+    let K = s.K, view = null, iv8 = {}, editQ = false;
     const byId = (id) => D.G.pool.find((e) => e.id === id);
     const set = () => s.train.map(byId);
     const evalNow = (th) => M.evaluate(set(), D.G.test, { K, threshold: th || 0 });
+    // Older saves that already tested before the question step keep working: their first test stands.
+    const asked = () => !!(s.rq && s.rh) || (!!s.first && !s.firstTrain);
+    const improved = () => !!(s.first && s.latest && s.latest.acc > s.first.acc);
     const tasks = () => {
       const a = s.ans;
       return [
+        ["Ask a question and make a hypothesis", asked()],
         ["Build: a training set with both kinds and at least 8 examples", s.train.length >= 8 && new Set(set().map((e) => e.label)).size === 2],
         ["Train and test on 20 new creatures", !!s.first],
         ["Investigate one prediction", !!s.investigated],
         ["Improve the data and test again", !!s.latest && s.changesTested > 0],
+        ...(s.latest && !improved() ? [["Explain why it didn't improve, and what you'd try next", !!(s.why8 && s.next8)]] : []),
         ["Set a threshold", s.th != null],
         ["Explain your model", ["q2", "q4", "q6", "q7"].every((k) => (Array.isArray(a[k]) ? a[k].length : a[k]))]
       ];
@@ -899,6 +1069,14 @@
           <p>Your team wants to use a machine to sort a new set of creatures. Before you approve it, prove you understand how it works, where it makes mistakes, and when a person should check its answer. A teammate labeled these creatures and started a training set.</p>
           <ol class="pm-tasks">${T.map(([t, ok], i) => `<li class="${ok ? "is-done" : ""}">${ok ? icon("check") : `<b>${i + 1}</b>`}<span>${esc(t)}</span>${ok ? '<span class="visually-hidden"> (done)</span>' : ""}</li>`).join("")}</ol>
         </section>
+        ${s.rq && s.rh && !editQ ? `<p class="pm-result pm-qsum">${icon("flag")}<span><strong>My question:</strong> ${esc((RQ.find((x) => x[0] === s.rq) || [, ""])[1])} <strong>My hypothesis:</strong> ${esc((RH.find((x) => x[0] === s.rh) || [, ""])[1])}.</span>${b("rq-edit", "x", "Change", "btn btn--ghost btn--small pm-link")}</p>`
+          : `<section class="lab-panel pm-sec">
+          <h3><span class="pm-step">1</span>Your investigation</h3>
+          <p><strong>My question:</strong></p>${chips("rq", RQ, s.rq)}
+          <p><strong>My hypothesis</strong> (before testing): what do you expect is wrong with this model?</p>${chips("rh", RH, s.rh)}
+          <label class="pm-field">In my own words (optional) <input class="input input--small" maxlength="200" id="pm-rh" value="${esc(s.rhTxt || "")}"></label>
+          ${s.rq && s.rh ? b("rq-done", "x", `${icon("check")}Done`, "btn btn--primary btn--small") : ""}
+        </section>`}
         <div class="pm-bench">
           <section class="lab-panel pm-sec">
             <h3>${icon("box")}Training set <span class="muted">(${s.train.length}: ${g} Glims, ${s.train.length - g} Norps)</span></h3>
@@ -906,7 +1084,7 @@
           </section>
           <section class="lab-panel pm-sec">
             <h3>${icon("flask")}Test</h3>
-            <div class="pm-row">${b("test", "x", `${icon("ai")}${s.first ? "Train and test again" : "Train and test"}`, "btn btn--primary")}${F.mode === "researcher" ? `<label class="pm-field pm-field--inline">Neighbors (K) <select class="input input--small" id="pm-k8">${[1, 3, 5].map((k) => `<option ${k === K ? "selected" : ""}>${k}</option>`).join("")}</select></label>` : ""}</div>
+            <div class="pm-row">${b("test", "x", `${icon("ai")}${s.first ? "Train and test again" : "Train and test"}`, "btn btn--primary", asked() ? "" : "disabled")}${asked() ? "" : `<span class="muted pm-small">Ask a question and make a hypothesis first.</span>`}${F.mode === "researcher" ? `<label class="pm-field pm-field--inline">Neighbors (K) <select class="input input--small" id="pm-k8">${[1, 3, 5].map((k) => `<option ${k === K ? "selected" : ""}>${k}</option>`).join("")}</select></label>` : ""}</div>
             ${s.first ? `<p class="pm-big">First test: <strong>${pct(s.first.acc)}</strong>${s.latest ? ` · Latest: <strong>${pct(s.latest.acc)}</strong>` : ""}</p>
               <p class="muted pm-small">${wrong.length ? `${wrong.length} mistake${wrong.length > 1 ? "s" : ""}. Tap one to inspect it.` : "No mistakes on this test. Inspect the shakiest prediction instead."}</p>
               <div class="pm-row pm-row--mini">${(wrong.length ? wrong : [shaky]).map((i) => `<button type="button" class="pm-mini ${view === i.ex.id ? "is-sel" : ""}" data-act="inspect" data-id="${i.ex.id}" data-k="inspect:${i.ex.id}" aria-pressed="${view === i.ex.id}" aria-label="${esc(M.describe(i.ex.traits))}: said ${i.label}, really ${i.truth}">${M.creature(i.ex.traits, 40, " ")}${tag(i.label)}</button>`).join("")}</div>` : `<p class="muted">Train and test to see how it does on 20 creatures it has never seen.</p>`}
@@ -921,6 +1099,11 @@
             <div class="pm-row pm-row--mini">${D.G.pool.filter((e) => !s.train.includes(e.id)).map((e) => `<span class="pm-mini pm-mini--static">${M.creature(e.traits, 40)}${tag(e.label)}${b("add", e.id, `${icon("plus")}<span class="visually-hidden">Add</span>`, "pm-x pm-x--add")}</span>`).join("")}</div></details>
           ${F.mode !== "explorer" ? `<div class="pm-tabs2">${crossTab(set(), "antennae")}${crossTab(set(), "tail")}</div>` : ""}
         </section>
+        ${s.latest && !improved() ? `<section class="lab-panel pm-sec">
+          <h3>${icon("search")}Your change didn't raise the score. That's evidence too.</h3>
+          <p>First test ${pct(s.first.acc)}, latest ${pct(s.latest.acc)}. Why might that be?</p>${chips("why8", WHY8, s.why8)}
+          <p>What would you try next?</p>${chips("next8", NEXT8, s.next8)}
+        </section>` : ""}
         ${s.first ? `<section class="lab-panel pm-sec">
           <h3><span class="pm-step">5</span>Set a threshold</h3>
           <p>Below this confidence, your machine says “I'm not sure. Ask a human to check.”</p>
@@ -931,22 +1114,31 @@
           <h3><span class="pm-step">6</span>Explain your model</h3>
           ${Object.entries(Q).map(([k, [q, opts, multi]]) => `<p><strong>${esc(q)}</strong>${multi ? " Choose any that apply." : ""}</p>${chips(k, opts, s.ans[k] || (multi ? [] : ""), !!multi)}`).join("")}
           <label class="pm-field">One important lesson I learned (optional) <input class="input" maxlength="200" id="pm-lesson" value="${esc(s.txt || "")}"></label>
-          ${b("finish", "x", `${icon("star")}Make my AI Model Report`, "btn btn--primary", T.every((t) => t[1]) ? "" : "disabled")}
+          ${b("finish", "x", `${icon("star")}Make my AI Research Report`, "btn btn--primary", T.every((t) => t[1]) ? "" : "disabled")}
         </section>` : ""}
         ${s.finished ? reportHtml(S, api) + certPanel(S, api, certReady(api, false)) : ""}`);
       const k8 = el.querySelector("#pm-k8");
       if (k8) k8.addEventListener("change", (e) => { K = s.K = Number(e.target.value); save(); api.say(`Now using ${K} neighbors. Train and test again to see the change.`, "info"); });
       const ls = el.querySelector("#pm-lesson");
       if (ls) ls.addEventListener("change", (e) => { s.txt = e.target.value.slice(0, 200); save(); });
+      const rh = el.querySelector("#pm-rh");
+      if (rh) rh.addEventListener("change", (e) => { s.rhTxt = e.target.value.slice(0, 200); save(); });
       wireReport(el, S, api);
     }
     delegate(el, {
       rm: (id) => { s.train = s.train.filter((x) => x !== id); if (s.first) s.changes++; save(); render(); },
       add: (id) => { if (s.train.length >= M.MAX_TRAIN) return; s.train.push(id); if (s.first) s.changes++; save(); render(); },
+      rq: (id) => { s.rq = id; editQ = true; save(); render(); },
+      rh: (id) => { s.rh = id; editQ = true; save(); render(); },
+      "rq-done": () => { editQ = false; render(); api.say("Your question and hypothesis are saved. Now train and test.", "good"); },
+      "rq-edit": () => { editQ = true; render(); },
+      why8: (id) => { s.why8 = id; save(); render(); },
+      next8: (id) => { s.next8 = id; save(); render(); },
       test: () => {
+        if (!asked()) return api.say("Ask a question and make a hypothesis first. Scientists predict before they test.", "warn");
         if (s.train.length < 2 || new Set(set().map((e) => e.label)).size < 2) return api.say("The training set needs examples of both Glims and Norps.", "warn");
         const r = evalNow(); const snap = { acc: r.overall, n: s.train.length, wrong: r.total - r.correct };
-        if (!s.first) { s.first = snap; s.changes = 0; } else { s.latest = snap; s.changesTested = s.changes; }
+        if (!s.first) { s.first = snap; s.changes = 0; s.firstTrain = s.train.slice(); } else { s.latest = snap; s.changesTested = s.changes; }
         save(); render(); api.log("lab_test_run", { acc: Math.round(r.overall * 100), n: s.train.length });
         api.say(s.latest ? (s.latest.acc > s.first.acc ? `Accuracy went from ${pct(s.first.acc)} to ${pct(s.latest.acc)}.` : s.latest.acc < s.first.acc ? `Accuracy went down, from ${pct(s.first.acc)} to ${pct(s.latest.acc)}. What changed?` : `Accuracy stayed at ${pct(s.latest.acc)}.`) : `${pct(r.overall)} on 20 new creatures. Now find a mistake and inspect it.`, "info");
       },
@@ -989,11 +1181,23 @@
       <p class="cert-cele__k">Responsible AI Explorer</p>
       ${ready.ok ? `<p>You trained a real model, tested it, caught its mistakes, and decided when people should check it.</p>${SE.certificate.button(certInfo(api), "See my certificate")}`
         : `<p>Your report is ready. To earn the certificate, finish: ${ready.missing.map(([i, t]) => `<a href="#/lab/${LAB}/${i + 1}">${esc(t)}</a>`).join(", ")}.</p>`}
-      <button type="button" class="btn btn--ghost" data-pm-print>${icon("print")}Print my AI Model Report</button></div></div>`;
+      <button type="button" class="btn btn--ghost" data-pm-print>${icon("print")}Print my AI Research Report</button></div></div>`;
   }
-  /* My AI Model Report: only real results from this student's work. */
+  /* Group results on the challenge's rule traits (antennae × tail), only groups with at least 3 test creatures. */
+  function groupView(trainIds, K) {
+    const tr = trainIds.map((id) => D.G.pool.find((e) => e.id === id)).filter(Boolean);
+    const g = M.evaluate(tr, D.G.test, { K }).byCombo(D.G.relevant);
+    return Object.values(g).filter((x) => x.n >= 3).map((x) => ({ name: x.values.map((v, i) => M.traitText(D.G.relevant[i], v)).join(" + "), n: x.n, acc: x.accuracy }));
+  }
+  /* My AI Research Report: only real results from this student's work. */
   function reportHtml(S, api) {
     const s = S.s8, a = s.ans;
+    const K = s.K || 3;
+    const g0 = s.firstTrain ? groupView(s.firstTrain, K) : null, g1 = groupView(s.train, K);
+    const moved = g0 ? g1.map((x) => { const o = g0.find((y) => y.name === x.name); return o && Math.round(o.acc * 100) !== Math.round(x.acc * 100) ? `${x.name}: ${pct(o.acc)} → ${pct(x.acc)}` : null; }).filter(Boolean) : [];
+    const worst = g1.slice().sort((x, y) => x.acc - y.acc)[0];
+    const invP = (() => { const t = D.G.test.find((e) => e.id === s.investigated); if (!t) return null; const p = M.knn(s.train.map((id) => D.G.pool.find((e) => e.id === id)), t.traits, { K }); return { t, p }; })();
+    const nameOf = (list, id) => (list.find((x) => x[0] === id) || [, ""])[1];
     const set = s.train.map((id) => D.G.pool.find((e) => e.id === id));
     const g = set.filter((e) => e.label === "Glim").length;
     const cover = (t) => M.TRAITS[t].filter((v) => set.some((e) => e.traits[t] === v)).map((v) => M.traitText(t, v)).join(", ");
@@ -1003,10 +1207,18 @@
     const nb = (key) => (S.notebook || []).find((n) => n.key === key);
     const thRes = M.evaluate(set, D.G.test, { threshold: s.th, K: s.K || 3 });
     return `<section class="pm-report" id="pm-report" aria-labelledby="pm-report-h">
-      <header><p class="pm-report__k">STEM 207 · STEM Coliseum AI workshop</p><h3 id="pm-report-h">My AI Model Report</h3>
+      <header><p class="pm-report__k">STEM 207 · STEM Coliseum AI workshop</p><h3 id="pm-report-h">My AI Research Report</h3>
         <p>${api.user && api.user.role === "student" ? esc(api.user.displayName) : "Name: ____________________"} · ${new Date().toLocaleDateString()}</p></header>
       <dl class="pm-facts pm-facts--report">
-        <div><dt>Model purpose</dt><dd>Sort made-up creatures into Glims and Norps by comparing them with labeled examples (k-nearest neighbors).</dd></div>
+        ${s.rq ? `<div><dt>My investigation question</dt><dd>${esc(nameOf(RQ, s.rq))}</dd></div>` : ""}
+        ${s.rh ? `<div><dt>My original hypothesis</dt><dd>${esc(nameOf(RH, s.rh))}${s.rhTxt ? `. In my words: ${esc(s.rhTxt)}` : ""}</dd></div>` : ""}
+        <div><dt>Model purpose</dt><dd>Sort made-up creatures into Glims and Norps by comparing them with labeled examples (k-nearest neighbors, K = ${K}).</dd></div>
+        <div><dt>My model's first result</dt><dd>${pct(s.first.acc)} on 20 new creatures, with ${s.first.n} training examples</dd></div>
+        <div><dt>My model's new result</dt><dd>${pct(s.latest.acc)}, with ${s.latest.n} training examples</dd></div>
+        <div><dt>What improved or got worse</dt><dd>${moved.length ? esc(moved.join("; ")) : "No group of 3 or more test creatures changed."}</dd></div>
+        ${invP ? `<div><dt>An important mistake I discovered</dt><dd>${esc(M.describe(invP.t.traits))}: the model said ${esc(invP.p.label)} (${Math.round(invP.p.agree * 100)}% agreement), really ${esc(invP.t.label)}. Its nearest examples: ${invP.p.neighbors.map((n) => `${n.ex.label} at distance ${n.distance}`).join(", ")}.</dd></div>` : ""}
+        <div><dt>Something it still struggles with</dt><dd>${worst && worst.acc < 1 ? `${esc(worst.name)}: ${pct(worst.acc)} right (${worst.n} test creatures)` : "No group of 3 or more test creatures is below 100% on this test. New kinds of creatures could still trip it up."}</dd></div>
+        ${s.why8 ? `<div><dt>Why it didn't improve, and my next experiment</dt><dd>${esc(nameOf(WHY8, s.why8))}. Next: ${esc(nameOf(NEXT8, s.next8))}.</dd></div>` : ""}
         <div><dt>Training examples</dt><dd>${set.length} (${g} Glims, ${set.length - g} Norps)</dd></div>
         <div><dt>Feature coverage</dt><dd>Antennae: ${esc(cover("antennae"))}. Tails: ${esc(cover("tail"))}.</dd></div>
         <div><dt>Test accuracy</dt><dd>${pct(s.latest.acc)} on 20 creatures it never trained on</dd></div>
@@ -1049,7 +1261,7 @@
           <fieldset class="pm-land__mode"><legend>Choose how to explore (you can change it any time)</legend>
             ${Object.entries(MODES).map(([k, v]) => `<label><input type="radio" name="pm-mode" value="${k}" ${k === mode ? "checked" : ""}> <strong>${v}</strong> <span class="muted">${MODE_NOTE[k]}</span></label>`).join("")}</fieldset>
           <div class="pm-land__go"><a class="btn btn--launch" href="#/lab/${LAB}/1">${icon("rocket")}Start the workshop</a></div>
-          <p class="muted pm-small">You'll make: an AI Research Notebook, a printable AI Model Report, and a Responsible AI Explorer certificate. Everything here is made up. No cameras, no accounts, and your work stays on this device.</p>
+          <p class="muted pm-small">You'll make: an AI Research Notebook, a printable AI Research Report, and a Responsible AI Explorer certificate. Everything here is made up. No cameras, no accounts, and your work stays on this device.</p>
         </div>
       </div></div>`;
     el.querySelectorAll('[name="pm-mode"]').forEach((r) => r.addEventListener("change", (e) => setMode(e.target.value)));
@@ -1095,9 +1307,9 @@
     { title: "When the Machine Doesn't Know", concept: "Confidence and uncertainty",
       learn: "What a model confidence score means, and how a threshold trades answering more against being wrong less.",
       why: "AI is used where mistakes matter. A system that hands unsure cases to a person can be safer than one that always answers.",
-      goal: "Try 3 thresholds, find a confident mistake, and choose a threshold for two different jobs.",
-      steps: ["Slide the threshold and watch the counts.", "Find a wrong answer where all 5 nearby examples agreed.", "Choose a threshold for the game and for the pet shop."],
-      hints: ["Raising the threshold makes the machine answer fewer creatures. Does it always get more accurate?", "Look at the purple creatures. Were any purple ones in the training data?", "For the pet shop, which is worse: a bite, or asking a person more often?"],
+      goal: "Decide whether you'd trust a 5-of-5 answer, try 3 settings on the Trust Dashboard, find a confident mistake, and choose a threshold for two different jobs.",
+      steps: ["Would you trust an answer all 5 neighbors agree on? Decide, then see.", "On the Trust Dashboard, try 3 settings. Watch accuracy and coverage together.", "Find a wrong answer where all 5 agreed.", "Choose a threshold for the game and for the pet shop."],
+      hints: ["A higher setting makes the machine answer fewer creatures. Does accuracy always go up?", "Look at the purple creatures. Were any purple ones in the training data?", "For the pet shop, which is worse: a bite, or asking a person more often?"],
       learned: "A confidence score is the model's own number. It can be high and still wrong, especially for something new. A threshold helps, but people decide what mistakes cost, and new kinds of cases still need a person." },
     { title: "The Human Decision Room", concept: "Responsible use",
       learn: "How to decide whether AI should help, help with a person reviewing, or not make a decision at all.",
@@ -1108,8 +1320,8 @@
     { title: "The Responsible AI Challenge", concept: "Build, test, explain, decide",
       learn: "How to build, test, investigate, improve, and explain a model before anyone uses it.",
       why: "Before an AI is used, someone has to prove how it works, where it fails, and when a person should check it. That someone can be you.",
-      goal: "Complete all 6 tasks, then make your AI Model Report.",
-      steps: ["Improve the training set, then train and test.", "Inspect a mistake, change the data, and test again.", "Set a threshold, explain your model, and make your report."],
+      goal: "Ask a question and make a hypothesis, then complete every task and make your AI Research Report.",
+      steps: ["Choose your question and hypothesis before you test.", "Train and test, inspect a mistake, change the data, and test again on the same creatures.", "Set a threshold, explain your model, and make your report."],
       hints: ["Look at the antennae and tail tables. Which kinds are missing?", "Inspect a mistake. Which of its closest examples misled it?", "Add creatures like the one it got wrong, then test again."],
       learned: "You trained a real model, measured it on new data, found a mistake, improved the data, and decided when a person should check. That's what responsible AI work looks like." }
   ];

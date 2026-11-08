@@ -17,6 +17,9 @@
  *   E  Bias: horns decide, but every training Glim is orange, spiky, long-tailed and every Norp blue, round,
  *      short-tailed. Typical creatures 10 of 10; blue Glims and orange Norps 0 of 6 (63% overall).
  *      Adding the six blue-Glim / orange-Norp candidates → 94% (5 of 6). The two green candidates don't help.
+ *      Tradeoff (optional): with a budget of 14 examples, swapping four blue Norps (e-t09–e-t12) for four
+ *      candidates (e-p01, e-p03, e-p04, e-p06) lifts the problem group from 0 to 5 of 6 and overall to 88%,
+ *      but the blue Norp e-x05 (round horns) goes from right to wrong: fixing one problem created another.
  *   F  Confidence trap (K = 5): pointy horns → Glim, except purple creatures, a new kind the training data
  *      never included, are the other way round. Threshold 0: 58% right, all answered. 80%: 67%, 75% answered.
  *      100%: 50%, half answered: three purple creatures stay wrong with 5 of 5 neighbors agreeing.
@@ -85,7 +88,9 @@
       "blue round 2 pointy 1 short", "blue round 3 pointy 0 short", "blue round 1 pointy 2 short", "orange spiky 2 none 1 long", "orange spiky 1 round 0 long", "orange spiky 3 none 2 long"]),
     candidates: make("e-p", horns, ["blue round 2 pointy 2 short", "blue round 1 pointy 0 short", "blue round 3 pointy 1 short", "orange spiky 2 none 2 long", "orange spiky 1 round 1 long", "orange spiky 3 none 1 long", "green round 2 pointy 0 short", "green spiky 3 round 2 long"]),
     /* The group the model fails: creatures whose color doesn't match the pattern in the training data. */
-    counter: (e) => (e.traits.color === "blue" && e.label === "Glim") || (e.traits.color === "orange" && e.label === "Norp") };
+    counter: (e) => (e.traits.color === "blue" && e.label === "Glim") || (e.traits.color === "orange" && e.label === "Norp"),
+    /* The optional budget challenge: the same 14 slots, a swap that helps one group and hurts another. */
+    tradeoff: { budget: 14, remove: ["e-t09", "e-t10", "e-t11", "e-t12"], add: ["e-p01", "e-p03", "e-p04", "e-p06"], lost: "e-x05" } };
 
   /* Stage 6: the confidence trap (K = 5) */
   const xorPurple = (t) => ((t.horns === "pointy") !== (t.color === "purple") ? "Glim" : "Norp");

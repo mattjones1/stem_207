@@ -66,6 +66,20 @@ async def stage2(pg):
     ok("S2: a valid training set wins", await won(pg))
     await act(pg, "view", "table")
     ok("S2: a table view lists every creature with its traits", await pg.locator(".pm-table tbody tr").count() >= 24)
+    await act(pg, "view", "cards")
+    # Creature Studio: design, label, add. A copy of a held-out test creature is refused.
+    n0 = len((await state(pg))["s2"]["labels"])
+    await pg.evaluate("""(() => { const t = SE.pmData.TESTPOOL[0].traits; return t; })()""")
+    q1 = await pg.evaluate("SE.pmData.TESTPOOL[0].traits")
+    for k, v in q1.items(): await act(pg, "st-trait", f"{k}|{v}")
+    await act(pg, "st-label", "Glim"); await act(pg, "st-add")
+    ok("Studio: a copy of a test creature is refused (no training on the test set)", "tested on" in await say(pg) and len((await state(pg))["s2"]["labels"]) == n0, await say(pg))
+    await act(pg, "st-trait", "color|purple"); await act(pg, "st-trait", "horns|pointy"); await act(pg, "st-label", "Glim"); await act(pg, "st-add")
+    s2 = (await state(pg))["s2"]
+    ok("Studio: a designed creature joins the training set with its label", len(s2["labels"]) == n0 + 1 and s2["labels"][-1] == ["u-1", "Glim"] and s2["custom"][0]["traits"]["color"] == "purple")
+    t = await pg.inner_text(".pm-dash")
+    ok("Studio: the dashboard counts it", str(n0 + 1) in t and "No number here promises" in t, t[:160])
+    await act(pg, "remove", "u-1")
 
 TRAIN3 = """(() => { const s = JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k => /^stem207\\.pm\\.(?!mode)/.test(k))));
   return s.s3.train.map(([id, l]) => ({ id, traits: SE.pmData.POOL.find(c => c.id === id).traits, label: l })); })()"""
@@ -122,6 +136,28 @@ async def stage3(pg):
         ok("S3: the wrong cause is refused", "didn't change" in await say(pg) and not await won(pg))
     await act(pg, "cause", flip)
     ok("S3: with every task done, naming the changed example wins", await won(pg))
+    # Experiment bench (optional): measure on the held-out creatures, save a snapshot, add a missing kind, Fool the Machine.
+    await pg.evaluate("document.querySelector('details[data-k=bench3]').open = true")
+    await act(pg, "measure")
+    m3 = await pg.evaluate("""((tr) => { const rule = SE.pmData.SECRET_RULES.find(r => r.id === JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k => /^stem207\\.pm\\.(?!mode)/.test(k)))).s2.rule);
+      return Math.round(SE.mlKit.evaluate(tr, SE.pmData.labelWith(rule, SE.pmData.TESTPOOL.slice(0, 12))).overall * 100); })(""" + TRAIN3 + ")")
+    ok("Bench: Measure shows the model's real held-out accuracy", f"{m3}%" in await pg.inner_text(".pm-ext"), m3)
+    await act(pg, "snapname", "Baseline"); await act(pg, "snap")
+    snaps = (await state(pg)).get("snaps", [])
+    ok("Bench: a snapshot is saved with the measured result", len(snaps) == 1 and snaps[0]["name"] == "Baseline" and round(snaps[0]["acc"] * 100) == m3)
+    await go(pg, 3)
+    await pg.evaluate("document.querySelector('details[data-k=bench3]').open = true")
+    ok("Bench: snapshots survive leaving the stage", "Baseline" in await pg.inner_text("[data-k=bench3]"))
+    fool = await pg.evaluate("""((tr) => { const st = JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k => /^stem207\\.pm\\.(?!mode)/.test(k))));
+      const rule = SE.pmData.SECRET_RULES.find(r => r.id === st.s2.rule), tests = SE.pmData.TESTPOOL.map(t => SE.mlKit.key(t.traits));
+      const M = SE.mlKit, all = []; for (const c of M.TRAITS.color) for (const s of M.TRAITS.shape) for (const e of M.TRAITS.eyes) for (const h of M.TRAITS.horns) for (const a of M.TRAITS.antennae) for (const t of M.TRAITS.tail) all.push({ color: c, shape: s, eyes: e, horns: h, antennae: a, tail: t });
+      const tr2 = st.s3.model.map(([id, l]) => ({ id, traits: (SE.pmData.POOL.find(c => c.id === id) || st.s2.custom.find(c => c.id === id)).traits, label: l }));
+      return all.find(t => !tests.includes(M.key(t)) && M.knn(tr2, t, { K: st.s3.K || 3 }).label !== (rule.test(t) ? 'Glim' : 'Norp')) || null; })(""" + TRAIN3 + ")")
+    if fool:
+        for k, v in fool.items(): await act(pg, "st-trait", f"{k}|{v}")
+        await act(pg, "fool-guess", "wrong"); await act(pg, "fool")
+        ok("Fool the Machine: a creature the model gets wrong is recognized, with its real label from the rule", "You fooled it" in await say(pg) and (await state(pg))["s3"]["ch"].get("fool") is True, await say(pg))
+        ok("Fool the Machine: the designed creature opens in Inside the Machine", await pg.locator(".pm-evidence .pm-iv").count() == 1)
     # The AI Field Guide: stage 3 unlocks card D (not E), and its demo is the real model.
     await pg.locator('[data-fg="D"]').first.click(); await pg.wait_for_timeout(150)
     fg = await pg.inner_text("#pm-fg")
@@ -164,6 +200,11 @@ async def stage5(pg):
     ok("S5: a group doing well is refused with its numbers", "2 of 2" in await say(pg) or "too small" in await say(pg), await say(pg))
     await act(pg, "group", "color|blue")
     ok("S5: a group below overall is accepted", "4 of 7" in await say(pg), await say(pg))
+    await pg.select_option("#pm-trait2", "horns"); await pg.wait_for_timeout(200)
+    tb = await pg.inner_text("#pm-body")
+    ok("Bias 2.0: grouping by two traits finds blue + pointy horns at 0 of 3", "blue + pointy horns" in tb and "0 of 3" in tb, tb[:300])
+    ok("Bias 2.0: small groups say too few to tell, and missing training kinds are flagged", "too few to tell" in tb and "none" in tb)
+    await pg.select_option("#pm-trait2", ""); await pg.wait_for_timeout(200)
     await act(pg, "hyp", "broken")
     ok("S5: a weak hypothesis gets a pointer", "compared with its examples" in await pg.inner_text("#pm-body"))
     await act(pg, "hyp", "shortcut")
@@ -175,27 +216,37 @@ async def stage5(pg):
     t = await pg.inner_text(".pm-ba")
     ok("S5: before/after shows the real change", "63%" in t and "94%" in t, t)
     ok("S5: an evidence-based fix wins", await won(pg))
+    ok("Bias 2.0: before/after bars and an evidence panel from the real results", await pg.locator(".pm-babars__row").count() >= 2 and "Problem group 0 → 5 of 6" in await pg.inner_text(".pm-evid"), await pg.inner_text(".pm-evid"))
+    await pg.evaluate("document.querySelector('details[data-k=trade5]').open = true")
+    await act(pg, "trade")
+    tt = await pg.inner_text("[data-k=trade5]")
+    ok("Tradeoff: the swap lifts the problem group to 5 of 6 but turns a right blue Norp wrong", "0 → 5 of 6" in tt and "88%" in tt and "right" in tt and "wrong" in tt, tt[:300])
+    await act(pg, "tradewhy", "removed")
+    ok("Tradeoff: the explanation about removed neighbors is confirmed", "outvoted" in await pg.inner_text("[data-k=trade5]"))
 
 async def stage6(pg):
     await go(pg, 6)
-    async def slide(v):
-        await pg.evaluate(f"(() => {{ const r = document.querySelector('#pm-th'); r.value = '{v}'; r.dispatchEvent(new Event('input', {{ bubbles: true }})); }})()"); await pg.wait_for_timeout(120)
-    await slide(80)
+    ok("S6: the Trust Dashboard waits for the 5-of-5 prediction", await pg.locator('[data-act="th"]').count() == 0 and "Five out of five" in await pg.inner_text("#pm-body"))
+    await act(pg, "trust", "trust")
+    ok("S6: the trap is revealed only after the prediction", "It's really a" in await pg.inner_text(".pm-trap"))
+    opts = await pg.evaluate("[...document.querySelectorAll('[data-act=th]')].map(b => b.dataset.id)")
+    ok("S6: only possible settings are offered for K = 5 (always, 60, 80, 100)", opts == ["0", "60", "80", "100"], opts)
+    await act(pg, "th", "80")
     t = await pg.inner_text(".pm-metrics")
     ok("S6: at 80%: 9 answered, 3 wrong, 75% coverage", "9" in t and "75%" in t, t)
+    ok("S6: accuracy and coverage shown together", "Accuracy of its answers" in await pg.inner_text(".pm-gauges") and "Coverage" in await pg.inner_text(".pm-gauges"))
     await act(pg, "tap", "f-x09"); await act(pg, "explain", "new"); await act(pg, "done")
-    ok("S6: needs 3 thresholds before recording", "at least 3" in await say(pg), await say(pg))
-    await slide(70)
-    ok("S6: says when two settings behave the same", "works the same as" in await pg.inner_text("#pm-body"))
+    ok("S6: needs 3 settings before recording", "at least 3" in await say(pg), await say(pg))
+    await act(pg, "th", "60")
     await act(pg, "tap", "f-x06")
     ok("S6: a low-agreement mistake isn't a confident mistake", "Only 3 of 5" in await pg.inner_text("#pm-body"))
     await act(pg, "tap", "f-x09")
     ok("S6: the purple confident mistake is recognized", "Found one" in await pg.inner_text("#pm-body"))
-    await slide(100)
-    await act(pg, "sth", "game|100"); await act(pg, "swhy", "game|cover"); await act(pg, "sth", "bite|50"); await act(pg, "swhy", "bite|safe"); await act(pg, "purple", "both")
+    await act(pg, "th", "100")
+    await act(pg, "sth", "game|100"); await act(pg, "swhy", "game|cover"); await act(pg, "sth", "bite|0"); await act(pg, "swhy", "bite|safe"); await act(pg, "purple", "both")
     await act(pg, "done")
     ok("S6: a lower bar for bites than for the game is questioned", "Is that what you meant" in await say(pg), await say(pg))
-    await act(pg, "sth", "game|50"); await act(pg, "sth", "bite|80"); await act(pg, "done")
+    await act(pg, "sth", "game|0"); await act(pg, "sth", "bite|80"); await act(pg, "done")
     ok("S6: consistent thresholds win", await won(pg))
 
 async def stage7(pg):
@@ -216,6 +267,9 @@ async def stage7(pg):
 
 async def stage8(pg, student=True):
     await go(pg, 8)
+    ok("S8: testing waits for a question and a hypothesis", await pg.is_disabled('[data-act="test"]'))
+    await act(pg, "rq", "group"); await act(pg, "rh", "missing"); await act(pg, "rq-done")
+    ok("S8: the question and hypothesis fold into one line", "My hypothesis:" in await pg.inner_text(".pm-qsum"))
     await act(pg, "test")
     s = (await state(pg))["s8"]
     model = await pg.evaluate("SE.mlKit.evaluate(SE.pmData.G.pool.slice(0,4).concat(SE.pmData.G.pool.slice(12,16)), SE.pmData.G.test).overall")
@@ -229,6 +283,9 @@ async def stage8(pg, student=True):
         await pg.locator(f'[data-act="add"][data-id="{cid}"]').click(); await pg.wait_for_timeout(60)
     ok("S8: the add list stays open while adding", await pg.evaluate("document.querySelector('details[data-k=gpool]').open"))
     await act(pg, "test")
+    if await pg.locator('[data-act="why8"]').count():
+        ok("S8: no improvement asks for an explanation and a next experiment", not await pg.is_enabled('[data-act="finish"]'))
+        await act(pg, "why8", "toofew"); await act(pg, "next8", "addmissing")
     await act(pg, "th", "67")
     for k, v in [("q2", "both"), ("q4", "addmissing"), ("q6", "newkind"), ("q7", "costly")]: await act(pg, k, v)
     await pg.fill("#pm-lesson", "More kinds of examples beat more copies."); await pg.dispatch_event("#pm-lesson", "change")
@@ -240,6 +297,8 @@ async def stage8(pg, student=True):
     expect = f"Improved from {a}% to {b}%" if b > a else (f"Stayed at {b}%" if a == b else f"Went down from {a}% to {b}%")
     ok("S8: the report states the measured before/after honestly", expect in rep, (expect, rep[:300]))
     ok("S8: the report has every section", all(x in rep for x in ["Model purpose", "Training examples", "Feature coverage", "Test accuracy", "A mistake I investigated", "Confidence threshold", "When a person should check", "Keep the humanity in technology"]))
+    ok("S8: the research report has the question, hypothesis, results, group changes, and what it still struggles with", all(x in rep for x in ["My AI Research Report", "My investigation question", "My original hypothesis", "My model's first result", "My model's new result", "What improved or got worse", "Something it still struggles with", "An important mistake I discovered"]), rep[:400])
+    ok("S8: the first and new results are the measured ones", f"{a}% on 20 new creatures" in rep and f"{b}%, with" in rep)
     ok("S8: the report includes notebook results from stages 4–6", "accuracy experiment" in rep.lower() and "bias detective" in rep.lower())
     if student:
         ok("S8: the certificate is offered after all stages", await pg.locator("#lab-win [data-cert]").count() == 1)
@@ -281,7 +340,7 @@ async def main():
     except Exception as e: ok("stage8 ran without error", False, str(e)[:300])
 
     # Chromebook: the stage and its main button are on the first screen
-    for n, sel in [(1, '[data-act="guess"]'), (4, '[data-act="pred"]'), (8, '[data-act="test"]')]:
+    for n, sel in [(1, '[data-act="guess"]'), (4, '[data-act="pred"]'), (8, '[data-act="rq"], .pm-qsum')]:
         await go(pg, n)
         box = await pg.locator(sel).first.bounding_box()
         ok(f"Chromebook: stage {n}'s first control is on the first screen", box and box["y"] + box["height"] <= 650, box)

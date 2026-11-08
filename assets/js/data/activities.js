@@ -7168,9 +7168,9 @@ window.STEM.activities = [
       "Train the model, test new creatures, and read why it predicted each one.",
       "Compare more of the same with more variety on a fixed test set.",
       "Find the group a biased model gets wrong, then fix the training data.",
-      "Set a confidence threshold, decide when AI should be used, and make your AI Model Report."
+      "Set a confidence threshold, decide when AI should be used, and make your AI Research Report."
     ],
-    check: "Show your AI Model Report. Point to one mistake your model made, the examples that caused it, what you changed, and whether the test score really went up.",
+    check: "Show your AI Research Report. Point to one mistake your model made, the examples that caused it, what you changed, and whether the test score really went up.",
     stopAt: "You finish the Responsible AI Challenge (stage 8) and print your report. Grades 2–3 can stop after Bias Detective (stage 5).",
     stuck: [
       "Look at the training examples, not the new creature. What do the closest ones have in common?",
@@ -7188,7 +7188,7 @@ window.STEM.activities = [
       { time: "0:43–0:58", title: "Bias Detective (stage 5)", detail: "Group moment: the Talk about it questions. Who should notice and fix a model that fails one group?" },
       { time: "0:58–1:10", title: "Confidence (stage 6)", detail: "Demo the slider. Ask: did raising the threshold always make it more accurate? Why were the purple creatures wrong at 100%?" },
       { time: "1:10–1:25", title: "Human Decision Room (stage 7)", detail: "Before students start, read two cases aloud and model a reason. Discuss the judgment calls afterward." },
-      { time: "1:25–1:30", title: "Report and recognition (stage 8)", detail: "Students finish the challenge, print the AI Model Report, and earn the certificate. In a 90-minute session, start stage 8 early or assign it as the next session's opener." }
+      { time: "1:25–1:30", title: "Report and recognition (stage 8)", detail: "Students finish the challenge, print the AI Research Report, and earn the certificate. In a 90-minute session, start stage 8 early or assign it as the next session's opener." }
     ],
     teacherNotes: [
       "Timing (90 minutes): welcome 5, Be the Machine 10, build and train 15, accuracy experiment 13, Bias Detective 15, confidence 12, Human Decision Room 15, report and recognition 5. These are targets and haven't been tested with classes yet; nothing times students out. Stage 8 takes most groups 10–15 minutes, so many classes finish it in a second session.",

@@ -191,6 +191,28 @@ ok("Field Guide F: there is a blue Glim the biased model gets wrong", !!f.bias &
 ok("Field Guide G: a purple creature is wrong with 5 of 5 agreeing", !!f.trap && f.trap.agree === 1 && !f.trap.correct && f.trap.ex.traits.color === "purple");
 ok("Field Guide: 8 cards, each with every part", KN.CARDS.length === 8 && KN.CARDS.every((c) => c.def && c.analogy && c.demo && c.q && c.q[1].some((o) => o[0] === c.q[2]) && c.miscon && c.world && c.deeper));
 ok("Field Guide A: the sort has rule-based and learned examples", KN.SORT.some((s) => s[2] === "rule") && KN.SORT.some((s) => s[2] === "learned"));
+// Bias 2.0: the budget tradeoff really helps one group and hurts another (same 14 slots).
+const TR = D.E.tradeoff, byE = (id) => D.E.train.concat(D.E.candidates).find((e) => e.id === id);
+const tradeSet = D.E.train.filter((e) => !TR.remove.includes(e.id)).concat(TR.add.map(byE));
+const rT = M.evaluate(tradeSet, D.E.test), r0T = M.evaluate(D.E.train, D.E.test);
+const cg = (r) => r.items.filter((i) => D.E.counter(i.ex) && i.correct).length;
+ok("tradeoff: the swap keeps the budget of 14", tradeSet.length === TR.budget && D.E.train.length === TR.budget);
+ok("tradeoff: the problem group goes from 0 to 5 of 6, overall to 88%", cg(r0T) === 0 && cg(rT) === 5 && Math.round(rT.overall * 100) === 88, [cg(r0T), cg(rT), rT.overall]);
+ok("tradeoff: the named blue Norp goes from right to wrong", r0T.items.find((i) => i.ex.id === TR.lost).correct && !rT.items.find((i) => i.ex.id === TR.lost).correct && byE(TR.remove[0]).traits.color === "blue");
+// Trust Dashboard: the settings offered are exactly the possible agreements for K = 5.
+ok("Trust Dashboard settings for K = 5 are 60, 80, 100 (plus always answer)", M.possibleAgreements(5).join() === "60,80,100");
+const answeredAt = (t) => M.evaluate(D.F.train, D.F.test, { K: 5, threshold: t }).answered;
+ok("70% answers exactly what 80% does (so it isn't offered)", answeredAt(70) === answeredAt(80) && answeredAt(90) === answeredAt(100));
+// Studio helpers.
+["assets/js/labs/pm-studio.js"].forEach((f2) => vm.runInContext(fs.readFileSync(path.join(ROOT, f2), "utf8"), sandbox, { filename: f2 }));
+const STU = sandbox.window.SE.pmStudio;
+const bst = {}; STU.act(bst, "st-trait", "eyes|3"); STU.act(bst, "st-trait", "color|green"); STU.act(bst, "st-label", "Norp");
+ok("Studio: trait buttons build a valid creature (numbers stay numbers)", M.valid(STU.traitsOf(bst)) && STU.traitsOf(bst).eyes === 3 && bst.label === "Norp");
+ok("Studio: an exact copy of a test creature is detected", STU.isTestCopy(D.TESTPOOL[0].traits, D.TESTPOOL) && !STU.isTestCopy(STU.traitsOf(bst), [D.TESTPOOL[0]]));
+const Sx = {}; STU.snap(Sx, { stage: 2, name: "Baseline", n: 8, glims: 4, acc: 0.5 }); STU.snap(Sx, { stage: 2, name: "Better variety", n: 9, glims: 4, acc: 0.75 });
+ok("Studio: snapshots compare with the first", Sx.snaps.length === 2 && STU.snapsHtml(Sx, 2).includes("+25 points"));
+const dash = STU.dashboardHtml([ex("d1", "blue round 1 none 0 short", "Glim"), ex("d2", "blue round 1 none 0 short", "Norp")], { ruleTraits: ["horns", "antennae"] });
+ok("Studio: the dashboard flags contradictions and missing combinations", dash.includes("look exactly the same") && dash.includes("aren't in the set"));
 const svg2 = M.creature(M.parse("blue round 2 pointy 1 short"));
 ok("the creature art groups each trait for highlighting", ["horns", "eyes", "tail", "antennae", "shape color"].every((t) => svg2.includes(`data-trait="${t}"`)));
 

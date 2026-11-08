@@ -14,7 +14,7 @@ Students become AI trainers. They:
 - catch a confident mistake;
 - decide when AI should help and when a person must decide.
 
-They finish with a printable AI Model Report and the Responsible AI Explorer certificate.
+They finish with a printable AI Research Report and the Responsible AI Explorer certificate.
 
 On the site: **Activity library → Artificial Intelligence → Train the Machine** (`#/activity/lab-pattern-machine`). The lab is `#/lab/pattern-machine`.
 
