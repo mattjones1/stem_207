@@ -1591,3 +1591,9 @@ button.cc-cell:focus-visible { outline: 3px solid #b4006a; outline-offset: -3px;
 }
 .pm-qsum { align-items: center; flex-wrap: wrap; }
 .pm-qsum .pm-link { margin-left: auto; }
+.pm-fg__top { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; justify-content: space-between; }
+.pm-fg__def.is-reading, .pm-fg__top h4.is-reading { background: var(--teal-soft); outline: 2px solid var(--teal); border-radius: 4px; }
+.pm-feat { display: flex; flex-wrap: wrap; gap: .3rem .8rem; align-items: center; border: 1.5px dashed var(--line); border-radius: var(--radius-sm); padding: .4rem .7rem; margin: .3rem 0 0; }
+.pm-feat legend { font-weight: 700; font-size: .9rem; display: inline-flex; gap: .4rem; align-items: center; }
+.pm-feat p { flex-basis: 100%; margin: 0; }
+.pm-cm td, .pm-cm th { text-align: center; }

@@ -133,7 +133,12 @@
     S.fg = Object.assign({ open: null, seen: [], q: {}, demo: {} }, S.fg || {});
     const fg = S.fg;
     const unlocked = (c) => c.stage <= (o.stage || 0) || fg.seen.includes(c.id);
-    const draw = () => paint(panel, html());
+    // Read it to me: the definition, the analogy, and the prediction question (for readers who want it aloud).
+    const draw = () => {
+      paint(panel, html());
+      const c = fg.open && byId(fg.open), btn = panel.querySelector('[data-read="fg"]');
+      if (c && btn) btn.onclick = () => SE.speech.read(btn, [{ text: c.title, el: panel.querySelector("#pm-fg-h") }, { text: c.def, el: panel.querySelector(".pm-fg__def") }, { text: "Think of it like this: " + c.analogy }, { text: c.q[0] }]);
+    };
     function html() {
       const c = fg.open && byId(fg.open);
       const st = c ? (fg.demo[c.id] = fg.demo[c.id] || {}) : null;
@@ -141,7 +146,7 @@
       return `<div class="pm-fg__head"><h3>${icon("bulb")}AI Field Guide</h3><p class="muted pm-small">Ideas you can revisit. New cards unlock as you go.</p></div>
         <div class="pm-fg__list" role="group" aria-label="Cards">${CARDS.map((x) => unlocked(x) ? b("fg-card", x.id, `${esc(x.id)}. ${esc(x.title)}`, "pm-chip", `aria-pressed="${fg.open === x.id}"`) : `<span class="pm-chip pm-chip--locked">${icon("lock")}${esc(x.id)}. Locked</span>`).join("")}</div>
         ${c ? `<article class="pm-fg__card" aria-labelledby="pm-fg-h">
-          <h4 id="pm-fg-h">${esc(c.id)}. ${esc(c.title)}</h4>
+          <div class="pm-fg__top"><h4 id="pm-fg-h">${esc(c.id)}. ${esc(c.title)}</h4>${SE.speech ? SE.speech.button("fg") : ""}</div>
           <p class="pm-fg__def">${esc(c.def)}</p>
           <p><strong>Think of it like this:</strong> ${esc(c.analogy)}</p>
           <div class="pm-fg__demo"><p class="pm-fg__k">${icon("flask")}Try it</p>${c.demo(st)}</div>

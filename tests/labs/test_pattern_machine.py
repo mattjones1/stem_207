@@ -307,6 +307,39 @@ async def stage8(pg, student=True):
         ok("certificate: award, name, workshop, skills, mission", all(x in ct for x in ["Responsible AI Explorer", "Ava R.", "Train the Machine", "Found and fixed biased data", "Keep the humanity in technology."]), ct[:200])
         await pg.keyboard.press("Escape"); await pg.wait_for_timeout(150)
 
+async def researcher(pg):
+    before = (await state(pg))["s3"]["train"]
+    await pg.evaluate("localStorage.setItem('stem207.pm.mode', 'researcher')")
+    # Stage 4: the K comparison is the model's real accuracy.
+    await go(pg, 4)
+    rows = await pg.evaluate("[...document.querySelectorAll('.pm-kcmp tbody tr')].map(r => [...r.querySelectorAll('td')].map(td => td.textContent))")
+    model = await pg.evaluate("""[SE.pmData.CD.same, SE.pmData.CD.variety].map(pool => { const tr = SE.pmData.CD.base.concat(pool.slice(0, 9));
+      return [1, 3, 5].map(k => Math.round(SE.mlKit.evaluate(tr, SE.pmData.CD.test, { K: k }).overall * 100) + '%'); })""")
+    ok("Researcher: stage 4 compares K = 1, 3, 5 with the model's real accuracy", rows == model, (rows, model))
+    # Stage 3: feature selection is saved and the walkthrough says what's ignored. Switching modes kept the work.
+    await go(pg, 3)
+    ok("modes: switching to Researcher keeps the stage 3 training set", (await state(pg))["s3"]["train"] == before)
+    await pg.locator('#pm-feat3 input[value="color"]').uncheck(); await pg.wait_for_timeout(200)
+    ok("Researcher: unchecking a trait is saved as the model's features", (await state(pg))["s3"]["features"] == ["shape", "eyes", "horns", "antennae", "tail"], (await state(pg))["s3"].get("features"))
+    await act(pg, "train"); await act(pg, "pick", "q-02")
+    ok("Researcher: Inside the Machine says which trait is ignored", "ignoring color" in await pg.inner_text(".pm-iv"))
+    feat = await pg.evaluate("""((tr) => { const t = SE.pmData.TESTPOOL.find(c => c.id === 'q-02').traits; return SE.mlKit.knn(tr, t, { features: ['shape','eyes','horns','antennae','tail'] }).label; })(""" + TRAIN3 + ")")
+    pt = " ".join((await pg.inner_text(".pm-test")).split())
+    ok("Researcher: the prediction uses only the chosen traits", f"predicts ▲ {feat}" in pt or f"predicts ● {feat}" in pt, (feat, pt))
+    await pg.locator('#pm-feat3 input[value="color"]').check(); await pg.wait_for_timeout(200)
+    ok("Researcher: checking all six goes back to the default", (await state(pg))["s3"]["features"] == [])
+    # Stage 8: the confusion matrix and training vs. test accuracy come from the model.
+    await go(pg, 8)
+    cm = await pg.evaluate("[...document.querySelectorAll('.pm-cm tbody td')].map(td => parseInt(td.textContent))")
+    want = await pg.evaluate("""(() => { const st = JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k => /^stem207\\.pm\\.(?!mode)/.test(k)))).s8;
+      const tr = st.train.map(id => SE.pmData.G.pool.find(e => e.id === id)), c = SE.mlKit.confusion(SE.mlKit.evaluate(tr, SE.pmData.G.test, { K: st.K || 3 }));
+      return [c.GG, c.GN, c.NG, c.NN]; })()""")
+    ok("Researcher: the confusion matrix matches the model and covers all 20", cm == want and sum(cm) == 20, (cm, want))
+    ok("Researcher: training vs. new-creature accuracy is shown", "On its training examples" in await pg.inner_text(".pm-res8"))
+    await pg.evaluate("localStorage.setItem('stem207.pm.mode', 'investigator')")
+    await go(pg, 3)
+    ok("modes: Investigator hides the Researcher tools but keeps the work", await pg.locator("#pm-feat3").count() == 0 and (await state(pg))["s3"]["train"] == before)
+
 async def main():
   async with async_playwright() as p:
     b = await p.chromium.launch(); errs = []; outside = []
@@ -338,6 +371,8 @@ async def main():
         except Exception as e: ok(f"{f.__name__} ran without error", False, str(e)[:300])
     try: await stage8(pg)
     except Exception as e: ok("stage8 ran without error", False, str(e)[:300])
+    try: await researcher(pg)
+    except Exception as e: ok("researcher ran without error", False, str(e)[:300])
 
     # Chromebook: the stage and its main button are on the first screen
     for n, sel in [(1, '[data-act="guess"]'), (4, '[data-act="pred"]'), (8, '[data-act="rq"], .pm-qsum')]:
