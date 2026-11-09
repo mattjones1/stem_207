@@ -174,11 +174,11 @@
   SE.speech = {
     ok: () => "speechSynthesis" in window && typeof window.SpeechSynthesisUtterance === "function",
     button: (key, label = "Read it to me") => SE.speech.ok()
-      ? `<button type="button" class="btn btn--ghost btn--small read-btn" data-read="${key}" aria-pressed="false">${SE.icon("sound")}<span class="read-btn__label">${label}</span></button>` : "",
+      ? `<button type="button" class="btn btn--ghost btn--small read-btn" data-read="${key}" data-label="${label}" aria-pressed="false">${SE.icon("sound")}<span class="read-btn__label">${label}</span></button>` : "",
     stop() {
       if (SE.speech.ok()) window.speechSynthesis.cancel();
       document.querySelectorAll(".is-reading").forEach((e) => e.classList.remove("is-reading"));
-      document.querySelectorAll(".read-btn[aria-pressed=true]").forEach((b) => { b.setAttribute("aria-pressed", "false"); b.querySelector(".read-btn__label").textContent = "Read it to me"; });
+      document.querySelectorAll(".read-btn[aria-pressed=true]").forEach((b) => { b.setAttribute("aria-pressed", "false"); b.querySelector(".read-btn__label").textContent = b.dataset.label || "Read it to me"; });
     },
     read(btn, parts) {
       if (!SE.speech.ok()) return;

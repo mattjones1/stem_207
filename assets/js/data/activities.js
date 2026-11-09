@@ -6515,26 +6515,27 @@ window.STEM.activities = [
       materials: ["A laptop, Chromebook, or tablet for each student (or each pair)", "A projector for demos", "Optional: grid paper for planning the Captain's Challenge"],
       setup: [
         "Make a class and print login cards. Students sign in, and their progress saves.",
-        "Open levels 6 (Fog on the Water) and 7 (The Changing Channel) on the projector computer before class.",
-        "Signed in as an educator, each level has a Demo the solution button. Students never see it."
+        "Open levels 6 (Fog on the Water) and 7 (The Changing Channel) on the projector computer before class. Each opens with a short lesson you can walk through with the class.",
+        "Each lesson has a worked example to step through and one question. Students need the right answer to go on, and every answer explains itself."
       ],
       prerequisites: "None. Level 1 starts at the very beginning."
     },
     steps: [
       "Open Captain Code and press Start in Casco Bay.",
-      "Read the harbor master's briefing and your goal.",
-      "Tap blocks to build your program. Tap a gap to choose where new blocks go.",
-      "On some levels, guess where the boat will stop, or plot your course, before you run.",
-      "Press Run to watch the boat, or Step to run one block at a time.",
+      "Read the harbor master's briefing and your goal. When a level starts with a lesson, read it and try the example first.",
+      "Plan your route: press Plot your course, tap the squares, and mark the traps you'll haul.",
+      "Tap blocks to build your program. Tap a gap to choose where new blocks go. Your Python shows beside it.",
+      "Guess where the boat will stop. Then press Run, or Step to run one block at a time.",
       "Read the feedback, fix the first thing that went wrong, and run again."
     ],
     reflect: "Which level changed how you were thinking about the problem? What did you do differently?",
     extend: "Design your own chart in level 10 and challenge a partner to beat your block count. Then sail on to Penobscot Bay.",
     teacherNotes: [
       "Workshop flow (90 minutes): welcome and captain briefing, 8 minutes (the human-boat warm-up). Levels 1–4, 22 minutes. Levels 5–7, 20 minutes. Levels 8–9, 18 minutes. Captain's Challenge, 15 minutes. Python reveal and reflection, 7 minutes. These times are targets and haven't been tested with classes yet.",
-      "Demo: signed in as an educator, Demo the solution loads a verified reference solution. Step through it on the projector before students try levels 6, 7, and 8. Students never see this button.",
+      "Lessons: levels 5 to 10 open with a short lesson the first time (Repeat, if / else, an if inside an if, variables, your own block, and the captain's routine). On the projector, walk the class through the lesson's worked example with Step before they try the level. Lesson in the brief opens it again.",
       "Checkpoints: on your dashboard, check who has finished level 4 by about minute 30, level 7 by minute 50, and level 9 by minute 68. A student with many test runs and no progress needs a conversation, not the answer.",
-      "Grades 2–3: aim for level 5. Turn on Extra help (Plot your course on each level, and clues after two tries); Bigger blocks makes the blocks larger for anyone. Older students can skip Extra help and chase Par and the Compass mark.",
+      "Grades 2–3: aim for level 5. Have them plan every level with Plot your course and read My plan in words aloud before they build. After two tries that don't work, the feedback points them to Hint. Older students can chase Par and the Compass mark.",
+      "Level 10 has two parts. Part 1 is a four-leg voyage: traps A to D tick off as they're hauled, and a failed run names the legs that worked. Part 2, Design my chart, opens after Part 1 is won, with four numbered steps and a live check that the chart can be sailed.",
       "Block budgets count every block, including the blocks inside the student's own block. A route that works but runs over the budget still runs; the feedback then asks for a loop, a variable, or their own block. Any program that meets the goal passes: there is no single required answer.",
       "Common mistakes: using the student's own left and right instead of the boat's, Forward outside a loop that should be inside it, a repeat count that's off by one, and reaching the mooring without hauling. The feedback names each one with the student's numbers.",
       "Level 7 and other channel levels run the same program on two or three maps. A memorized route can't pass both. Ask: why do real programmers test with more than one case?",
@@ -6659,7 +6660,7 @@ window.STEM.activities = [
     reflect: "Which level made you change how you were thinking about the problem? What did you do differently?",
     extend: "On each voyage's free build, solve the level, then try to beat par by using loops and conditionals to make your program shorter.",
     teacherNotes: [
-      "Running an instructor-led workshop? Use Captain Code: its 10 Casco Bay levels fit 90 minutes, with fog, tides, and an educator Demo button. Harbor Code is self-paced practice with the same ideas and new harbors.",
+      "Running an instructor-led workshop? Use Captain Code: its 10 Casco Bay levels fit 90 minutes, with lessons before each new idea, fog, and tides. Harbor Code is self-paced practice with the same ideas and new harbors.",
       "Each voyage follows the Coding Foundations Learning Plan: levels 1–3 sequencing and debugging (step 1), 4–6 loops (step 3), 7–9 actions and conditionals (steps 2 and 4), 10 variables (step 5), 11 functions (step 6), 12 independent creation (step 7).",
       "Voyage 2 (Penobscot Bay) adds Set trap and If at a dashed spot. Voyage 3 (Down East) adds a simple rule: you can only set a trap you have already hauled. Both are actions and conditionals at the same skill level as Voyage 1.",
       "Debug levels vary the kind of bug: a wrong turn, an extra block, a wrong turn inside a loop, and a loop that repeats too few times.",

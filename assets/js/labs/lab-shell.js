@@ -110,9 +110,12 @@
     const briefingHtml = level.briefing ? `<p class="lab-briefing">${icon("boat")}<span><strong>Harbor master:</strong> ${esc(level.briefing)}</span></p>` : "";
     const goalHtml = `<p class="lab-goal${lab.briefFirst ? " lab-goal--lead" : ""}"><strong>Your goal:</strong> ${esc(level.goal)}</p>`;
     const stepsHtml = level.steps ? `<ol class="lab-steps">${level.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>` : "";
-    const toolsHtml = `<div class="lab-brief__tools">
-            ${SE.speech.button("lab")}
-            <button type="button" class="btn btn--ghost btn--small" id="lab-hint-btn" aria-expanded="false" aria-controls="lab-hint">${icon("question")}Need a hint?</button>
+    // compactTools labs (Captain Code) show Read it to me and the hint as one quiet row of small links.
+    const compact = !!lab.compactTools;
+    const hintWord = compact ? "Hint" : "Need a hint?";
+    const toolsHtml = `<div class="lab-brief__tools${compact ? " lab-brief__tools--compact" : ""}">
+            ${SE.speech.button("lab", compact ? "Listen" : undefined)}
+            <button type="button" class="btn btn--ghost btn--small" id="lab-hint-btn" aria-expanded="false" aria-controls="lab-hint">${icon("question")}${hintWord}</button>
             ${done.has(idx) ? `<span class="chip chip--done">${icon("check")}You finished this level</span>` : ""}
           </div>
           ${level.hints ? `<div class="lab-hint" id="lab-hint" hidden>${level.hints.map((h, i) => `<p data-hint="${i}" ${i ? "hidden" : ""}><strong>Hint ${i + 1} of ${level.hints.length}:</strong> ${esc(h)}</p>`).join("")}</div>` : `<p class="lab-hint" id="lab-hint" hidden>${esc(level.hint)}</p>`}`;
@@ -177,14 +180,14 @@
         const next = h.querySelector("[data-hint][hidden]");
         if (next) {
           next.hidden = false;
-          if (!h.querySelector("[data-hint][hidden]")) hintBtn.innerHTML = `${icon("question")}Hide hints`;
+          if (!h.querySelector("[data-hint][hidden]")) hintBtn.innerHTML = `${icon("question")}${compact ? "Hide" : "Hide hints"}`;
           if (isStudent) SE.store.log("lab_hint", { labId: lab.id, level: idx, hint: Number(next.dataset.hint) + 1 });
           return;
         }
       }
       h.hidden = !h.hidden;
       hintBtn.setAttribute("aria-expanded", String(!h.hidden));
-      if (level.hints) hintBtn.innerHTML = `${icon("question")}${h.hidden ? "Need a hint?" : level.hints.length > 1 ? "Show another hint" : "Hide hint"}`;
+      if (level.hints) hintBtn.innerHTML = `${icon("question")}${h.hidden ? hintWord : level.hints.length > 1 ? (compact ? "Next hint" : "Show another hint") : (compact ? "Hide" : "Hide hint")}`;
       if (level.hints && h.hidden) h.querySelectorAll("[data-hint]").forEach((p, i) => { p.hidden = i > 0; });
       if (!h.hidden && isStudent) SE.store.log("lab_hint", { labId: lab.id, level: idx });
     });

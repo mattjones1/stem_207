@@ -112,12 +112,20 @@
           st.dropped.add(k); yield b;
           break;
         }
+        // ctx.loopTicks (Captain Code): a loop also yields itself at the start of each lap, as { lap, of },
+        // so a lab can show "lap 2 of 4". Other labs leave it off and step exactly as before.
         case "repeat":
-          for (let i = 0; i < b.n; i++) { yield* run(b.body, st, ctx); if (st.error || st.done) return; }
+          for (let i = 0; i < b.n; i++) {
+            if (ctx.loopTicks) yield { ...b, checking: true, lap: i + 1, of: b.n };
+            yield* run(b.body, st, ctx); if (st.error || st.done) return;
+          }
           break;
         case "repeatVar": {
           const n = st.vars.steps || 0;
-          for (let i = 0; i < n; i++) { yield* run(b.body, st, ctx); if (st.error || st.done) return; }
+          for (let i = 0; i < n; i++) {
+            if (ctx.loopTicks) yield { ...b, checking: true, lap: i + 1, of: n };
+            yield* run(b.body, st, ctx); if (st.error || st.done) return;
+          }
           break;
         }
         case "untilGoal": {
@@ -133,22 +141,25 @@
         }
         case "ifGem": {
           const k = `${st.x},${st.y}`;
-          yield { ...b, checking: true };
-          if (st.gems.has(k) && !st.got.has(k)) yield* run(b.body, st, ctx);
+          const yes = st.gems.has(k) && !st.got.has(k);
+          yield { ...b, checking: true, answer: yes };
+          if (yes) yield* run(b.body, st, ctx);
           if (st.error) return;
           break;
         }
         case "ifSpot": {
           const k = `${st.x},${st.y}`;
-          yield { ...b, checking: true };
-          if (st.spots.has(k) && !st.dropped.has(k)) yield* run(b.body, st, ctx);
+          const yes = st.spots.has(k) && !st.dropped.has(k);
+          yield { ...b, checking: true, answer: yes };
+          if (yes) yield* run(b.body, st, ctx);
           if (st.error) return;
           break;
         }
         case "ifWall": {
           const [dx, dy] = DIRS[st.dir];
-          yield { ...b, checking: true };
-          if (isWall(ctx.g, st.x + dx, st.y + dy)) yield* run(b.body, st, ctx);
+          const yes = isWall(ctx.g, st.x + dx, st.y + dy);
+          yield { ...b, checking: true, answer: yes };   // answer: which branch runs next (true = the if part)
+          if (yes) yield* run(b.body, st, ctx);
           else yield* run(b.else, st, ctx);
           if (st.error) return;
           break;
@@ -156,8 +167,9 @@
         case "ifLedgeLeft":
         case "ifLedgeRight": {
           const [dx, dy] = DIRS[(b.type === "ifLedgeLeft" ? LEFT : RIGHT)[st.dir]];
-          yield { ...b, checking: true };
-          if (isWall(ctx.g, st.x + dx, st.y + dy)) yield* run(b.body, st, ctx);
+          const yes = isWall(ctx.g, st.x + dx, st.y + dy);
+          yield { ...b, checking: true, answer: yes };
+          if (yes) yield* run(b.body, st, ctx);
           else yield* run(b.else || [], st, ctx);
           if (st.error) return;
           break;

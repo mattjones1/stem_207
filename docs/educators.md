@@ -17,7 +17,6 @@ The teacher side. Read before changing the Dashboard, classes, Learning Plans, t
 - After sign-up, a new educator lands on their class page.
 - Build Your First Website keeps student code on the device. Review a finished page by looking at the student's screen (they can choose "will show you" when they send the activity) or from their printed project summary.
 - Train the Machine (the Pattern Machine Lab) keeps training sets, notebook notes, and written reasons on the device. Review a student's work from their printed AI Research Report; the Responsible AI Explorer certificate is separate from Pass / Try again, which still awards Activity XP.
-- Labs: signed in as an educator, Captain Code shows **Demo the solution** on every level. It loads the level's verified reference solution for stepping through on a projector. Students never see it.
 - Test: `python3 tests/site/test_classes.py`.
 
 ## Learning Plans

@@ -93,5 +93,46 @@ for (const L of ALL) {
   ok("an infinite loop is stopped, not frozen", H.sail({ dir: "E" }, ["#####", "#S.G#", "#####"], PY.parse("while not at_mooring():\n    turn_left()", { goal: "mooring" }).main).result.reason === "loop");
 }
 
+// Lessons (learn first, then try): the new ideas have one, every worked example really sails to the mooring,
+// and every question has exactly one right answer, with a reason for each answer.
+{
+  const want = ["cb-5", "cb-6", "cb-7", "cb-8", "cb-9", "cb-10", "de-5", "pb-7", "de-6", "pb-9", "de-8", "pb-10", "de-10"];
+  want.forEach((id) => ok(`${id}: opens with a lesson`, !!(ALL.find((L) => L.id === id) || {}).lesson));
+  for (const L of ALL.filter((x) => x.lesson)) {
+    const cards = L.lesson.cards;
+    ok(`${L.id}: lesson has a title and 2+ cards`, L.lesson.title && cards.length >= 2);
+    ok(`${L.id}: lesson ends with a question`, !!cards[cards.length - 1].check);
+    cards.forEach((c, i) => {
+      ok(`${L.id} card ${i + 1}: has a heading`, !!c.h);
+      if (c.example) {
+        const e = c.example, p = PY.parse(e.src, { varName: e.varName, goal: "mooring" });
+        ok(`${L.id} card ${i + 1}: example compiles`, !p.errors.length, JSON.stringify(p.errors));
+        ok(`${L.id} card ${i + 1}: example map is valid`, !H.validateGrid(e.grid).length);
+        const r = H.sail({ dir: e.dir }, e.grid, p.main, p.fn).result;
+        ok(`${L.id} card ${i + 1}: example sails to the mooring`, r.atGoal && !r.values.error && r.reason === "ok", JSON.stringify(r));
+      }
+      if (c.check) {
+        ok(`${L.id} card ${i + 1}: question has exactly one right answer`, c.check.options.filter((o) => o[1]).length === 1);
+        ok(`${L.id} card ${i + 1}: every answer explains itself`, c.check.options.every((o) => o[0] && o[2]));
+      }
+    });
+  }
+  // Level 10's legs: one letter per trap buoy, on the chart.
+  const L10 = CASCO[9], g10 = H.parseGrid(L10.grids[0]);
+  ok("cb-10: one leg per trap", L10.legs && L10.legs.length === g10.gems.length);
+  ok("cb-10: every leg sits on a trap buoy", L10.legs.every((l) => g10.gems.includes(l.at)));
+  ok("cb-10: leg letters are unique", new Set(L10.legs.map((l) => l.name)).size === L10.legs.length);
+  // Loops report their laps when asked (ctx.loopTicks), and ifs report their answer.
+  const prog = PY.parse("for i in range(3):\n    move()", {}).main;
+  const g = H.parseGrid(["######", "#S..G#", "######"]), st = H.startState(g, "E");
+  const laps = [...H.run(prog, st, { g, fn: [], depth: 0, loopTicks: true })].filter((b) => b.lap).map((b) => `${b.lap}/${b.of}`);
+  ok("a Repeat reports lap 1 of 3, 2 of 3, 3 of 3", laps.join(",") === "1/3,2/3,3/3", laps.join(","));
+  const st2 = H.startState(g, "E");
+  ok("without loopTicks, a Repeat yields only its body", [...H.run(prog, st2, { g, fn: [], depth: 0 })].every((b) => !b.lap));
+  const st3 = H.startState(H.parseGrid(["####", "#SG#", "####"]), "E"), g3 = H.parseGrid(["####", "#SG#", "####"]);
+  const ans = [...H.run(PY.parse("if ledge_ahead():\n    turn_left()\nelse:\n    move()").main, st3, { g: g3, fn: [], depth: 0 })].find((b) => b.answer !== undefined);
+  ok("an if reports its answer (no ledge ahead: false)", ans && ans.answer === false);
+}
+
 console.log(`\n${pass}/${pass + fail} passed`);
 process.exit(fail ? 1 : 0);

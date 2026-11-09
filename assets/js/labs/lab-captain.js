@@ -4,12 +4,14 @@
  * and Down East (12 each) are for students who finish early. Levels live in captain-levels.js.
  *
  * Built on Harbor Code's engine (harbor-engine.js: run, check, sail, fog sight) and block editor
- * (harbor-editor.js, with Undo/Redo here). What Captain Code adds on top:
- *   predict first (tap where the boat will stop), plot your course (the run shows where it left the plan),
- *   real fog (only the squares around the boat are drawn), channels (one program must pass every map),
- *   block budgets that still let a working route run and then ask for a smarter one, three marks per level
- *   (Made it, Par, Compass), feedback that names the student's own numbers, Extra help, an educator Demo,
- *   See your code in Python side by side, a free-build chart designer, a Voyage Card, and a certificate.
+ * (harbor-editor.js, with Undo/Redo and rich loops here). What Captain Code adds on top:
+ *   a lesson before each new idea (learn first, then try), guess where the boat stops (any level, required
+ *   first on predict levels), plot your course with the jobs on the route and the plan in words (the run
+ *   shows where it left the plan), real fog (only the squares around the boat are drawn), channels (one
+ *   program must pass every map), block budgets that still let a working route run and then ask for a smarter
+ *   one, three marks per level (Made it, Par, Compass), feedback that names the student's own numbers, Python
+ *   side by side (on by default), Level 10's lettered legs and step-by-step chart designer, a Voyage Card,
+ *   and a certificate.
  * Pure helpers for tests: SE.captain.feedback(L, result, ctx), SE.captain.marks(L, ctx), SE.captain.LEVELS.
  */
 (function () {
@@ -25,13 +27,11 @@
     { title: "Down East", short: "Down East", from: CASCO.length + PENOBSCOT.length, to: LEVELS.length - 1, blurb: "Big tides and narrow passages. Nested loops, wall-following, and your own navigation toolkit." }
   ];
   const DIR_WORD = { N: "north", E: "east", S: "south", W: "west" };
+  const ARROW = { N: "↑", E: "→", S: "↓", W: "←" };
   const pyOpts = (L) => ({ varName: L.varName, goal: "mooring" });
-  const HELP_KEY = "stem207.captain.help";
-  const helpOn = () => { try { return sessionStorage.getItem(HELP_KEY) === "1"; } catch (e) { return false; } };
-  const setHelp = (on) => { try { sessionStorage.setItem(HELP_KEY, on ? "1" : "0"); } catch (e) { /* private mode */ } };
-  const BIG_KEY = "stem207.captain.big";   // Bigger blocks: larger targets for anyone, separate from Extra help
-  const bigOn = () => { try { return sessionStorage.getItem(BIG_KEY) === "1"; } catch (e) { return false; } };
-  const setBig = (on) => { try { sessionStorage.setItem(BIG_KEY, on ? "1" : "0"); } catch (e) { /* private mode */ } };
+  const PY_KEY = "stem207.captain.py";   // Python shows beside the blocks unless the student hides it (this session)
+  const pyOn = () => { try { return sessionStorage.getItem(PY_KEY) !== "0"; } catch (e) { return true; } };
+  const setPy = (on) => { try { sessionStorage.setItem(PY_KEY, on ? "1" : "0"); } catch (e) { /* private mode */ } };
 
   /* Block words for a level: the mooring, the level's variable and its own block. */
   const labeler = (L) => (type) => {
@@ -52,9 +52,9 @@
     return labeler(L)(type);
   };
   /* The block counter: the budget when there is one ("too many" in words, not only color), else par. */
-  const countText = (L, help) => (n) => L.budget
+  const countText = (L) => (n) => L.budget
     ? `${n} / ${L.budget} blocks${n > L.budget ? " · too many" : ""}`
-    : `${n} blocks${L.par && !help ? ` · par ${L.par}` : ""}`;
+    : `${n} blocks${L.par ? ` · par ${L.par}` : ""}`;
 
   /* ───────── The student's own boat (My harbor), or the standard one ───────── */
   function boatFor(user) {
@@ -176,40 +176,42 @@
     const labelOf = labeler(L);
     const body = el.closest(".lab-body");
     if (body) body.classList.add("lab-body--wide");   // a narrower brief, so the three panes fit
-    const isTeacher = !!(api.user && api.user.role === "educator");
     const boat = boatFor(api.user);
     const reduce = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-    let help = helpOn(), big = bigOn();
+    const py = pyOn();
     let grids = L.grids.map((g) => g.slice());
     let dir = L.dir;
     let w = 0, g = H.parseGrid(grids[0]);
     let gen = null, st = null, timer = null, running = false, finished = false, speed = reduce ? 140 : 380;
     let seen = new Set(), passed = new Set(), testingAll = false;
-    let mode = L.plan || (help && !L.fog) ? "plan" : null;     // null | "plan" | "predict" | "design"
+    let mode = L.plan ? "plan" : null;     // null | "plan" | "predict" | "design"
     let plan = [], planBroke = null, prediction = null, predicted = !L.predict, predictedRight = false;
-    let failedRuns = 0, lastTurn = false, custom = false, demo = false, tool = "#", stepsTaken = 0;
+    const planActs = new Map();   // plan square -> "haul" | "set": the jobs the student plans to do there
+    let failedRuns = 0, lastTurn = false, custom = false, tool = "#", stepsTaken = 0, blocksRun = 0, stepTold = false;
+    const canGuess = !L.fog;   // Guess where it stops is on every level the student can see (required first where L.predict)
     const worldName = (i) => (L.worlds ? L.worlds[i] : `Map ${i + 1}`);
+    // Level 10: the trap letters (L.legs) belong to the given chart, not to one the student designs.
+    const legsOn = () => !!L.legs && !custom;
+    const legAt = (k) => (legsOn() ? L.legs.find((l) => l.at === k) : null);
+    let partOneWon = false;
+    const designOpen = () => !L.legs || partOneWon || SE.labs.progressFor(api.user, "captain-code").has(idx);
 
     const starter = L.starter ? H.clone(SE.minipy.parse(L.starter, pyOpts(L)).main) : [];
     const bad = grids.map(H.validateGrid).flat();
     if (bad.length) { el.innerHTML = `<p class="lab-feedback is-warn">This level's map has a problem: ${esc(bad[0])}</p>`; return () => {}; }
 
     el.innerHTML = `
-      <div class="cc ${help ? "cc--help" : ""} ${big ? "cc--big" : ""}" id="cc">
-        <div class="cc__bar">
+      <div class="cc ${py ? "cc--py" : ""}" id="cc">
+        ${L.lesson ? `<section class="cc-lesson" id="cc-lesson" hidden aria-labelledby="cc-lesson-h"></section>` : ""}
+        ${(L.par && L.par !== L.budget) || compassText(L) ? `<div class="cc__bar">
           <div class="cc__goalchips">
-            ${L.par && L.par !== L.budget ? `<span class="var-chip cc-hide-help" id="cc-par">Par <b>${L.par}</b>: an expert's block count</span>` : ""}
-            ${compassText(L) ? `<span class="cc-compass cc-hide-help">${icon("compass")}${esc(compassText(L))}</span>` : ""}
+            ${L.par && L.par !== L.budget ? `<span class="var-chip" id="cc-par">Par <b>${L.par}</b>: an expert's block count</span>` : ""}
+            ${compassText(L) ? `<span class="cc-compass">${icon("compass")}${esc(compassText(L))}</span>` : ""}
           </div>
-          <div class="cc__bartools">
-            <button type="button" class="btn btn--ghost btn--small" id="cc-big" aria-pressed="${big}">${icon("plus")}Bigger blocks</button>
-            <button type="button" class="btn btn--ghost btn--small" id="cc-help" aria-pressed="${help}">${icon("bulb")}Extra help</button>
-            ${isTeacher ? `<button type="button" class="btn btn--ghost btn--small" id="cc-demo">${icon("eye")}Demo the solution</button>` : ""}
-          </div>
-        </div>
+        </div>` : ""}
         <div class="cc__panes">
-          <section class="cc__py" id="cc-py" hidden aria-labelledby="cc-py-title">
-            <div class="cc__pyhead"><h3 id="cc-py-title">${icon("code")}See your code in Python</h3>
+          <section class="cc__py" id="cc-py" ${py ? "" : "hidden"} aria-labelledby="cc-py-title">
+            <div class="cc__pyhead"><h3 id="cc-py-title">${icon("code")}Your code in Python</h3>
               <button type="button" class="linkish" id="cc-copy">${icon("clipboard")}Copy</button></div>
             <pre class="cc-py__code" id="cc-py-code"></pre>
             <ul class="cc-py__notes" id="cc-py-notes"></ul>
@@ -220,6 +222,7 @@
             </details>
           </section>
           <div class="cc__code rover__code" id="cc-code"></div>
+          ${L.design ? `<section class="cc__design" id="cc-designpanel" hidden aria-label="Design my chart"></section>` : ""}
           <div class="cc__chart">
             ${grids.length > 1 ? `<div class="cc-tabs" role="tablist" aria-label="Channels">${grids.map((_, i) => `<button type="button" role="tab" class="cc-tab" id="cc-tab-${i}" data-world="${i}" aria-selected="${i === 0}"><span>${esc(worldName(i))}</span><b class="cc-tab__ok" data-ok="${i}"></b></button>`).join("")}</div>` : ""}
             <div class="cc__gridwrap" id="cc-gridwrap"></div>
@@ -229,16 +232,17 @@
             </div>
             <div class="cc__controls rover__controls">
               <button type="button" class="btn btn--launch" id="cc-run">${icon("rocket")}Run</button>
-              <button type="button" class="btn btn--ghost" id="cc-step">${icon("arrowRight")}Step</button>
+              <button type="button" class="btn btn--ghost" id="cc-step" title="Run just the next block, so you can watch closely">${icon("arrowRight")}Step (1 block)</button>
               <button type="button" class="btn btn--ghost" id="cc-reset">${icon("refresh")}Reset</button>
               ${grids.length > 1 ? `<button type="button" class="btn btn--ghost" id="cc-all">${icon("check")}Test ${grids.length === 2 ? "both" : "all"} ${L.worlds && /tide/i.test(L.worlds[0]) ? "tides" : "channels"}</button>` : ""}
             </div>
             <div class="cc__modepanel" id="cc-modepanel" aria-live="polite"></div>
+            <div class="cc-planwords" id="cc-planwords" hidden></div>
             <div class="cc__modes" role="group" aria-labelledby="cc-tools-title">
               <span class="cc__modes-title" id="cc-tools-title">Captain's tools</span>
               ${L.fog ? "" : `<button type="button" class="btn btn--ghost btn--small" id="cc-plan" aria-pressed="false">${icon("map")}Plot your course</button>`}
-              ${L.predict ? `<button type="button" class="btn btn--ghost btn--small" id="cc-predict" aria-pressed="false">${icon("target")}Guess where it stops</button>` : ""}
-              <button type="button" class="btn btn--ghost btn--small" id="cc-pybtn" aria-pressed="false" aria-controls="cc-py">${icon("code")}See it in Python</button>
+              ${canGuess ? `<button type="button" class="btn btn--ghost btn--small" id="cc-predict" aria-pressed="false">${icon("target")}Guess where it stops</button>` : ""}
+              <button type="button" class="btn btn--ghost btn--small" id="cc-pybtn" aria-pressed="${py}" aria-controls="cc-py">${icon("code")}Python</button>
               ${L.design ? `<button type="button" class="btn btn--ghost btn--small" id="cc-design" aria-pressed="false">${icon("palette")}Design my chart</button>` : ""}
               <span class="cc-speed" role="group" aria-label="Speed" id="cc-speed"><span aria-hidden="true">Speed</span>${[["700", "Slow"], ["380", "Normal"], ["140", "Fast"]].map(([v, t]) => `<button type="button" class="cc-speed__b" data-speed="${v}" aria-pressed="${Number(v) === speed}">${t}</button>`).join("")}</span>
             </div>
@@ -251,11 +255,12 @@
     const fb = document.getElementById("lab-feedback");
     if (fb) $(".cc__readout").after(fb);
     const ed = H.editor($("#cc-code"), {
-      blocks: L.blocks, labelOf, paletteLabel: paletteLabeler(L), countText: countText(L, help), usesFn: L.usesFn, fnName: L.fnName || "My Move", maxBlocks: L.budget, par: help ? null : L.par,
-      starter, countFn: true, undo: true, python: false, varName: L.varName, goal: "mooring",
+      blocks: L.blocks, labelOf, paletteLabel: paletteLabeler(L), countText: countText(L), usesFn: L.usesFn, fnName: L.fnName || "My Move", maxBlocks: L.budget, par: L.par,
+      starter, countFn: true, undo: true, python: false, varName: L.varName, goal: "mooring", loops: true, say: (t, k) => api.say(t, k),
       isBusy: () => running,
       onEdit: () => { passed.clear(); markTabs(); resetWorld(); api.say(""); renderPy(); }
     });
+    $("#cc-code").appendChild($("#cc-planwords"));   // the plan in words sits right under the program it guides
 
     /* ───────── The chart ───────── */
     const key = (x, y) => `${x},${y}`;
@@ -267,7 +272,8 @@
       const got = st && st.got.has(k), set = st && st.dropped.has(k), hit = st && st.visited.has(k);
       if (ch === "G") return { cls: "cc-cell--mooring", html: `<span class="cc-moor" aria-hidden="true"><i></i></span>`, say: "your mooring" };
       if (ch === "S") return { cls: "cc-cell--dock", html: "", say: "the dock" };
-      if (ch === "*") return { cls: got ? "is-got" : "", html: got ? "" : `<span class="cc-buoy">${icon("buoy")}</span>`, say: got ? "open water (trap hauled)" : "a trap buoy" };
+      const leg = legAt(k);
+      if (ch === "*") return { cls: got ? "is-got" : "", html: (got ? "" : `<span class="cc-buoy">${icon("buoy")}</span>`) + (leg ? `<b class="cc-leg ${got ? "is-done" : ""}" aria-hidden="true">${leg.name}</b>` : ""), say: got ? `open water (trap ${leg ? leg.name + " " : ""}hauled)` : leg ? `trap ${leg.name}, ${leg.where}` : "a trap buoy" };
       if (ch === "o") return { cls: set ? "is-set" : "", html: `<span class="cc-spot"><i></i>${set ? icon("buoy") : ""}</span>`, say: set ? "a trap you set" : "a dashed circle (set a trap here)" };
       if (ch === "x") return { cls: hit ? "is-hit" : "", html: `<span class="cc-x" aria-hidden="true">✕</span>`, say: hit ? "a search mark you sailed over" : "a search mark" };
       return { cls: "", html: "", say: "open water" };
@@ -279,12 +285,14 @@
     function renderGrid() {
       const interactive = mode === "plan" || mode === "predict" || mode === "design";
       const planAt = new Map(plan.map((k, i) => [k, i + 1]));
+      const heading = planHeadings();
       const cells = g.rows.map((r, y) => [...r].map((_, x) => {
         const c = cellInfo(x, y), k = key(x, y);
-        const n = planAt.get(k);
-        const extra = `${n ? `<b class="cc-plan" aria-hidden="true">${n}</b>` : ""}${prediction === k ? `<span class="cc-guess" aria-hidden="true">${icon("target")}</span>` : ""}`;
+        const n = planAt.get(k), act = planActs.get(k);
+        const arrow = n ? ARROW[heading[n - 1]] : "";
+        const extra = `${n ? `<b class="cc-plan ${act ? "cc-plan--act" : ""}" aria-hidden="true">${act ? (act === "haul" ? "H" : "S") : arrow}</b>` : ""}${prediction === k ? `<span class="cc-guess" aria-hidden="true">${icon("target")}</span>` : ""}`;
         const cls = `cc-cell ${c.cls} ${planBroke === k ? "is-off" : ""}`;
-        const say = `Row ${y}, column ${x}: ${c.say}${n ? `, plan step ${n}` : ""}${prediction === k ? ", your guess" : ""}`;
+        const say = `Row ${y}, column ${x}: ${c.say}${n ? `, plan step ${n}, heading ${DIR_WORD[heading[n - 1]]}` : ""}${act ? `, plan to ${act === "haul" ? "haul the trap" : "set a trap"} here` : ""}${prediction === k ? ", your guess" : ""}`;
         return interactive
           ? `<button type="button" class="${cls}" data-x="${x}" data-y="${y}" tabindex="-1" aria-label="${esc(say)}">${c.html}${extra}</button>`
           : `<div class="${cls}" data-x="${x}" data-y="${y}">${c.html}${extra}</div>`;
@@ -324,7 +332,8 @@
     function chips() {
       const v = [];
       if (L.blocks.includes("setVar")) v.push(`<span class="var-chip">${esc(L.varName || "steps")} = <b>${st.vars.steps}</b></span>`);
-      if (g.gems.length) v.push(`<span class="var-chip">hauled <b>${st.got.size}</b>/${g.gems.length}</span>`);
+      if (legsOn()) v.push(`<span class="cc-legs" aria-label="Traps hauled">${L.legs.map((l) => `<span class="cc-legs__i ${st.got.has(l.at) ? "is-done" : ""}">${st.got.has(l.at) ? icon("check") : ""}${l.name}<span class="visually-hidden">${st.got.has(l.at) ? " hauled" : " not hauled yet"}</span></span>`).join("")}</span>`);
+      else if (g.gems.length) v.push(`<span class="var-chip">hauled <b>${st.got.size}</b>/${g.gems.length}</span>`);
       if (g.spots.length) v.push(`<span class="var-chip">set <b>${st.dropped.size}</b>/${g.spots.length}</span>`);
       if (g.marks.length) v.push(`<span class="var-chip">marks <b>${g.marks.filter((k) => st.visited.has(k)).length}</b>/${g.marks.length}</span>`);
       if (L.usesFn && L.minCalls) v.push(`<span class="var-chip">${esc(L.fnName)} used <b>${st.calls}</b></span>`);
@@ -336,7 +345,7 @@
       stop();
       g = H.parseGrid(grids[w]);
       st = H.startState(g, dir);
-      gen = null; finished = false; planBroke = null; stepsTaken = 0; lastTurn = false;
+      gen = null; finished = false; planBroke = null; stepsTaken = 0; blocksRun = 0; lastTurn = false;
       seen = L.fog ? H.visibleFrom(g, st.x, st.y, L.fog) : new Set();
       renderGrid();
       ed.clearHighlight(); pyActive(null);
@@ -359,13 +368,13 @@
     }
     function begin() {
       if (!ed.program.length) { api.say("Your program is empty. Tap a block to add it.", "warn"); return false; }
-      if (!predicted && !demo) {
+      if (!predicted) {
         if (mode !== "predict") setMode("predict");
         api.say("Before you run it: tap the square where you think the boat will stop. Then press Run.", "info");
         return false;
       }
       st = H.startState(g, dir);
-      gen = H.run(ed.program, st, { g, fn: ed.fn, depth: 0, carry: !!L.carry });
+      gen = H.run(ed.program, st, { g, fn: ed.fn, depth: 0, carry: !!L.carry, loopTicks: true });
       api.log("lab_test_run", { blocks: ed.count(), world: w });
       return true;
     }
@@ -374,7 +383,8 @@
       const r = gen.next();
       if (r.done) { finish(); return false; }
       const b = r.value;
-      ed.highlight(b); pyActive(b.id);
+      blocksRun++;
+      ed.highlight(b); pyActive(b.id, b.lap);
       if (b.type === "left" || b.type === "right") lastTurn = true;
       else if (b.type === "move" && !st.error) lastTurn = false;
       if (b.type === "move" && !st.error) {
@@ -386,7 +396,7 @@
       place(st.x, st.y, st.dir);
       refreshCells(); chips();
       if (st.error) { finish(); return false; }
-      setStatus(b.checking ? `Checking: ${labelOf(b.type)}` : labelOf(b.type));
+      setStatus(`Step ${blocksRun}: ${b.lap ? `${labelOf(b.type).replace(/ times$/, "")}, lap ${b.lap} of ${b.of}` : b.checking ? `checking ${labelOf(b.type)}${b.answer === undefined ? "" : b.answer ? " (yes)" : " (no)"}` : labelOf(b.type)}`);
       return true;
     }
     function finish() {
@@ -396,14 +406,18 @@
       const count = ed.count();
       const ctx = { g, st, program: ed.program, fn: ed.fn, count, lastTurn };
       let note = "";
-      if (prediction && !demo) {
+      if (prediction) {
         const [px, py] = prediction.split(",").map(Number);
         predictedRight = px === st.x && py === st.y;
         const off = Math.abs(px - st.x) + Math.abs(py - st.y);
         note = predictedRight ? " You predicted exactly where it stopped!" : ` It stopped ${plural(off, "square", "squares")} from your guess. Your guess is the ring on the chart.`;
         prediction = null; refreshPredict();
       }
-      if (planBroke) note += " The red square is where the boat left your plan.";
+      if (!planBroke && plan.length && res.reason !== "crash") {
+        // The route matched; did the program do the jobs the plan marks?
+        const missed = [...planActs].find(([k, a]) => plan.includes(k) && !(a === "haul" ? st.got : st.dropped).has(k));
+        if (missed) { planBroke = missed[0]; refreshCells(); note += ` Your plan ${missed[1] === "haul" ? "hauls a trap" : "sets a trap"} on the red square, but your program didn't.`; }
+      } else if (planBroke) note += " The red square is where the boat left your plan.";
       if (!res.ok) {
         failedRuns++; testingAll = false;
         if (res.reason === "crash") {
@@ -413,7 +427,13 @@
           api.log("lab_bug", { kind: "crash" });
         }
         setStatus({ crash: "Bump!", loop: "Going in circles", short: "Stopped", traps: "Traps missing", marks: "Marks missed", calls: "Use your block" }[res.reason] || "Try again");
-        api.say(feedback(L, res, ctx) + note + (help && failedRuns >= 2 ? " Need a clue? Press Need a hint? under your goal." : ""), "warn");
+        if (legsOn()) {   // name the legs: what works, and which trap is next
+          const doneLegs = L.legs.filter((l) => st.got.has(l.at)), next = L.legs.filter((l) => !st.got.has(l.at));
+          note += doneLegs.length
+            ? ` Legs done: ${doneLegs.map((l) => l.name).join(", ")}. Keep those blocks!${next.length ? ` The bug is in the leg after trap ${doneLegs[doneLegs.length - 1].name}.` : " Now get home to the mooring."}`
+            : " Start with leg 1: get to your first trap and haul it.";
+        }
+        api.say(feedback(L, res, ctx) + note + (failedRuns >= 2 ? " Need a clue? Press Hint under your goal." : ""), "warn");
         return;
       }
       if (L.budget && count > L.budget) { testingAll = false; setStatus("Works, but too long"); api.say(feedback(L, { reason: "budget", values: res.values }, ctx) + note, "warn"); return; }
@@ -451,9 +471,15 @@
       if (L.design) Object.assign(result, { grid: grids[0], dir, custom });
       const done = new Set(SE.labs.progressFor(api.user, "captain-code")); done.add(idx);
       const regionDone = (r) => { for (let i = r.from; i <= r.to; i++) if (!done.has(i)) return false; return true; };
-      const after = `<div class="cc-win">${markRow(m, markWhat(L))}${demo ? `<p class="muted">Demo run: the reference solution.</p>` : ""}</div>`;
+      const after = `<div class="cc-win">${markRow(m, markWhat(L))}</div>`;
       let extra = "";
       if (L.design) extra += voyageCard(python, count, m);
+      if (L.legs && !custom && !partOneWon) {
+        partOneWon = true;
+        extra += `<section class="cc-part2" aria-labelledby="cc-part2-title"><h3 id="cc-part2-title">${icon("palette")}Part 2: design your own voyage</h3>
+          <p>You sailed the Captain's Challenge. Now make a chart nobody has sailed before: place your boat, the mooring, 2 to 4 traps, and some ledges. Then program your boat to sail it.</p>
+          <button type="button" class="btn btn--primary" id="cc-part2-go">${icon("palette")}Design my chart</button></section>`;
+      }
       const r = REGIONS.findIndex((x) => idx === x.to);
       if (r >= 0 && regionDone(REGIONS[r])) extra += graduation(r);
       api.win(result, { extra, after });
@@ -497,6 +523,8 @@
         window.print();
         setTimeout(() => document.body.classList.remove("cc-printing"), 500);
       });
+      const p2 = document.getElementById("cc-part2-go");
+      if (p2) p2.addEventListener("click", () => { $("#cc").scrollIntoView({ block: "start" }); if (mode !== "design") setMode("design"); const t = el.querySelector('[data-tool="S"]'); if (t) t.focus({ preventScroll: true }); });
       const py = document.getElementById("cc-grad-py");
       if (py) py.addEventListener("click", () => { showPy(true); $("#cc-py").scrollIntoView({ block: "nearest" }); });
     }
@@ -507,28 +535,232 @@
       $("#cc-py-code").innerHTML = lines.map((l) => `<span class="cc-py__line" ${l.id ? `data-pyid="${l.id}"` : ""}>${highlightPy(l.text) || " "}</span>`).join("\n");
       $("#cc-py-notes").innerHTML = pyNotes(lines).map((t) => `<li>${t}</li>`).join("");
     }
-    function pyActive(id) {
+    /* Light up the running line. A loop's line also shows its counter (i = 0, 1, 2…, as Python counts laps). */
+    function pyActive(id, lap) {
       el.querySelectorAll(".cc-py__line.is-active").forEach((n) => n.classList.remove("is-active"));
-      if (id) { const n = el.querySelector(`.cc-py__line[data-pyid="${id}"]`); if (n) n.classList.add("is-active"); }
+      if (!id) { el.querySelectorAll(".cc-py__lap").forEach((n) => n.remove()); return; }
+      const n = el.querySelector(`.cc-py__line[data-pyid="${id}"]`);
+      if (!n) return;
+      n.classList.add("is-active");
+      if (lap) {
+        let tag = n.querySelector(".cc-py__lap");
+        if (!tag) { tag = document.createElement("span"); tag.className = "cc-py__lap"; n.appendChild(tag); }
+        tag.textContent = /^\s*for /.test(n.textContent) ? `  i = ${lap - 1}` : `  lap ${lap}`;
+      }
     }
     function showPy(on) {
       $("#cc-py").hidden = !on;
       $("#cc").classList.toggle("cc--py", on);
       $("#cc-pybtn").setAttribute("aria-pressed", String(on));
+      setPy(on);
       if (on) { renderPy(); api.log("lab_python_view", {}); }
+    }
+
+    /* ───────── Lesson: learn first, then try (L.lesson, from captain-levels.js) ─────────
+       The first time a level opens, its lesson shows in place of the workspace. "Lesson" in the brief opens it again. */
+    const lessonKey = `stem207.captain.lesson.${L.id}.${api.user && api.user.id ? api.user.id : "preview"}`;
+    const lessonSeen = () => { try { return localStorage.getItem(lessonKey) === "1"; } catch (e) { return false; } };
+    let lesson = null;   // { i, right: Set of cards answered right, ex: the worked example's run }
+    function openLesson(i = 0) {
+      if (!L.lesson) return;
+      stop();
+      if (!lesson) { lesson = { i: 0, right: new Set(), ex: null }; api.log("lab_lesson_viewed", { lesson: L.id }); }
+      lesson.i = i; lesson.ex = null;
+      $("#cc").classList.add("cc--lesson");
+      const box = $("#cc-lesson");
+      box.hidden = false;
+      const c = L.lesson.cards[i], last = i === L.lesson.cards.length - 1;
+      const gated = c.check && !lesson.right.has(i);
+      box.innerHTML = `
+        <p class="cc-lesson__top"><span class="eyebrow">${icon("bulb")}Learn it first · ${esc(L.lesson.title)}</span><span class="cc-lesson__n">Card ${i + 1} of ${L.lesson.cards.length}</span></p>
+        <h3 id="cc-lesson-h" tabindex="-1">${esc(c.h)}</h3>
+        ${(c.say || []).map((t) => `<p>${esc(t)}</p>`).join("")}
+        ${c.show ? `<div class="cc-lesson__blocks" aria-label="Blocks">${c.show.map((t) => { const depth = (t.match(/^ */)[0].length) / 2; return `<p class="cc-lesson__blk" style="--d:${depth}">${esc(t.trim())}</p>`; }).join("")}</div>` : ""}
+        ${c.example ? lessonExample(c.example) : ""}
+        ${c.check ? `<fieldset class="cc-lesson__check"><legend>${esc(c.check.q)}</legend>
+          <div class="cc-lesson__opts">${c.check.options.map(([t], k) => `<button type="button" class="btn btn--ghost" data-opt="${k}" aria-pressed="${lesson.right.has(i) && c.check.options[k][1]}">${esc(t)}</button>`).join("")}</div>
+          <p class="cc-lesson__why" id="cc-lesson-why" role="status">${lesson.right.has(i) ? esc(c.check.options.find((o) => o[1])[2]) : ""}</p></fieldset>` : ""}
+        <div class="cc-lesson__nav">
+          ${i > 0 ? `<button type="button" class="btn btn--ghost" id="cc-lesson-back">${icon("arrowLeft")}Back</button>` : ""}
+          ${last
+            ? `<button type="button" class="btn btn--launch" id="cc-lesson-done" ${gated ? "disabled" : ""}>${icon("rocket")}Start coding</button>`
+            : `<button type="button" class="btn btn--primary" id="cc-lesson-next" ${gated ? "disabled" : ""}>Next${icon("arrowRight")}</button>`}
+          ${gated ? `<span class="cc-lesson__gate">Answer the question to go on.</span>` : ""}
+          ${lessonSeen() ? `<button type="button" class="linkish" id="cc-lesson-skip">Back to the level</button>` : ""}
+        </div>`;
+      if (c.example) resetExample();
+      const h = $("#cc-lesson-h");
+      if (h) h.focus({ preventScroll: true });
+    }
+    function closeLesson() {
+      try { localStorage.setItem(lessonKey, "1"); } catch (e) { /* private mode: it shows again next time */ }
+      $("#cc").classList.remove("cc--lesson");
+      $("#cc-lesson").hidden = true;
+      lesson = null;
+      renderGrid();
+      const first = $(".palette .blk--btn");
+      if (first) first.focus({ preventScroll: true });
+      api.say(`Now try it: ${L.goal}`, "info");
+    }
+    /* The worked example: a tiny real chart and its program, stepped through with the real engine. */
+    function exLines(list, depth, out) {
+      list.forEach((b) => {
+        out.push(`<li class="cc-ex__line" data-exid="${b.id}" style="--d:${depth}">${esc(exLabel(b))}</li>`);
+        if (b.body) exLines(b.body, depth + 1, out);
+        if (b.else) { out.push(`<li class="cc-ex__line cc-ex__else" style="--d:${depth}">else</li>`); exLines(b.else, depth + 1, out); }
+      });
+      return out;
+    }
+    let exLabel = (b) => b.type;
+    function lessonExample(e) {
+      return `<div class="cc-ex">
+          <div class="cc-ex__chart" id="cc-ex-chart"></div>
+          <div class="cc-ex__side">
+            <ol class="cc-ex__code" id="cc-ex-code" aria-label="The example program"></ol>
+            <p class="cc-ex__status" id="cc-ex-status" role="status">Press Step to run the first block.</p>
+            <div class="cc-ex__btns"><button type="button" class="btn btn--primary" id="cc-ex-step">${icon("arrowRight")}Step (1 block)</button><button type="button" class="btn btn--ghost" id="cc-ex-reset">${icon("refresh")}Start over</button></div>
+            ${e.tip ? `<p class="cc-ex__tip">${icon("bulb", 'class="inline-icon"')}${esc(e.tip)}</p>` : ""}
+          </div>
+        </div>`;
+    }
+    function resetExample() {
+      const e = L.lesson.cards[lesson.i].example;
+      const parsed = SE.minipy.parse(e.src, { varName: e.varName, goal: "mooring" });
+      const p = { main: H.clone(parsed.main), fn: H.clone(parsed.fn) };   // clone gives each block an id to light up
+      const eg = H.parseGrid(e.grid), est = H.startState(eg, e.dir);
+      const lab = labeler({ fnName: e.fnName, varName: e.varName });
+      exLabel = (b) => lab(b.type) + (H.BLOCKS[b.type].count ? ` ${b.n}` : "") + (b.type === "repeat" ? " times" : "");
+      lesson.ex = { g: eg, st: est, gen: H.run(p.main, est, { g: eg, fn: p.fn, depth: 0, loopTicks: true }), done: false, varName: e.varName };
+      $("#cc-ex-code").innerHTML = (p.fn.length ? [`<li class="cc-ex__line cc-ex__fn" style="--d:0">${esc(e.fnName || "My Move")} =</li>`, ...exLines(p.fn, 1, []), `<li class="cc-ex__line cc-ex__fn" style="--d:0">Main program:</li>`] : []).concat(exLines(p.main, p.fn.length ? 1 : 0, [])).join("");
+      $("#cc-ex-status").textContent = "Press Step to run the first block.";
+      $("#cc-ex-step").disabled = false;
+      drawExample();
+    }
+    function drawExample() {
+      const { g: eg, st: est } = lesson.ex;
+      const cells = eg.rows.map((r, y) => [...r].map((ch, x) => {
+        const k = key(x, y);
+        const cls = ch === "#" ? "cc-cell--ledge" : ch === "G" ? "cc-cell--mooring" : ch === "S" ? "cc-cell--dock" : ch === "*" && est.got.has(k) ? "is-got" : "";
+        const html = ch === "G" ? `<span class="cc-moor" aria-hidden="true"><i></i></span>` : ch === "*" && !est.got.has(k) ? `<span class="cc-buoy">${icon("buoy")}</span>` : "";
+        return `<div class="cc-cell ${cls}">${html}</div>`;
+      }).join("")).join("");
+      $("#cc-ex-chart").innerHTML = `<div class="cc__grid" style="--cols:${eg.w};--rows:${eg.h}" role="img" aria-label="A small example chart. The boat is at row ${est.y}, column ${est.x}, facing ${DIR_WORD[est.dir]}.">${cells}<div class="cc-boat" style="width:calc(100% / ${eg.w});height:calc(100% / ${eg.h});transform:translate(${est.x * 100}%, ${est.y * 100}%)">${boatSvg(boat)}</div></div>
+        ${lesson.ex.varName ? `<span class="var-chip">${esc(lesson.ex.varName)} = <b>${est.vars.steps}</b></span>` : ""}`;
+      const svg = $("#cc-ex-chart .cc-boat > svg");
+      if (svg) svg.style.transform = `rotate(${H.ROT[est.dir]}deg)`;
+    }
+    function stepExample() {
+      const ex = lesson.ex;
+      if (!ex || ex.done) return;
+      const r = ex.gen.next();
+      el.querySelectorAll(".cc-ex__line.is-active").forEach((n) => n.classList.remove("is-active"));
+      if (r.done || ex.st.error) {
+        ex.done = true; $("#cc-ex-step").disabled = true;
+        $("#cc-ex-status").textContent = ex.st.error ? "The boat stopped. Press Start over to watch again." : "Made it to the mooring! Press Start over to watch it again.";
+        $("#cc-ex-reset").focus();
+        return;
+      }
+      const b = r.value;
+      const line = el.querySelector(`.cc-ex__line[data-exid="${b.id}"]`);
+      if (line) line.classList.add("is-active");
+      const word = exLabel(b).replace(/ \d+ times$/, "");
+      $("#cc-ex-status").textContent = b.lap ? `${word}: lap ${b.lap} of ${b.of}.`
+        : b.answer !== undefined ? `${word}? ${b.answer ? "Yes, so the if part runs." : "No, so the else part runs."}`
+        : b.type === "call" ? `${word}: running the steps inside it.` : `${word}.`;
+      drawExample();
+    }
+    function lessonClick(e) {
+      const t = e.target.closest("button");
+      if (!t || !lesson) return;
+      const c = L.lesson.cards[lesson.i];
+      if (t.id === "cc-lesson-next") openLesson(lesson.i + 1);
+      else if (t.id === "cc-lesson-back") openLesson(lesson.i - 1);
+      else if (t.id === "cc-lesson-done" || t.id === "cc-lesson-skip") closeLesson();
+      else if (t.id === "cc-ex-step") stepExample();
+      else if (t.id === "cc-ex-reset") { resetExample(); $("#cc-ex-step").focus(); }
+      else if (t.dataset.opt && c.check) {
+        const [, right, why] = c.check.options[Number(t.dataset.opt)];
+        el.querySelectorAll("[data-opt]").forEach((b) => b.setAttribute("aria-pressed", String(b === t)));
+        api.log("lab_lesson_check", { lesson: L.id, card: lesson.i, right: !!right });
+        if (right) {
+          lesson.right.add(lesson.i);
+          const go = $("#cc-lesson-next") || $("#cc-lesson-done");
+          if (go) go.disabled = false;
+          const gate = el.querySelector(".cc-lesson__gate");
+          if (gate) gate.remove();
+        }
+        const w = $("#cc-lesson-why");
+        w.className = `cc-lesson__why ${right ? "is-good" : "is-warn"}`;
+        w.textContent = why;
+      }
     }
 
     /* ───────── Plan, predict, design ───────── */
     function setMode(m) {
+      if (m === "design" && mode !== "design" && !designOpen()) {
+        api.say("Finish Part 1 first: haul traps A, B, C, and D, and reach your mooring. Then you can design your own chart.", "info");
+        return;
+      }
       if (mode === "design" && m === "design" && !finishDesign()) return;   // a chart that breaks the rules stays open
       mode = mode === m ? null : m;
+      if (mode === "design") stop();
+      // While designing, the four steps take the program's place beside the chart, and Run waits until Done.
+      $("#cc").classList.toggle("cc--designing", mode === "design");
+      const dp = $("#cc-designpanel");
+      if (dp) { dp.hidden = mode !== "design"; dp.innerHTML = mode === "design" ? designPanel() : ""; }
       ["plan", "predict", "design"].forEach((k) => { const b = $(`#cc-${k}`); if (b) b.setAttribute("aria-pressed", String(mode === k)); });
       const p = $("#cc-modepanel");
-      if (mode === "plan") p.innerHTML = `<p>${icon("map", 'class="inline-icon"')}Tap the squares your boat will sail through, in order, starting next to the boat. Tap the last one again to take it back.</p><button type="button" class="linkish" id="cc-plan-clear">${icon("trash")}Clear my plan</button>`;
+      if (mode === "plan") p.innerHTML = `<p>${icon("map", 'class="inline-icon"')}Tap the squares your boat will sail through, in order, starting next to the boat.${g.gems.length || g.spots.length ? " Then tap a trap on your route to plan a job there: haul it, or set a trap on a dashed circle." : ""}</p>
+        <div class="cc-plantools"><button type="button" class="linkish" id="cc-plan-back">${icon("arrowLeft")}Take back the last square</button><button type="button" class="linkish" id="cc-plan-clear">${icon("trash")}Clear my plan</button></div>`;
       else if (mode === "predict") p.innerHTML = `<p>${icon("target", 'class="inline-icon"')}Read your program. Tap the square where you think the boat will stop.</p>`;
-      else if (mode === "design") p.innerHTML = `<div class="cc-tools" role="group" aria-label="Chart tools">${[["#", "Ledge"], [".", "Water"], ["*", "Trap buoy"], ["S", "Boat start"], ["G", "Mooring"]].map(([t, n]) => `<button type="button" class="btn btn--ghost btn--small" data-tool="${t}" aria-pressed="${tool === t}">${esc(n)}</button>`).join("")}<button type="button" class="btn btn--ghost btn--small" id="cc-turnboat">${icon("refresh")}Boat faces ${DIR_WORD[dir]}</button><button type="button" class="btn btn--primary btn--small" id="cc-design-done">${icon("check")}Done: test my chart</button></div><p class="field-help">Pick a tool, then tap squares. The edge stays granite.</p>`;
       else p.innerHTML = "";
       renderGrid();
+      if (mode === "design") { solvable(); $("#cc-gridwrap").scrollIntoView({ block: "nearest" }); }
+    }
+    /* The plan's heading on each planned square (the way the boat sails into it). */
+    function planHeadings() {
+      let [px, py] = g.start;
+      return plan.map((k) => {
+        const [x, y] = k.split(",").map(Number);
+        const d = x > px ? "E" : x < px ? "W" : y > py ? "S" : "N";
+        px = x; py = y;
+        return d;
+      });
+    }
+    /* The plan in words: "Forward 2 · Turn right · Forward 1 · Haul…", worked out from the boat's starting
+       direction. It's a plan for the student to code from, never blocks. */
+    function planWords() {
+      const out = [];
+      let cur = dir, run = 0;
+      const flush = () => { if (run) { out.push(`Forward ${run}`); run = 0; } };
+      planHeadings().forEach((d, i) => {
+        if (d !== cur) {
+          flush();
+          if (H.RIGHT[cur] === d) out.push("Turn right");
+          else if (H.LEFT[cur] === d) out.push("Turn left");
+          else out.push("Turn right", "Turn right");
+          cur = d;
+        }
+        run++;
+        const act = planActs.get(plan[i]);
+        if (act) { flush(); out.push(act === "haul" ? "Haul trap" : "Set trap"); }
+      });
+      flush();
+      return out;
+    }
+    function renderPlanWords() {
+      const box = $("#cc-planwords");
+      if (!box) return;
+      const words = planWords();
+      box.hidden = !words.length;
+      const home = plan.length && g.goal && plan[plan.length - 1] === key(g.goal[0], g.goal[1]);
+      const jobs = g.gems.length + g.spots.length, planned = [...planActs.keys()].filter((k) => plan.includes(k)).length;
+      box.innerHTML = words.length ? `<p class="cc-planwords__t">${icon("map", 'class="inline-icon"')}My plan in words</p>
+        <ol class="cc-planwords__list">${words.map((w) => `<li>${esc(w)}</li>`).join("")}</ol>
+        <p class="cc-planwords__note">${home ? "Your plan reaches the mooring." : "Keep plotting until you reach the mooring."}${jobs ? ` Jobs planned: ${planned} of ${jobs}.` : ""} Now build blocks that follow it.</p>
+        ${SE.speech.button("plan", "Listen")}` : "";
+      const rb = box.querySelector('[data-read="plan"]');
+      if (rb) rb.addEventListener("click", () => SE.speech.read(rb, [{ text: `My plan. ${words.join(". ")}.`, el: box.querySelector(".cc-planwords__list") }]));
     }
     function refreshPredict() { const b = $("#cc-predict"); if (b) b.setAttribute("aria-pressed", String(mode === "predict")); }
     function adjacent(a, b) { const [ax, ay] = a.split(",").map(Number), [bx, by] = b.split(",").map(Number); return Math.abs(ax - bx) + Math.abs(ay - by) === 1; }
@@ -540,11 +772,16 @@
         api.log("lab_predict", { x, y });
         api.say("Got it. Now press Run and see if you're right.", "info");
       } else if (mode === "plan") {
-        if (plan.length && plan[plan.length - 1] === k) plan.pop();
+        const job = ch === "*" ? "haul" : ch === "o" ? "set" : null;
+        if (plan.includes(k) && job) {   // a trap on the route: tap to plan the job there, tap again to take it off
+          if (planActs.has(k)) planActs.delete(k); else planActs.set(k, job);
+          api.say(planActs.has(k) ? `Planned: ${job === "haul" ? "haul the trap" : "set a trap"} on this square.` : "Job taken off this square.", "info");
+        }
+        else if (plan.length && plan[plan.length - 1] === k) { planActs.delete(plan.pop()); api.say(""); }
         else if (ch === "#") { api.say("That's a granite ledge. Plot through open water.", "warn"); return; }
         else if (!adjacent(plan.length ? plan[plan.length - 1] : key(g.start[0], g.start[1]), k)) { api.say("Plot one square at a time: pick a square next to the last one.", "warn"); return; }
-        else plan.push(k);
-        api.say("");
+        else { plan.push(k); api.say(job ? `There's a ${job === "haul" ? "trap buoy" : "dashed circle"} here. Tap it again to plan a job on it.` : ""); }
+        renderPlanWords();
       } else if (mode === "design") {
         if (x === 0 || y === 0 || x === g.w - 1 || y === g.h - 1) { api.say("The edge of the chart stays granite.", "warn"); return; }
         const rows = grids[w].map((r) => [...r]);
@@ -556,16 +793,44 @@
         custom = true; passed.clear();
       }
       renderGrid();
+      if (mode === "design") solvable();
       const again = el.querySelector(`.cc-cell[data-x="${x}"][data-y="${y}"]`);
       if (again && again.tagName === "BUTTON") { el.querySelectorAll("button.cc-cell").forEach((c) => (c.tabIndex = -1)); again.tabIndex = 0; again.focus(); }
     }
     /* Leaving the designer: the chart must be valid, reachable, and have a trap. true = it's ready to sail. */
+    /* Level 10's designer, step by step, with a live check that the chart can be sailed. */
+    const DESIGN_STEPS = [
+      { n: 1, t: "Place your boat", tools: [["S", "Boat start"]], turn: true },
+      { n: 2, t: "Place the mooring", tools: [["G", "Mooring"]] },
+      { n: 3, t: "Add 2 to 4 trap buoys", tools: [["*", "Trap buoy"]] },
+      { n: 4, t: "Add ledges to make it tricky", tools: [["#", "Ledge"], [".", "Water"]] }
+    ];
+    function designPanel() {
+      return `<h3 id="cc-design-title">${icon("palette")}Design my chart</h3>
+        <ol class="cc-dsteps">${DESIGN_STEPS.map((s) => `<li><span class="cc-dsteps__n" aria-hidden="true">${s.n}</span><span class="cc-dsteps__t">${esc(s.t)}</span>
+          <span class="cc-tools" role="group" aria-label="${esc(s.t)}">${s.tools.map(([t, n]) => `<button type="button" class="btn btn--ghost btn--small" data-tool="${t}" aria-pressed="${tool === t}">${esc(n)}</button>`).join("")}${s.turn ? `<button type="button" class="btn btn--ghost btn--small" id="cc-turnboat">${icon("refresh")}Boat faces ${DIR_WORD[dir]}</button>` : ""}</span></li>`).join("")}</ol>
+        <div class="cc-dcheck"><p class="cc-solvable" id="cc-solvable" role="status"></p><button type="button" class="btn btn--primary btn--small" id="cc-design-done">${icon("check")}Done: test my chart</button></div>
+        <p class="field-help">Pick a tool, then tap squares. The edge stays granite.</p>`;
+    }
+    /* Can this chart be sailed? Updated after every square the student paints. */
+    function solvable() {
+      const out = $("#cc-solvable");
+      if (!out) return;
+      const bad = H.validateGrid(grids[w]);
+      const traps = (grids[w].join("").match(/\*/g) || []).length;
+      const r = !bad.length && SE.levelDesigner ? SE.levelDesigner.route(grids[w]) : { ok: !bad.length, why: bad[0] };
+      const why = bad.length ? bad[0] : !r.ok ? String(r.why).replace(/Wharf tool/g, "Mooring tool").replace(/wharf/g, "mooring") : traps < 2 ? "Add at least 2 trap buoys, so the voyage has jobs to do." : traps > 4 ? "That's a lot of traps. Keep it to 4 or fewer." : "";
+      out.className = `cc-solvable ${why ? "is-no" : "is-yes"}`;
+      out.innerHTML = why ? `${icon("alert")}<span><strong>Not ready yet.</strong> ${esc(why)}</span>` : `${icon("check")}<span><strong>Sailable!</strong> The best route is ${r.moves} moves. Press Done to sail it.</span>`;
+    }
     function finishDesign() {
       const bad = H.validateGrid(grids[w]);
       if (bad.length) { api.say(bad[0], "warn"); return false; }
       const r = SE.levelDesigner ? SE.levelDesigner.route(grids[w]) : { ok: true };
       if (!r.ok) { api.say(String(r.why).replace(/Wharf tool/g, "Mooring tool").replace(/wharf/g, "mooring"), "warn"); return false; }
-      if (!grids[w].join("").includes("*")) { api.say("Add at least one trap buoy so the voyage has a job to do.", "warn"); return false; }
+      const traps = (grids[w].join("").match(/\*/g) || []).length;
+      if (traps < 2) { api.say("Add at least 2 trap buoys, so the voyage has jobs to do.", "warn"); return false; }
+      if (traps > 4) { api.say("That's a lot of traps. Keep it to 4 or fewer.", "warn"); return false; }
       passed.clear(); markTabs();
       api.log("lab_design", { grid: grids[w] });
       resetWorld();
@@ -575,7 +840,12 @@
 
     /* ───────── Events ───────── */
     $("#cc-run").addEventListener("click", () => { if (running) { stop(); return; } go(); });
-    $("#cc-step").addEventListener("click", () => { if (running) stop(); if (finished || (st && st.error)) resetWorld(); stepOnce(); });
+    $("#cc-step").addEventListener("click", () => {
+      if (running) stop();
+      if (finished || (st && st.error)) resetWorld();
+      const first = !gen;
+      if (stepOnce() && first && !stepTold) { stepTold = true; api.say("Step runs one block at a time, so you can watch closely. Press it again for the next block.", "info"); }
+    });
     $("#cc-reset").addEventListener("click", () => { testingAll = false; resetWorld(); api.say(""); });
     $("#cc-speed").addEventListener("click", (e) => {
       const b = e.target.closest("[data-speed]");
@@ -583,11 +853,6 @@
       speed = Number(b.dataset.speed);
       el.querySelectorAll("[data-speed]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
       if (running) { clearInterval(timer); timer = setInterval(() => { if (!stepOnce()) stop(); }, speed); }
-    });
-    $("#cc-big").addEventListener("click", () => {
-      big = !big; setBig(big);
-      $("#cc").classList.toggle("cc--big", big);
-      $("#cc-big").setAttribute("aria-pressed", String(big));
     });
     const all = $("#cc-all");
     if (all) all.addEventListener("click", () => { testingAll = true; passed.clear(); markTabs(); switchWorld(0); go(); });
@@ -606,28 +871,17 @@
       const no = () => api.say("Your browser didn't allow copying. Select the code and copy it instead.", "warn");
       if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, no); else no();
     });
-    $("#cc-help").addEventListener("click", () => {
-      help = !help; setHelp(help);
-      $("#cc").classList.toggle("cc--help", help);
-      $("#cc-help").setAttribute("aria-pressed", String(help));
-      api.say(help ? "Extra help is on: Plot your course opens on each level, and you get clues when you're stuck." : "Extra help is off.", "info");
-    });
-    const demoBtn = $("#cc-demo");
-    if (demoBtn) demoBtn.addEventListener("click", () => {
-      const p = SE.minipy.parse(L.reference, pyOpts(L));
-      demo = true; predicted = true;
-      ed.set(H.clone(p.main), H.clone(p.fn));
-      passed.clear(); markTabs(); resetWorld(); renderPy();
-      api.say("Demo: the reference solution is loaded. Press Step to walk through it with the class. (Students don't see this button.)", "info");
-    });
-    $("#cc-modepanel").addEventListener("click", (e) => {
+    const panelClick = (e) => {
       const t = e.target.closest("button");
       if (!t) return;
-      if (t.id === "cc-plan-clear") { plan = []; planBroke = null; renderGrid(); }
+      if (t.id === "cc-plan-clear") { plan = []; planActs.clear(); planBroke = null; renderGrid(); renderPlanWords(); }
+      else if (t.id === "cc-plan-back") { if (plan.length) planActs.delete(plan.pop()); planBroke = null; renderGrid(); renderPlanWords(); }
       else if (t.id === "cc-design-done") setMode("design");
       else if (t.dataset.tool) { tool = t.dataset.tool; el.querySelectorAll("[data-tool]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tool === tool))); }
-      else if (t.id === "cc-turnboat") { dir = H.RIGHT[dir]; t.innerHTML = `${icon("refresh")}Boat faces ${DIR_WORD[dir]}`; custom = true; resetWorld(); }
-    });
+      else if (t.id === "cc-turnboat") { dir = H.RIGHT[dir]; t.innerHTML = `${icon("refresh")}Boat faces ${DIR_WORD[dir]}`; custom = true; resetWorld(); solvable(); }
+    };
+    $("#cc-modepanel").addEventListener("click", panelClick);
+    if ($("#cc-designpanel")) $("#cc-designpanel").addEventListener("click", panelClick);
     $("#cc-gridwrap").addEventListener("click", (e) => {
       const c = e.target.closest("button.cc-cell");
       if (c && !running) pickCell(Number(c.dataset.x), Number(c.dataset.y));
@@ -641,6 +895,15 @@
       if (n) { c.tabIndex = -1; n.tabIndex = 0; n.focus(); }
     });
 
+    if (L.lesson) {
+      $("#cc-lesson").addEventListener("click", lessonClick);
+      // "Lesson" in the brief, beside Listen and Hint, opens the lesson again.
+      const tools = document.querySelector(".lab-brief__tools");
+      if (tools) {
+        tools.insertAdjacentHTML("beforeend", `<button type="button" class="btn btn--ghost btn--small" id="cc-lesson-open">${icon("bulb")}Lesson</button>`);
+        document.getElementById("cc-lesson-open").addEventListener("click", () => openLesson(0));
+      }
+    }
     resetWorld();
     renderPy();
     const startMode = mode; mode = null;
@@ -653,6 +916,7 @@
     if (L.starter) api.say("This program was written by another captain. Read it, tap where you think the boat will stop, then press Step to watch it one block at a time.", "info");
     const best = bestFor(api, idx);
     if (best) api.say(`Your best so far: ${best} blocks.${L.par ? ` Par is ${L.par}.` : ""}`, "info");
+    if (L.lesson && !lessonSeen()) openLesson(0);
     return () => { testingAll = false; stop(); };
   }
 
@@ -676,15 +940,11 @@
             <p>Each challenge teaches you a smarter way to code. There's a catch: as your skills grow, you get fewer blocks to use. Can you become a master captain?</p>
             <div class="cc-land__go">
               <a class="btn btn--launch" href="#/lab/captain-code/1" id="cc-start">${icon("rocket")}Start in Casco Bay</a>
-              <button type="button" class="btn btn--ghost" id="cc-land-help" aria-pressed="${helpOn()}">${icon("bulb")}Extra help</button>
             </div>
           </div>
         </div>
         <ul class="cc-land__regions">${REGIONS.map((r, i) => `<li><a href="#/lab/captain-code/${r.from + 1}"><strong>${esc(r.title)}</strong><span>${r.to - r.from + 1} levels${i === 0 ? " · the workshop" : " · for early finishers"}</span><span class="muted">${esc(r.blurb)}</span></a></li>`).join("")}</ul>
       </div>`;
-    el.querySelector("#cc-land-help").addEventListener("click", (e) => {
-      const on = !helpOn(); setHelp(on); e.currentTarget.setAttribute("aria-pressed", String(on));
-    });
   }
 
   const GOALS = {
@@ -707,6 +967,7 @@
     title: "Captain Code",
     tagline: "Program a lobster boat along the Maine coast. Your boat only goes where your code tells it: 10 workshop levels in Casco Bay, plus 24 more along the coast.",
     briefFirst: true,
+    compactTools: true,
     levels: LEVELS,
     chapters: REGIONS,
     mount,

@@ -11,7 +11,7 @@ An original STEM 207 workshop, built on the Harbor Code engine (2026).
 | **What students do** | Program a Maine lobster boat through the 10 Casco Bay levels, then design their own chart and see their code in Python. |
 | **What they make** | A Voyage Card (level 10) with their chart and program, printable. |
 | **What they earn** | The **Casco Bay Certified Captain** certificate and the Certified Captain patch, for finishing all 10 levels. |
-| **Grades 2–3** | Aim for level 5 with Extra help on. |
+| **Grades 2–3** | Aim for level 5. Plan every level with Plot your course. |
 | **Early finishers** | Penobscot Bay (12 levels) and Down East (12 levels), then Harbor Python. |
 | **Prep** | About 10 minutes. |
 
@@ -66,7 +66,7 @@ Every level has a briefing from the harbor master, a goal, three hints (notice, 
 **Setup checklist**
 - [ ] Make a class and print login cards. Students sign in with the class code and their picture code, so progress saves.
 - [ ] Sign in as an educator on the projector computer. Open level 6 (Fog on the Water) and level 7 (The Changing Channel).
-- [ ] Find **Demo the solution** on a level. It's educator-only: students never see it.
+- [ ] Walk through the lessons at the start of levels 5, 6, and 7. Each one has a worked example to step through and one question. You can lead them on the projector.
 - [ ] Clear a strip of floor for the human-boat warm-up, about 4 × 4 floor tiles.
 - [ ] Print the cards in [02-printable-cards.md](02-printable-cards.md): the warm-up card, the Plot your course sheet, and the exit ticket.
 - [ ] Optional: grid paper for planning level 10.
@@ -78,10 +78,10 @@ Every level has a briefing from the harbor master, a goal, three hints (notice, 
 | Time | Activity | What happens |
 | --- | --- | --- |
 | 0:00–0:08 | Welcome and captain briefing | **Human-boat warm-up:** one student is the boat, and the class calls out Forward, Turn left, and Turn right. The boat follows exactly, even when it's wrong. Point out that left and right are the boat's left and right. |
-| 0:08–0:30 | Levels 1–4 | Students work. Demo Step on level 3 if many get stuck. **Checkpoint:** most students finish level 4 by about 0:30. |
-| 0:30–0:50 | Levels 5–7 | **Group moment before level 6:** step through the fog program on the projector. **Checkpoint:** level 7 by about 0:50. |
+| 0:08–0:30 | Levels 1–4 | Students work. If many get stuck on level 3, press Step on the projector and find the first wrong block together. **Checkpoint:** most students finish level 4 by about 0:30. |
+| 0:30–0:50 | Levels 5–7 | **Group moment before level 6:** open its lesson on the projector, step through the worked example together, and answer the question as a class. **Checkpoint:** level 7 by about 0:50. |
 | 0:50–1:08 | Levels 8–9 | **Group moment at level 7:** why does a memorized route fail at the other tide? **Checkpoint:** level 9 by about 1:08. |
-| 1:08–1:23 | Captain's Challenge (level 10) | Students beat par or design their own chart. Pairs trade charts and try to beat each other's block count. |
+| 1:08–1:23 | Captain's Challenge (level 10) | **Part 1:** a four-leg voyage. Students plan, then build and test one leg at a time; traps A to D tick off as they're hauled. **Part 2:** Design my chart, four numbered steps with a live check that it can be sailed. Pairs trade charts and try to beat each other's block count. |
 | 1:23–1:30 | Python reveal and reflection | Show one level 10 program in the Python view. Ask: your boat followed your code exactly. Who did the thinking? Exit tickets. |
 
 Times are targets and haven't been tested with classes yet. Nothing times students out. Check the checkpoints on your dashboard.
@@ -91,7 +91,9 @@ Times are targets and haven't been tested with classes yet. Nothing times studen
 - **"It doesn't work."** Ask the student to press **Step** instead of Run, and to tell you the first block where the boat does something they didn't expect. Fix only that block.
 - **Turning confusion.** Have the student stand up and face the way the boat faces, then turn.
 - **Over the budget.** Ask the student to say the route out loud: "Forward, forward, haul; forward, forward, haul…" and listen for the part that repeats.
-- **Demo the solution** loads a verified reference solution. Use it on the projector to step through levels 6, 7, and 8 before students try them. Don't use it to rescue one student: a conversation does more.
+- **Learn first, then try.** Levels 5 to 10 open with a short lesson the first time: the idea in everyday words, the blocks, a worked example on a tiny chart, and one question. The right answer unlocks the level, and a wrong one explains why. **Lesson** in the brief opens it again.
+- **Plan before building.** Plot your course marks the route and the traps to haul, and shows **My plan in words** ("Forward 2 · Turn right · Haul trap"). Students build the blocks from it themselves. A run shows where the boat left the plan, or a planned haul it skipped.
+- **Loops.** While a loop runs, its block shows "lap 2 of 4" and the Python line shows `i = 1`. **See it unrolled** shows the long program a Repeat replaces, and **Select blocks → Put in a Repeat** wraps blocks a student already wrote.
 - **Dashboard.** A student with many test runs and no progress needs a conversation, not the answer.
 - **Level 7 has two tabs,** High tide and Low tide. **Test both tides** runs the same program on both.
 
@@ -128,14 +130,8 @@ One working approach for each level. Any program that meets the goal passes. Pyt
 **Misconception to listen for:** "The computer knew what I meant." It never does. The boat did exactly what the code said, so the thinking was the captain's.
 
 ## Differentiation
-- **Extra help** (a button on the landing screen and every level; it lasts only for the session):
-  - Plot your course opens on each level (not in fog);
-  - par and stretch targets hidden;
-  - a nudge toward Need a hint? after two failed runs.
-
-  Turn it on for grades 2–3 and for any student who needs it.
-- **Bigger blocks** (next to Extra help, also for the session): larger blocks and tap targets for anyone, with no other change.
-- **Grades 2–3:** aim for level 5. Read the briefings aloud. Pairs work well: one taps, one predicts.
+- **Support for every student:** after two runs that don't work, the feedback points to **Hint** (three hints, one at a time). **Listen** reads the goal and briefing aloud.
+- **Grades 2–3:** aim for level 5. Read the briefings aloud, and have students read My plan in words before they build. Pairs work well: one taps, one predicts.
 - **Grades 6–8:** chase Par and the Compass mark on every level, and finish level 10 in 26 blocks or fewer.
 - **Early finishers:**
   - Penobscot Bay (12 levels) and Down East (12 levels): the same ideas, combined in new ways, including nested loops and a foggy grand challenge.

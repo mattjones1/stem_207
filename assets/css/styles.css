@@ -809,13 +809,23 @@ ul, ol { margin: 0; padding: 0; }
 .teacher-notes:not([open]) summary .toggle-hint::after { content: "Show"; }
 .teacher-notes__body { padding: 0 1.5rem 1.5rem; display: grid; gap: 1rem; }
 
+/* The side column runs the full height of the page, so its first card, Your steps, can stick in view the whole
+   way down; the other cards scroll up behind it. */
 .aside {
-  position: sticky;
-  top: calc(5.5rem + env(safe-area-inset-top, 0px));
+  align-self: stretch;
   display: grid;
+  align-content: start;
   gap: 1rem;
 }
 .aside .block { padding: 1.25rem; }
+/* "Your steps" quick view: the activity's steps stay in view while the page scrolls (wide screens only). */
+.aside .steps-quick { position: sticky; top: calc(5.5rem + env(safe-area-inset-top, 0px)); z-index: 2; padding: 1rem 1.1rem; display: grid; gap: .5rem; box-shadow: 0 6px 18px rgba(1, 32, 30, .12); }
+.steps-quick__title { display: flex; align-items: center; gap: .4rem; margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; }
+.steps-quick__title svg { width: 1.1rem; height: 1.1rem; fill: none; stroke: currentColor; stroke-width: 2; }
+.steps-quick__list { margin: 0; padding-left: 1.3rem; display: grid; gap: .35rem; max-height: min(40vh, 18rem); overflow-y: auto; overscroll-behavior: contain; font-size: .92rem; }
+.steps-quick__item { display: flex; gap: .45rem; align-items: flex-start; min-height: 24px; }
+.steps-quick__item input { width: 24px; height: 24px; margin: 0; flex: none; accent-color: var(--teal); }
+.steps-quick__jump { justify-self: start; min-height: 24px; display: inline-flex; align-items: center; font-weight: 700; font-size: .9rem; color: var(--teal); }
 .aside h2 { font-size: 1.1rem; }
 .reqs { display: grid; gap: .55rem; list-style: none; }
 .reqs li { display: grid; grid-template-columns: 1.4rem minmax(0, 1fr); gap: .55rem; align-items: start; }
@@ -930,6 +940,7 @@ ul, ol { margin: 0; padding: 0; }
   .track { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .activity-layout { grid-template-columns: minmax(0, 1fr); }
   .aside { position: static; grid-row: 1; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .aside .steps-quick { display: none; }
   .aside .launch-mini { grid-column: 1 / -1; }
 }
 @media (max-width: 860px) {

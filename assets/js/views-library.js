@@ -667,6 +667,16 @@
           </label></li>`).join("")}</ol>
          <p class="steps-progress" id="steps-progress" aria-live="polite"></p>`
       : `<ol class="steps">${a.steps.map((x, i) => `<li><span>${esc(stepText(i))}</span></li>`).join("")}</ol>`;
+    /* The same steps in the sticky side column, so they stay in view while the page scrolls (wide screens only).
+       A student's ticks here and in the main list stay in step. */
+    const quickSteps = `
+          <section class="block steps-quick" aria-label="Your steps (quick view)">
+            <p class="steps-quick__title">${icon("list")}Your steps</p>
+            <ol class="steps-quick__list">${a.steps.map((x, i) => `<li>${isStudent
+              ? `<label class="steps-quick__item"><input type="checkbox" data-qstep="${i}" ${checked.has(i) ? "checked" : ""}><span>${esc(stepText(i))}</span></label>`
+              : `<span class="steps-quick__item"><span>${esc(stepText(i))}</span></span>`}</li>`).join("")}</ol>
+            <a class="steps-quick__jump" href="#s-steps" data-jump="s-steps">Jump to full steps</a>
+          </section>`;
 
     app().innerHTML = `
       <section class="page-top">
@@ -798,6 +808,7 @@
         </div>
 
         <aside class="aside" aria-label="Activity at a glance">
+          ${quickSteps}
           <div class="block launch-mini">
             <h2>At a glance</h2>
             ${factsList(a)}
@@ -839,9 +850,15 @@
       app().querySelectorAll("[data-step]").forEach((cb) => {
         cb.addEventListener("change", () => {
           SE.store.log("step_checked", { activityId: a.id, step: Number(cb.dataset.step), checked: cb.checked });
+          const q = app().querySelector(`[data-qstep="${cb.dataset.step}"]`);
+          if (q) q.checked = cb.checked;
           updateProgress();
         });
       });
+      app().querySelectorAll("[data-qstep]").forEach((q) => q.addEventListener("change", () => {
+        const cb = app().querySelector(`[data-step="${q.dataset.qstep}"]`);
+        if (cb && cb.checked !== q.checked) { cb.checked = q.checked; cb.dispatchEvent(new Event("change")); }
+      }));
       updateProgress();
       SE.views.bindDebrief(user, a);
     }

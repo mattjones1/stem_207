@@ -12,6 +12,7 @@
  *   budget (most blocks allowed), par (the reference's block count), stretch: { blocks?, text } (no blocks = a first-run win)
  *   stretchRef (Python): a program that meets stretch.blocks, so the Compass is reachable (tests)
  *   predict (guess where the boat stops first), plan (plot your course), starter (a broken program, in Python)
+ *   legs: [{ at: "x,y", name, where }] the trap letters on level 10; lesson: set from LESSONS at the bottom of this file
  *   reference (Python), wrong: [{ src, reason }] programs that must fail, and why (tests)
  * Block count: every block counts once, nested ones too, and the blocks inside your own block. Calling it is 1.
  */
@@ -127,10 +128,12 @@
     },
     {
       id: "cb-10", title: "Captain's Challenge: Design Your Voyage", concept: "Create", design: true,
-      briefing: "You've learned it all. Sail this chart, then make it yours: change the ledges and traps, and design a voyage nobody has sailed before.",
-      goal: "Haul every trap and reach your mooring. Then try to beat par, or design your own chart.",
-      steps: ["Plan on paper or with Plot your course.", "Build, run, and debug.", "Beat par with loops and your own block.", "Press Design my chart to change the map."],
-      hints: ["Break the voyage into parts: which trap first?", "Look for stretches that repeat. A loop or your own block can sail them.", "Test one part at a time: get to the first trap, then add the next part."],
+      briefing: "You've learned it all, Captain. Part 1: four traps, A to D, are waiting across the bay. Haul them all and bring the boat home. Part 2: design a voyage of your own.",
+      goal: "Part 1: haul traps A, B, C, and D, then reach your mooring. Part 2: design your own chart and sail it.",
+      steps: ["Plan: press Plot your course. Mark your route and the traps you'll haul.", "Build leg 1 only: the blocks to reach your first trap and haul it. Press Run.", "When a leg works, add the next one. The trap letters tick off as you haul them.", "Improve: can a loop or your own block beat par?", "Part 2: press Design my chart and follow its four steps."],
+      hints: ["Pick an order for the traps. Which one is closest to the dock?", "Get one leg working before you write the next. Step through to find where a leg goes wrong.", "Look for stretches that repeat. A Repeat block or your own block can sail them in fewer blocks."],
+      // legs: the traps by letter, so the chart, the run, and the feedback can say which leg is done (any order counts).
+      legs: [{ at: "4,1", name: "A", where: "by the dock" }, { at: "2,3", name: "B", where: "in the west cove" }, { at: "4,5", name: "C", where: "on the south shore" }, { at: "7,4", name: "D", where: "by the mooring" }],
       learned: "You planned, built, tested, debugged, and improved your own program. That's what programmers do every day.",
       grids: [["#########", "#S..*...#", "#.##.##.#", "#.*.....#", "#.##.##*#", "#...*..G#", "#########"]], dir: "E",
       blocks: [...MOVE, "pick", "repeat", "untilGoal", "ifGem", "ifWall", "setVar", "repeatVar", "changeVar", "call"], usesFn: true, needGems: true,
@@ -679,5 +682,123 @@ for i in range(5):
     }
   ];
 
-  SE.captainLevels = { CASCO, PENOBSCOT, DOWNEAST };
+  /* ═════════ Lessons: learn first, then try ═════════
+   * A level with a lesson opens on it the first time (lab-captain.js), before the student writes any code.
+   * A lesson is { title, cards: [card] }. A card has a heading (h) and short paragraphs (say), plus at most one of:
+   *   show:    lines of blocks to look at, like ["Repeat 4 times", "  Forward"] (two spaces = inside)
+   *   example: { grid, dir, src (Python), fnName?, varName?, tip }: a tiny map the student steps through
+   *   check:   { q, options: [[answer, right?, why]] }: one question; the student needs the right answer to go on
+   * tests/tools/test_captain_levels.js sails every example to the mooring and checks each question has one right answer.
+   */
+  const LESSONS = {
+    loops: {
+      title: "Meet the Repeat block",
+      cards: [
+        { h: "Say it once, do it many times", say: ["When you brush your teeth, you don't think \"brush, brush, brush\" 20 times.", "You think \"brush 20 times.\" That's a loop: one pattern, repeated."] },
+        { h: "A loop holds a pattern", say: ["A Repeat block holds blocks inside it. It runs them, then runs them again, as many times as its number says.", "Everything inside the Repeat is the pattern. Blocks after it run once, when the loop is done."],
+          show: ["Repeat 2 times", "  Forward", "  Forward", "  Haul trap", "Forward"] },
+        { h: "Watch a loop run", say: ["Press Step. Watch the lap counter: lap 1 of 2, then lap 2 of 2. Then the last Forward runs once."],
+          example: { grid: ["########", "#S.*.*G#", "########"], dir: "E", src: "for i in range(2):\n    move()\n    move()\n    haul()\nmove()", tip: "Each lap does the whole pattern: Forward, Forward, Haul trap." } },
+        { h: "Check your thinking", check: { q: "A Repeat 3 times holds Forward and Haul trap. How many times does Forward run?", options: [
+          ["1 time", false, "Not quite. The loop runs everything inside it once per lap. How many laps are there?"],
+          ["3 times", true, "Yes! 3 laps, and each lap runs Forward once."],
+          ["6 times", false, "Close, but that counts both blocks. Forward is only one of the two blocks inside."]] } }
+      ]
+    },
+    ifElse: {
+      title: "Meet if / else",
+      cards: [
+        { h: "You make choices all day", say: ["If it's raining, you take a coat. Else, you wear a T-shirt.", "You check one question, and the answer picks what you do. That's an if / else."] },
+        { h: "The boat can check too", say: ["In fog, you can't see the route. But the boat can sense a ledge right in front of it.", "Every time the if / else runs, the boat asks: is there a ledge ahead? Yes runs the if part. No runs the else part. Only one part runs."],
+          show: ["If ledge ahead", "  Turn right", "else", "  Forward"] },
+        { h: "Ask again and again", say: ["One question isn't enough for a whole trip. So we put the if / else inside Repeat until at mooring.", "The boat asks, acts, and asks again, until it reaches the mooring."],
+          show: ["Repeat until at mooring", "  If ledge ahead", "    Turn right", "  else", "    Forward"] },
+        { h: "Watch the boat decide", say: ["Press Step. Each time the boat checks, you'll see the answer: yes or no. Then watch which part runs."],
+          example: { grid: ["#####", "#S..#", "###.#", "###G#", "#####"], dir: "E", src: "while not at_mooring():\n    if ledge_ahead():\n        turn_right()\n    else:\n        move()", tip: "No ledge: Forward. Ledge: Turn right. The same rule, every time." } },
+        { h: "Check your thinking", check: { q: "The boat faces open water. Which part of the if / else runs?", options: [
+          ["The if part: Turn right", false, "The if part runs only when the answer is yes. Is there a ledge ahead?"],
+          ["The else part: Forward", true, "Yes! No ledge ahead, so the answer is no, and the else part runs."],
+          ["Both parts", false, "An if / else always picks just one part. Which one fits open water?"]] } }
+      ]
+    },
+    ifInIf: {
+      title: "A question inside a question",
+      cards: [
+        { h: "Two maps, one program", say: ["The tide moves the channel. At high tide it bends one way, and at low tide the other.", "A route you memorize works on one map only. A program that checks and decides works on both."] },
+        { h: "Ask a second question", say: ["When there's a ledge ahead, the boat has to turn. But which way?", "It can ask a second question: is there a ledge on my right? If yes, turn left. If no, turn right. That's an if inside an if."],
+          show: ["If ledge ahead", "  If ledge on the right", "    Turn left", "  else", "    Turn right", "else", "  Forward"] },
+        { h: "Watch it choose a side", say: ["Press Step. At the ledge, watch both questions get answered."],
+          example: { grid: ["#####", "###G#", "#S..#", "#####"], dir: "E", src: "while not at_mooring():\n    if ledge_ahead():\n        if ledge_right():\n            turn_left()\n        else:\n            turn_right()\n    else:\n        move()", tip: "Ledge ahead: yes. Ledge on the right: yes. So the boat turns left." } },
+        { h: "Check your thinking", check: { q: "There's a ledge ahead, and open water on the boat's right. What does the boat do?", options: [
+          ["Turn left", false, "That's what it does when the right side is blocked too. Here, the right is open."],
+          ["Turn right", true, "Yes! The second answer is no, so the else part runs: Turn right."],
+          ["Forward", false, "Forward runs only when there's no ledge ahead. Here there is one."]] } }
+      ]
+    },
+    variables: {
+      title: "Meet variables",
+      cards: [
+        { h: "A box with a name", say: ["A variable is like a box with a label on it. The box holds a number.", "Your score in a game is a variable. It changes while you play."] },
+        { h: "Three blocks for the box", say: ["Set distance to 1 puts 1 in the box.", "Change distance by 1 adds 1 to whatever is in the box.", "Repeat distance times looks in the box right now, and repeats that many times."],
+          show: ["Set distance to 1", "Repeat 3 times", "  Repeat distance times", "    Forward", "  Turn right", "  Change distance by 1"] },
+        { h: "Watch the box grow", say: ["Press Step. Watch distance on the chart: 1, then 2, then 3. Each side gets one square longer."],
+          example: { grid: ["######", "#..S.#", "#....#", "#G...#", "######"], dir: "E", varName: "distance", src: "distance = 1\nfor i in range(3):\n    for i in range(distance):\n        move()\n    turn_right()\n    distance += 1", tip: "The same loop sails 1, then 2, then 3 squares, because distance grows." } },
+        { h: "Check your thinking", check: { q: "distance is 2. Then Change distance by 1 runs. What is distance now?", options: [
+          ["1", false, "Change by 1 adds 1. It doesn't start over."],
+          ["2", false, "The box changed. What's 2 plus 1?"],
+          ["3", true, "Yes! 2 plus 1 is 3. The next loop sails 3 squares."]] } }
+      ]
+    },
+    functions: {
+      title: "Meet your own block",
+      cards: [
+        { h: "A name for many steps", say: ["\"Make toast\" is short for a lot of steps: get bread, put it in, push the lever, wait.", "Your own block works the same way. You give a group of steps a name."] },
+        { h: "Define it, then call it", say: ["Define: build the steps once, in your block's own box.", "Call: put your block in the main program. Every time it runs, all of its steps run."],
+          show: ["Two Forward =", "  Forward", "  Forward", "Main program:", "  Two Forward", "  Turn right", "  Two Forward"] },
+        { h: "Watch a call run", say: ["Press Step. When the program reaches Two Forward, watch it run the steps inside."],
+          example: { grid: ["#####", "#S..#", "###.#", "###G#", "#####"], dir: "E", fnName: "Two Forward", src: "def two_forward():\n    move()\n    move()\n\ntwo_forward()\nturn_right()\ntwo_forward()", tip: "One definition, used twice. Change it once, and both calls change." } },
+        { h: "Check your thinking", check: { q: "Your block has 3 blocks inside. Your program calls it 2 times. How many blocks run from inside it?", options: [
+          ["3", false, "That's one call. Each call runs all 3 again."],
+          ["5", false, "Not quite. Each call runs all 3 blocks inside."],
+          ["6", true, "Yes! 2 calls, and each one runs 3 blocks."]] } }
+      ]
+    },
+    nested: {
+      title: "A loop inside a loop",
+      cards: [
+        { h: "A pattern of patterns", say: ["Think of rows of seats. You check every seat in a row, then go to the next row.", "One loop does a row. Another loop around it does every row."],
+          show: ["Repeat 3 times", "  Repeat 4 times", "    Forward", "  Turn right"] },
+        { h: "Check your thinking", check: { q: "Repeat 3 times holds Repeat 2 times, which holds Forward. How many times does Forward run?", options: [
+          ["2", false, "That's one lap of the outer loop. It runs 3 laps."],
+          ["5", false, "Loops multiply, they don't add. Try 3 groups of 2."],
+          ["6", true, "Yes! 3 laps of the outer loop, and 2 Forwards in each."]] } }
+      ]
+    },
+    voyage: {
+      title: "The captain's routine",
+      cards: [
+        { h: "Big voyages are made of legs", say: ["This chart is the biggest yet: three traps, and lots of turns.", "Real programmers don't write a big program all at once. They split it into parts and get each part working."] },
+        { h: "Plan, build, test, improve", say: ["Plan: use Plot your course to mark your route and the traps you'll haul.", "Build: write blocks for leg 1 only.", "Test: press Run. When leg 1 works, add leg 2. Then leg 3.", "Improve: look for patterns. A loop or your own block can make it shorter."] },
+        { h: "Check your thinking", check: { q: "Your boat hauls trap 1, then bumps a ledge on the way to trap 2. What should you do first?", options: [
+          ["Clear everything and start over", false, "Leg 1 works! Keep it. The bug is somewhere after trap 1."],
+          ["Step through and find the first block after trap 1 that goes wrong", true, "Yes! Keep what works, and fix the first thing that doesn't."],
+          ["Add more blocks to the end", false, "The boat never gets to the end. Fix the bug where it happens first."]] } }
+      ]
+    }
+  };
+  /* Short recaps when an idea comes back later on the coast: the idea in one card, then the check. */
+  const recap = (L, h, say) => ({ title: `Remember: ${L.title.replace(/^Meet /, "")}`, cards: [{ h, say }, L.cards[L.cards.length - 1]] });
+  const lessonFor = {
+    "cb-5": LESSONS.loops, "cb-6": LESSONS.ifElse, "cb-7": LESSONS.ifInIf, "cb-8": LESSONS.variables, "cb-9": LESSONS.functions, "cb-10": LESSONS.voyage,
+    "de-5": LESSONS.nested,
+    "pb-7": recap(LESSONS.ifElse, "The boat asks, then acts", ["An if / else asks one question, like \"Is there a ledge ahead?\"", "Yes runs the if part. No runs the else part. Inside Repeat until at mooring, the boat asks again after every move."]),
+    "de-6": recap(LESSONS.ifElse, "The boat asks, then acts", ["In fog, the boat can't see far, but it can sense what's right next to it.", "An if / else turns what it senses into a choice: one part for yes, one for no."]),
+    "pb-9": recap(LESSONS.variables, "A box that holds a number", ["A variable holds a number that can change. Set puts a number in. Change adds to it.", "Repeat distance times uses the number in the box right now."]),
+    "de-8": recap(LESSONS.variables, "A box that holds a number", ["A variable remembers a number while the program runs.", "Change it inside a loop, and each lap can do a little more."]),
+    "pb-10": recap(LESSONS.functions, "Define once, call many times", ["Your own block is a name for a group of steps.", "Build it once in its box. Each time you call it, all of its steps run."]),
+    "de-10": recap(LESSONS.functions, "Define once, call many times", ["A toolkit is a set of your own blocks.", "Name each job once, then use the names to write a short main program."])
+  };
+  [...CASCO, ...PENOBSCOT, ...DOWNEAST].forEach((L) => { if (lessonFor[L.id]) L.lesson = lessonFor[L.id]; });
+
+  SE.captainLevels = { CASCO, PENOBSCOT, DOWNEAST, LESSONS };
 })();
