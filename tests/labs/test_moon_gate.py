@@ -27,7 +27,7 @@ async def main():
     def watch(pg): pg.on("pageerror", lambda e: errs.append(str(e)))
     pg = await b.new_page(viewport={"width": 1280, "height": 900}); watch(pg)
     await pg.goto(S); await pg.evaluate("localStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400)
-    await pg.click("text=Look around as a guest"); await pg.wait_for_timeout(300)
+    await pg.evaluate("SE.store.signInEducator(SE.store.DEMO.email, SE.store.DEMO.password)"); await pg.wait_for_timeout(300)
 
     # ── Every rule × visitor combination (3 badges × 2 THEN × 2 ELSE × 3 visitors = 36), through the UI
     await level(pg, 3)   # level 3 has optional predictions, so any combination can be tested
@@ -159,7 +159,7 @@ async def main():
     ok("educator can add it to a Learning Plan", await t.locator('a[href="#/teach/plans/new/lab-moon-gate"]').count() >= 1)
     # reduced motion + phone
     rm = await b.new_page(viewport={"width": 390, "height": 844}, reduced_motion="reduce"); watch(rm)
-    await rm.goto(S); await rm.wait_for_timeout(300); await rm.click("text=Look around as a guest"); await rm.wait_for_timeout(300)
+    await rm.goto(S); await rm.wait_for_timeout(300); await rm.evaluate("SE.store.signInEducator(SE.store.DEMO.email, SE.store.DEMO.password)"); await rm.wait_for_timeout(300)
     await rm.goto(S + "#/lab/moon-gate/1"); await rm.wait_for_timeout(400)
     await test(rm, "moon", "open")
     tr_ = await rm.evaluate("getComputedStyle(document.querySelector('.mg-door--l')).transitionDuration")

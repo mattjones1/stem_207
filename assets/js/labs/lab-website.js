@@ -8,7 +8,7 @@
  *   Code Coach    one line about the tag or CSS property under the cursor
  *   Color helper  every color in the CSS, with a picker that rewrites that value in the code
  *   Check my page a checklist with three outcomes: Looks good, Needs a fix, Check with a person
- * Privacy: student code and plans stay on this device (localStorage for students, sessionStorage for guests).
+ * Privacy: student code and plans stay on this device (localStorage for students, sessionStorage for educators previewing).
  * Only check names are logged. Pure rules for tests: SE.website.checks(doc, ctx), SE.website.TAGS.
  */
 (function () {
@@ -233,7 +233,7 @@
   /* ───────── Saving (this device only) ───────── */
   function storeFor(user) {
     const student = user && user.role === "student";
-    const key = `stem207.website.${student ? user.id : "guest"}`;
+    const key = `stem207.website.${student ? user.id : "preview"}`;
     let s = null;
     try { s = student ? window.localStorage : window.sessionStorage; } catch (e) { s = null; }
     return {

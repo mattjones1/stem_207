@@ -26,7 +26,7 @@ async def main():
     pg.on("pageerror", lambda e: errs.append(f"{pg.url}: {e}"))
     pg.on("request", lambda r: outside.append(r.url) if r.url.startswith("http") and "localhost" not in r.url and "fonts." not in r.url else None)
     await pg.goto(S); await pg.evaluate("localStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400)
-    await pg.evaluate("SE.store.startGuest(); localStorage.setItem('stem207.devPlan', 'educator')")
+    await pg.evaluate("SE.store.signInEducator(SE.store.DEMO.email, SE.store.DEMO.password).then(() => localStorage.setItem('stem207.devPlan', 'educator'))")
     frame = lambda: pg.frame_locator("#wb-frame")
 
     # Level 1: an empty headline, then a real one, live in the preview.

@@ -1025,12 +1025,12 @@ code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-si
 .track__status.is-cleared { color: var(--teal); }
 .track__status.is-claimed { color: var(--orange-ink); }
 
-.guest-banner, .edu-strip, .demo-banner, .teacher-note-banner {
+.edu-strip, .demo-banner, .teacher-note-banner {
   margin-top: 1.25rem; display: flex; align-items: center; gap: .9rem; flex-wrap: wrap;
   padding: .9rem 1.1rem; border-radius: var(--radius); background: var(--surface); border: 1.5px solid var(--line);
 }
-.guest-banner > svg, .edu-strip > svg, .demo-banner > svg, .teacher-note-banner > svg { width: 1.6rem; height: 1.6rem; flex: none; fill: none; stroke: var(--teal); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.guest-banner p, .edu-strip p, .demo-banner p, .teacher-note-banner p { flex: 1 1 20rem; min-width: 0; }
+.edu-strip > svg, .demo-banner > svg, .teacher-note-banner > svg { width: 1.6rem; height: 1.6rem; flex: none; fill: none; stroke: var(--teal); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.edu-strip p, .demo-banner p, .teacher-note-banner p { flex: 1 1 20rem; min-width: 0; }
 .demo-banner { background: var(--orange-soft); border-color: transparent; }
 .demo-banner > svg { stroke: var(--orange-ink); }
 

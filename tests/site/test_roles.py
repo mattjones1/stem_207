@@ -1,4 +1,4 @@
-# Pages for another role: a guest or student who opens a teacher (or student-only) page is sent somewhere useful
+# Pages for another role: someone signed out, or a student, who opens a teacher (or student-only) page is sent somewhere useful
 # with a reason, never to the educator sign-in while signed in. Also: teacher notes are for educators only, Moxie
 # says why it's closed, blank Learning Plan drafts don't pile up, and every teacher page has its own tab title.
 #   LOCAL_MODE=1 PORT=8767 node tests/backend/mock-supabase.js ; python3 tests/site/test_roles.py [url]
@@ -19,18 +19,10 @@ async def main():
     pg.on("pageerror", lambda e: errs.append(f"{pg.url}: {e}"))
     await pg.goto(S); await pg.evaluate("localStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400)
 
-    # Guest
-    await pg.evaluate("SE.store.startGuest()")
-    await go(pg, "#/plans")
-    ok("guest at My Learning Plans goes to the student sign-in, with a reason", pg.url.endswith("#/signin/student") and "Sign in to see your Learning Plans" in await toast(pg), pg.url)
-    for h, word in [("#/me", "profile"), ("#/base", "harbor")]:
-      await go(pg, h)
-      ok(f"guest at {h} goes Home and is told why", pg.url.endswith("#/") and word in await toast(pg), pg.url)
-    await go(pg, "#/activity/robot-maze-mission")
-    ok("guest doesn't see teacher notes", await pg.locator(".teacher-notes").count() == 0)
-    ok("guest doesn't see standards codes", await pg.locator(".facts__std").count() == 0)
-    await go(pg, "#/moxie")
-    ok("guest at Moxie sees what it is, not 'not found'", "Moxie: build with an ESP32" in await pg.inner_text("#app") and "couldn’t find" not in await pg.inner_text("#app"))
+    # Signed out: every page goes to sign in (there is no guest access)
+    for h in ["#/", "#/plans", "#/me", "#/base", "#/activities", "#/activity/robot-maze-mission", "#/lab/dance-party/1", "#/moxie", "#/teach"]:
+      await pg.goto(S + "#/signin"); await pg.wait_for_timeout(100); await pg.goto(S + h); await pg.wait_for_timeout(400)
+      ok(f"signed out at {h} goes to sign in", pg.url.endswith("#/signin"), pg.url)
 
     # Student
     await pg.evaluate("localStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(300)

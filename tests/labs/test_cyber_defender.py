@@ -21,7 +21,7 @@ async def main():
     pg = await b.new_page(viewport={"width": 1366, "height": 650})
     pg.on("pageerror", lambda e: errs.append(f"{pg.url}: {e}"))
     await pg.goto(S); await pg.evaluate("localStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400)
-    await pg.evaluate("SE.store.startGuest(); localStorage.setItem('stem207.devPlan', 'educator')")
+    await pg.evaluate("SE.store.signInEducator(SE.store.DEMO.email, SE.store.DEMO.password).then(() => localStorage.setItem('stem207.devPlan', 'educator'))")
 
     # Level 1: decode with the wheel.
     await level(pg, 1)

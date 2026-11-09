@@ -6123,7 +6123,7 @@ window.STEM.activities = [
     before: {
       materials: ["A Chromebook or laptop with a keyboard for each student", "Paper and pencils for the wireframe", "A projector for demos"],
       setup: [
-        "Make a class and print login cards so drafts save on each student's device. Guests can work, but their drafts last only for the browser session.",
+        "Make a class and print login cards. Students sign in, and drafts save on each student's device.",
         "Open stage 2 and stage 7 on the projector before class.",
         "Student code and plans stay on the device. To review a page, look at the student's screen, or ask them to show you."
       ],
@@ -6514,7 +6514,7 @@ window.STEM.activities = [
     before: {
       materials: ["A laptop, Chromebook, or tablet for each student (or each pair)", "A projector for demos", "Optional: grid paper for planning the Captain's Challenge"],
       setup: [
-        "Make a class and print login cards so progress saves. Guests can play, but their progress isn't saved.",
+        "Make a class and print login cards. Students sign in, and their progress saves.",
         "Open levels 6 (Fog on the Water) and 7 (The Changing Channel) on the projector computer before class.",
         "Signed in as an educator, each level has a Demo the solution button. Students never see it."
       ],
@@ -6645,7 +6645,7 @@ window.STEM.activities = [
     ],
     before: {
       materials: ["Laptop, Chromebook, or tablet"],
-      setup: ["Students can sign in to save progress, or explore as guests.", "The lab has three voyages of 12 levels. Every voyage starts with beginner sequences and builds to functions and a free build, so students who finish Voyage 1 can keep practicing at the same level in Voyages 2 and 3.", "Within a voyage, levels 1–3 suit any beginner. Levels 8–12 suit students ready for conditionals, variables, and functions."],
+      setup: ["Students sign in with their login cards, and progress saves.", "The lab has three voyages of 12 levels. Every voyage starts with beginner sequences and builds to functions and a free build, so students who finish Voyage 1 can keep practicing at the same level in Voyages 2 and 3.", "Within a voyage, levels 1–3 suit any beginner. Levels 8–12 suit students ready for conditionals, variables, and functions."],
       prerequisites: "None. The lab starts at the very beginning and climbs through Coding Foundations."
     },
     steps: [
@@ -6756,7 +6756,7 @@ window.STEM.activities = [
     ],
     before: {
       materials: ["Laptop, Chromebook, or tablet (keyboard works too)"],
-      setup: ["Works as a 10-minute warm-up. Students can sign in to save progress or explore as guests.", "Optional unplugged opener: have one student \"run\" a three-card dance program for the class."],
+      setup: ["Works as a 10-minute warm-up. Students sign in with their login cards, and progress saves.", "Optional unplugged opener: have one student \"run\" a three-card dance program for the class."],
       prerequisites: "None. This is a first coding activity."
     },
     steps: [
@@ -6864,7 +6864,7 @@ window.STEM.activities = [
     ],
     before: {
       materials: ["Laptop, Chromebook, or tablet"],
-      setup: ["Best after students know sequences and click events (Robot Dance Party and Coding Foundations step 2).", "Plan about 15 minutes. Students can sign in to save progress or explore as guests."],
+      setup: ["Best after students know sequences and click events (Robot Dance Party and Coding Foundations step 2).", "Plan about 15 minutes. Students sign in with their login cards, and progress saves."],
       prerequisites: "Understands sequences and that a click can start code (events)."
     },
     steps: [
@@ -7156,7 +7156,7 @@ window.STEM.activities = [
     before: {
       materials: ["A Chromebook, laptop, or tablet for each student (pairs work too)", "A projector for the group moments"],
       setup: [
-        "Make a class and print login cards so work saves on each student's device. Guests can work, but their work lasts only for the browser session.",
+        "Make a class and print login cards. Students sign in, and work saves on each student's device.",
         "Open stages 3, 5, and 6 on the projector before class so you can demo Inside the Machine, the error log, and the threshold slider.",
         "Read the dataset notes in the teacher notes below so you know what each experiment is built to show."
       ],

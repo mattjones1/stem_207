@@ -72,7 +72,7 @@ The feedback line sums up what to fix ("2 things to fix: Alt text, Link"). The f
 ## Before class
 
 **Setup checklist**
-- [ ] Make a class and print login cards so drafts save on each student's device. Guests can work, but their drafts last only for the browser session.
+- [ ] Make a class and print login cards so drafts save on each student's device. Students sign in to use the lab.
 - [ ] Check keyboards. `<` and `>` are Shift + comma and Shift + period.
 - [ ] Open stage 2 and stage 7 on the projector computer.
 - [ ] Print the cards in [02-printable-cards.md](02-printable-cards.md): the wireframe sheet, the five-second test card, and the exit ticket.
@@ -185,7 +185,6 @@ Stage 7 reveals the bugs in three steps: the first Check names the kinds of prob
 
 ## Troubleshooting
 1. **A student's draft is gone.**
-   - **They were a guest:** guest drafts last only for the browser session. Sign them in.
    - **They switched devices:** drafts stay on the device they used.
 2. **A student can't see the preview and code together.** Reset the Chromebook zoom to 100% (Ctrl + 0).
 3. **The student typed something and the page didn't change.** The preview drops anything unsafe, like scripts, frames, forms, and outside links or pictures. Point them back to the tags on the Tag Shelf.

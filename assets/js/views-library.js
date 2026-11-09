@@ -1,7 +1,7 @@
 /*
- * STEM 207 — library views: dashboard, exploration areas, activity pages, coding pathway.
- * These views adapt to who is signed in: guests browse, students earn progress,
- * educators see how their class is doing.
+ * STEM 207 — library views: exploration areas, activity pages, coding pathway.
+ * These views adapt to who is signed in: students earn progress, educators see how
+ * their class is doing.
  */
 (function () {
   "use strict";
@@ -112,7 +112,7 @@
       </div>`;
   };
 
-  SE.homeLabel = () => { const u = SE.store.currentUser(); return !u || u.role === "guest" ? "Home" : u.role === "student" ? "Home" : "Dashboard"; };
+  SE.homeLabel = () => { const u = SE.store.currentUser(); return !u || u.role === "student" ? "Home" : "Dashboard"; };
   const backLink = (href = "#/", label) => `<a class="back-link" href="${href}">${icon("arrowLeft")}${label || SE.homeLabel()}</a>`;
   SE.backLink = backLink;
 
@@ -193,11 +193,7 @@
 
   function bindLibrary(prof) {
     const q = document.getElementById("f-q");
-    if (!q) {
-      // No library on this page (the guest home): time buttons open Activities with that filter.
-      app().querySelectorAll(".time-picker button").forEach((btn) => btn.addEventListener("click", () => { filters.time = btn.dataset.time; location.hash = "#/activities"; }));
-      return;
-    }
+    if (!q) return;
     q.addEventListener("input", () => { filters.q = q.value.trim(); renderResults(prof); });
     app().querySelectorAll(".filters select").forEach((sel) => {
       sel.addEventListener("change", () => {
@@ -267,87 +263,6 @@
     results.innerHTML = `<div class="cards">${list.map((a) => activityCard(a, prof)).join("")}</div>`;
   }
 
-  /* ───────── Dashboard ───────── */
-  /* Coastal scene for the dashboard hero: a lighthouse sweeping its beam over Casco Bay-style
-     water, granite ledge, a pine ridge, Katahdin in the distance, and one lobster buoy per
-     exploration area. Each buoy is a link to its area. */
-  const BUOYS = [
-    { x: 182, y: 270, label: "Coding", c1: "#94c93d", c2: "#012d2b" },
-    { x: 290, y: 270, label: "VR", c1: "#ffffff", c2: "#94c93d" },
-    { x: 398, y: 270, label: "AI", c1: "#f2c14e", c2: "#012d2b" },
-    { x: 112, y: 312, label: "Engineering", c1: "#e9603f", c2: "#ffffff" },
-    { x: 210, y: 312, label: "Science", c1: "#94c93d", c2: "#ffffff" },
-    { x: 300, y: 312, label: "Creative", c1: "#ffffff", c2: "#e9603f" },
-    { x: 392, y: 312, label: "3D", c1: "#f2c14e", c2: "#e9603f" }
-  ];
-  function coastSvg() {
-    const sky = SE.rng("maine-sky");
-    const stars = Array.from({ length: 34 }, () => `<circle cx="${(sky() * 440).toFixed(1)}" cy="${(sky() * 120).toFixed(1)}" r="${(sky() * 1 + .4).toFixed(2)}" fill="#fff" opacity="${(sky() * .5 + .2).toFixed(2)}"/>`).join("");
-    const pr = SE.rng("maine-ridge");
-    const pines = [];
-    for (let x = 150; x < 450; x += 9 + pr() * 9) {
-      const h = 26 + pr() * 34;
-      pines.push(`<use href="#pine207" x="${x.toFixed(1)}" y="${(252 - h).toFixed(1)}" width="${(h * 117 / 332).toFixed(1)}" height="${h.toFixed(1)}"/>`);
-    }
-    const buoys = SE.liveAreas.slice(0, BUOYS.length).map((a, i) => {
-      const b = BUOYS[i];
-      return `<a href="#/activities/${a.id}" aria-label="${esc(a.name)}">
-        <g transform="translate(${b.x} ${b.y})">
-          <ellipse class="buoy-ring" cx="0" cy="1" rx="13" ry="3.5" fill="none" stroke="#b9e27f" stroke-opacity=".35" stroke-width="1.2"/>
-          <g class="buoy">
-            <line x1="0" y1="-24" x2="0" y2="-36" stroke="#cfe9e6" stroke-width="1.6"/>
-            <rect x="-6.5" y="-25" width="13" height="25" rx="6.5" fill="${b.c1}"/>
-            <rect x="-6.5" y="-16" width="13" height="7" fill="${b.c2}"/>
-            <rect x="-6.5" y="-25" width="13" height="25" rx="6.5" fill="none" stroke="#01201e" stroke-opacity=".35"/>
-          </g>
-          <text x="0" y="19" text-anchor="middle">${esc(b.label)}</text>
-        </g></a>`;
-    }).join("");
-    return `
-      <svg viewBox="0 0 440 340" role="group" aria-label="${["", "One", "Two", "Three", "Four", "Five", "Six", "Seven"][SE.liveAreas.length] || SE.liveAreas.length} lobster buoys float off a Maine lighthouse, one for each exploration area">
-        <defs>
-          <symbol id="pine207" viewBox="1138 172 117 332"><path d="${SE.brand.PINE_D}"/></symbol>
-          <linearGradient id="beamGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff9d6" stop-opacity=".75"/><stop offset="1" stop-color="#fff9d6" stop-opacity="0"/></linearGradient>
-          <linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#073431"/><stop offset="1" stop-color="#03211f"/></linearGradient>
-          <linearGradient id="fadeX" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000"/><stop offset=".12" stop-color="#fff"/><stop offset=".88" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
-          <linearGradient id="fadeY" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".78" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
-          <mask id="coastFadeX" maskUnits="userSpaceOnUse" x="0" y="0" width="440" height="340"><rect width="440" height="340" fill="url(#fadeX)"/></mask>
-          <mask id="coastFadeY" maskUnits="userSpaceOnUse" x="0" y="0" width="440" height="340"><rect width="440" height="340" fill="url(#fadeY)"/></mask>
-        </defs>
-        <g mask="url(#coastFadeX)"><g mask="url(#coastFadeY)">
-        ${stars}
-        <circle cx="384" cy="46" r="15" fill="#f6f1d3" opacity=".9"/><circle cx="391" cy="41" r="13" fill="#083733" opacity=".9"/>
-        <path d="M150 252 L214 196 L236 206 L262 168 L284 180 L300 160 L338 196 L372 214 L440 232 L440 252 Z" fill="#096660"/>
-        <path d="M262 168 L270 172 L284 180 L275 183 L268 177 Z M300 160 L310 170 L304 172 Z" fill="#bfe4e0" opacity=".55"/>
-        <g fill="#03221f">${pines.join("")}</g>
-        <rect x="0" y="250" width="440" height="90" fill="url(#seaGrad)"/>
-        <g stroke="#94c93d" stroke-opacity=".18" stroke-width="1.2" fill="none" stroke-linecap="round">
-          <path d="M160 262 q8 -3 16 0 t16 0"/><path d="M330 290 q8 -3 16 0 t16 0"/><path d="M60 326 q8 -3 16 0 t16 0"/><path d="M280 332 q8 -3 16 0 t16 0"/><path d="M410 300 q8 -3 16 0 t16 0"/>
-        </g>
-        <path d="M70 262 L56 340 L84 340 Z" fill="#fff9d6" opacity=".08"/>
-        <path class="beam" style="--lx:70px;--ly:140px" d="M70 140 L440 100 L440 176 Z" fill="url(#beamGrad)"/>
-        <path d="M0 240 C18 230 40 236 58 232 C80 228 104 236 124 244 C146 252 160 262 170 276 C150 282 120 280 96 284 C64 290 30 284 0 288 Z" fill="#2f4341"/>
-        <path d="M0 252 C24 246 46 252 70 248 C94 244 120 254 140 262 C120 270 90 268 64 274 C40 278 18 274 0 278 Z" fill="#4f5f5d"/>
-        <path d="M22 258 l18 -4 M80 256 l22 3 M108 266 l14 -2" stroke="#6f8482" stroke-width="1.5" stroke-linecap="round"/>
-        <path d="M96 246 h34 v-20 h-34 Z" fill="#efece2"/><path d="M92 228 L113 214 L134 228 Z" fill="#8a2c2c"/><rect x="104" y="232" width="7" height="8" fill="#f2c14e" opacity=".85"/><rect x="117" y="232" width="7" height="8" fill="#083733"/>
-        <path d="M58 248 L62 150 H78 L82 248 Z" fill="#f4f2ea"/>
-        <path d="M60.6 200 H79.4" stroke="#d9d5c6" stroke-width="2"/>
-        <rect x="56" y="146" width="28" height="5" rx="1" fill="#01201e"/>
-        <rect x="62" y="132" width="16" height="14" fill="#01201e"/>
-        <rect x="64" y="134" width="12" height="10" fill="#fff4b0"/>
-        <circle cx="70" cy="139" r="9" fill="#fff4b0" opacity=".35"/>
-        <path d="M60 132 L70 122 L80 132 Z" fill="#01201e"/><line x1="70" y1="122" x2="70" y2="116" stroke="#01201e" stroke-width="1.6"/>
-        </g></g>
-        ${buoys}
-      </svg>`;
-  }
-
-  const timePicker = () => `
-    <div class="time-picker" role="group" aria-labelledby="time-picker-label">
-      <span class="time-picker__label" id="time-picker-label">How much time do you have?</span>
-      ${durations.map((d) => `<button type="button" data-time="${d.id}" aria-pressed="${filters.time === d.id}">${icon("clock")}${d.max} min</button>`).join("")}
-    </div>`;
-
   function areasSection(prof, eyebrow = "Explore the lab") {
     return `
       <section class="section wrap" aria-labelledby="explore-title">
@@ -378,27 +293,6 @@
       </section>`;
   }
 
-  function featuredSection() {
-    const featured = activities.find((a) => a.featured) || activities[0];
-    const fArea = SE.areaById[featured.area];
-    return `
-      <section class="section wrap" aria-labelledby="featured-title">
-        <div class="section__head"><div><span class="eyebrow">Featured classroom activity</span><h2 id="featured-title" class="visually-hidden">Featured classroom activity</h2></div></div>
-        <article class="featured">
-          <div class="featured__body">
-            <div class="card__area"><span class="icon-badge">${icon(fArea.icon)}</span>${esc(fArea.name)}</div>
-            <h3>${esc(featured.title)}</h3>
-            <p class="featured__mission">${esc(featured.mission)}</p>
-            <div class="card__foot">${accessChips(featured)}</div>
-            <div class="featured__actions">
-              <a class="btn btn--primary" href="#/activity/${featured.id}">${icon("rocket")}See the activity</a>
-            </div>
-          </div>
-          <div class="featured__side">${factsList(featured)}</div>
-        </article>
-      </section>`;
-  }
-
   /* ───────── Activities: the categories, then search (students and educators share this page) ───────── */
   SE.views.activities = function (user, id) {
     if (id) return SE.views.area(user, id);
@@ -421,45 +315,6 @@
       ${librarySection(user, prof)}`;
     bindLibrary(prof);
   };
-
-  /* Home for guests (students have SE.views.today, educators the Dashboard). */
-  SE.views.dashboard = function (user) {
-    const isStudent = user && user.role === "student";
-    if (filtersFor !== (user && user.id)) {
-      filters = defaultFilters();
-      if (isStudent && user.gradeBand) filters.grade = user.gradeBand;
-      filtersFor = user && user.id;
-    }
-
-    /* "Support STEM 207": grown-ups only (guests here, educators on the Dashboard, the footer link).
-       Students never see it. Set the Venmo name in config.js; until then it shows a placeholder. */
-    const guestBanner = user && user.role === "guest" ? `
-      <div class="wrap"><div class="guest-banner">
-        ${icon("user")}<p><strong>You're exploring as a guest.</strong> Activities work, but nothing is saved. Sign in to save your work, earn XP, and collect patches.</p>
-        <a class="btn btn--primary btn--small" href="#/signin">Sign in</a>
-      </div></div>` : "";
-
-    app().innerHTML = `
-      <section class="hero ridge" aria-labelledby="hero-title">
-        <div class="wrap hero__inner">
-          <div>
-            <span class="eyebrow">STEM 207 · Grades 2–8 · Made in Maine</span>
-            <h1 id="hero-title" tabindex="-1">From the coast to Katahdin, big ideas start here.</h1>
-            <p class="hero__lede">Pick a category, read the activity, and launch it. Coding, virtual field trips, AI, engineering, science, and art, built for Maine classrooms.</p>
-            ${timePicker()}
-          </div>
-          <div class="coast">${coastSvg()}</div>
-        </div>
-      </section>
-      ${guestBanner}
-      ${user && user.role === "educator" ? SE.views.educatorStrip(user) : ""}
-      ${areasSection(null, "Categories")}
-      ${featuredSection()}
-      <section class="wrap section"><a class="btn btn--primary" href="#/activities">${icon("search")}Browse all activities</a></section>
-      ${user && user.role === "guest" ? `<section class="wrap section">${SE.donateCard()}</section>` : ""}`;
-    bindLibrary(null);
-  };
-  SE.views.timePicker = timePicker;
 
   /* ───────── Area ───────── */
   /* The Coding page in browsing groups (STEM.codingGroups, planning/CODING_PLAN.md). A group with nothing
@@ -533,7 +388,7 @@
       ${drafts.length ? `
       <section class="wrap section" aria-labelledby="area-drafts">
         <div class="section__head"><div><span class="eyebrow">Educators only</span><h2 id="area-drafts">Drafts (${drafts.length})</h2></div>
-          <p>Not published. Students and guests can't see these, and they can't be assigned.</p></div>
+          <p>Not published. Students can't see these, and they can't be assigned.</p></div>
         <ul class="draft-list">${drafts.map((a) => `<li><a href="#/activity/${a.id}">${esc(a.title)}</a> <span class="chip chip--soon">${a.placeholder ? "Placeholder" : esc(SE.moxie.PUB[a.pub] || "Draft")}</span></li>`).join("")}</ul>
       </section>` : ""}`;
   };
@@ -550,7 +405,7 @@
         </div>
       </section>
       <section class="wrap section">
-        <div class="notice"><p><strong>Placeholder.</strong> This exercise has no content yet. Students and guests can't see it, it can't be assigned, and it isn't counted in the library.</p></div>
+        <div class="notice"><p><strong>Placeholder.</strong> This exercise has no content yet. Students can't see it, it can't be assigned, and it isn't counted in the library.</p></div>
       </section>`;
   }
 

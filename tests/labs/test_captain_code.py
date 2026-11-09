@@ -43,7 +43,7 @@ async def main():
     ctx = await b.new_context(viewport={"width": 1366, "height": 650}, reduced_motion="reduce")
     pg = await ctx.new_page(); pg.on("pageerror", lambda e: errs.append(f"{pg.url}: {e}"))
     await pg.goto(S); await pg.evaluate("localStorage.clear(); sessionStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400)
-    await pg.evaluate("SE.store.startGuest()")
+    await pg.evaluate("SE.store.signInEducator(SE.store.DEMO.email, SE.store.DEMO.password)")
 
     # Landing: the rule, Start on the first screen, three regions with real level counts.
     await pg.goto(S + "#/lab/captain-code"); await pg.wait_for_timeout(500)
@@ -216,7 +216,7 @@ async def main():
     await level(pg, 9)
     rb = await pg.locator("#cc-run").bounding_box()
     ok("Run is on the first screen at 1366x650", rb and rb["y"] + rb["height"] <= 650, rb)
-    ok("guests don't see the Demo button", await pg.locator("#cc-demo").count() == 0)
+    ok("an educator previewing sees the Demo button", await pg.locator("#cc-demo").count() == 1)
     await pg.click("#cc-big")
     ok("Bigger blocks makes the toolbox bigger without Extra help", await pg.locator("#cc.cc--big:not(.cc--help)").count() == 1 and (await pg.locator('#cc-code [data-add="move"]').bounding_box())["height"] >= 52)
     await pg.click("#cc-big")
@@ -224,7 +224,7 @@ async def main():
     # Phone width: no sideways scroll.
     ph = await b.new_context(viewport={"width": 390, "height": 800}, reduced_motion="reduce")
     pp = await ph.new_page(); pp.on("pageerror", lambda e: errs.append(f"phone: {e}"))
-    await pp.goto(S); await pp.evaluate("SE.store.startGuest()")
+    await pp.goto(S); await pp.evaluate("SE.store.signInEducator(SE.store.DEMO.email, SE.store.DEMO.password)")
     for n in [7, 9]:
         await pp.goto(S + "#/activities"); await pp.wait_for_timeout(100)
         await pp.goto(S + f"#/lab/captain-code/{n}"); await pp.wait_for_timeout(500)

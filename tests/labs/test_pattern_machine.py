@@ -1,6 +1,6 @@
 # Pattern Machine Lab: Train the Machine. All 8 stages played through real clicks (wrong paths refused with
 # specific feedback, right paths win), the chart's numbers match the model, the report and certificate,
-# guest mode, no outside requests, and Chromebook size.
+# an educator's preview (saved for the browser session only), no outside requests, and Chromebook size.
 #   LOCAL_MODE=1 PORT=8767 node tests/backend/mock-supabase.js ; python3 tests/labs/test_pattern_machine.py [url]
 import asyncio, sys, json
 from playwright.async_api import async_playwright
@@ -348,15 +348,15 @@ async def main():
     pg.on("request", lambda r: outside.append(r.url) if not r.url.startswith(S.rstrip("/")) and not r.url.startswith("data:") and "fonts.g" not in r.url else None)
     await pg.goto(S); await pg.evaluate("localStorage.clear(); sessionStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400)
 
-    # Guest: landing, mode choice, and the lab works without an account
-    await pg.click("text=Look around as a guest"); await pg.wait_for_timeout(400)
+    # Educator preview: landing, mode choice, and the lab works without saving to a student
+    await pg.evaluate("SE.store.signInEducator(SE.store.DEMO.email, SE.store.DEMO.password)"); await pg.wait_for_timeout(400)
     await pg.goto(S + "#/lab/pattern-machine"); await pg.wait_for_timeout(500)
-    ok("guest: landing shows the big idea and modes", "People decide whether those patterns are useful" in await pg.inner_text("#app") and await pg.locator('[name="pm-mode"]').count() == 3)
+    ok("educator preview: landing shows the big idea and modes", "People decide whether those patterns are useful" in await pg.inner_text("#app") and await pg.locator('[name="pm-mode"]').count() == 3)
     await pg.check('[name="pm-mode"][value="explorer"]')
     await go(pg, 2)
-    ok("guest: Explorer mode shows 16 creatures and 3 rules", await pg.locator('[data-act="rule"]').count() == 3)
+    ok("educator preview: Explorer mode shows 16 creatures and 3 rules", await pg.locator('[data-act="rule"]').count() == 3)
     await act(pg, "rule", "horns")
-    ok("guest: work is kept in sessionStorage only", await pg.evaluate("!!sessionStorage.getItem('stem207.pm.guest') && !localStorage.getItem('stem207.pm.guest')"))
+    ok("educator preview: work is kept in sessionStorage only", await pg.evaluate("!!sessionStorage.getItem('stem207.pm.preview') && !localStorage.getItem('stem207.pm.preview')"))
     await pg.evaluate("localStorage.setItem('stem207.pm.mode', 'investigator')")
 
     # Student

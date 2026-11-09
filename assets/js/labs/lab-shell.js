@@ -25,7 +25,7 @@
  *   api.say(text, kind)  show feedback ("info" | "good" | "warn")
  *   api.log(type, data)  record a lab action (e.g. "lab_test_run")
  *   api.saved()          data from this student's last completion of this level
- *   api.user             current user (or null for guests)
+ *   api.user             current user (a student, or an educator previewing)
  */
 (function () {
   "use strict";
@@ -34,7 +34,7 @@
   const app = () => document.getElementById("app");
   const registry = [];
   SE.views = SE.views || {};
-  const guestProgress = {}; // labId -> Set of levels, for guests (not saved)
+  const previewProgress = {}; // labId -> Set of levels, for educators previewing (not saved)
 
   SE.labs = {
     register(def) { registry.push(def); },
@@ -49,7 +49,7 @@
 
     /* Levels this student has completed, from their activity log. */
     progressFor(userOrProf, labId) {
-      if (!userOrProf || userOrProf.role === "guest") return guestProgress[labId] || new Set();
+      if (!userOrProf) return previewProgress[labId] || new Set(); // what an educator finished while previewing
       // Only students log lab levels, so an educator's progress is always empty (no need to build a profile).
       if (userOrProf.role && userOrProf.role !== "student") return new Set();
       const prof = userOrProf.labLevels ? userOrProf : SE.game.profile(userOrProf.id);
@@ -161,7 +161,7 @@
           <div class="lab-win" id="lab-win" hidden></div>
         </section>
       </div>
-      ${!user || user.role === "guest" ? `<div class="wrap"><p class="muted lab-guest">${icon("user", 'class="inline-icon"')}Exploring as a guest: your lab progress won't be saved. <a href="#/signin">Sign in</a> to save your progress.</p></div>` : ""}`;
+`;
 
     const readBtn = document.querySelector('[data-read="lab"]');
     if (readBtn) readBtn.addEventListener("click", () => SE.speech.read(readBtn,
@@ -211,11 +211,11 @@
         const before = isStudent ? SE.game.profile(user.id) : null;
         const first = !done.has(idx);
         if (isStudent) SE.store.log("lab_level_completed", { labId: lab.id, level: idx, result });
-        else { guestProgress[lab.id] = guestProgress[lab.id] || new Set(); guestProgress[lab.id].add(idx); }
+        else { previewProgress[lab.id] = previewProgress[lab.id] || new Set(); previewProgress[lab.id].add(idx); }
         const after = isStudent ? SE.game.profile(user.id) : null;
         const newPatches = after ? after.patches.filter((p) => p.earned && !before.patches.find((b) => b.patch.id === p.patch.id).earned) : [];
         const next = idx + 1 < lab.levels.length ? idx + 1 : null;
-        const allDone = isStudent ? SE.labs.progressFor(after, lab.id).size === lab.levels.length : guestProgress[lab.id].size === lab.levels.length;
+        const allDone = isStudent ? SE.labs.progressFor(after, lab.id).size === lab.levels.length : previewProgress[lab.id].size === lab.levels.length;
         const panel = document.getElementById("lab-win");
         panel.innerHTML = `
           ${opts.extra || ""}

@@ -50,7 +50,7 @@ async def main():
     pg.on("request", lambda r: outside.append(r.url) if r.frame.parent_frame is not None and not (r.url.startswith("data:") or r.url.startswith("about:")) else None)
     pg.on("dialog", lambda d: (dialogs.append(d.message), asyncio.ensure_future(d.dismiss())))
     await pg.goto(S); await pg.evaluate("localStorage.clear(); sessionStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400)
-    await pg.evaluate("SE.store.startGuest()")
+    await pg.evaluate("SE.store.signInEducator(SE.store.DEMO.email, SE.store.DEMO.password)")
 
     # ── The checker, on real rendered pages ──
     a = await pg.evaluate(AUDIT, [PAGE, CSS, {"narrowOverflow": False, "viewedPhone": True}])
@@ -237,7 +237,7 @@ async def main():
     ok("it lists the accessibility fixes the student made", "readable" in done.lower() or "alt text" in done.lower(), done[:600])
     ok("it offers the certificate and a copy of the code", await pg.locator("#lab-win button:has-text('Print my certificate')").count() == 1 and await pg.locator("#ws-copy").count() == 1)
     # Start from my page: the stages 2-6 project comes into stage 8.
-    await pg.evaluate("(() => { const k = 'stem207.website.guest'; const s = JSON.parse(sessionStorage.getItem(k)); delete s.shipFrom; delete s.ship; delete s.snap['7']; sessionStorage.setItem(k, JSON.stringify(s)); })()")
+    await pg.evaluate("(() => { const k = 'stem207.website.preview'; const s = JSON.parse(sessionStorage.getItem(k)); delete s.shipFrom; delete s.ship; delete s.snap['7']; sessionStorage.setItem(k, JSON.stringify(s)); })()")
     await stage(pg, 8)
     await pg.click("#ws-start-mine"); await pg.wait_for_timeout(300)
     ok("Start from my page brings in the student's page from stages 2-6", "Paddle the calm" in await pg.input_value("#ws-html"), await pg.input_value("#ws-html"))
@@ -245,8 +245,8 @@ async def main():
     # ── Progress, drafts, and the original lab ──
     ok("Web Builder's progress is separate", await pg.evaluate("SE.labs.progressFor(null, 'web-builder').size") == 0 and await pg.evaluate(f"SE.labs.progressFor(null, '{LAB}').size") == 8)
     g2 = await (await b.new_context()).new_page()
-    await g2.goto(S); await g2.evaluate("SE.store.startGuest()"); await g2.goto(S + f"#/lab/{LAB}/3"); await g2.wait_for_timeout(600)
-    ok("a new guest session doesn't see another guest's draft", "Paddle the calm" not in await g2.input_value("#ws-html"))
+    await g2.goto(S); await g2.evaluate("SE.store.signInEducator(SE.store.DEMO.email, SE.store.DEMO.password)"); await g2.goto(S + f"#/lab/{LAB}/3"); await g2.wait_for_timeout(600)
+    ok("a new browser session doesn't see another preview's draft", "Paddle the calm" not in await g2.input_value("#ws-html"))
     await g2.close()
     st = await (await b.new_context(viewport={"width": 1366, "height": 900})).new_page()
     st.on("pageerror", lambda e: errs.append(f"student: {e}"))
@@ -272,7 +272,7 @@ async def main():
     ok("the activity page has the teacher guide (schedule and answer guide)", "Stage 7 answer guide" in t and "90 minutes" in t)
     ph = await (await b.new_context(viewport={"width": 390, "height": 800}, reduced_motion="reduce")).new_page()
     ph.on("pageerror", lambda e: errs.append(f"phone: {e}"))
-    await ph.goto(S); await ph.evaluate("SE.store.startGuest()")
+    await ph.goto(S); await ph.evaluate("SE.store.signInEducator(SE.store.DEMO.email, SE.store.DEMO.password)")
     for n in [1, 5]:
         await ph.goto(S + "#/activities"); await ph.wait_for_timeout(100)
         await ph.goto(S + f"#/lab/{LAB}/{n}"); await ph.wait_for_timeout(600)

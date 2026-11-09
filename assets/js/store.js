@@ -310,7 +310,15 @@
     db.teams = (db.teams || []).filter((x) => !x.isDemo).concat(d.teams);
   }
 
+  /* Only students and educators can be signed in. Anything else (like a session from the
+     old guest option) is cleared, so it lands on the sign-in page. */
+  function dropUnknownSession() {
+    const s = readSession();
+    if (s && s.role !== "student" && s.role !== "educator") writeSession(null);
+  }
+
   function init() {
+    dropUnknownSession();
     db = readDb();
     if (!db || db.version !== 7) {
       db = { version: 7, educators: [], classes: [], students: [], events: [], assignments: [], messages: [] };
@@ -480,7 +488,7 @@
   async function initCloud() {
     db = emptyDb();
     const s = readSession();
-    if (!s || !s.cloud) { if (s && s.role !== "guest") writeSession(null); return; }
+    if (!s || !s.cloud) { if (s) writeSession(null); return; }
     try {
       if (s.role === "educator") {
         const a = SE.cloud.auth();
@@ -570,11 +578,9 @@
       }
       writeSession(null);
     },
-    startGuest() { writeSession({ role: "guest" }); },
     currentUser() {
       const s = readSession();
       if (!s) return null;
-      if (s.role === "guest") return { role: "guest" };
       if (s.role === "student") {
         const st = db.students.find((x) => x.id === s.id);
         return st ? { role: "student", ...st, cls: db.classes.find((c) => c.id === st.classId) } : null;

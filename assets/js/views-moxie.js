@@ -207,7 +207,7 @@
     else if (msg) SE.toast(msg);
   }
 
-  /* Moxie isn't open to this person yet: say so (students wait for their teacher; guests see who it's for). */
+  /* Moxie isn't open to this person yet: say so (students wait for their teacher; others see who it's for). */
   const closed = (user) => SE.views.notOpen(isStu(user)
     ? { title: "Moxie isn't open yet", text: "Your teacher will open Moxie for your class.", href: "#/activities", label: "See other activities" }
     : { title: "Moxie: build with an ESP32", text: "Moxie is a 16-session course where students wire and code a real microcontroller. Teachers can sign in to see it.", href: "#/signin/educator", label: "Educator sign in" });

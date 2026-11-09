@@ -34,7 +34,7 @@ async def local(b):
     pg.on("pageerror", lambda e: errs.append(f"{pg.url}: {e}"))
     await pg.goto(S); await pg.evaluate("localStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400)
 
-    # Students and guests never see drafts, and Moxie changes no library counts.
+    # Students never see drafts, and Moxie changes no library counts.
     await student_sample(pg, S)
     await go(pg, S + "#/moxie")
     ok("student: draft Moxie overview isn't open (says the teacher opens it)", "Your teacher will open Moxie" in await pg.inner_text("#app"))

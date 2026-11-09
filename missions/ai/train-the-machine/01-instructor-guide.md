@@ -85,7 +85,7 @@ Every stage has a goal, steps, three hints (notice, then an idea, then a small e
 ## Before class
 
 **Setup checklist**
-- [ ] Make a class and print login cards so work saves on each student's device. Guests can work ("Look around as a guest"), but their work lasts only for the browser session.
+- [ ] Make a class and print login cards so work saves on each student's device. Students sign in to use the lab.
 - [ ] Open stages 3, 5, and 6 on the projector so you can demo **Inside the Machine**, the error log, and the **Trust Dashboard**.
 - [ ] Read the answer guide below so you know what each experiment is built to show.
 - [ ] Print the cards in [02-printable-cards.md](02-printable-cards.md): the Be the Machine card, the Decision Room discussion card, and the exit ticket.
@@ -238,11 +238,10 @@ Make sure students notice that even 100% didn't catch the purple creatures.
   | **3. Diagnosing limitations and improving data** | Says "add more data". | Names a missing kind of creature. | Finds the failing group with enough creatures to judge, changes the data, and shows the before/after. | Explains a tradeoff: a change that helped one group and hurt another. |
   | **4. The role of human judgment** | Trusts any confident answer. | Says people should check "sometimes". | Ties who should decide to the cost of a mistake, with a fitting reason. | Weighs coverage against accuracy and names who is responsible for checking. |
 
-- **Certificate vs XP:** the Responsible AI Explorer certificate is separate from Pass / Try again. Activity XP still comes from your teacher check. The certificate uses the display name only, and it's blank for guests.
+- **Certificate vs XP:** the Responsible AI Explorer certificate is separate from Pass / Try again. Activity XP still comes from your teacher check. The certificate uses the display name only, and it's blank when an educator previews the lab.
 
 ## Troubleshooting
 1. **A student's work is gone.**
-   - **They were a guest:** guest work lasts only for the browser session. Sign them in.
    - **They switched devices:** work stays on the device they used.
 2. **The certificate won't unlock.** The stage 8 panel lists the missing stages as links: finish stages 3–6, pass stage 7, and finish stage 8.
 3. **"My accuracy didn't go up."** That's a valid result. The report says so honestly. Ask what they'd try next. Stage 5 accepts an explanation after 2 attempts.
@@ -256,7 +255,7 @@ Make sure students notice that even 100% didn't catch the purple creatures.
 ## Classroom pilot checklist
 Run through this the first time you teach it, and send notes to STEM 207.
 - [ ] **Devices:** the lab opens at 100% zoom on a school Chromebook. In every stage the main action is visible without scrolling, and the Field Guide and Notebook open.
-- [ ] **Saving:** a signed-in student leaves stage 3 after changing a training example, comes back, and the change is still there. A guest's work clears when the browser closes.
+- [ ] **Saving:** a signed-in student leaves stage 3 after changing a training example, comes back, and the change is still there. Work you do while previewing as an educator clears when the browser closes.
 - [ ] **Inside the Machine:** a student completes all 5 steps by keyboard only (Tab, Enter).
 - [ ] **Timing:** note the real minutes for each stage against the 90-minute plan. Did stage 8 fit, or did it need a second session?
 - [ ] **Reading load:** Explorer-mode students (grades 4–5) can follow each stage's goal without adult help. Note words they asked about.

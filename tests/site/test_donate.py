@@ -1,5 +1,5 @@
-# "Support STEM 207" (SE.donateCard; config.js donate): grown-ups only. Guests see it on Home, educators on
-# the Dashboard, and grown-ups get a footer link that opens it in the dialog. Students never see it.
+# "Support STEM 207" (SE.donateCard; config.js donate): grown-ups only. Educators see it on the Dashboard,
+# and grown-ups get a footer link that opens it in the dialog. Students never see it.
 # Until donate.venmo is set it shows a "QR coming soon" placeholder and no button; once set, the button
 # goes to https://venmo.com/u/<name> and the QR has alt text.
 #   LOCAL_MODE=1 PORT=8767 node tests/backend/mock-supabase.js ; python3 tests/site/test_donate.py [url]
@@ -19,24 +19,23 @@ async def main():
     pg.on("pageerror", lambda e: errs.append(f"{pg.url}: {e}"))
     await pg.goto(S); await pg.evaluate("localStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400)
 
-    # Guest Home: the placeholder (no Venmo name yet)
-    await pg.evaluate("SE.store.startGuest()"); await go(pg, "#/")
-    card = pg.locator("#app .donate")
-    ok("guest Home shows Support STEM 207", await card.count() == 1 and "Support STEM 207" in await card.inner_text())
-    ok("placeholder: 'QR coming soon' and no Venmo button", await pg.locator("#app .donate__qr.is-missing").count() == 1 and await pg.locator("#app .donate a[href*='venmo.com']").count() == 0)
+    # A grown-up (an educator) opens the card from the footer: the placeholder (no Venmo name yet)
+    await pg.evaluate("SE.store.signInEducator(SE.store.DEMO.email, SE.store.DEMO.password)"); await go(pg, "#/teach")
+    await pg.click("#donate-open"); await pg.wait_for_timeout(300)
+    card = pg.locator("dialog[open] .donate")
+    ok("footer link opens Support STEM 207 in the dialog", await card.count() == 1 and "Support STEM 207" in await card.inner_text())
+    ok("placeholder: 'QR coming soon' and no Venmo button", await pg.locator("dialog[open] .donate__qr.is-missing").count() == 1 and await pg.locator("dialog[open] .donate a[href*='venmo.com']").count() == 0)
     ok("the card never says tax-deductible", "tax" not in (await card.inner_text()).lower())
+    await pg.keyboard.press("Escape"); await pg.wait_for_timeout(200)
 
     # With a Venmo name set (missing QR image falls back to the placeholder frame)
     await pg.evaluate(SET); await pg.wait_for_timeout(400)
-    btn = pg.locator("#app .donate a[href*='venmo.com']")
-    ok("set: Donate with Venmo goes to venmo.com/u/<name>", await btn.count() == 1 and await btn.get_attribute("href") == "https://venmo.com/u/stem207-test" and await btn.get_attribute("target") == "_blank")
-    ok("set: the QR image has alt text, and the name is written out", await pg.locator("#app .donate__qr img[alt]").count() == 1 and "@stem207-test" in await card.inner_text())
-    await pg.wait_for_timeout(300)
-    ok("a QR image that won't load falls back to the placeholder frame", await pg.locator("#app .donate__qr.is-missing").count() == 1)
-
-    # Footer link opens the card in the dialog
     await pg.click("#donate-open"); await pg.wait_for_timeout(300)
-    ok("footer link opens the card in the dialog", await pg.locator("dialog[open] .donate").count() == 1)
+    btn = pg.locator("dialog[open] .donate a[href*='venmo.com']")
+    ok("set: Donate with Venmo goes to venmo.com/u/<name>", await btn.count() == 1 and await btn.get_attribute("href") == "https://venmo.com/u/stem207-test" and await btn.get_attribute("target") == "_blank")
+    ok("set: the QR image has alt text, and the name is written out", await pg.locator("dialog[open] .donate__qr img[alt]").count() == 1 and "@stem207-test" in await card.inner_text())
+    await pg.wait_for_timeout(300)
+    ok("a QR image that won't load falls back to the placeholder frame", await pg.locator("dialog[open] .donate__qr.is-missing").count() == 1)
     await pg.keyboard.press("Escape"); await pg.wait_for_timeout(200)
 
     # Student: never

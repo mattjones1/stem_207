@@ -22,8 +22,8 @@ async def main():
     def watch(pg):
         pg.on("pageerror", lambda e: errs.append(str(e)))
     pg=await b.new_page(viewport={"width":1280,"height":900}); watch(pg)
-    await pg.goto(S); await pg.evaluate("localStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400); await pg.click("text=Look around as a guest"); await pg.wait_for_timeout(400)
-    # ── Level 1: predict + run (guest)
+    await pg.goto(S); await pg.evaluate("localStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400); await pg.evaluate("SE.store.signInEducator(SE.store.DEMO.email, SE.store.DEMO.password)"); await pg.wait_for_timeout(400)
+    # ── Level 1: predict + run (educator preview)
     await pg.goto(S+"#/lab/dance-party/1"); await pg.wait_for_timeout(500)
     ok("L1 starts with 3-step example", await prog(pg)==["right","jump","spin"], await prog(pg))
     await pg.click("#dp-run"); await pg.wait_for_timeout(200)
@@ -208,7 +208,7 @@ async def main():
     ok("educator can add it to a Learning Plan", await t.locator('a[href="#/teach/plans/new/lab-dance-party"]').count()>=1)
     # ── reduced motion + mobile
     rm=await b.new_page(viewport={"width":390,"height":844}, reduced_motion="reduce"); watch(rm)
-    await rm.goto(S); await rm.wait_for_timeout(300); await rm.click("text=Look around as a guest"); await rm.wait_for_timeout(300)
+    await rm.goto(S); await rm.wait_for_timeout(300); await rm.evaluate("SE.store.signInEducator(SE.store.DEMO.email, SE.store.DEMO.password)"); await rm.wait_for_timeout(300)
     await rm.goto(S+"#/lab/dance-party/4"); await rm.wait_for_timeout(400)
     await add(rm,"jump","spin","pose")
     await rm.click("#dp-run"); await rm.wait_for_timeout(250)

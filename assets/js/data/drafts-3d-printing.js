@@ -6,7 +6,7 @@
  * empty on purpose: objectives, descriptions, steps, grades, time, equipment, prerequisites,
  * deliverables, and assessments arrive only when the program supplies real exercises.
  * Placeholders are drafts (STEM.drafts): educators see them on the 3D Printing area page;
- * students and guests never do; they can't be launched, assigned, counted, or earn XP.
+ * students never do; they can't be launched, assigned, counted, or earn XP.
  * To publish one, replace it with a complete record (see README, "Adding an activity").
  */
 (function () {

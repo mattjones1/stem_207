@@ -48,17 +48,8 @@
           <span>See your class dashboard and student progress.</span>
         </a>
       </div>
-      <div class="auth__alt">
-        <button type="button" class="linkish" id="guest-btn">Look around as a guest</button>
-        <span aria-hidden="true">·</span>
-        <a href="#/signup">Create an educator account</a>
-      </div>
+      <p class="auth__alt"><a href="#/signup">Create an educator account</a></p>
       ${prototypeNote}`, true);
-    document.getElementById("guest-btn").addEventListener("click", () => {
-      SE.store.startGuest();
-      location.hash = "#/";
-      SE.route(true);
-    });
   };
 
   /* ───────── Student sign-in: 3 steps ───────── */

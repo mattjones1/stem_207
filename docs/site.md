@@ -26,22 +26,27 @@ Site-wide presentation rules. CLAUDE.md has the short versions; this is the deta
   - A **Class** is a roster with a sign-in code.
   - A **Category** is one of the seven areas.
   - Never "expedition".
-- Home (`#/`) is "Home" for students and guests and "Dashboard" for educators. Use `SE.homeLabel()`, which is the default for `SE.backLink`.
+- Home (`#/`) is "Home" for students and "Dashboard" for educators. Use `SE.homeLabel()`, which is the default for `SE.backLink`.
 - Menus:
   - Educators: Dashboard · Learning Plans · Activities · Classes · Checks.
   - Students: Home · My Learning Plans · Activities · My harbor.
-  - Guests: Home · Activities.
   - There's no Projector button.
 - `#/activities` is the shared category view, and `#/activities/<category>` is one category.
 - Old addresses redirect (`MOVED` in `main.js`): `#/library`, `#/area/<id>`, `#/explore`, `#/teach/pathways`, `#/teach/class`, `#/teach/reflections`, `#/teach/missions`, and `#/my/pathways/<id>`.
-- A page for another role never sends a signed-in person to another role's sign-in. Students at teacher pages go Home with "That page is for teachers."; guests at `#/plans` go to the student sign-in, and at `#/me` / `#/base` go Home, each with a toast saying why. A page that exists but isn't open yet uses `SE.views.notOpen({ title, text, href, label })` (Moxie for students and guests), not "not found".
-- Teacher notes show only to educators (not guests). Every `#/teach/*` page has its own tab title.
+- A page for another role never sends a signed-in person to another role's sign-in. Students at teacher pages go Home with the toast "That page is for teachers." Someone who isn't signed in goes to `#/signin` from every page except the sign-in pages. A page that exists but isn't open yet uses `SE.views.notOpen({ title, text, href, label })` (Moxie for students), not "not found".
+- Teacher notes show only to educators. Every `#/teach/*` page has its own tab title.
 - Test: `node tests/tools/test_wording.js` (activity, category, rank, patch, and view text never says mission, expedition, or pathway; student steps aren't written to the teacher) and `python3 tests/site/test_roles.py`.
 - Class rewards are the "class journey".
 
+## Sign in and accounts
+- **Two ways in, nothing else:** "I'm a student" and "I'm an educator" (`SE.views.signin` in `views-auth.js`). There is **no guest access**: someone who isn't signed in sees only `#/signin`, `#/signin/student`, `#/signin/educator`, and `#/signup` (the router gate in `main.js`). `SE.store` clears any stored session whose role isn't `student` or `educator` (such as an old `guest` session) at start-up.
+- **Students** (approved, don't redesign): class code, then name, then three secret pictures in order. In cloud mode, `student_sign_in` checks the pictures on the server (8 wrong tries in 10 minutes pauses that student) and hands back a 7-day session token.
+- **Educators:** email and password. Cloud mode uses Supabase Auth; local mode keeps a salted hash in this browser (a prototype only).
+- Test: `python3 tests/site/test_auth.py [local_url]`.
+
 ## Free site and donations
 - **The whole site is free.** A paid version (Family and Educator subscriptions) is a future goal and is **shelved** on the `paid-site` branch (tag `paid-shelved-2026-10`). Its plan and the must-fix list for resuming are at the top of `planning/STEM 207 PAID.md` on that branch. Don't bring paid code (access.js, tiers, locks, pricing, families) to `main` unless the user asks to resume it.
-- **"Support STEM 207"** (`SE.donateCard({ compact })` in `views-library.js`): a Venmo donate card for **grown-ups only**: the guest Home, the educator Dashboard side column, and the footer link `#donate-open` (opens it in `SE.modal`; hidden for students by `body[data-role="student"]`). **Never show it on a student screen.**
+- **"Support STEM 207"** (`SE.donateCard({ compact })` in `views-library.js`): a Venmo donate card for **grown-ups only**: the educator Dashboard side column, and the footer link `#donate-open` (opens it in `SE.modal`; hidden for students by `body[data-role="student"]`). **Never show it on a student screen.**
   - `config.js` `donate: { venmo, qr }`. With `venmo` empty, it shows a "QR coming soon" placeholder and no button. Set the Venmo **Business** username (no @) to show "Donate with Venmo" (`https://venmo.com/u/<name>`), and put the Venmo app's QR at `assets/img/donate-venmo.png`. A QR that won't load falls back to the placeholder.
   - Donations go to STEM 207, LLC. They aren't tax-deductible, so the wording is "Support", never "tax-deductible".
   - Test: `python3 tests/site/test_donate.py`.

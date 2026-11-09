@@ -64,9 +64,9 @@ Every level has a briefing from the harbor master, a goal, three hints (notice, 
 ## Before class
 
 **Setup checklist**
-- [ ] Make a class and print login cards. Students sign in with the class code and their picture code, so progress saves. Guests can play, but their progress isn't saved.
+- [ ] Make a class and print login cards. Students sign in with the class code and their picture code, so progress saves.
 - [ ] Sign in as an educator on the projector computer. Open level 6 (Fog on the Water) and level 7 (The Changing Channel).
-- [ ] Find **Demo the solution** on a level. It's educator-only: students and guests never see it.
+- [ ] Find **Demo the solution** on a level. It's educator-only: students never see it.
 - [ ] Clear a strip of floor for the human-boat warm-up, about 4 × 4 floor tiles.
 - [ ] Print the cards in [02-printable-cards.md](02-printable-cards.md): the warm-up card, the Plot your course sheet, and the exit ticket.
 - [ ] Optional: grid paper for planning level 10.
@@ -158,7 +158,7 @@ One working approach for each level. Any program that meets the goal passes. Pyt
 - **Certificate vs XP:** the certificate and patch come from finishing Casco Bay. Activity XP still comes from your teacher check (Pass / Try again).
 
 ## Troubleshooting
-1. **A student's progress is gone.** They were probably a guest. Sign them in with the class code and picture code. Guest progress isn't saved.
+1. **A student's progress is gone.** Check they signed in as themselves (the right name on the class code). Progress belongs to the student who signed in.
 2. **A student can't see the Run button or the map.** Reset the Chromebook zoom to 100% (Ctrl + 0).
 3. **The boat seems to ignore a block.** It's probably outside the loop or if block. Tap a gap to choose where new blocks go, and use Undo (Ctrl + Z) to back up.
 4. **There's no printer.** Print the Voyage Card or certificate to "Save as PDF".

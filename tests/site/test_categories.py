@@ -27,7 +27,7 @@ async def main():
     ctx = await b.new_context(viewport={"width": 1280, "height": 900}); pg = await ctx.new_page()
     pg.on("pageerror", lambda e: errs.append(f"{pg.url}: {e}"))
     await pg.goto(S); await pg.evaluate("localStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400)
-    await pg.evaluate("SE.store.startGuest()"); await go(pg, "#/")
+    await student(pg); await go(pg, "#/activities")
 
     # Counts and ids are the baseline: nothing lost; the three 3D exercises are the only additions.
     # Activities added since the baseline are listed in it with the plan that added them ("added").
@@ -36,17 +36,16 @@ async def main():
     ok("every planned addition resolves", await pg.evaluate(f"{json.dumps([a['id'] for a in added])}.every((id) => SE.activityById[id])"))
     ok("every baseline mission still resolves", await pg.evaluate(f"{json.dumps([m['id'] for m in BASE['missions']])}.every((id) => SE.activityById[id])"))
     ok("7 categories, all live", await pg.evaluate("STEM.areas.length === 7 && SE.liveAreas.length === 7"))
-    ok("home shows 7 category cards", await pg.locator("a.area-card").count() == 7)
+    ok("Activities shows 7 category cards", await pg.locator("a.area-card").count() == 7)
     ok("no category card says Coming soon", await pg.locator("a.area-card--soon").count() == 0)
-    ok("the buoy hero has 7 buoys, one per category", await pg.locator(".coast .buoy").count() == 7)
     ok("3D Printing has 3 activities", await pg.evaluate("STEM.activities.filter((a) => a.area === '3d-printing').length") == 3)
 
-    # Guests and students see the three exercises, never the placeholders.
+    # Students see the three exercises, never the placeholders.
     await go(pg, "#/area/3d-printing")
     t = await pg.inner_text("#app")
-    ok("guest: 3D Printing lists the 3 exercises and no drafts", all(k in t for k in ["Lobster Buoy Charm", "Trail Blaze Marker", "Fix It! Design a Clip"]) and await pg.locator("#area-drafts").count() == 0)
+    ok("student: 3D Printing lists the 3 exercises and no drafts", all(k in t for k in ["Lobster Buoy Charm", "Trail Blaze Marker", "Fix It! Design a Clip"]) and await pg.locator("#area-drafts").count() == 0)
     await go(pg, "#/activity/3d-printing-exercise-04")
-    ok("guest: a placeholder is not found", NOT_FOUND in await pg.inner_text("#app"))
+    ok("student: a placeholder is not found", NOT_FOUND in await pg.inner_text("#app"))
     await pg.evaluate("SE.store.signOut()"); await student(pg)
     await go(pg, "#/activity/3d-printing-exercise-05")
     ok("student: a placeholder is not found", NOT_FOUND in await pg.inner_text("#app"))

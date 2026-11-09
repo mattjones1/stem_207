@@ -13,9 +13,6 @@
     let html = "";
     if (!user) {
       html = `<a href="#/signin" class="nav-signin">${icon("user")}Sign in</a>`;
-    } else if (user.role === "guest") {
-      html = link("#/", "dashboard", "Home") + link("#/activities", "activities", "Activities") +
-        `<a href="#/signin" class="nav-signin" data-signout>${icon("user")}Sign in</a>`;
     } else if (user.role === "student") {
       const prof = SE.game.profile(user.id);
       html = link("#/", "dashboard", "Home") + link("#/plans", "plans", "My Learning Plans") + link("#/activities", "activities", "Activities") + link("#/base", "base", "My harbor") +
@@ -84,7 +81,7 @@
     // The coding pathway and the AI route are Learning Plan templates now.
     const tpl = { pathway: "tpl-coding-foundations", "ai-route": "tpl-ai-route" }[a === "teach" && b === "pathway" ? "pathway" : a];
     if (tpl && (a !== "teach" || b === "pathway")) {
-      location.replace(user.role === "educator" ? `#/teach/plans/${tpl}` : user.role === "student" ? "#/plans" : `#/activities/${tpl === "tpl-ai-route" ? "ai" : "coding"}`);
+      location.replace(user.role === "educator" ? `#/teach/plans/${tpl}` : "#/plans");
       return;
     }
 
@@ -112,24 +109,20 @@
     else if (!a && user.role === "student") { SE.views.today(user); navKey = "dashboard"; title = "Home · STEM 207"; }
     else if (a === "plans") {
       if (user.role === "educator") { location.replace("#/teach/plans"); return; }
-      if (user.role !== "student") { elsewhere("#/signin/student", "Sign in to see your Learning Plans."); return; }
       if (b) SE.views.myPlan(user, b); else SE.views.myPlans(user);
       navKey = "plans"; title = "My Learning Plans · STEM 207";
     }
-    else if (!a) {
-      if (user.role === "educator") { location.replace("#/teach"); return; }
-      SE.views.dashboard(user); navKey = "dashboard";
-    }
+    else if (!a) { location.replace("#/teach"); return; } // students are handled above, so this is an educator
     else if (a === "activities") {
       SE.views.activities(user, b); navKey = "activities";
       title = `${b && SE.areaById[b] ? SE.areaById[b].name : "Activities"} · STEM 207`;
     }
     else if (a === "me") {
-      if (user.role !== "student") { elsewhere("#/", user.role === "guest" ? "Sign in as a student to see your profile." : ""); return; }
+      if (user.role !== "student") { elsewhere("#/"); return; }
       SE.views.me(user); navKey = "me"; title = "My profile · STEM 207";
     }
     else if (a === "base") {
-      if (user.role !== "student") { elsewhere("#/", user.role === "guest" ? "Sign in as a student to see your harbor." : ""); return; }
+      if (user.role !== "student") { elsewhere("#/"); return; }
       SE.views.base(user); navKey = "base"; title = "My harbor · STEM 207";
     }
     else if (a === "activity") { SE.views.activity(user, b); title = `${SE.activityById[b] ? SE.activityById[b].title : "Not found"} · STEM 207`; }

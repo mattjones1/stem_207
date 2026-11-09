@@ -362,7 +362,7 @@ Check every external link before adding it, and record whether it needs an accou
 Two activities are marked **Resource coming soon** until the program picks a resource: the 360° Notice & Wonder Challenge (needs a 360° scene) and Stop-Motion Story Studio (needs a stop-motion app). The ecosystem field trip uses Google Earth now and still needs a headset experience.
 
 ## Support STEM 207 (donations)
-STEM 207 is free. Grown-ups (guests, educators, and the footer link) see a **Support STEM 207** card; students never do. To turn it on:
+STEM 207 is free. Grown-ups (educators on the Dashboard, and the footer link) see a **Support STEM 207** card; students never do. To turn it on:
 1. In `assets/js/config.js`, set `donate.venmo` to your Venmo Business username (without the @).
 2. Save the QR from the Venmo app as `assets/img/donate-venmo.png`.
 

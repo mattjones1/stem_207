@@ -21,7 +21,7 @@ async def main():
     ctx = await b.new_context(viewport={"width": 1366, "height": 650}, reduced_motion="reduce")
     pg = await ctx.new_page(); pg.on("pageerror", lambda e: errs.append(f"{pg.url}: {e}"))
     await pg.goto(S); await pg.evaluate("localStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400)
-    await pg.evaluate("SE.store.startGuest()")
+    await pg.evaluate("SE.store.signInEducator(SE.store.DEMO.email, SE.store.DEMO.password)")
 
     # Read it: a wrong prediction is named, the right one wins.
     await level(pg, 1)

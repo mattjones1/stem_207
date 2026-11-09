@@ -8,7 +8,7 @@
  * pattern-machine-data.js (SE.pmData); their lessons are checked by tests/tools/test_pattern_machine.js.
  *
  * Privacy: everything is made up. Student work (training sets, notebook, report) stays on this device
- * (localStorage stem207.pm.<studentId>, or sessionStorage for guests). The log gets numbers and ids only.
+ * (localStorage stem207.pm.<studentId>, or sessionStorage for educators previewing). The log gets numbers and ids only.
  * Pure rules for tests: SE.patternMachine (judgeUse, scoreUses, PASS, USES, REASONS, DECISIONS, check).
  */
 (function () {
@@ -25,7 +25,7 @@
   /* ───────── Saving (this device only) and modes ───────── */
   function storeFor(user) {
     const student = user && user.role === "student";
-    const key = `stem207.pm.${student ? user.id : "guest"}`;
+    const key = `stem207.pm.${student ? user.id : "preview"}`;
     let s = null;
     try { s = student ? window.localStorage : window.sessionStorage; } catch (e) { s = null; }
     return {

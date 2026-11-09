@@ -56,7 +56,6 @@
 .lab-win__learned { padding: .9rem 1rem; background: var(--surface); border-radius: var(--radius-sm); display: grid; gap: .3rem; }
 .lab-win__learned p { font-size: 1.05rem; }
 .lab-win__actions { display: flex; flex-wrap: wrap; gap: .6rem; }
-.lab-guest { margin-top: 1rem; }
 @media (max-width: 960px) {
   .lab-body { grid-template-columns: minmax(0, 1fr); }
   .lab-brief { position: static; }

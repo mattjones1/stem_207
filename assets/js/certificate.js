@@ -6,7 +6,7 @@
  *
  * info: { award, course, detail, skills?: [], name, className, at }
  * Only the student's display name and class name appear: no other personal information.
- * For guests, the name is a blank line to write on.
+ * For anyone who isn't a student (an educator previewing), the name is a blank line to write on.
  */
 (function () {
   "use strict";

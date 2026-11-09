@@ -1,4 +1,4 @@
-# Accessibility checks on the main student, teacher, and guest pages, in light and dark mode.
+# Accessibility checks on the sign-in, student, and teacher pages, in light and dark mode.
 # A home-grown subset of axe-core's rules (no downloads needed):
 #   name      buttons, links, and images (svg role=img) have an accessible name
 #   label     form fields have a label
@@ -160,8 +160,8 @@ async def main():
         F = []
         await pg.goto(S); await pg.evaluate("localStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400)
         for h in PUBLIC: await visit(pg, h); await audit(pg, h, F)
-        # A guest: Home with the Support STEM 207 card, then the card in the dialog with a Venmo name set.
-        await pg.evaluate("SE.store.startGuest()"); await visit(pg, "#/"); await audit(pg, "guest home", F)
+        # A grown-up: the Support STEM 207 card in the dialog with a Venmo name set.
+        await pg.evaluate("SE.store.signInEducator(SE.store.DEMO.email, SE.store.DEMO.password)"); await visit(pg, "#/teach")
         await pg.evaluate("window.STEM207_CONFIG.donate = { venmo: 'stem207-test', qr: '' }"); await pg.click("#donate-open"); await pg.wait_for_timeout(250)
         await audit(pg, "modal: support", F); await pg.keyboard.press("Escape")
         await pg.evaluate("window.STEM207_CONFIG.donate = {}; SE.store.signOut()"); await pg.wait_for_timeout(200)
