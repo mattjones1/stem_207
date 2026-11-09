@@ -83,7 +83,8 @@
     function renderList(list, owner, branch) {
       const slot = (i, where = "") => {
         const on = cursor.owner === owner && cursor.branch === branch && cursor.index === i;
-        return `<button type="button" class="slot ${on ? "is-cursor" : ""} ${where ? "slot--after" : ""}" data-owner="${owner}" data-branch="${branch}" data-index="${i}" ${where && on ? `data-where="${where}"` : ""} aria-label="Put new blocks here${where ? `, ${where}` : ""}${on ? " (selected)" : ""}"></button>`;
+        if (!where) return `<button type="button" class="slot ${on ? "is-cursor" : ""}" data-owner="${owner}" data-branch="${branch}" data-index="${i}" aria-label="Put new blocks here${on ? " (selected)" : ""}"></button>`;
+        return `<button type="button" class="slot slot--after ${on ? "is-cursor" : ""}" data-owner="${owner}" data-branch="${branch}" data-index="${i}" ${on ? `data-where="${where}"` : ""} aria-label="Put new blocks here, ${where}${on ? " (selected)" : ""}"></button>`;
       };
       let html = `<ol class="blocks">${slot(0)}`;
       list.forEach((b, i) => {
@@ -96,8 +97,21 @@
         const foot = rich && def.container ? `<div class="blk__foot" aria-hidden="true">${isLoop(b.type) ? "end repeat" : "end if"}</div>` : "";
         const unrollBtn = rich && b.type === "repeat" && b.body.length ? `<button type="button" class="linkish blk__unrollbtn" data-unroll="${b.id}" aria-expanded="${unrolled.has(b.id)}">${unrolled.has(b.id) ? "Hide the long way" : "See it unrolled"}</button>` : "";
         const unrollList = rich && unrolled.has(b.id) && b.body.length ? (() => { const u = unroll([b]); return `<div class="blk__unrolled"><p>Without the loop, that's ${u.length}${u.length >= 40 ? "+" : ""} blocks:</p><ol>${u.map((t) => `<li>${esc(t)}</li>`).join("")}</ol></div>`; })() : "";
+        if (!rich) {   // Harbor Code: exactly the markup it always had
+          html += `<li class="blk blk--${def.kind}" data-bid="${b.id}">
+          <div class="blk__row">
+            ${icon(def.glyph, def.flip ? 'style="transform:scaleX(-1)"' : "")}
+            <span class="blk__label">${esc(label)}</span>
+            ${count}
+            <button type="button" class="blk__del" data-del="${b.id}" aria-label="Remove ${esc(label)}">✕</button>
+          </div>
+          ${def.container ? `<div class="blk__body">${renderList(b.body, b.id, "body")}</div>` : ""}
+          ${def.hasElse ? `<div class="blk__else"><span>else</span></div><div class="blk__body">${renderList(b.else, b.id, "else")}</div>` : ""}
+        </li>${slot(i + 1)}`;
+          return;
+        }
         const tick = selecting && owner !== "fn" ? `<input type="checkbox" class="blk__sel" data-sel="${b.id}" ${selected.has(b.id) ? "checked" : ""} aria-label="Select ${esc(label)}">` : "";
-        html += `<li class="blk blk--${def.kind} ${rich && def.container ? "blk--c" : ""}" data-bid="${b.id}">
+        html += `<li class="blk blk--${def.kind}${def.container ? " blk--c" : ""}" data-bid="${b.id}">
           <div class="blk__row">
             ${tick}${icon(def.glyph, def.flip ? 'style="transform:scaleX(-1)"' : "")}
             <span class="blk__label">${esc(label)}</span>
@@ -108,7 +122,7 @@
           ${def.container ? `<div class="blk__body">${renderList(b.body, b.id, "body")}</div>` : ""}
           ${def.hasElse ? `<div class="blk__else"><span>else</span></div><div class="blk__body">${renderList(b.else, b.id, "else")}</div>` : ""}
           ${foot}${unrollBtn}${unrollList}
-        </li>${slot(i + 1, rich && def.container ? (isLoop(b.type) ? "after the loop" : "after the if") : "")}`;
+        </li>${slot(i + 1, def.container ? (isLoop(b.type) ? "after the loop" : "after the if") : "")}`;
       });
       return html + "</ol>";
     }
