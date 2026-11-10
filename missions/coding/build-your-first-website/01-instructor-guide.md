@@ -8,7 +8,7 @@ An original STEM 207 workshop (2026).
 | | |
 | --- | --- |
 | **Big idea** | Websites are built by people, for people. Plan with a real person, write clear HTML, and check that everyone can read and use the page. |
-| **What students do** | Plan, code, test, and ship a web page for a made-up Maine business in real HTML and CSS. |
+| **What students do** | Plan, code, test, and finish a web page about an idea of their own (or a made-up Maine business) in real HTML and CSS. |
 | **What they make** | A finished web page and a printed project summary. |
 | **What they earn** | The **First Website Shipped** certificate, for finishing stage 8. |
 | **Grades 2–3** | Aim for stage 5 (Give Your Website Style). Show an Example is always on screen. |
@@ -33,17 +33,18 @@ Students will:
 
 Every stage has a goal, steps, three hints (notice, then an idea, then a small example), and a "What you learned" line. **Check my page** reads the real rendered page, so students can't finish a stage just by clicking Done. Any valid page passes; nothing is compared against an answer.
 
-Students pick one of three made-up businesses:
-- **Casco Bay Bakery** (`muffins.svg`)
-- **Pine Coast Kayak Rentals** (`kayak.svg`)
-- **Harbor Bait & Tackle** (`tackle.svg`)
+Students plan their own website in the **Planning Studio** (stage 1): an animal, a game or hobby fan page, a sport, nature or a good cause, an invention, outer space, their own idea, or one of three made-up Maine businesses (Casco Bay Bakery, Pine Coast Kayak Rentals, Harbor Bait & Tackle). **Surprise me** suggests a starting idea from a curated list (no AI). There's no "about me" page: students don't type their name, address, school, or phone number.
+
+The plan has five parts (idea; who and why; what visitors see; the look; page structure, with sections put in order by buttons), a **planning mockup** labeled as a sketch, and a readiness checklist that explains what's missing. Only a name, a purpose, a headline, and an opening sentence are required. The five-second partner test is optional.
+
+On every later stage, **My plan** opens the student's plan beside the code. Changing the plan never changes the code; **Use in my code** buttons (the headline as an `<h1>`, the opening sentence as a `<p>`, the three things as a `<ul>`, the picture as an `<img>`, the colors in the CSS body rule) say what they'll add and add it on a second press. The website's name is the `<title>` in the locked start of the file.
 
 Stages 2–6 grow one project.
 
 | # | Stage | Concept | What students do | What Check my page needs | Minutes |
 | --- | --- | --- | --- | --- | --- |
 | | **Part 1: Plan** | | | | **12** |
-| 1 | Meet Your Maine Business | Plan before you code | Pick a business, sketch a wireframe on paper, run a five-second test with a partner, and write what they noticed and one change. | A business picked, at least 4 wireframe sections ticked, what the tester noticed, and one change | |
+| 1 | Plan Your Website | Plan before you code | Pick an idea, name the website, choose its purpose and audience, write a headline and an opening sentence, pick three things, a picture, and colors, and put the sections in order. Optional: a five-second test with a partner. | A name, a purpose, a headline (2+ words), and an opening sentence (5+ words) | |
 | | **Part 2: Build with HTML** | | | | **17** |
 | 2 | Build the Bones | HTML structure | Type an `<h1>` and a `<p>`. | `h1`, `p` | |
 | 3 | Tell Your Story | Paragraphs and lists | Add an `<h2>` and a `<ul>` with `<li>` items. | adds `h2`, a list | |
@@ -89,7 +90,7 @@ The feedback line sums up what to fix ("2 things to fix: Alt text, Link"). The f
 | Time | Activity | What happens |
 | --- | --- | --- |
 | 0:00–0:08 | Welcome: what is a website? | Show a real local website. Ask: who built it, and who is it for? Introduce the three businesses. |
-| 0:08–0:20 | Wireframe and five-second test (stage 1) | Students sketch on the wireframe sheet, then test with a partner using the five-second test card. **Group moment:** what did your tester notice first? |
+| 0:08–0:20 | Plan Your Website (stage 1) | Students plan in the Planning Studio and watch the mockup change. Optional: sketch on the wireframe sheet and run the five-second test with a partner. **Group moment:** share one headline. Does it say what the page is about? |
 | 0:20–0:37 | HTML (stages 2–4) | **Demo first:** type `<h1>`, the business name, `</h1>`, and watch the preview. Then show the Tag Shelf. |
 | 0:37–0:49 | CSS (stage 5) | Demo a `body { }` rule and the color helper. |
 | 0:49–0:59 | Accessibility and contrast (stage 6) | **Group moment:** who can't read low-contrast text? (Someone on a sunny screen, or someone with low vision.) |

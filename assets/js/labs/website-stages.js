@@ -46,11 +46,11 @@
 
   const STAGES = [
     {
-      title: "Meet Your Maine Business", concept: "Plan before you code", kind: "plan",
-      goal: "Pick a business, sketch a wireframe on paper, and test it with a partner for five seconds.",
-      steps: ["Pick one of the three businesses.", "On paper, draw boxes for the title, heading, description, list, picture, and link.", "Show your sketch to a partner for five seconds, then hide it.", "Write what your partner noticed, and one thing you'll change."],
-      hints: ["A wireframe is just boxes with labels. No coloring needed.", "Put the most important thing for a customer near the top.", "Ask your partner: What is this business? What does it offer? What would you look for next?"],
-      learned: "Web designers plan and test with real people before they write code. A five-second test shows what people notice first.",
+      title: "Plan Your Website", concept: "Plan before you code", kind: "plan",
+      goal: "Plan your own website: the idea, who it's for, what visitors see, the look, and the order of its sections.",
+      steps: ["Pick an idea, or press Surprise me.", "Name your website, and choose its purpose.", "Write a main headline and one opening sentence.", "Pick three things to show, a picture, and your colors.", "Put your sections in order. Watch the planning mockup change."],
+      hints: ["Start with something you care about. A topic you like is easier to write about.", "Your headline becomes your <h1>, and your opening sentence becomes your first <p>.", "The checklist under the mockup says what's still missing, and why it matters."],
+      learned: "Web designers plan before they code: the purpose, the audience, the words, and the structure. Your plan will turn into real HTML and CSS, one stage at a time.",
       checks: []
     },
     {

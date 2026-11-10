@@ -331,94 +331,20 @@
     return `<nav class="ws-journey" aria-label="Your progress"><ol>${JOURNEY.map((j, i) => `<li class="${i === idx ? "is-here" : ""} ${done.has(i) ? "is-done" : ""}"><a href="#/lab/${LAB}/${i + 1}" ${i === idx ? 'aria-current="step"' : ""}>${done.has(i) ? icon("check") : `<b>${i + 1}</b>`}<span>${j}</span>${done.has(i) ? '<span class="visually-hidden"> (done)</span>' : ""}</a></li>`).join("")}</ol></nav>`;
   }
 
-  /* ───────── Stage 1: plan ───────── */
+  /* ───────── Stage 1: the Planning Studio (website-plan.js) ───────── */
   function mountPlan(el, idx, api) {
     const st = storeFor(api.user), state = st.load();
-    const plan = Object.assign({ message: "", sections: [], noticed: "", improve: "", alone: false }, state.plan || {});
-    const SECTIONS = ["Website title", "Main heading", "Short description", "List of products or services", "Picture", "A link"];
     const body = el.closest(".lab-body");
     if (body) body.classList.add("lab-body--wide");
-    el.innerHTML = `
-      <div class="ws ws--plan">
-        ${journey(api, idx)}
-        <fieldset class="ws-biz"><legend>1. Pick your business (all made up)</legend>
-          ${Object.values(BUSINESSES).map((b) => `<button type="button" class="ws-biz__card" data-biz="${b.id}" aria-pressed="${state.business === b.id}">
-            <img src="${WK.PICTURES[b.pic]}" alt="" width="120" height="90"><strong>${esc(b.name)}</strong><span>${esc(b.about)}</span><span class="muted">${esc(b.owner)}</span></button>`).join("")}
-        </fieldset>
-        <div class="ws-plan__cols">
-          <section class="ws-card" aria-labelledby="ws-wf-h">
-            <h3 id="ws-wf-h">2. Sketch a wireframe on paper</h3>
-            <p>A wireframe is a simple drawing that shows where the important parts of your website will go. Boxes and labels, no coloring.</p>
-            <details><summary>See an example wireframe</summary>${wireframeSvg()}</details>
-            <h3>3. The five-second test</h3>
-            <p>Show your sketch to a partner. Press the button, then hide the sketch when time is up.</p>
-            <button type="button" class="btn btn--ghost" id="ws-five">${icon("clock")}Start 5 seconds</button>
-            <p class="ws-five" id="ws-five-out" aria-live="assertive"></p>
-            <ol class="ws-qs" id="ws-qs" hidden><li>What is this business?</li><li>What does it offer?</li><li>What would you look for next?</li></ol>
-          </section>
-          <section class="ws-card" aria-labelledby="ws-notes-h">
-            <h3 id="ws-notes-h">4. My plan</h3>
-            <p class="muted small">Write about your made-up business. This stays on this device.</p>
-            <label class="ws-field">Main message: what should customers learn first?<input class="input" id="ws-msg" maxlength="140" value="${esc(plan.message)}"></label>
-            <fieldset class="ws-field"><legend>Sections on my page</legend><div class="ws-chips">${SECTIONS.map((s) => `<label class="ws-chip"><input type="checkbox" value="${esc(s)}" ${plan.sections.includes(s) ? "checked" : ""}> ${esc(s)}</label>`).join("")}</div></fieldset>
-            <label class="ws-field">What did your tester notice?<textarea class="input" id="ws-noticed" rows="2" maxlength="300">${esc(plan.noticed)}</textarea></label>
-            <label class="ws-field">One thing you'll change because of it<textarea class="input" id="ws-improve" rows="2" maxlength="300">${esc(plan.improve)}</textarea></label>
-            <label class="ws-chip"><input type="checkbox" id="ws-alone" ${plan.alone ? "checked" : ""}> No partner today: my teacher was my tester.</label>
-            <button type="button" class="btn btn--launch" id="ws-plan-done">${icon("check")}Save my plan</button>
-            <p class="field-help">STEM 207 can't hear your conversation. It checks that you wrote down what your tester noticed and one change.</p>
-          </section>
-        </div>
-      </div>`;
-    const $ = (s) => el.querySelector(s);
-    let timer = null;
-    el.querySelectorAll("[data-biz]").forEach((b) => b.addEventListener("click", () => {
-      state.business = b.dataset.biz; st.save(state);
-      el.querySelectorAll("[data-biz]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-      api.say(`You're building a website for ${BUSINESSES[state.business].name}.`, "info");
-    }));
-    $("#ws-five").addEventListener("click", () => {
-      clearInterval(timer);
-      let n = 5;
-      const out = $("#ws-five-out");
-      out.textContent = `Show your sketch: ${n}`;
-      timer = setInterval(() => {
-        n--;
-        if (n > 0) { out.textContent = `Show your sketch: ${n}`; return; }
-        clearInterval(timer);
-        out.textContent = "Time's up! Hide the sketch. Ask your partner these questions:";
-        $("#ws-qs").hidden = false;
-      }, 1000);
-    });
-    const collect = () => {
-      plan.message = $("#ws-msg").value.trim();
-      plan.sections = [...el.querySelectorAll(".ws-chips input:checked")].map((c) => c.value);
-      plan.noticed = $("#ws-noticed").value.trim();
-      plan.improve = $("#ws-improve").value.trim();
-      plan.alone = $("#ws-alone").checked;
-      state.plan = plan; st.save(state);
-    };
-    el.addEventListener("input", collect);
-    $("#ws-plan-done").addEventListener("click", () => {
-      collect();
-      const missing = !state.business ? "Pick a business first." : plan.sections.length < 4 ? "Check at least 4 sections you drew on your wireframe." : plan.noticed.length < 3 ? "Write what your tester noticed." : plan.improve.length < 3 ? "Write one thing you'll change." : null;
-      if (missing) { api.say(missing, "warn"); return; }
-      api.log("lab_test_run", { stage: 0, alone: plan.alone });
-      api.win({ business: state.business, sections: plan.sections.length, alone: plan.alone }, { extra: `<p class="ws-cheer">${icon("check")}${esc(CELEBRATE[0])}</p>` });
-    });
-    return () => clearInterval(timer);
-  }
-  function wireframeSvg() {
-    const box = (x, y, w, h, t) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#fff" stroke="#012d2b" stroke-width="2" stroke-dasharray="${t === "Picture" ? "6 4" : "0"}"/><text x="${x + w / 2}" y="${y + h / 2 + 5}" text-anchor="middle" font-size="14" font-family="sans-serif" fill="#012d2b">${t}</text>`;
-    return `<svg class="ws-wire" viewBox="0 0 320 260" role="img" aria-label="Example wireframe: a title bar at the top, a main heading, a short description, a picture on the left with a list of products on the right, and a link at the bottom.">
-      <rect width="320" height="260" rx="8" fill="#ecebe4"/>${box(10, 10, 300, 28, "Website title")}${box(10, 46, 300, 34, "Main heading")}${box(10, 88, 300, 34, "Short description")}${box(10, 130, 130, 80, "Picture")}${box(150, 130, 160, 80, "List of products")}${box(10, 218, 300, 32, "Link: See our menu")}</svg>`;
+    return SE.websitePlan.mountStudio(el, api, { state, save: () => st.save(state), journey: journey(api, idx) });
   }
 
   /* ───────── Stages 2–8: the code workspace ───────── */
   function mountCode(el, idx, api) {
     const S = STAGES[idx];
     const st = storeFor(api.user), state = st.load();
-    if (!BUSINESSES[state.business]) state.business = "bakery";
-    const b = BUSINESSES[state.business];
+    const plan = SE.websitePlan.migrate(state);   // an old save (a business) becomes a v2 plan
+    const b = SE.websitePlan.subject(plan);         // the plan's words for starters, the Tag Shelf, and examples
     const bucket = S.source === "project" ? "project" : S.source;   // project (stages 2–6), debug, ship
     if (!state[bucket] || typeof state[bucket].html !== "string") state[bucket] = S.source === "debug" ? { ...BROKEN } : S.source === "ship" ? { ...SHIP } : seed(idx, b);
     state.snap = state.snap || {};
@@ -445,8 +371,9 @@
         <div class="ws__bar">
           <p class="ws-bizline">${S.source === "debug"
             ? `${icon("alert")}<span>This page belongs to another developer: <strong>Puffin Point Ice Cream</strong>.</span>`
-            : `<span>Your business: <strong>${esc(b.name)}</strong></span> <a href="#/lab/${LAB}/1">Change on stage 1</a>`}</p>
+            : `<span>Your website: <strong id="ws-name">${esc(b.name)}</strong></span>`}</p>
           <div class="ws__toggles" role="group" aria-label="Studio tools">
+            ${S.source === "debug" ? "" : `<button type="button" class="btn btn--ghost btn--small" id="ws-plan" aria-controls="wp-drawer" aria-expanded="false">${icon("map")}My plan</button>`}
             <button type="button" class="btn btn--ghost btn--small" id="ws-example">${icon("eye")}Show an Example</button>
             <button type="button" class="btn btn--ghost btn--small" id="ws-tags">${icon("code")}Tag Explorer</button>
           </div>
@@ -519,18 +446,59 @@
     const frame = $("#ws-frame");
     const save = () => { work.html = ta.html.value; if (ta.css) work.css = ta.css.value; st.save(state); };
     // The editors: the real textareas, colored, with line numbers. The start of the file is shown, locked.
-    const pageName = S.source === "debug" ? "Puffin Point Ice Cream" : b.name;
-    const shellTop = [
+    const shellTopFor = (name) => [
       { text: "<!DOCTYPE html>", why: "Use modern HTML" },
       { text: "<html lang=\"en\">", why: "The whole page, in English" },
       { text: "<head>", why: "Information for the browser" },
       { text: "  <meta charset=\"UTF-8\">", why: "Show every letter correctly" },
-      { text: `  <title>${pageName}</title>`, why: "The name in the browser tab" }
+      { text: `  <title>${name}</title>`, why: "The name in the browser tab (from your plan)" }
     ].concat(S.css ? [{ text: "  <link rel=\"stylesheet\" href=\"style.css\">", why: "Use the CSS in style.css" }] : [], [{ text: "</head>" }, { text: "<body>", why: "Everything visitors see" }]);
+    const SHELL_END = [{ text: "</body>" }, { text: "</html>" }];
     const ed = {
-      html: SE.codeEditor(ta.html, { lang: "html", shellTop, shellBottom: [{ text: "</body>" }, { text: "</html>" }], foldTop: true }),
+      html: SE.codeEditor(ta.html, { lang: "html", shellTop: shellTopFor(S.source === "debug" ? "Puffin Point Ice Cream" : b.name), shellBottom: SHELL_END, foldTop: true }),
       css: ta.css ? SE.codeEditor(ta.css, { lang: "css" }) : null
     };
+    /* My Website Plan: the student's plan on every stage. Editing it never changes code; "Use in my code" buttons say
+       what they'll add, then add it at the cursor on a second press (and fill an empty <h1> instead of adding one). */
+    const clean = (t) => String(t || "").replace(/[<>&]/g, "");
+    const planDrawer = S.source === "debug" ? null : SE.websitePlan.drawer(el.querySelector(".ws"), {
+      state, stage: idx, save: () => st.save(state),
+      onChange(p) { const n = SE.websitePlan.subject(p).name; $("#ws-name").textContent = n; ed.html.setShell(shellTopFor(n), SHELL_END); },
+      onUse(kind, p, btn) {
+        const s = SE.websitePlan.subject(p);
+        const html = ta.html.value, emptyH1 = /<h1>\s*<\/h1>/.exec(html);
+        const add = {
+          headline: emptyH1 ? null : `<h1>${clean(p.headline)}</h1>`, intro: `<p>${clean(p.intro)}</p>`,
+          points: `<ul>\n${s.items.map((x) => `  <li>${clean(x)}</li>`).join("\n")}\n</ul>`,
+          picture: `<img src="${s.pic}" alt="">`
+        };
+        if (kind === "name") { ed.html.setShell(shellTopFor(s.name), SHELL_END); return `Your <title> line already follows your plan: ${s.name}. It's in the locked lines at the top of the file.`; }
+        if (kind === "colors" && !ta.css) return "Colors are CSS. You'll use them on stage 5, Give Your Website Style.";
+        if (kind === "headline" && !clean(p.headline)) return "Write a headline in your plan first.";
+        const what = kind === "headline" && emptyH1 ? `your headline between your empty <h1> and </h1>` : kind === "colors" ? `background-color: ${p.colors.secondary}; and color: ${p.colors.primary}; in your CSS body rule` : `${add[kind].split("\n")[0]}${add[kind].includes("\n") ? "…" : ""} where your cursor is`;
+        if (btn.dataset.armed !== "1") {
+          el.querySelectorAll("[data-armed]").forEach((x) => { delete x.dataset.armed; });
+          btn.dataset.armed = "1";
+          btn.lastChild.textContent = "Yes, add it";
+          return `This adds ${what}. Nothing else in your code changes. Press again to add it.`;
+        }
+        delete btn.dataset.armed;
+        btn.lastChild.textContent = { name: "Put it in my <title>", headline: "Use as my <h1>", intro: "Use as a <p>", points: "Use as a <ul> list", picture: "Add as an <img>", colors: "Use in my CSS body rule" }[kind];
+        if (kind === "colors") {
+          showTab("css");
+          const body = /body\s*\{/i.exec(ta.css.value);
+          if (body) { ta.css.setSelectionRange(body.index + body[0].length, body.index + body[0].length); typeAt(ta.css, `\n  background-color: ${p.colors.secondary};\n  color: ${p.colors.primary};`); }
+          else { ta.css.setSelectionRange(ta.css.value.length, ta.css.value.length); typeAt(ta.css, `${ta.css.value && !ta.css.value.endsWith("\n") ? "\n" : ""}body {\n  background-color: ${p.colors.secondary};\n  color: ${p.colors.primary};\n}\n`); }
+        } else {
+          showTab("html");
+          if (kind === "headline" && emptyH1) { const at = emptyH1.index + 4; ta.html.setSelectionRange(at, emptyH1.index + emptyH1[0].length - 5); typeAt(ta.html, clean(p.headline)); }
+          else { const before = ta.html.value.slice(0, ta.html.selectionStart); typeAt(ta.html, (before && !before.endsWith("\n") ? "\n" : "") + add[kind] + "\n"); }
+        }
+        api.log("lab_plan_used", { stage: idx, part: kind });
+        return kind === "picture" ? "Added. Now write the alt text: what's in the picture?" : "Added to your code. Change the words any time.";
+      }
+    });
+    if (planDrawer) $("#ws-plan").addEventListener("click", (e) => { planDrawer.toggle(e.currentTarget); e.currentTarget.setAttribute("aria-expanded", String(planDrawer.isOpen)); });
     const refreshEditors = () => { ed.html.refresh(); if (ed.css) ed.css.refresh(); };
 
     /* Typing real code: insertText keeps the browser's own Undo history. */
@@ -767,7 +735,7 @@
       const info = { award: "First Website Shipped", course: "Build Your First Website", detail: `A web page for ${b.name}, checked for structure, style, and access`, name: api.user && api.user.role === "student" ? api.user.displayName : "", className: api.user && api.user.cls ? api.user.cls.name : "", at: Date.now() };
       const extra = `<section class="ws-done" id="ws-done" aria-labelledby="ws-done-h">
         <h3 id="ws-done-h">${icon("rocket")}Your First Website Is Ready!</h3>
-        <p class="ws-done__biz">A website for <strong>${esc(b.name)}</strong> (a made-up Maine business). ${state.shipFrom === "project" ? "Started from my earlier page." : "Built from a blank page."}</p>
+        <p class="ws-done__biz">My website: <strong>${esc(b.name)}</strong>. ${state.shipFrom === "project" ? "Started from my earlier page." : "Built from a blank page."}</p>
         <div class="ws-done__cols">
           <iframe class="ws-done__frame" title="Your finished website" sandbox srcdoc="${esc(doc)}"></iframe>
           <div>
@@ -922,11 +890,11 @@
     id: LAB,
     area: "coding",
     title: "Build Your First Website",
-    tagline: "Launch your first website: plan, code, test, and ship a real web page for a made-up Maine business, in HTML and CSS.",
+    tagline: "Launch your first website: plan it, code it in real HTML and CSS, test it, and finish a web page about an idea of your own.",
     levels: STAGES,
     briefFirst: true,
     chapters: [
-      { title: "Plan", short: "Plan", from: 0, to: 0, blurb: "Meet your business and plan on paper. Then test your plan with a real person." },
+      { title: "Plan", short: "Plan", from: 0, to: 0, blurb: "Plan your own website: the idea, the words, the look, and the order of its sections." },
       { title: "Build", short: "Build", from: 1, to: 3, blurb: "Real HTML: headings, paragraphs, lists, pictures, and links." },
       { title: "Style and access", short: "Style", from: 4, to: 5, blurb: "CSS for how it looks, and checks so it works for everyone." },
       { title: "Debug and ship", short: "Ship", from: 6, to: 7, blurb: "Fix a broken website, then build and ship your own." }
