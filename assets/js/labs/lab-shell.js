@@ -17,6 +17,7 @@
  *   landing(el, { user }) (optional): a start screen, shown at #/lab/<id> until the student finishes a level
  *   briefFirst (optional): the brief leads with the goal and Need a hint?, then the briefing and steps; "What you'll learn"
  *     and "Why it matters" fold into "Why this level?" (Captain Code)
+ *   unit (optional): what the screens call a level, like "activity" (default "level"): "Activity 2: …", "0 of 5 activities"
  *
  * The api passed to mount:
  *   api.win(data, opts)  mark the level complete (data is saved with the event)
@@ -96,13 +97,14 @@
     const ch = chapterOf(idx);
     const inView = (i) => !chapters || (i >= chapters[ch].from && i <= chapters[ch].to);
     const firstOpen = (c) => { for (let i = c.from; i <= c.to; i++) if (!done.has(i)) return i; return c.from; };
+    const unit = lab.unit || "level", Unit = unit[0].toUpperCase() + unit.slice(1), units = unit.replace(/y$/, "ie") + "s";
 
     // The brief's parts. Most labs show them in this order: objective, simulation, briefing, goal, steps, tools.
     // briefFirst labs lead with the goal and fold the objective into "Why this level?".
     const objectiveInner = `${level.learn ? `<p><span class="lab-objective__k">${icon("target")}What you'll learn</span>${esc(level.learn)}</p>` : ""}
             ${level.why ? `<p><span class="lab-objective__k">${icon("bulb")}Why it matters</span>${esc(level.why)}</p>` : ""}`;
     const objectiveHtml = !(level.learn || level.why) ? ""
-      : lab.briefFirst ? `<details class="lab-objective lab-objective--fold"><summary>Why this level?</summary>${objectiveInner}</details>`
+      : lab.briefFirst ? `<details class="lab-objective lab-objective--fold"><summary>Why this ${unit}?</summary>${objectiveInner}</details>`
       : `<div class="lab-objective">
             ${objectiveInner}
           </div>`;
@@ -116,7 +118,7 @@
     const toolsHtml = `<div class="lab-brief__tools${compact ? " lab-brief__tools--compact" : ""}">
             ${SE.speech.button("lab", compact ? "Listen" : undefined)}
             <button type="button" class="btn btn--ghost btn--small" id="lab-hint-btn" aria-expanded="false" aria-controls="lab-hint">${icon("question")}${hintWord}</button>
-            ${done.has(idx) ? `<span class="chip chip--done">${icon("check")}You finished this level</span>` : ""}
+            ${done.has(idx) ? `<span class="chip chip--done">${icon("check")}You finished this ${unit}</span>` : ""}
           </div>
           ${level.hints ? `<div class="lab-hint" id="lab-hint" hidden>${level.hints.map((h, i) => `<p data-hint="${i}" ${i ? "hidden" : ""}><strong>Hint ${i + 1} of ${level.hints.length}:</strong> ${esc(h)}</p>`).join("")}</div>` : `<p class="lab-hint" id="lab-hint" hidden>${esc(level.hint)}</p>`}`;
 
@@ -138,9 +140,9 @@
           ${chapters ? `<nav class="lab-chapters" aria-label="Voyages">${chapters.map((c, ci) => {
             const n = c.to - c.from + 1, d = [...done].filter((i) => i >= c.from && i <= c.to).length;
             return `<a href="#/lab/${lab.id}/${firstOpen(c) + 1}" class="lab-chapter ${ci === ch ? "is-current" : ""} ${d === n ? "is-done" : ""}" ${ci === ch ? 'aria-current="true"' : ""}>
-              <span class="lab-chapter__t">${esc(c.title)}</span><span class="lab-chapter__n">${d === n ? icon("check") : ""}${d} of ${n} levels</span></a>`;
+              <span class="lab-chapter__t">${esc(c.title)}</span><span class="lab-chapter__n">${d === n ? icon("check") : ""}${d} of ${n} ${units}</span></a>`;
           }).join("")}</nav>` : ""}
-          <ol class="lab-levels" aria-label="${chapters ? `${esc(chapters[ch].title)} levels` : "Levels"}">
+          <ol class="lab-levels" aria-label="${chapters ? `${esc(chapters[ch].title)} ${units}` : units[0].toUpperCase() + units.slice(1)}">
             ${lab.levels.map((l, i) => !inView(i) ? "" : `
               <li><a href="#/lab/${lab.id}/${i + 1}" class="${i === idx ? "is-current" : ""} ${done.has(i) ? "is-done" : ""}" ${i === idx ? 'aria-current="step"' : ""}>
                 <span class="lab-levels__n">${done.has(i) ? icon("check") : i + 1}</span>
@@ -152,9 +154,9 @@
 
       <div class="wrap lab-body">
         <section class="lab-brief" aria-labelledby="lvl-title">
-          ${chapters ? `<p class="lab-voyage">${esc(chapters[ch].title)} · level ${idx - chapters[ch].from + 1} of ${chapters[ch].to - chapters[ch].from + 1}</p>${idx === chapters[ch].from && !lab.briefFirst ? `<p class="lab-voyage__blurb">${esc(chapters[ch].blurb)}</p>` : ""}` : ""}
+          ${chapters ? `<p class="lab-voyage">${esc(chapters[ch].title)} · ${unit} ${idx - chapters[ch].from + 1} of ${chapters[ch].to - chapters[ch].from + 1}</p>${idx === chapters[ch].from && !lab.briefFirst ? `<p class="lab-voyage__blurb">${esc(chapters[ch].blurb)}</p>` : ""}` : ""}
           <span class="lab-concept">${icon("bulb")}${esc(level.concept)}</span>
-          <h2 id="lvl-title">Level ${idx + 1}: ${esc(level.title)}</h2>
+          <h2 id="lvl-title">${Unit} ${idx + 1}: ${esc(level.title)}</h2>
           ${lab.briefFirst ? goalHtml + toolsHtml + briefingHtml + stepsHtml + objectiveHtml : objectiveHtml + simHtml + briefingHtml + goalHtml + stepsHtml + toolsHtml}
         </section>
 
@@ -225,7 +227,7 @@
           <div class="lab-win__head">
             <span class="lab-win__badge">${icon("check")}</span>
             <div>
-              <h2 tabindex="-1" id="lab-win-title">${opts.title ? esc(opts.title) : `Level ${idx + 1} complete${allDone && next === null ? ". Lab finished!" : "!"}`}</h2>
+              <h2 tabindex="-1" id="lab-win-title">${opts.title ? esc(opts.title) : `${Unit} ${idx + 1} complete${allDone && next === null ? ". Lab finished!" : "!"}`}</h2>
             </div>
           </div>
           ${opts.after || ""}
@@ -233,8 +235,8 @@
           ${newPatches.length ? `<div class="patch-row">${newPatches.map((p) => `<figure class="patch-tile patch-tile--new">${SE.patchArt(p.patch, true, 76)}<figcaption><strong>${esc(p.patch.name)}</strong></figcaption></figure>`).join("")}</div>` : ""}
           ${isStudent ? SE.base.unlockStrip(SE.base.newUnlocks(before, after)) : ""}
           <div class="lab-win__actions">
-            ${next !== null ? `<a class="btn btn--launch" href="#/lab/${lab.id}/${next + 1}">${icon("arrowRight")}${chapters && chapterOf(next) !== ch ? `Start ${esc(chapters[chapterOf(next)].title)}` : `Next level: ${esc(lab.levels[next].title)}`}</a>` : ""}
-            <button type="button" class="btn btn--ghost" id="lab-replay">${icon("refresh")}Try this level again</button>
+            ${next !== null ? `<a class="btn btn--launch" href="#/lab/${lab.id}/${next + 1}">${icon("arrowRight")}${chapters && chapterOf(next) !== ch ? `Start ${esc(chapters[chapterOf(next)].title)}` : `Next ${unit}: ${esc(lab.levels[next].title)}`}</a>` : ""}
+            <button type="button" class="btn btn--ghost" id="lab-replay">${icon("refresh")}Try this ${unit} again</button>
             ${next === null && activity ? `<a class="btn btn--primary" href="#/activity/${activity.id}#s-debrief">${icon("flag")}Finish with the activity debrief</a>` : ""}
           </div>`;
         panel.hidden = false;

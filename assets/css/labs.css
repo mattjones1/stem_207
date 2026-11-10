@@ -1917,7 +1917,23 @@ button.cc-cell:focus-visible { outline: 3px solid #b4006a; outline-offset: -3px;
 @media (max-width: 760px) { .wdd { grid-template-columns: minmax(0, 1fr); } }
 
 /* ───────── STEM 207 Website Builder (wb-interview.js, lab-wb.js) ───────── */
-.wb { display: grid; gap: 1rem; }
+/* .wbx, not .wb: .wb is the Web Builder lab's two-column editor (above). */
+.wbx { display: grid; gap: 1rem; }
+.wbx--welcome .wb-hero { max-width: 48rem; }
+.wbx--two { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); align-items: start; }
+.wbx--two .wb-hero { max-width: none; }
+.wbx--q .wb-card { width: 100%; max-width: 54rem; margin-inline: auto; }
+/* Next and Back stay in view while a long question scrolls. */
+.wbx--q .wb-actions { position: sticky; bottom: 0; padding: .6rem 0 .2rem; border-top: 1px solid var(--line); background: var(--surface); }
+.wbx--reveal .wb-card { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); align-items: start; gap: .8rem 1.4rem; }
+.wb-reveal__view, .wb-reveal__say { display: grid; gap: .6rem; min-width: 0; }
+.wb-reveal__say h2 { font-size: var(--step-2, 1.8rem); }
+.wb-reveal__say p { margin: 0; }
+.wbx--reveal .wb-frame { height: clamp(18rem, calc(100vh - 12rem), 36rem); }
+.wb-more-ways { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .9rem; }
+.wb-more-ways a { display: inline-flex; align-items: center; gap: .3rem; min-height: 28px; font-weight: 700; }
+.wb-more-ways svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 2; }
+@media (max-width: 860px) { .wbx--two, .wbx--reveal .wb-card { grid-template-columns: minmax(0, 1fr); } }
 .wb-hero, .wb-card { display: grid; gap: .6rem; padding: 1.2rem 1.3rem; border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 .wb-hero h2 { margin: 0; font-size: var(--step-2, 1.8rem); }
 .wb-card h2 { margin: 0; }
@@ -1991,4 +2007,9 @@ button.cc-cell:focus-visible { outline: 3px solid #b4006a; outline-offset: -3px;
 .wbr h3 { margin: 0; }
 .wb-done { display: grid; gap: .6rem; }
 @media (max-width: 860px) { .wbs__panes, .wbc__ba, .wb-sec, .wb-rv { grid-template-columns: minmax(0, 1fr); } .wbs__view { order: -1; } }
-@media (max-height: 760px) and (min-width: 1000px) { .wbs .ce .ce__input { min-height: 0; height: 15rem; } .wbs .ce__keys { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } .wbs .ws-frame { height: 15rem; } }
+/* The studio fits a Chromebook screen: the code and the preview use the height there is, and scroll inside. */
+.wbs .ce__hl, .wbs .ce .ce__input { font-size: .9rem; }
+.wbs .ws-frame { height: clamp(15rem, calc(100vh - 15rem), 34rem); }
+.wbs .ce .ce__input { min-height: 0; height: clamp(15rem, calc(100vh - 17rem), 34rem); }
+.wbs__view .wbr textarea { min-height: 0; }
+@media (max-height: 760px) and (min-width: 1000px) { .wbs .ce__keys { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }

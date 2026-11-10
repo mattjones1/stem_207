@@ -38,14 +38,14 @@
     const save = () => { state.q = q; store.save(state); };
 
     function welcome() {
-      el.innerHTML = `<div class="wb wb-welcome">
+      el.innerHTML = `<div class="wbx wbx--welcome${state.v1 ? " wbx--two" : ""}">
         <div class="wb-hero"><p class="eyebrow">STEM 207 Website Builder</p><h2>Your ideas. Your website. Your code.</h2>
           <p>Ever imagined creating your own website? Tell us what you have in mind, and our builder will turn your ideas into a real first version. Then you'll learn how to change the real code and make it completely your own.</p>
           <p class="muted small">The builder is a program that follows rules to turn your answers into HTML and CSS. It isn't AI, and you'll see every line it writes.</p>
           <div class="wb-actions"><button type="button" class="btn btn--launch" id="wb-go">${icon("rocket")}Let's Build Something</button><button type="button" class="btn btn--ghost" id="wb-example">${icon("eye")}Explore an Example</button></div>
           ${state.v1 ? `<p><a href="#/lab/website-builder/1">${icon("arrowRight")}Back to my website in the Coding Studio</a></p>` : ""}
         </div>
-        ${achievements(state, api)}
+        ${state.v1 ? achievements(state, api) : ""}
       </div>`;
       el.querySelector("#wb-go").addEventListener("click", () => { q = state.v1 ? 7 : 0; save(); interview(); });
       el.querySelector("#wb-example").addEventListener("click", () => reveal(C().build(EXAMPLE), true));
@@ -67,9 +67,8 @@
       else if (x.key === "style") body = `${pickRow("style", C().THEMES, A.style)}<div class="wb-own" ${A.style === "custom" ? "" : "hidden"}><label class="wb-field">My color<input type="color" id="wb-color" value="${esc(A.color)}"></label></div>`;
       else if (x.key === "special") body = pickRow("special", C().SPECIALS, A.special) + `<p class="muted small">The builder only makes things HTML and CSS can really do. Moving parts would need JavaScript, which comes later.</p>`;
       else if (x.key === "audience") body = pickRow("audience", C().AUDIENCES, A.audience);
-      el.innerHTML = `<div class="wb wb-q">
-        ${dots()}
-        <section class="wb-card" aria-labelledby="wb-qh"><p class="wb-qn">Question ${q + 1} of ${Q.length}</p><h2 id="wb-qh" tabindex="-1">${esc(x.h)}</h2><p>${esc(x.say)}</p>${body}
+      el.innerHTML = `<div class="wbx wbx--q">
+        <section class="wb-card" aria-labelledby="wb-qh">${dots()}<p class="wb-qn">Question ${q + 1} of ${Q.length}</p><h2 id="wb-qh" tabindex="-1">${esc(x.h)}</h2><p>${esc(x.say)}</p>${body}
           <p class="wb-msg" id="wb-msg" role="status"></p>
           <div class="wb-actions">${q ? `<button type="button" class="btn btn--ghost" id="wb-back">${icon("arrowLeft")}Back</button>` : ""}
             ${x.optional ? `<button type="button" class="btn btn--ghost" id="wb-skip">Skip this one</button>` : ""}
@@ -87,7 +86,7 @@
     }
     function review() {
       const row = (i, label, val) => `<div class="wb-rv"><dt>${esc(label)}</dt><dd>${esc(val || "(skipped)")}</dd><button type="button" class="linkish" data-edit="${i}" aria-label="Edit ${esc(label)}">Edit</button></div>`;
-      el.innerHTML = `<div class="wb wb-review"><section class="wb-card" aria-labelledby="wb-rh"><h2 id="wb-rh" tabindex="-1">Here's What You Told Us</h2>
+      el.innerHTML = `<div class="wbx wbx--q"><section class="wb-card" aria-labelledby="wb-rh"><h2 id="wb-rh" tabindex="-1">Here's What You Told Us</h2>
         <dl class="wb-rvs">
           ${row(0, "Kind of website", (C().KINDS[A.kind] || {}).label)}${row(1, "The big idea", A.idea)}${row(2, "Name", A.name)}
           ${row(3, "What people see", A.sections.map((s) => C().SECTION_INFO[s.id].label + (s.more ? ` (${s.more})` : "")).join("; "))}
@@ -100,19 +99,24 @@
     }
     function reveal(r, isExample) {
       const doc = WK().srcdoc(r.html, { css: r.css, title: r.title });
-      el.innerHTML = `<div class="wb wb-reveal">
+      // The website gets the big left column; the words and the one main button sit beside it, on the first screen.
+      el.innerHTML = `<div class="wbx wbx--reveal">
         <section class="wb-card" aria-labelledby="wb-vh">
-          <p class="eyebrow">${isExample ? "Example project: made from sample answers" : "Version 1"}</p>
-          <h2 id="wb-vh" tabindex="-1">${isExample ? "Here's an example website" : "You Made a Website!"}</h2>
-          <p>${isExample ? "The builder made this from sample answers about Maine moose. Make your own to change the code." : "Your ideas are now real HTML and CSS. The builder created the first version by following rules, but you're the designer. Ready to see how it works?"}</p>
-          <div class="wb-size" role="group" aria-label="Preview size"><button type="button" class="btn btn--ghost btn--small" data-size="desk" aria-pressed="true">Desktop</button><button type="button" class="btn btn--ghost btn--small" data-size="phone" aria-pressed="false">Phone</button></div>
-          <div class="wb-frame-box" id="wb-box"><iframe class="wb-frame" title="${esc(isExample ? "The example website" : "Your website, version 1")}" sandbox="allow-same-origin" srcdoc="${esc(doc)}"></iframe></div>
-          <div class="wb-two"><p><strong>HTML</strong> says what each part is: a heading, a list, a picture. It's in <code>index.html</code>.</p><p><strong>CSS</strong> says how it looks: colors, fonts, and spacing. It's in <code>styles.css</code>.</p></div>
-          <details class="wb-what" open><summary>What the builder made</summary><ul>${r.explanation.map((x) => `<li>${esc(x)}</li>`).join("")}${r.notes.map((x) => `<li>${esc(x)}</li>`).join("")}</ul><p class="muted small">It used: ${esc(r.concepts.join(", "))}.</p></details>
-          <div class="wb-actions">${isExample
-            ? `<button type="button" class="btn btn--launch" id="wb-mine">${icon("rocket")}Make my own</button>`
-            : `<a class="btn btn--ghost" href="#/lab/website-builder/1" data-open="explore">${icon("search")}Explore My Code</a><a class="btn btn--ghost" href="#/lab/website-builder/1" data-open="change">${icon("palette")}Make Changes</a><a class="btn btn--launch" href="#/lab/website-builder/1" data-open="studio">${icon("code")}Open Coding Studio</a>`}</div>
-          ${isExample ? "" : `<p class="muted small">The builder wrote this first draft. Your next job is to understand it, test it, and make it better.</p>`}
+          <div class="wb-reveal__view">
+            <div class="wb-size" role="group" aria-label="Preview size"><button type="button" class="btn btn--ghost btn--small" data-size="desk" aria-pressed="true">Desktop</button><button type="button" class="btn btn--ghost btn--small" data-size="phone" aria-pressed="false">Phone</button></div>
+            <div class="wb-frame-box" id="wb-box"><iframe class="wb-frame" title="${esc(isExample ? "The example website" : "Your website, version 1")}" sandbox="allow-same-origin" srcdoc="${esc(doc)}"></iframe></div>
+          </div>
+          <div class="wb-reveal__say">
+            <p class="eyebrow">${isExample ? "Example project: made from sample answers" : "Version 1"}</p>
+            <h2 id="wb-vh" tabindex="-1">${isExample ? "Here's an example website" : "You Made a Website!"}</h2>
+            <p>${isExample ? "The builder made this from sample answers about Maine moose. Make your own to change the code." : "Your ideas are now real HTML and CSS. The builder wrote this first draft by following rules. You're the designer: your job is to understand it, test it, and make it better."}</p>
+            <div class="wb-actions">${isExample
+              ? `<button type="button" class="btn btn--launch" id="wb-mine">${icon("rocket")}Make my own</button>`
+              : `<a class="btn btn--launch" href="#/lab/website-builder/1" data-open="studio">${icon("code")}Open my code</a>`}</div>
+            ${isExample ? "" : `<p class="wb-more-ways">Or start with: <a href="#/lab/website-builder/1" data-open="explore">${icon("search")}Explore my code</a> <a href="#/lab/website-builder/1" data-open="change">${icon("palette")}Make a change</a></p>`}
+            <div class="wb-two"><p><strong>HTML</strong> says what each part is: a heading, a list, a picture. It's in <code>index.html</code>.</p><p><strong>CSS</strong> says how it looks: colors, fonts, and spacing. It's in <code>styles.css</code>.</p></div>
+            <details class="wb-what" open><summary>What the builder made</summary><ul>${r.explanation.map((x) => `<li>${esc(x)}</li>`).join("")}${r.notes.map((x) => `<li>${esc(x)}</li>`).join("")}</ul><p class="muted small">It used: ${esc(r.concepts.join(", "))}.</p></details>
+          </div>
         </section></div>`;
       el.querySelector("#wb-vh").focus();
       el.querySelectorAll("[data-size]").forEach((b) => b.addEventListener("click", () => {

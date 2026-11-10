@@ -142,8 +142,13 @@
     state.reflect = state.reflect || {};
     store.save(state);
     const save = () => store.save(state);
-    let tab = "html", phone = false, map = [], timer = null, ready = Promise.resolve();
+    let tab = "html", phone = false, map = [], timer = null, ready = Promise.resolve(), checked = false;
     const title = state.title || "My Website";
+    const reflect = idx === 6;   // The Human Touch: its questions lead the right column, so they're on the first screen
+    const actions = `<div class="ws-actions"><button type="button" class="btn btn--launch" id="wb-check">${icon("check")}Check my work</button></div><div class="ws-feedback-slot"></div>`;
+    const R = state.reflect || {};
+    const reflectHtml = !reflect ? "" : `<section class="wbr" id="wb-reflect" aria-labelledby="wbr-h"><h3 id="wbr-h">The Human Touch</h3><p class="muted small">Your answers stay on this device.</p>
+        ${[["right", "Did the builder understand your idea? What did it get right?"], ["wrong", "What did it get wrong, or leave out?"], ["changed", "What will you change, and why will it help a real visitor?"]].map(([k, q]) => `<label class="wp-field">${esc(q)}<textarea class="input" data-reflect="${k}" rows="2" maxlength="400">${esc(R[k] || "")}</textarea></label>`).join("")}</section>`;
 
     el.innerHTML = `
       <div class="wbs" id="wbs">
@@ -170,14 +175,14 @@
             <p class="ws-coach" id="wb-coach" aria-live="polite"></p>
           </section>
           <section class="wbs__view" aria-label="Preview">
+            ${reflect ? reflectHtml + actions : ""}
             <div class="ws-viewbar"><span class="ws-viewbar__h" id="wb-prev-h">Live preview</span>
               <div class="ws-size" role="group" aria-label="Preview size"><button type="button" class="btn btn--ghost btn--small" id="wb-desk" aria-pressed="true">Desktop</button><button type="button" class="btn btn--ghost btn--small" id="wb-phone" aria-pressed="false">Phone</button></div></div>
             <div class="ws-framebox" id="wb-framebox"><iframe id="wb-frame" class="ws-frame" title="Preview of your website" sandbox="allow-same-origin" aria-describedby="wb-prev-h"></iframe></div>
+            ${reflect ? "" : actions}
             <p class="wbs__blank" id="wb-blank" role="status"></p>
-            <div class="wbs__rules" id="wb-rules" aria-live="polite"><p class="field-help">Tap any part of your page: its HTML is selected, and the CSS rules that style it show here.</p></div>
-            <div class="ws-actions"><button type="button" class="btn btn--launch" id="wb-check">${icon("check")}Check my work</button></div>
-            <div class="ws-feedback-slot"></div>
             <section class="ws-checks" id="wb-results" aria-label="Check my work results"></section>
+            <div class="wbs__rules" id="wb-rules" aria-live="polite"><p class="field-help">Tap any part of your page: its HTML is selected, and the CSS rules that style it show here.</p></div>
           </section>
         </div>
       </div>`;
@@ -223,7 +228,10 @@
       const out = $("#wb-blank");
       const open = (ta.css.value.match(/\{/g) || []).length, close = (ta.css.value.match(/\}/g) || []).length;
       const semis = cssSemicolons(ta.css.value);
+      // In Debug, these hints would name a bug before the student has looked: they wait for the first Check my work.
+      const hints = !debug || checked;
       out.textContent = !d || !d.body || !d.body.textContent.trim() ? "Your page looks blank because there are no words inside <body> yet, or they're inside a tag that was never closed."
+        : !hints ? ""
         : open !== close ? `Your CSS has ${open} { and ${close} }. Every rule needs both, so some styles may not show.`
           : semis.length ? `A CSS line near line ${semis[0].line} is missing its semicolon, so the browser skips the line after it.` : "";
     }
@@ -245,7 +253,7 @@
 
     /* ───────── Check my work: each activity checks real changes ───────── */
     async function check() {
-      clearTimeout(timer); persist(); render(); await ready;
+      clearTimeout(timer); checked = true; persist(); render(); await ready;
       const d = $("#wb-frame").contentDocument, base = state.base[idx], b = parse(base.html), now = parse(ta.html.value);
       const items = [], issues = [];
       const item = (ok, label, msg) => items.push({ ok, label, msg });
@@ -338,7 +346,8 @@
               <div class="wbc__ba"><figure><figcaption>Before</figcaption>${WS.miniFrame(cur.html, cur.css, "Before the change", "wbc__f")}</figure><figure><figcaption>After</figcaption>${WS.miniFrame(p.html, p.css, "After the change", "wbc__f")}</figure></div>
               <h3>What changed in the code?</h3><p>${esc(p.why)}</p>
               ${dH.some((x) => x.op !== " ") ? `<p class="muted small">index.html</p>${WS.diffHtml(dH, "Changes in index.html")}` : ""}${dC.some((x) => x.op !== " ") ? `<p class="muted small">styles.css</p>${WS.diffHtml(dC, "Changes in styles.css")}` : ""}
-              <div class="wb-actions"><button type="button" class="btn btn--primary" id="wbc-apply">${icon("check")}Apply</button><button type="button" class="btn btn--ghost" id="wbc-teach">${icon("bulb")}Teach Me to Make This Change</button><button type="button" class="btn btn--ghost" id="wbc-cancel">Cancel</button></div>`;
+              <div class="wb-actions"><button type="button" class="btn btn--primary" id="wbc-teach">${icon("bulb")}Teach Me to Make This Change</button><button type="button" class="btn btn--ghost" id="wbc-apply">${icon("check")}Apply it for me</button><button type="button" class="btn btn--ghost" id="wbc-cancel">Cancel</button></div>
+              <p class="muted small">Teach Me shows you how to type it yourself. That's how you learn it, and it counts as your work.</p>`;
             out.querySelector("#wbc-cancel").onclick = () => dlg.close();
             out.querySelector("#wbc-apply").onclick = () => {
               state.versions.push({ at: Date.now(), label: `Before: ${q.slice(0, 40)}`, html: cur.html, css: cur.css });
@@ -419,12 +428,7 @@
       });
       draw(false);
     }
-    if (idx === 6) {
-      const r = state.reflect;
-      $("#wb-results").innerHTML = `<section class="wbr" aria-labelledby="wbr-h"><h3 id="wbr-h">The Human Touch</h3><p class="muted small">Your answers stay on this device.</p>
-        ${[["right", "Did the builder understand your idea? What did it get right?"], ["wrong", "What did it get wrong, or leave out?"], ["changed", "What will you change, and why will it help a real visitor?"]].map(([k, q]) => `<label class="wp-field">${esc(q)}<textarea class="input" data-reflect="${k}" rows="2" maxlength="400">${esc(r[k] || "")}</textarea></label>`).join("")}</section>`;
-      $("#wb-results").addEventListener("input", (e) => { const t = e.target.closest("[data-reflect]"); if (t) { state.reflect[t.dataset.reflect] = t.value; save(); } });
-    }
+    if (reflect) $("#wb-reflect").addEventListener("input", (e) => { const t = e.target.closest("[data-reflect]"); if (t) { state.reflect[t.dataset.reflect] = t.value; save(); } });
 
     /* ───────── Events ───────── */
     Object.values(ta).forEach((area) => {
@@ -458,7 +462,7 @@
   SE.labs.register({
     id: LAB, area: "coding", title: "STEM 207 Website Builder",
     tagline: "Describe a website in your own words, watch the builder write it in real HTML and CSS, then make the code yours.",
-    briefFirst: true, compactTools: true, levels: ACTIVITIES,
+    briefFirst: true, compactTools: true, unit: "activity", levels: ACTIVITIES,
     chapters: [{ title: "Learn by changing it", short: "Learn", from: 0, to: 4, blurb: "Read and change the code the builder wrote: HTML, CSS, layout, and something new." }, { title: "Make it yours", short: "Yours", from: 5, to: 7, blurb: "Debug, add the human touch, and finish your website." }],
     landing: (el, api) => SE.wbInterview.mount(el, api, storeFor(api.user)),
     mount

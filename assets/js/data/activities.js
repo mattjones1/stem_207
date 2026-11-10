@@ -6199,7 +6199,7 @@ window.STEM.activities = [
       { "term": "Debugging", "def": "Finding and fixing mistakes in code, one at a time." }
     ],
     check: "Show your finished page. Point to one change you made in the HTML and one in the CSS, and say what the builder got right and wrong.",
-    stopAt: "You finish all 8 activities (My Website, My Creation). Grades 2–3 can stop after Discover CSS (activity 3).",
+    stopAt: "You finish all 8 activities (My Website, My Creation). Grades 4–5 can stop after Discover CSS (activity 3).",
     stuck: [
       "Tap the part of your page you want to change. Its code is selected.",
       "Put the cursor in the code and read What does this do? under the editor.",

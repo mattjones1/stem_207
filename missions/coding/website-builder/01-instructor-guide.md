@@ -34,7 +34,7 @@ The builder is a program in STEM 207 that follows rules. It:
 
 Nothing is sent to any outside service. The same answers always make the same website.
 
-**Make a Change** works the same way: it knows about 20 changes ("make the title stand out", "add more space", "add a section about…"). It shows Before → After and the exact lines it would change, and the student chooses Apply or Cancel. **Teach Me to Make This Change** turns the same change into steps the student types. Anything it doesn't know gets an honest "the builder doesn't know that one yet."
+**Make a Change** works the same way: it knows about 20 changes ("make the title stand out", "add more space", "make the background blue", "add a section about…"). It shows Before → After and the exact lines it would change. The main button is **Teach Me to Make This Change**, which turns the change into steps the student types. **Apply it for me** and Cancel are the other choices. Anything it doesn't know gets an honest "the builder doesn't know that one yet."
 
 ## The 8 activities
 

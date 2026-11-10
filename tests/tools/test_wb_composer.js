@@ -72,6 +72,10 @@ const moose = C.build({ kind: "animals", idea: "moose in the Maine forest", name
 ok("the student's own list becomes list items", /<li>Hiking<\/li>[\s\S]*<li>Kayaking<\/li>[\s\S]*<li>Camping<\/li>/.test(moose.html));
 ok("the student's own sentences become facts", /<li>Moose can swim\.<\/li>/.test(moose.html));
 ok("keywords pick matching pictures", moose.pictures.includes("moose.svg") || moose.pictures.includes("tree.svg"), moose.pictures);
+const trail = C.build({ kind: "animals", idea: "A website about moose and hiking trails in Maine forests", name: "Maine Moose Facts", sections: [{ id: "favorites", more: "hiking, kayaking and camping" }, { id: "pictures" }], style: "nature", special: "hero" });
+ok("the idea's subject picks the hero picture (moose, not the trail)", trail.pictures[0] === "moose.svg" && /class="hero-pic" src="moose\.svg"/.test(trail.html), trail.pictures);
+ok("the gallery doesn't repeat the hero picture", !/<figure>\s*<img src="moose\.svg"/.test(trail.html));
+ok("the student's long sentence goes on its own short lines, so it fits the code box", /<p class="tagline">\n {6}A website about moose and hiking trails\n {6}in Maine forests\.\n {4}<\/p>/.test(trail.html), trail.html.split("\n").slice(14, 20));
 ok("missing content is a clear placeholder, not an invented fact", /Add your own/.test(C.build({ kind: "animals", name: "Owls", sections: [{ id: "facts" }, { id: "about" }] }).html));
 ok("it explains what it built, and says what's a placeholder", r0.explanation.length >= 3 && /placeholder/.test(r0.explanation.join(" ")));
 ok("fixContrast lifts a too-light color to 4.5 to 1", C.contrast(C.fixContrast("#cccccc", "#ffffff"), "#ffffff") >= 4.5);
@@ -86,6 +90,16 @@ ok("every change is small: it never rewrites the page", results.every(([, p]) =>
 ok("changes keep the code safe", results.every(([, p]) => !p.ok || !/<script|\son[a-z]+=|javascript:|url\(/i.test(p.html + p.css)));
 const dk = X.propose("make it darker", cur);
 ok("darker keeps the words readable", C.contrast(X.getProp(dk.css, "body", "color"), X.getProp(dk.css, "body", "background-color")) >= 4.5);
+const lessDark = X.propose("make it less dark", { html: dk.html, css: dk.css });
+ok("\"less dark\" makes it lighter, not darker", lessDark.ok && lessDark.id === "lighter", lessDark.id);
+ok("\"too bright\" makes it darker", X.propose("it's too bright", cur).id === "darker");
+const blue = X.propose("make the background blue", cur);
+ok("a color name changes that color", blue.ok && blue.id === "color" && X.getProp(blue.css, "body", "background-color") === "#1c64d1", blue.id);
+ok("after a color change the words and links stay readable", C.contrast(X.getProp(blue.css, "body", "color"), "#1c64d1") >= 4.5 && C.contrast(X.getProp(blue.css, "a", "color"), "#1c64d1") >= 4.5);
+const hero = X.propose("make the title area light green", cur);
+ok("\"title\" plus a color changes the hero, readably", hero.ok && C.contrast(X.getProp(hero.css, ".hero", "color"), X.getProp(hero.css, ".hero", "background-color")) >= 4.5 && X.getProp(hero.css, "body", "background-color") === X.getProp(cur.css, "body", "background-color"));
+ok("\"outer space\" is a look, not more padding", X.propose("make it look like outer space", cur).id === "spacetheme");
+ok("\"add more space\" is still padding", X.propose("add more space", cur).id === "space");
 const sec = X.propose("add a section about secret tips", cur);
 ok("a new section gets a heading, an id, and a working menu link", /<section id="secret-tips"[\s\S]*<h2>Secret tips<\/h2>/.test(sec.html) && /href="#secret-tips"/.test(sec.html));
 ok("a link to a part that doesn't exist says so honestly", /no part of the page/.test(X.propose("add a link to dragons", cur).why));

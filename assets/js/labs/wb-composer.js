@@ -72,10 +72,13 @@
   /* "I want a website about…" → "A website about…": a gentle tidy-up of the student's sentence, never new facts. */
   const tidyIdea = (s) => sentence(clean(s).replace(/^(i want|i'd like|i would like|i wanna)\s+(to make\s+)?(a|an)\s+/i, "A ").replace(/^my (website|site|page) (is|will be)\s+/i, ""));
   const words = (s) => (String(s || "").toLowerCase().match(/[a-z]+/g) || []);
-  function picturesFor(text, kind) {
+  /* The picture for the idea's first matching word comes first (the subject: "moose" in "moose and hiking trails"),
+     then pictures matched anywhere, by how many keywords they match. */
+  function picturesFor(text, kind, idea) {
     const info = (SE.webKit && SE.webKit.PICTURE_INFO) || {};
-    const w = new Set(words(text));
-    const scored = Object.keys(info).map((k) => ({ k, n: info[k][1].split(" ").filter((x) => w.has(x)).length })).filter((x) => x.n > 0).sort((a, b) => b.n - a.n || a.k.localeCompare(b.k));
+    const w = new Set(words(text)), iw = words(idea);
+    const at = (k) => { const keys = info[k][1].split(" "), i = iw.findIndex((x) => keys.includes(x)); return i < 0 ? Infinity : i; };
+    const scored = Object.keys(info).map((k) => ({ k, n: info[k][1].split(" ").filter((x) => w.has(x)).length, at: at(k) })).filter((x) => x.n > 0).sort((a, b) => a.at - b.at || b.n - a.n || a.k.localeCompare(b.k));
     const picks = scored.map((x) => x.k);
     const fallback = (KINDS[kind] || KINDS.other).pic;
     if (!picks.includes(fallback)) picks.push(fallback);
@@ -93,7 +96,7 @@
     const chosen = (a.sections && a.sections.length ? a.sections : [{ id: "welcome" }, { id: "about" }, { id: "favorites" }]).filter((s) => SECTION_INFO[s.id]);
     const more = (id) => clean((chosen.find((s) => s.id === id) || {}).more);
     const allText = [a.idea, ...chosen.map((s) => s.more)].join(" ");
-    const pics = picturesFor(allText, kind);
+    const pics = picturesFor(allText, kind, a.idea);
     const seed = hash(`${name}|${kind}|${style}`);
     const special = SPECIALS[a.special] ? a.special : "";
 
@@ -115,6 +118,12 @@
     const H = [];   // HTML lines
     const ind = (n, s) => "  ".repeat(n) + s;
     const placeholder = (what) => [ind(3, `<!-- Add your own ${what} here -->`), ind(3, `<p>Write your ${what} here.</p>`)];
+    // A long line puts its words on their own lines between the tags, so they fit the code box without scrolling
+    // sideways (the browser treats a line break in text like a space).
+    const WIDTH = 46;
+    const wrapWords = (t, w) => { const out = []; let line = ""; t.split(" ").forEach((x) => { if (line && `${line} ${x}`.length > w) { out.push(line); line = x; } else line = line ? `${line} ${x}` : x; }); if (line) out.push(line); return out; };
+    const el = (n, open, text, close) => { const one = ind(n, `${open}${text}${close}`); return one.length <= WIDTH ? [one] : [ind(n, open), ...wrapWords(text, Math.max(24, WIDTH - (n + 1) * 2)).map((l) => ind(n + 1, l)), ind(n, close)]; };
+    const img = (n, cls, src) => { const alt = attrEsc(altFor(src)), one = ind(n, `<img ${cls}src="${src}" alt="${alt}">`); return one.length <= WIDTH ? [one] : [ind(n, `<img ${cls}src="${src}"`), ind(n + 1, `alt="${alt}">`)]; };
 
     const bodySections = chosen.filter((s) => s.id !== "welcome" && s.id !== "links");
     // Header and menu
@@ -130,9 +139,11 @@
     // Main: the hero, then each section
     H.push("<main>");
     H.push(ind(1, "<!-- The hero: the first thing visitors see -->"), ind(1, `<section class="hero hero--${heroLayout}">`));
-    const heroText = [ind(2, `<h1>${textEsc(name)}</h1>`), ind(2, `<p class="tagline">${textEsc(chosen.some((s) => s.id === "welcome") && more("welcome") ? sentence(more("welcome")) : idea)}</p>`)];
-    if (heroLayout === "split") { H.push(ind(2, "<div class=\"hero-words\">"), ...heroText.map((l) => "  " + l), ind(2, "</div>"), ind(2, `<img src="${pics[0]}" alt="${attrEsc(altFor(pics[0]))}">`)); }
-    else { H.push(...heroText); if (heroLayout === "banner") H.push(ind(2, `<img class="hero-pic" src="${pics[0]}" alt="${attrEsc(altFor(pics[0]))}">`)); }
+    const heroText = [...el(2, "<h1>", textEsc(name), "</h1>"), ...el(2, "<p class=\"tagline\">", textEsc(chosen.some((s) => s.id === "welcome") && more("welcome") ? sentence(more("welcome")) : idea), "</p>")];
+    if (heroLayout === "split") { H.push(ind(2, "<div class=\"hero-words\">"), ...heroText.map((l) => "  " + l), ind(2, "</div>"), ...img(2, "", pics[0])); }
+    else { H.push(...heroText); if (heroLayout === "banner") H.push(...img(2, "class=\"hero-pic\" ", pics[0])); }
+    // The gallery shows pictures the hero didn't already use.
+    const galleryPics = (heroLayout !== "centered" && pics.length > 1 ? pics.slice(1) : pics).slice(0, 3);
     if (navTargets.length) H.push(ind(2, `<a class="button" href="#${navTargets[0].id}">Start with ${textEsc(navTargets[0].title.toLowerCase())}</a>`));
     H.push(ind(1, "</section>"));
     sections.push({ id: "hero", title: name, kind: "hero" });
@@ -145,35 +156,35 @@
       const items = listFrom(m);
       if (layout === "gallery") {
         H.push(ind(2, "<div class=\"gallery\">"));
-        pics.slice(0, 3).forEach((p) => H.push(ind(3, "<figure>"), ind(4, `<img src="${p}" alt="${attrEsc(altFor(p))}">`), ind(4, `<figcaption>${textEsc(altFor(p))}</figcaption>`), ind(3, "</figure>")));
+        galleryPics.forEach((p) => H.push(ind(3, "<figure>"), ...img(4, "", p), ...el(4, "<figcaption>", textEsc(altFor(p)), "</figcaption>"), ind(3, "</figure>")));
         H.push(ind(2, "</div>"));
-        if (m && !items.length) H.push(ind(2, `<p>${textEsc(sentence(m))}</p>`));
+        if (m && !items.length) H.push(...el(2, "<p>", textEsc(sentence(m)), "</p>"));
       } else if (layout === "cards") {
         const cards = items.length >= 2 ? items : ["First highlight", "Second highlight", "Third highlight"];
         H.push(ind(2, "<div class=\"cards\">"));
-        cards.slice(0, 4).forEach((c) => H.push(ind(3, "<article class=\"card\">"), ind(4, `<h3>${textEsc(c)}</h3>`), ind(4, `<p>Write one sentence about ${textEsc(c.toLowerCase())}.</p>`), ind(3, "</article>")));
+        cards.slice(0, 4).forEach((c) => H.push(ind(3, "<article class=\"card\">"), ...el(4, "<h3>", textEsc(c), "</h3>"), ...el(4, "<p>", `Write one sentence about ${textEsc(c.toLowerCase())}.`, "</p>"), ind(3, "</article>")));
         H.push(ind(2, "</div>"));
       } else if (s.id === "favorites") {
         const list = items.length >= 2 ? items : ["My first favorite", "My second favorite", "My third favorite"];
-        H.push(ind(2, "<ul class=\"list\">"), ...list.map((x) => ind(3, `<li>${textEsc(x)}</li>`)), ind(2, "</ul>"));
+        H.push(ind(2, "<ul class=\"list\">"), ...list.flatMap((x) => el(3, "<li>", textEsc(x), "</li>")), ind(2, "</ul>"));
       } else if (s.id === "facts") {
         const facts = m ? m.split(/(?<=[.!?])\s+/).map(sentence).filter(Boolean) : [];
         H.push(ind(2, "<ul class=\"facts\">"));
-        if (facts.length) facts.slice(0, 5).forEach((f) => H.push(ind(3, `<li>${textEsc(f)}</li>`)));
+        if (facts.length) facts.slice(0, 5).forEach((f) => H.push(...el(3, "<li>", textEsc(f), "</li>")));
         else H.push(ind(3, "<!-- Add your own fun facts here: one <li> for each -->"), ind(3, "<li>Your first fun fact goes here.</li>"), ind(3, "<li>Your second fun fact goes here.</li>"));
         H.push(ind(2, "</ul>"));
       } else if (s.id === "about") {
-        H.push(ind(2, "<div class=\"two-col\">"), ind(3, `<img src="${pics[1] || pics[0]}" alt="${attrEsc(altFor(pics[1] || pics[0]))}">`));
-        if (m) H.push(ind(3, `<p>${textEsc(sentence(m))}</p>`)); else H.push(...placeholder("About words"));
+        H.push(ind(2, "<div class=\"two-col\">"), ...img(3, "", pics[1] || pics[0]));
+        if (m) H.push(...el(3, "<p>", textEsc(sentence(m)), "</p>")); else H.push(...placeholder("About words"));
         H.push(ind(2, "</div>"));
       } else if (s.id === "business") {
-        H.push(ind(2, `<p class="callout">${m ? textEsc(sentence(m)) : "Describe what your made-up business does. (No real addresses or phone numbers.)"}</p>`));
+        H.push(...el(2, "<p class=\"callout\">", m ? textEsc(sentence(m)) : "Describe what your made-up business does. (No real addresses or phone numbers.)", "</p>"));
       }
       H.push(ind(1, "</section>"));
       sections.push({ id, title: n.title, kind: s.id });
     });
     H.push("</main>", "", "<!-- The footer: the bottom of every page -->", "<footer class=\"site-footer\">",
-      ind(1, `<p>${textEsc(name)} · Made by a STEM 207 student${a.audience && AUDIENCES[a.audience] ? ` for ${textEsc(AUDIENCES[a.audience].toLowerCase())}` : ""}.</p>`));
+      ...el(1, "<p>", `${textEsc(name)} · Made by a STEM 207 student${a.audience && AUDIENCES[a.audience] ? ` for ${textEsc(AUDIENCES[a.audience].toLowerCase())}` : ""}.`, "</p>"));
     if (chosen.some((s) => s.id === "links") && navTargets.length) H.push(ind(1, `<p><a href="#${navTargets[0].id}">Back to ${textEsc(navTargets[0].title.toLowerCase())}</a></p>`));
     H.push("</footer>");
     const html = H.join("\n") + "\n";
