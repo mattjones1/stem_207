@@ -170,9 +170,16 @@
     const top = root.querySelector(".ce__shell--top"), bottom = root.querySelector(".ce__shell--bottom");
     let escArmed = false, flash = null, ghost = null, pair = null;
 
+    let foldOpen = !opts.foldTop;
     function drawShell() {
       const line = (l, n) => `<div class="ce__sline"><span class="ce__sn" aria-hidden="true">${n}</span><code>${highlight(l.text, "html")}</code>${l.why ? `<span class="ce__why">${esc(l.why)}</span>` : ""}</div>`;
-      top.innerHTML = shellTop.length ? `<p class="visually-hidden">Locked lines at the top of the file:</p>${shellTop.map((l, i) => line(l, i + 1)).join("")}` : "";
+      const lines = shellTop.map((l, i) => line(l, i + 1)).join("");
+      // foldTop: the locked lines start folded into one row, so the code and its buttons fit a small screen.
+      top.innerHTML = !shellTop.length ? "" : opts.foldTop
+        ? `<details class="ce__fold" ${foldOpen ? "open" : ""}><summary>Lines 1–${shellTop.length}: the start of the file (locked). ${foldOpen ? "Hide them" : "Show them"}</summary>${lines}</details>`
+        : `<p class="visually-hidden">Locked lines at the top of the file:</p>${lines}`;
+      const fold = top.querySelector(".ce__fold");
+      if (fold) fold.addEventListener("toggle", () => { if (foldOpen !== fold.open) { foldOpen = fold.open; drawShell(); const s = top.querySelector("summary"); if (s) s.focus(); } });
       const after = shellTop.length + ta.value.split("\n").length;
       bottom.innerHTML = shellBottom.length ? `<p class="visually-hidden">Locked lines at the end of the file:</p>${shellBottom.map((l, i) => line(l, after + i + 1)).join("")}` : "";
       top.hidden = !shellTop.length; bottom.hidden = !shellBottom.length;

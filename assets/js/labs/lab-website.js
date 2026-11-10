@@ -17,6 +17,8 @@
   const { icon, esc } = SE;
   const WK = SE.webKit;
   const { BUSINESSES, STAGES, BROKEN, SHIP, ex } = SE.websiteStages;
+  const { EXAMPLES, TAG_LESSON } = SE.websiteLessons;
+  const exampleFor = (idx) => EXAMPLES[idx] || EXAMPLES[1];
   const LAB = "build-your-first-website";
   const PIC_NAMES = Object.keys(WK.PICTURES);
   const BIZ_PICS = ["muffins.svg", "kayak.svg", "tackle.svg"];
@@ -75,74 +77,112 @@
   const LABEL = { h1: "Main heading", p: "Paragraph", h2: "Section heading", list: "List", img: "Picture", alt: "Alt text", link: "Link", style: "CSS style", contrast: "Readable colors", narrow: "Fits a phone screen", phone: "Phone preview", own: "Your own words" };
   const words = (s) => (String(s).trim().match(/\S+/g) || []).length;
   const wkOf = (el) => (el && el.getAttribute && el.getAttribute("data-wk")) || null;
-  /* doc: the rendered preview. ctx: { css, narrowOverflow, viewedPhone }. Returns { results: { id: { state, msg, wk } }, person: [{ msg, wk }] }.
-     state: "good" | "fix" | "person". */
+  /* Why each check matters, how to fix it, and a hint (a pattern, never the student's whole answer). */
+  const WHY = {
+    h1: "The main heading tells visitors, and screen readers, what the whole page is about.",
+    p: "A paragraph tells visitors about your idea in full sentences.",
+    h2: "Section headings help people find their way around a page.",
+    list: "A list makes related things quick to read.",
+    img: "A picture helps visitors see what your page is about.",
+    alt: "Alt text is read out loud for people who can't see the picture.",
+    link: "People using screen readers often hear only the link words, so they need to say where the link goes.",
+    style: "CSS gives your website its own look, so it doesn't look like every other plain page.",
+    contrast: "Words without enough contrast are hard to read on a sunny screen, or for people with low vision.",
+    narrow: "Lots of visitors use phones. Scrolling sideways to read is frustrating.",
+    phone: "Testing on a phone shows you what many visitors will really see.",
+    own: "Visitors come to your page for what you have to say."
+  };
+  const HOW = {
+    h1: ["Put your website's name between <h1> and </h1>, near the top of the page.", "<h1>Your website's name</h1>"],
+    p: ["Write a full sentence between <p> and </p>.", "<p>One sentence that introduces your idea.</p>"],
+    h2: ["Add a heading for one part of your page with <h2>.", "<h2>A title for this part</h2>"],
+    list: ["Put each thing in an <li>, and put all the <li> items inside <ul> and </ul>.", "<ul>\n  <li>First thing</li>\n  <li>Second thing</li>\n</ul>"],
+    img: ["Use one of the built-in pictures in src.", "<img src=\"moose.svg\" alt=\"…\">"],
+    alt: ["Inside the <img> tag, add alt=\"…\" with a few words that describe the picture.", "alt=\"What the picture shows\""],
+    link: ["Give the link words that say where it goes, and an href that points to an id on your page.", "<a href=\"#facts\">See the fun facts</a>"],
+    style: ["In the CSS tab, write a body rule with a background color and a text color, then one more style.", "body {\n  background-color: #fff7e8;\n  color: #213547;\n  padding: 1rem;\n}"],
+    contrast: ["Make the words darker, or the background lighter.", "color: #213547;"],
+    narrow: ["Look for something wider than a phone, like a fixed width. max-width keeps things inside the screen.", "max-width: 100%;"],
+    phone: ["Press Phone above the preview, and look at your whole page.", ""],
+    own: ["Add more sentences in your own words: what should visitors know?", "<p>Another sentence about your idea.</p>"]
+  };
+  /* doc: the rendered preview. ctx: { css, narrowOverflow, viewedPhone }. Returns
+     { results: { id: { state, msg, wk } }, person: [{ msg, wk }], issues: [{ key, check, label, what, why, how, hint, wk }] }.
+     state: "good" | "fix" | "person". issues lists every independent problem (each picture without alt text, each
+     bad link…), so every one can have its own Find it. results keeps the first problem per check, for gating. */
   function checks(doc, ctx = {}) {
-    const R = {}, person = [];
+    const R = {}, person = [], issues = [];
     const win = doc.defaultView, cs = (el) => win.getComputedStyle(el);
     const good = (id, msg, wk) => (R[id] = { state: "good", msg, wk });
-    const fix = (id, msg, wk) => (R[id] = { state: "fix", msg, wk });
+    const fix = (id, msg, wk, key) => {
+      if (!R[id] || R[id].state !== "fix") R[id] = { state: "fix", msg, wk };
+      const k = key || (wk != null ? `${id}:${wk}` : id);
+      if (!issues.some((x) => x.key === k)) issues.push({ key: k, check: id, label: LABEL[id], what: msg, why: WHY[id], how: HOW[id][0], hint: HOW[id][1], wk: wk == null ? null : wk });
+    };
     // Main heading (and the classic bug: a big <p> pretending to be one)
     const h1s = [...doc.querySelectorAll("h1")];
     if (!h1s.length) {
       const fake = [...doc.querySelectorAll("p, div, span, strong, b")].find((el) => el.textContent.trim() && parseFloat(cs(el).fontSize) >= 26);
       fake ? fix("h1", `"${fake.textContent.trim().slice(0, 40)}" looks like a heading, but it's marked up as <${fake.tagName.toLowerCase()}>. A main heading uses <h1>, so screen readers know it's the title.`, wkOf(fake))
-        : fix("h1", "Your page has words, but it needs a main heading. Try <h1>, the business name, then </h1>.");
-    } else if (!h1s[0].textContent.trim()) fix("h1", "Your <h1> is empty. Type the business name between <h1> and </h1>.", wkOf(h1s[0]));
-    else if (h1s.length > 1) fix("h1", `Your page has ${h1s.length} <h1> headings. Use one <h1> for the main heading, and <h2> for sections.`, wkOf(h1s[1]));
+        : fix("h1", "Your page has words, but it needs a main heading. Try <h1>, your website's name, then </h1>.");
+    } else if (!h1s[0].textContent.trim()) fix("h1", "Your <h1> is empty. Type your website's name between <h1> and </h1>.", wkOf(h1s[0]));
+    else if (h1s.length > 1) h1s.slice(1).forEach((h) => fix("h1", `Your page has ${h1s.length} <h1> headings. Use one <h1> for the main heading, and <h2> for sections.`, wkOf(h)));
     else good("h1", `Main heading: "${h1s[0].textContent.trim().slice(0, 50)}"`, wkOf(h1s[0]));
     // Paragraph
     const ps = [...doc.querySelectorAll("p")];
     const realP = ps.find((p) => words(p.textContent) >= 3);
     realP ? good("p", "Your page has a paragraph.", wkOf(realP))
-      : ps.length ? fix("p", "Your paragraph is very short. Write a full sentence about the business.", wkOf(ps[0]))
-        : fix("p", "Add a paragraph that tells customers about the business: <p>, a sentence, then </p>.");
+      : ps.length ? fix("p", "Your paragraph is very short. Write a full sentence about your idea.", wkOf(ps[0]))
+        : fix("p", "Add a paragraph that tells visitors about your idea: <p>, a sentence, then </p>.");
     // Section heading
     const h2 = [...doc.querySelectorAll("h2")].find((h) => h.textContent.trim());
-    h2 ? good("h2", `Section heading: "${h2.textContent.trim().slice(0, 40)}"`, wkOf(h2)) : fix("h2", "Add a section heading with <h2>, like <h2>Our menu</h2>.");
+    h2 ? good("h2", `Section heading: "${h2.textContent.trim().slice(0, 40)}"`, wkOf(h2)) : fix("h2", "Add a section heading with <h2>, like <h2>Fun facts</h2>.");
     // List
     const lists = [...doc.querySelectorAll("ul, ol")];
     const best = lists.sort((a, b) => b.querySelectorAll(":scope > li").length - a.querySelectorAll(":scope > li").length)[0];
     const nli = best ? best.querySelectorAll(":scope > li").length : 0;
-    !best ? fix("list", doc.querySelector("li") ? "Your <li> items need a list around them: put them inside <ul> and </ul>." : "Add a list of what the business offers: <ul>, then <li> items, then </ul>.")
+    !best ? fix("list", doc.querySelector("li") ? "Your <li> items need a list around them: put them inside <ul> and </ul>." : "Add a list of things that go together: <ul>, then <li> items, then </ul>.", wkOf(doc.querySelector("li")))
       : nli < 2 ? fix("list", `Your list has ${nli} item${nli === 1 ? "" : "s"}. Add another <li> inside the <${best.tagName.toLowerCase()}>.`, wkOf(best))
         : good("list", `Your list has ${nli} items.`, wkOf(best));
-    // Picture and alt text
+    // Pictures and alt text: one issue for each picture that needs a fix
     const imgs = [...doc.querySelectorAll("img")];
+    const name = (i) => i.getAttribute("data-name") || i.getAttribute("data-src") || "";
     if (!imgs.length) {
-      fix("img", "Add a picture for your business, like <img src=\"muffins.svg\" alt=\"…\">.");
-      fix("alt", "Add a picture first. Then give it alt text.");
+      fix("img", "Add a picture, like <img src=\"moose.svg\" alt=\"…\">.");
+      fix("alt", "Add a picture first. Then give it alt text.", null, "alt:none");
     } else {
-      const unknown = imgs.find((i) => !i.getAttribute("data-name"));
-      const name = (i) => i.getAttribute("data-name") || i.getAttribute("data-src") || "";
-      unknown ? fix("img", `"${name(unknown) || "(no src)"}" isn't one of the workshop's pictures. Use ${BIZ_PICS.join(", ")}.`, wkOf(unknown))
-        : good("img", `Your page shows ${name(imgs[0])}.`, wkOf(imgs[0]));
-      const noAlt = imgs.find((i) => !i.hasAttribute("alt") || !i.getAttribute("alt").trim());
-      const weak = imgs.find((i) => { const a = (i.getAttribute("alt") || "").trim(); return a && (GENERIC_ALT.test(a) || a.length < 8); });
-      if (noAlt) fix("alt", `Your picture ${name(noAlt)} has no alt text. What would someone need to know about this picture if they couldn't see it?`, wkOf(noAlt));
-      else if (weak) fix("alt", `Alt text "${weak.getAttribute("alt").trim()}" doesn't say what's in the picture. Describe it in a few words.`, wkOf(weak));
-      else {
+      const unknown = imgs.filter((i) => !i.getAttribute("data-name"));
+      unknown.forEach((u) => fix("img", `"${name(u) || "(no src)"}" isn't one of the built-in pictures, so it can't show. Use one like ${BIZ_PICS.join(", ")}, or moose.svg.`, wkOf(u)));
+      if (!unknown.length) good("img", `Your page shows ${name(imgs[0])}.`, wkOf(imgs[0]));
+      let altBad = 0;
+      imgs.forEach((i) => {
+        const a = (i.getAttribute("alt") || "").trim();
+        if (!i.hasAttribute("alt") || !a) { altBad++; fix("alt", `Your picture ${name(i)} has no alt text. What would someone need to know about this picture if they couldn't see it?`, wkOf(i)); }
+        else if (GENERIC_ALT.test(a) || a.length < 8) { altBad++; fix("alt", `Alt text "${a}" doesn't say what's in the picture. Describe it in a few words.`, wkOf(i)); }
+      });
+      if (!altBad) {
         good("alt", "Every picture has alt text.", wkOf(imgs[0]));
         imgs.forEach((i) => person.push({ key: `alt:${i.getAttribute("alt").trim()}`, msg: `Read your alt text out loud: "${i.getAttribute("alt").trim()}". Does it tell someone what's in the picture?`, wk: wkOf(i) }));
       }
     }
-    // Link
+    // Links: one issue for each link that needs a fix
     const links = [...doc.querySelectorAll("a")];
-    if (!links.length) fix("link", "Add a link with words that say where it goes, like <a href=\"#menu\">See our bakery menu</a>.");
+    if (!links.length) fix("link", "Add a link with words that say where it goes, like <a href=\"#facts\">See the fun facts</a>.");
     else {
-      let problem = null;
+      let linkBad = 0;
       for (const a of links) {
         const text = a.textContent.trim(), href = (a.getAttribute("href") || "").trim();
-        if (!text) { problem = ["Your link has no words. Put words between <a …> and </a>.", a]; break; }
-        if (GENERIC_LINK.test(text)) { problem = [`"${text}" doesn't say where the link goes. People using screen readers often hear only the link words. Try words like "See our flavors".`, a]; break; }
-        if (!href) { problem = ["Your link needs an address: href=\"#\" plus the id of a part of your page.", a]; break; }
-        if (href.startsWith("#")) {
+        let problem = null;
+        if (!text) problem = "Your link has no words. Put words between <a …> and </a>.";
+        else if (GENERIC_LINK.test(text)) problem = `"${text}" doesn't say where the link goes. People using screen readers often hear only the link words. Try words like "See the fun facts".`;
+        else if (!href) problem = "Your link needs an address: href=\"#\" plus the id of a part of your page.";
+        else if (href.startsWith("#")) {
           const id = href.slice(1);
-          if (!id || !doc.getElementById(id)) { problem = [`Your link goes to ${href}, but nothing on the page has id="${id || "…"}". Add id="${id || "menu"}" to a heading.`, a]; break; }
-        } else if (!/^https:\/\/[^\s.]+\.[^\s]+/.test(href)) { problem = [`Your link goes to "${href}". In this workshop, links jump to a part of your page, like href="#menu".`, a]; break; }
+          if (!id || !doc.getElementById(id)) problem = `Your link goes to ${href}, but nothing on the page has id="${id || "…"}". Add id="${id || "facts"}" to a heading.`;
+        } else if (!/^https:\/\/[^\s.]+\.[^\s]+/.test(href)) problem = `Your link goes to "${href}". In this workshop, links jump to a part of your page, like href="#facts".`;
+        if (problem) { linkBad++; fix("link", problem, wkOf(a)); }
       }
-      if (problem) fix("link", problem[0], wkOf(problem[1]));
-      else {
+      if (!linkBad) {
         good("link", `Your link "${links[0].textContent.trim().slice(0, 40)}" works.`, wkOf(links[0]));
         links.forEach((a) => person.push({ key: `link:${a.textContent.trim()}`, msg: `Read just your link words: "${a.textContent.trim()}". Would someone know where it goes?`, wk: wkOf(a) }));
       }
@@ -161,23 +201,48 @@
     else if (!bodyColor || (bodyColor.r === 0 && bodyColor.g === 0 && bodyColor.b === 0)) fix("style", "Your words are still the default black. Add color to your body rule, like color: #213547;");
     else if (!extraOk) fix("style", "Nice colors! Now make one more style choice, like padding: 1em; or a font-family, in a rule that matches part of your page.");
     else good("style", "Your CSS sets the background, the text color, and more.");
-    // Contrast (WCAG 2: the workshop asks 4.5 to 1 for all text)
+    // Contrast (WCAG 2: the workshop asks 4.5 to 1 for all text): one issue for each hard-to-read element
     const tc = WK.textContrast(doc);
-    const low = tc.filter((t) => t.ratio !== null && t.ratio < 4.5).sort((a, b) => a.ratio - b.ratio)[0];
-    const unknown = tc.filter((t) => t.ratio === null);
+    // One issue for each color pair that's hard to read (the same gray on every line is one problem, not ten).
+    const lows = Object.values(tc.filter((t) => t.ratio !== null && t.ratio < 4.5).sort((a, b) => a.ratio - b.ratio)
+      .reduce((m, t) => { const k = `${t.fg}|${t.bg}`; if (!m[k]) m[k] = t; return m; }, {}));
+    const unknownTc = tc.filter((t) => t.ratio === null);
     const known = tc.filter((t) => t.ratio !== null);
-    if (low) fix("contrast", `"${low.text}" has a contrast of ${low.ratio} to 1. Readable text needs at least 4.5 to 1. Try making the words darker or the background lighter.`, wkOf(low.el));
-    else if (!known.length && unknown.length) R.contrast = { state: "person", msg: "We can't measure the colors behind your words. Ask a person: is every word easy to read?", wk: wkOf(unknown[0].el) };
+    if (lows.length) lows.forEach((low) => fix("contrast", `"${low.text}" has a contrast of ${low.ratio} to 1. Readable text needs at least 4.5 to 1. Try making the words darker or the background lighter.`, wkOf(low.el)));
+    else if (!known.length && unknownTc.length) R.contrast = { state: "person", msg: "We can't measure the colors behind your words. Ask a person: is every word easy to read?", wk: wkOf(unknownTc[0].el) };
     else if (known.length) good("contrast", `All your text is readable: the lowest contrast is ${Math.min(...known.map((t) => t.ratio))} to 1.`, wkOf(known[0].el));
     else fix("contrast", "Add some words to your page first.");
-    unknown.forEach((t) => person.push({ msg: `We can't measure the contrast of "${t.text}" (something is behind it). Is it easy to read?`, wk: wkOf(t.el) }));
-    // Ship: fits a phone, looked at on a phone, and the student's own words
+    unknownTc.forEach((t) => person.push({ msg: `We can't measure the contrast of "${t.text}" (something is behind it). Is it easy to read?`, wk: wkOf(t.el) }));
+    // Finish: fits a phone, looked at on a phone, and the student's own words
     if (ctx.narrowOverflow === true) fix("narrow", "Your page is wider than a phone screen, so people would have to scroll sideways. Look for something too wide.");
     else if (ctx.narrowOverflow === false) good("narrow", "Your page fits on a phone screen.");
     ctx.viewedPhone ? good("phone", "You looked at your page in the Phone preview.") : fix("phone", "Press Phone above the preview and look at your page the way a phone shows it.");
     const all = doc.body.textContent.replace(/\s+/g, " ").trim();
-    words(all) >= 20 ? good("own", "Your page has your own words.") : fix("own", `Your page has ${words(all)} words. Tell customers more: aim for 20 or more.`);
-    return { results: R, person };
+    words(all) >= 20 ? good("own", "Your page has your own words.") : fix("own", `Your page has ${words(all)} words. Tell visitors more: aim for 20 or more.`);
+    return { results: R, person, issues };
+  }
+  /* Where a missing part could go, so Find it can show an "add it here" line. Never edits the code.
+     Returns { lang, at, label } or null when there's no sensible place. */
+  function insertPoint(check, html, css) {
+    const after = (re) => { let m, last = -1; const g = new RegExp(re, "gi"); while ((m = g.exec(html))) last = m.index + m[0].length; return last; };
+    const endOfLine = (i) => { const n = html.indexOf("\n", i); return n < 0 ? html.length : n + 1; };
+    switch (check) {
+      case "h1": return { lang: "html", at: 0, label: "Add your <h1> here, at the top" };
+      case "p": { const h = after("</h1>"); return { lang: "html", at: h >= 0 ? endOfLine(h) : 0, label: "Add a <p> here" }; }
+      case "h2": { const p = after("</p>|</ul>|</ol>"); return { lang: "html", at: p >= 0 ? endOfLine(p) : html.length, label: "Add your <h2> here" }; }
+      case "list": { const h = after("</h2>|</p>"); return { lang: "html", at: h >= 0 ? endOfLine(h) : html.length, label: "Add your <ul> list here" }; }
+      case "img": return { lang: "html", at: html.length, label: "Add your <img> here" };
+      case "alt": return { lang: "html", at: html.length, label: "Add a picture here first" };
+      case "link": return { lang: "html", at: html.length, label: "Add your <a> link here" };
+      case "own": return { lang: "html", at: html.length, label: "Add more sentences here" };
+      case "contrast": return { lang: "html", at: html.length, label: "Add some words here first" };
+      case "style": {
+        const b = /body\s*\{/i.exec(css || "");
+        return { lang: "css", at: b ? b.index + b[0].length : (css || "").length, label: b ? "Add styles inside your body rule" : "Add a body rule here" };
+      }
+      case "narrow": return { lang: "css", at: (css || "").length, label: "Look for something too wide" };
+      default: return null;
+    }
   }
 
   /* The page the way a screen reader moves through it: headings, paragraphs, lists, pictures, and links, in order.
@@ -216,18 +281,28 @@
     return out;
   }
 
-  /* Extra goals for early finishers (Challenge mode). They never block a stage. */
+  /* Level Up: Try This Next. Optional goals for anyone who wants more; they never block a stage. Each says what it
+     practices and what success looks like, and ticks when Check my page sees it on the real page. */
   function challenges(doc, ctx = {}) {
     const ids = [...doc.querySelectorAll("a[href^='#']")].filter((a) => a.getAttribute("href").length > 1 && doc.getElementById(a.getAttribute("href").slice(1)));
     const tc = WK.textContrast(doc).filter((t) => t.ratio !== null);
     return [
-      { label: "Two sections with <h2> headings", done: doc.querySelectorAll("h2").length >= 2 },
-      { label: "A second link that jumps to another section", done: new Set(ids.map((a) => a.getAttribute("href"))).size >= 2 },
-      { label: "A business hours section", done: /hour|open|closed|am\b|pm\b/i.test(doc.body.textContent) && doc.querySelectorAll("h2").length >= 2 },
-      { label: "A second picture with alt text", done: [...doc.querySelectorAll("img[alt]")].filter((i) => i.getAttribute("alt").trim()).length >= 2 },
-      { label: "A theme where all text has 7 to 1 contrast or more", done: tc.length > 0 && tc.every((t) => t.ratio >= 7) },
-      { label: "Fits a phone screen", done: ctx.narrowOverflow === false }
+      { label: "Two sections with <h2> headings", practice: "Organizing a page with headings", success: "Two <h2> headings, each starting its own part of the page.", done: doc.querySelectorAll("h2").length >= 2 },
+      { label: "A second link that jumps to another section", practice: "Links and ids", success: "Two links, each jumping to a different id on your page.", done: new Set(ids.map((a) => a.getAttribute("href"))).size >= 2 },
+      { label: "Group a part of your page in <section>", practice: "Semantic HTML", success: "A <section> with its own <h2> inside it.", done: [...doc.querySelectorAll("section")].some((s) => s.querySelector("h2")) },
+      { label: "A second picture with alt text", practice: "Describing pictures for everyone", success: "Two pictures, each with alt text that says what's in it.", done: [...doc.querySelectorAll("img[alt]")].filter((i) => i.getAttribute("alt").trim().length >= 8).length >= 2 },
+      { label: "A theme where all text has 7 to 1 contrast or more", practice: "Choosing readable colors", success: "Every word reaches 7 to 1 contrast, the highest accessibility level.", done: tc.length > 0 && tc.every((t) => t.ratio >= 7) },
+      { label: "Fits a phone screen", practice: "Designing for phones", success: "No sideways scrolling in the Phone preview.", done: ctx.narrowOverflow === false }
     ];
+  }
+  function levelUp(res) {
+    const list = res.challenges || [];
+    if (!list.length) return "";
+    const n = list.filter((c) => c.done).length;
+    return `<details class="ws-levelup"><summary>${icon("star")}Level Up: Try This Next (optional, ${n} of ${list.length} done)</summary>
+      <p class="muted small">Extra goals for when you want more. They never stop you from finishing this stage. Each one ticks when Check my page sees it on your page.</p>
+      <ul>${list.map((c) => `<li class="${c.done ? "is-done" : ""}">${icon(c.done ? "check" : "target")}<span><strong>${esc(c.label)}</strong>${c.done ? " (done)" : ""}<br><span class="muted small">Practice: ${esc(c.practice)}. You've got it when: ${esc(c.success)}</span></span></li>`).join("")}</ul>
+    </details>`;
   }
 
   /* ───────── Saving (this device only) ───────── */
@@ -241,7 +316,6 @@
       save(v) { try { if (s) s.setItem(key, JSON.stringify(v)); } catch (e) { /* storage full or off */ } }
     };
   }
-  const flag = (k, v) => { try { if (v === undefined) return sessionStorage.getItem(k) === "1"; sessionStorage.setItem(k, v ? "1" : "0"); } catch (e) { return false; } return v; };
   /* A starting page for a stage, built from the stages before it (for a student who starts partway). */
   function seed(idx, b) {
     if (idx <= 1) return { html: "<h1></h1>\n", css: "" };
@@ -353,8 +427,8 @@
     state.fixes = state.fixes || [];
     st.save(state);
     const work = state[bucket];
-    let help = flag("stem207.website.help"), challenge = flag("stem207.website.challenge"), big = flag("stem207.website.big");
     let tab = "html", phone = false, reader = false, map = [], timer = null, ready = Promise.resolve(), checks2 = 0, failed = 0, confirmReset = false, shipReady = null;
+    let lastIssues = [];   // the issues on screen, by key, so each Find it goes to its own problem
     state.confirmed = state.confirmed || {};
     const confirmed = (state.confirmed[idx] = state.confirmed[idx] || {});   // "Check with a person" items the student said yes to, keyed by their words
     const needsPeople = !!S.confirm;   // stage 6: the person items must be confirmed too
@@ -366,16 +440,15 @@
     const tags = TAGS(S.source === "debug" ? { pic: "lighthouse.svg", section: "flavors" } : b);   // the broken page has its own picture and section
 
     el.innerHTML = `
-      <div class="ws ${help ? "ws--help" : ""} ${big ? "ws--big" : ""}" id="ws">
+      <div class="ws" id="ws">
         ${journey(api, idx)}
         <div class="ws__bar">
           <p class="ws-bizline">${S.source === "debug"
             ? `${icon("alert")}<span>This page belongs to another developer: <strong>Puffin Point Ice Cream</strong>.</span>`
             : `<span>Your business: <strong>${esc(b.name)}</strong></span> <a href="#/lab/${LAB}/1">Change on stage 1</a>`}</p>
-          <div class="ws__toggles">
-            <button type="button" class="btn btn--ghost btn--small" id="ws-big" aria-pressed="${big}">${icon("plus")}Bigger code</button>
-            <button type="button" class="btn btn--ghost btn--small" id="ws-help" aria-pressed="${help}">${icon("bulb")}Extra help</button>
-            <button type="button" class="btn btn--ghost btn--small" id="ws-challenge" aria-pressed="${challenge}">${icon("star")}Challenge mode</button>
+          <div class="ws__toggles" role="group" aria-label="Studio tools">
+            <button type="button" class="btn btn--ghost btn--small" id="ws-example">${icon("eye")}Show an Example</button>
+            <button type="button" class="btn btn--ghost btn--small" id="ws-tags">${icon("code")}Tag Explorer</button>
           </div>
         </div>
         <div class="ws__panes">
@@ -389,8 +462,8 @@
             </div>` : ""}
             <div class="ws-tabrow">
               <div class="ws-tabs" role="tablist" aria-label="Code">
-                <button type="button" role="tab" id="ws-tab-html" aria-selected="true" aria-controls="ws-panel-html">HTML</button>
-                ${S.css ? `<button type="button" role="tab" id="ws-tab-css" aria-selected="false" aria-controls="ws-panel-css">CSS</button>` : ""}
+                <button type="button" role="tab" id="ws-tab-html" aria-selected="true" aria-controls="ws-panel-html">HTML <span class="ws-file">index.html</span></button>
+                ${S.css ? `<button type="button" role="tab" id="ws-tab-css" aria-selected="false" aria-controls="ws-panel-css">CSS <span class="ws-file">style.css</span></button>` : ""}
               </div>
               <div class="ws-undo">
                 <button type="button" class="linkish" id="ws-undo">${icon("refresh", 'style="transform:scaleX(-1)"')}Undo</button>
@@ -410,8 +483,7 @@
             <p class="ws-coach" id="ws-coach"></p>
             <div class="ws-actions">
               <button type="button" class="btn btn--launch" id="ws-check">${icon("check")}<span class="ws-check__label">Check my page</span></button>
-              ${S.source === "ship" ? `<button type="button" class="btn btn--primary" id="ws-ship" hidden>${icon("rocket")}Mark ready for review</button>` : ""}
-              ${S.example ? `<button type="button" class="btn btn--ghost btn--small ws-help-only" id="ws-example">${icon("plus")}Show an example</button>` : ""}
+              ${S.source === "ship" ? `<button type="button" class="btn btn--primary" id="ws-ship" hidden>${icon("rocket")}Finish my website</button>` : ""}
               ${S.source === "ship" ? `<button type="button" class="btn btn--ghost btn--small" id="ws-earlier" aria-expanded="false" aria-controls="ws-earlier-code">${icon("eye")}Show my earlier page</button>` : ""}
               <button type="button" class="btn btn--ghost btn--small" id="ws-reset">Start over</button>
             </div>
@@ -446,6 +518,20 @@
     const ta = { html: $("#ws-html"), css: $("#ws-css") };
     const frame = $("#ws-frame");
     const save = () => { work.html = ta.html.value; if (ta.css) work.css = ta.css.value; st.save(state); };
+    // The editors: the real textareas, colored, with line numbers. The start of the file is shown, locked.
+    const pageName = S.source === "debug" ? "Puffin Point Ice Cream" : b.name;
+    const shellTop = [
+      { text: "<!DOCTYPE html>", why: "Use modern HTML" },
+      { text: "<html lang=\"en\">", why: "The whole page, in English" },
+      { text: "<head>", why: "Information for the browser" },
+      { text: "  <meta charset=\"UTF-8\">", why: "Show every letter correctly" },
+      { text: `  <title>${pageName}</title>`, why: "The name in the browser tab" }
+    ].concat(S.css ? [{ text: "  <link rel=\"stylesheet\" href=\"style.css\">", why: "Use the CSS in style.css" }] : [], [{ text: "</head>" }, { text: "<body>", why: "Everything visitors see" }]);
+    const ed = {
+      html: SE.codeEditor(ta.html, { lang: "html", shellTop, shellBottom: [{ text: "</body>" }, { text: "</html>" }], foldTop: true }),
+      css: ta.css ? SE.codeEditor(ta.css, { lang: "css" }) : null
+    };
+    const refreshEditors = () => { ed.html.refresh(); if (ed.css) ed.css.refresh(); };
 
     /* Typing real code: insertText keeps the browser's own Undo history. */
     function typeAt(area, text, caretBack = 0) {
@@ -496,18 +582,34 @@
       });
       frame.srcdoc = out.doc;
     }
-    function findCode(wk) {
+    function findCode(wk, quiet) {
       const m = map.find((x) => String(x.i) === String(wk));
-      if (!m) return;
+      if (!m) return false;
       showTab("html");
-      const area = ta.html;
-      area.focus();
-      area.setSelectionRange(m.start, m.end);
-      const line = area.value.slice(0, m.start).split("\n").length - 1;
-      area.scrollTop = Math.max(0, line * 22 - 40);
+      ed.html.goTo(m.start, m.end);
       outline(wk);
       coach();
-      api.say(`Found it: the <${m.tag}> tag. It's selected in your code.`, "info");
+      if (!quiet) api.say(`Found it: the <${m.tag}> tag on line ${ed.html.lineOf(m.start)}. It's selected in your code.`, "info");
+      return true;
+    }
+    /* Find it for one issue: its own element when it has one, or where the missing part could go. */
+    function findIssue(key) {
+      const x = lastIssues.find((i) => i.key === key);
+      if (!x) return;
+      if (x.wk != null && findCode(x.wk, true)) {
+        api.say(`${x.label}: it's selected on line ${ed.html.lineOf(ta.html.selectionStart)}. ${x.how}`, "info");
+        return;
+      }
+      if (x.check === "phone") { $("#ws-phone").focus(); api.say("Press Phone above the preview to see your page the way a phone shows it.", "info"); return; }
+      if (x.check === "contrast" && ta.css) {
+        const c = WK.cssColors(ta.css.value).find((k) => /^color$/i.test(k.prop)) || WK.cssColors(ta.css.value)[0];
+        if (c) { showTab("css"); ed.css.goTo(c.start, c.end); api.say(`Here's a color in your CSS: ${c.selector} { ${c.prop} }. ${x.how}`, "info"); return; }
+      }
+      const p = insertPoint(x.check, ta.html.value, ta.css ? ta.css.value : "");
+      if (!p || (p.lang === "css" && !ta.css)) { api.say(`${x.label}: ${x.how}`, "info"); return; }
+      showTab(p.lang);
+      ed[p.lang].showInsertPoint(p.at, p.label);
+      api.say(`${p.label} (line ${p.lang === "html" ? ed.html.lineOf(p.at) : ta.css.value.slice(0, p.at).split("\n").length}). ${x.how}`, "info");
     }
     function outline(wk) {
       const d = frame.contentDocument;
@@ -518,21 +620,19 @@
     }
     function coach() {
       const out = $("#ws-coach");
+      // What does this do? A plain explanation of the code at the cursor (no AI: a dictionary of HTML and CSS).
       if (tab === "html") {
         const v = ta.html.value, c = ta.html.selectionStart;
         const lt = v.lastIndexOf("<", c - 1 < 0 ? 0 : c - 1);
         const m = lt >= 0 && v.slice(lt, lt + 30).match(/^<\/?([a-zA-Z][a-zA-Z0-9]*)/);
         const tag = m && m[1].toLowerCase();
-        out.textContent = tag && TAG_COACH[tag] ? TAG_COACH[tag] : "";
-        const here = map.filter((x) => x.start <= c).pop();
+        const x = SE.webStudio.explain(v, c, "html");
+        out.textContent = x ? `${x.title}: ${x.text}` : tag && TAG_COACH[tag] ? TAG_COACH[tag] : "";
+        const here = map.filter((y) => y.start <= c).pop();
         outline(here ? here.i : null);
       } else if (ta.css) {
-        const v = ta.css.value, c = ta.css.selectionStart;
-        const line = v.slice(v.lastIndexOf("\n", c - 1) + 1, (v.indexOf("\n", c) + 1 || v.length + 1) - 1);
-        const prop = (line.match(/^\s*([a-z-]+)\s*:/i) || [])[1];
-        const sel = (line.match(/^\s*([^{]+)\{/) || [])[1];
-        out.textContent = prop && CSS_COACH[prop.toLowerCase()] ? CSS_COACH[prop.toLowerCase()]
-          : sel ? `${sel.trim()} { } picks ${sel.trim() === "body" ? "the whole page" : `every <${sel.trim()}>`} to style.` : "";
+        const x = SE.webStudio.explain(ta.css.value, ta.css.selectionStart, "css");
+        out.textContent = x ? `${x.title}: ${x.text}` : "";
       }
     }
     function readerView() {
@@ -597,15 +697,18 @@
           : `<span class="ws-check__ask"><button type="button" class="btn btn--ghost btn--small" data-ok="${esc(c.key)}">Yes, it's clear</button>${c.wk != null ? `<button type="button" class="linkish" data-find="${c.wk}">Change it</button>` : ""}</span>`)
         : (c.wk != null ? `<button type="button" class="linkish" data-find="${c.wk}">Find it</button>` : "");
       const item = (c, st, detail = true) => `<li class="ws-check ws-check--${st}">${icon(st === "good" ? "check" : st === "fix" ? "alert" : "users")}<span><strong>${STATE_TEXT[st]}${c.id ? `: ${esc(LABEL[c.id])}` : ""}.</strong> ${detail ? esc(c.msg) : ""}</span>${!detail ? "" : st === "person" ? ask(c) : c.wk != null ? `<button type="button" class="linkish" data-find="${c.wk}">Find it</button>` : ""}</li>`;
+      // Every independent problem in this stage's checks, each with its own Find it (and keys that survive a re-check).
+      lastIssues = (res.issues || []).filter((x) => S.checks.includes(x.check));
       let html = "";
       if (mode === "summary") {
-        html = `<p class="ws-checks__h">Check found ${fixes.length} problem${fixes.length === 1 ? "" : "s"}: ${fixes.map((c) => esc(LABEL[c.id])).join(", ")}. Press Check my page again to find where they are.</p><ul class="ws-checklist">${fixes.map((c) => item(c, "fix", false)).join("")}</ul>`;
+        html = `<p class="ws-checks__h">Check found ${fixes.length} kind${fixes.length === 1 ? "" : "s"} of problem: ${fixes.map((c) => esc(LABEL[c.id])).join(", ")}. Press Show where they are to find each one.</p><ul class="ws-checklist">${fixes.map((c) => item(c, "fix", false)).join("")}</ul>`;
       } else {
-        // What to do comes first: fixes, then person checks. Passed checks fold into one line while there's work left.
+        // What to do comes first: every problem, then person checks. Passed checks fold into one line while there's work left.
         const goodLine = `<li class="ws-check ws-check--good">${icon("check")}<span><strong>Looks good:</strong> ${goods.map((c) => esc(LABEL[c.id])).join(", ")}.</span></li>`;
-        html = `<ul class="ws-checklist">${fixes.map((c) => item(c, "fix")).join("")}${persons.map((c) => item(c, "person")).join("")}${!goods.length ? "" : fixes.length || persons.length ? goodLine : goods.map((c) => item(c, "good")).join("")}</ul>`;
+        html = `${lastIssues.length ? `<p class="ws-checks__h">${lastIssues.length === 1 ? "1 thing needs a fix" : `${lastIssues.length} things need a fix`}:</p>${SE.webStudio.issueList(lastIssues)}` : ""}
+          <ul class="ws-checklist">${persons.map((c) => item(c, "person")).join("")}${!goods.length ? "" : fixes.length || persons.length ? goodLine : goods.map((c) => item(c, "good")).join("")}</ul>`;
       }
-      if (challenge) html += `<div class="ws-challenge"><p class="ws-checks__h">${icon("star")}Challenge mode goals</p><ul>${res.challenges.map((c) => `<li class="${c.done ? "is-done" : ""}">${icon(c.done ? "check" : "target")}${esc(c.label)}${c.done ? " (done)" : ""}</li>`).join("")}</ul></div>`;
+      html += levelUp(res);
       $("#ws-checks").innerHTML = html;
     }
     const FIX_WORDS = { h1: "Marked the main heading with <h1>", alt: "Gave every picture alt text", link: "Made the link words say where they go", contrast: "Made the text readable (contrast 4.5 to 1 or more)" };
@@ -634,8 +737,9 @@
       if (failing.length) {
         failed++;
         const names = failing.map((id) => LABEL[id]).join(", ");
-        api.say(summary ? `This page has ${failing.length} problems. Press Show where they are to find each one.`
-          : `${failing.length === 1 ? "1 thing" : `${failing.length} things`} to fix: ${names}. Start with the first one in the list.${help && failed >= 2 ? " Stuck? Press Need a hint? under your goal, or Show an example." : ""}`, "warn");
+        const n = lastIssues.length || failing.length;
+        api.say(summary ? `This page has ${failing.length} kinds of problem. Press Show where they are to find each one.`
+          : `${n === 1 ? "1 thing" : `${n} things`} to fix: ${names}. Each one has its own Find it.${failed >= 2 ? " Stuck? Press Show an Example, or Need a hint? under your goal." : ""}`, "warn");
         return;
       }
       const open = needsPeople ? res.person.filter((p) => p.key && /^(alt|link):/.test(p.key) && !confirmed[p.key]) : [];
@@ -647,7 +751,7 @@
       if (S.source === "ship") {
         shipReady = res;
         $("#ws-ship").hidden = false;
-        api.say("Every check passed. When you're happy with it, press Mark ready for review.", "good");
+        api.say("Every check passed. When you're happy with it, press Finish my website. It stays on this device: it isn't published on the internet.", "good");
         return;
       }
       win(res);
@@ -722,6 +826,10 @@
     $("#ws-undo").addEventListener("click", () => { ta[tab].focus(); document.execCommand("undo"); });
     $("#ws-redo").addEventListener("click", () => { ta[tab].focus(); document.execCommand("redo"); });
     $("#ws-checks").addEventListener("click", (e) => {
+      const iss = e.target.closest("[data-issue]");
+      if (iss) { findIssue(iss.dataset.issue); return; }
+      const hb = e.target.closest("[data-hint]");
+      if (hb) { const h = hb.closest(".wsi__i").querySelector(".wsi__hint"); h.hidden = !h.hidden; hb.setAttribute("aria-expanded", String(!h.hidden)); hb.textContent = h.hidden ? "Show me a hint" : "Hide the hint"; return; }
       const f = e.target.closest("[data-find]");
       if (f) { findCode(f.dataset.find); return; }
       const ok = e.target.closest("[data-ok]");
@@ -742,22 +850,32 @@
         state.shipFrom = "blank";
         api.say("Blank page: build it your way. Show my earlier page lets you look back.", "info");
       }
-      save(); render(); colors(); start.remove(); ta.html.focus();
+      save(); render(); colors(); refreshEditors(); start.remove(); ta.html.focus();
     });
     $("#ws-reset").addEventListener("click", (e) => {
       if (!confirmReset) { confirmReset = true; e.currentTarget.textContent = "Yes, start over"; api.say("This puts your code back the way it was when you started this stage. Press again to do it.", "info"); return; }
       const snap = state.snap[idx];
       ta.html.value = snap.html; if (ta.css) ta.css.value = snap.css;
-      save(); render(); colors(); confirmReset = false; e.currentTarget.textContent = "Start over";
+      save(); render(); colors(); refreshEditors(); confirmReset = false; e.currentTarget.textContent = "Start over";
       api.say("Your code is back to the start of this stage.", "info");
     });
-    const exBtn = $("#ws-example");
-    if (exBtn) exBtn.addEventListener("click", () => {
-      const snippet = S.example(b);
-      if (S.css && /\{/.test(snippet)) { showTab("css"); ta.css.setSelectionRange(ta.css.value.length, ta.css.value.length); typeAt(ta.css, (ta.css.value.trim() ? "\n" : "") + snippet); }
-      else { showTab("html"); ta.html.setSelectionRange(ta.html.value.length, ta.html.value.length); typeAt(ta.html, (ta.html.value.endsWith("\n") || !ta.html.value ? "" : "\n") + snippet); }
-      api.say("An example is in your code now. Change the words to make it yours.", "info");
+    /* Show an Example: always here. A working example and the website it makes, side by side. It never goes into
+       the student's code by itself: Insert a starter at my cursor says what it adds and asks first. */
+    $("#ws-example").addEventListener("click", () => {
+      const e = exampleFor(idx, b);
+      api.log("lab_example", { stage: idx });
+      SE.webStudio.showExample({
+        title: `Show an Example: ${S.concept}`, html: e.html, css: e.css, notes: e.notes, snippet: e.snippet, snippetLang: e.snippetLang,
+        onInsert(text, lang) {
+          const area = lang === "css" && ta.css ? ta.css : ta.html;
+          showTab(area === ta.css ? "css" : "html");
+          const before = area.value.slice(0, area.selectionStart);
+          typeAt(area, (before && !before.endsWith("\n") ? "\n" : "") + text + "\n");
+          api.say("The starter is in your code at the cursor. Change the words to make it yours.", "info");
+        }
+      });
     });
+    $("#ws-tags").addEventListener("click", () => SE.webStudio.tagExplorer({ lessonOf: (t) => TAG_LESSON[t] || "" }));
     const earlier = $("#ws-earlier");
     if (earlier) earlier.addEventListener("click", () => { const p = $("#ws-earlier-code"); p.hidden = !p.hidden; earlier.setAttribute("aria-expanded", String(!p.hidden)); });
     /* The preview: Desktop, Phone, or the Screen reader view (the page still renders behind it, for checks). */
@@ -776,9 +894,6 @@
     $("#ws-desk").addEventListener("click", () => setView("desk"));
     $("#ws-phone").addEventListener("click", () => setView("phone"));
     $("#ws-sr").addEventListener("click", () => setView(reader ? "desk" : "reader"));
-    $("#ws-big").addEventListener("click", (e) => { big = !big; flag("stem207.website.big", big); $("#ws").classList.toggle("ws--big", big); e.currentTarget.setAttribute("aria-pressed", String(big)); });
-    $("#ws-help").addEventListener("click", (e) => { help = !help; flag("stem207.website.help", help); $("#ws").classList.toggle("ws--help", help); e.currentTarget.setAttribute("aria-pressed", String(help)); });
-    $("#ws-challenge").addEventListener("click", (e) => { challenge = !challenge; flag("stem207.website.challenge", challenge); e.currentTarget.setAttribute("aria-pressed", String(challenge)); api.say(challenge ? "Challenge mode is on. Press Check my page to see the extra goals." : "Challenge mode is off.", "info"); });
 
     render();
     if (S.cssFirst) showTab("css");   // a stage about CSS opens on the CSS tab

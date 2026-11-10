@@ -11,8 +11,8 @@ An original STEM 207 workshop (2026).
 | **What students do** | Plan, code, test, and ship a web page for a made-up Maine business in real HTML and CSS. |
 | **What they make** | A finished web page and a printed project summary. |
 | **What they earn** | The **First Website Shipped** certificate, for finishing stage 8. |
-| **Grades 2–3** | Aim for stage 5 (Give Your Website Style), with Extra help on. |
-| **Early finishers** | Challenge mode goals, then the Web Builder Lab. |
+| **Grades 2–3** | Aim for stage 5 (Give Your Website Style). Show an Example is always on screen. |
+| **Early finishers** | Level Up: Try This Next goals, then the Web Builder Lab. |
 | **Prep** | About 10 minutes. |
 
 ## Learning objectives
@@ -53,7 +53,7 @@ Stages 2–6 grow one project.
 | 6 | Build for Everyone | Accessibility | Fix what Check finds, and raise contrast to at least 4.5 to 1. Then open the **Screen reader** view and confirm each alt text and link out loud (**Yes, it's clear** or **Change it**). | `h1`, alt text, link words, contrast, plus each alt text and link confirmed by the student | |
 | | **Part 4: Debug and ship** | | | | **26** |
 | 7 | Fix the Broken Website | Debugging | Find and fix four bugs on another developer's page (Puffin Point Ice Cream). The first Check names the kinds of problems; the button then reads **Show where they are**. | All four bugs fixed | |
-| 8 | Ship Your First Website | Create | Choose **Start from my page** or **Start blank (challenge)**, look at it on the Phone preview, press **Check my page**, and when every check passes, press **Mark ready for review**. | Every check, plus it fits a phone, the Phone preview was used, and 20+ of their own words | |
+| 8 | Ship Your First Website | Create | Choose **Start from my page** or **Start blank (challenge)**, look at it on the Phone preview, press **Check my page**, and when every check passes, press **Finish my website**. | Every check, plus it fits a phone, the Phone preview was used, and 20+ of their own words | |
 
 **Check my page** gives each check one of three results:
 - **Looks good**
@@ -100,7 +100,8 @@ The feedback line sums up what to fix ("2 things to fix: Alt text, Link"). The f
 Times are targets and haven't been tested with classes yet. Nothing times students out.
 
 ## Running it
-- **No web experience is needed to teach it.** Every stage's third hint is a small working example. Extra help adds **Show an example** for the student's own business.
+- **No web experience is needed to teach it.** Every stage's third hint is a small working example, and **Show an Example** is always in the toolbar: a working example (a page about Maine moose) beside the website it makes. Students tap a line to see what it makes, try changes in a copy, and can insert a small starter at their cursor (it asks first). It never fills in their page for them.
+- **Every problem gets its own Find it.** Check my page lists each problem separately, with what's wrong, why it matters, and how to fix it. Find it selects that problem's code, or shows a dashed "add it here" line for a missing part.
 - **"It's broken."** Ask the student to tap the part that looks wrong with **Find it**. The code that made it is selected.
 - **The rest of the page went big or bold.** A closing tag is missing. Ask them to find the tag that opens and doesn't close.
 - **Read the first Needs a fix.** Students fix one thing, then check again. Don't let them try to fix everything at once.
@@ -155,13 +156,12 @@ Stage 7 reveals the bugs in three steps: the first Check names the kinds of prob
 - "Bigger words make a heading." An `<h1>` tells browsers and screen readers what the page is about. Big text in a `<p>` doesn't.
 
 ## Differentiation
-- **Extra help:** **Show an example** for the student's business, and a nudge toward Need a hint? after two tries.
-- **Bigger code** (next to Extra help): a larger Tag Shelf and code text for anyone, with no other change.
-- **Grades 2–3:** aim for stage 5, with Extra help on. Plan stage 1 together as a class.
-- **Challenge mode** (grades 5–8 and early finishers). Its goals never block a stage:
+- **Support for everyone:** **Show an Example** is always there, **What does this do?** explains the code at the cursor, the **Tag Explorer** shows each tag with a small preview, and after two tries the feedback points to Show an Example and Need a hint?. For larger text, use the browser's zoom (Ctrl and +): the code box grows with it.
+- **Grades 2–3:** aim for stage 5. Plan stage 1 together as a class.
+- **Level Up: Try This Next** (grades 5–8 and early finishers), folded under the Check my page results. Each goal says what it practices and what success looks like, ticks when Check my page sees it, and never blocks a stage:
   - two sections with `<h2>` headings;
   - a second link that jumps to another section;
-  - a business hours section;
+  - a part of the page grouped in a `<section>` with its own heading;
   - a second picture with alt text;
   - a theme where all text has 7 to 1 contrast;
   - fitting a phone screen.

@@ -1163,7 +1163,7 @@ button.cc-cell:focus-visible { outline: 3px solid #b4006a; outline-offset: -3px;
 /* Secondary controls are compact chips (36px); Check my page stays a full 44px+ button. */
 .ws__toggles .btn--small, .ws-size .btn--small, .ws-actions .btn--small, .ws-start .btn--small { min-height: 36px; padding: .3rem .7rem; font-size: .85rem; gap: .3rem; }
 /* Tag Shelf chips sit on one line ("Main heading <h1>"), so a full shelf takes two rows, not three. */
-.ws:not(.ws--big) .ws-tag { flex-direction: row; align-items: center; gap: .35rem; min-height: 36px; padding: .2rem .55rem; }
+.ws .ws-tag { flex-direction: row; align-items: center; gap: .35rem; min-height: 36px; padding: .2rem .55rem; }
 .ws-tabrow { display: flex; align-items: flex-end; justify-content: space-between; gap: .5rem; }
 .ws-undo { display: flex; gap: .6rem; }
 .ws-undo .linkish { min-height: 32px; display: inline-flex; align-items: center; gap: .25rem; font-size: .9rem; }
@@ -1180,13 +1180,8 @@ button.cc-cell:focus-visible { outline: 3px solid #b4006a; outline-offset: -3px;
 .ws-tag code { font-family: ui-monospace, Consolas, "Courier New", monospace; font-size: .78rem; color: var(--teal); background: none; }
 .ws-tag:hover { background: color-mix(in srgb, #2a4f84 12%, var(--surface)); }
 .ws-tag:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-.ws--big .ws-tag { min-height: 52px; font-size: .9rem; }
-.ws--big .ws-tag code { font-size: .9rem; }
-.ws-help-only { display: none; }
-.ws--help .ws-help-only { display: inline-flex; }
 .ws-code { width: 100%; min-height: 12rem; font-family: ui-monospace, Consolas, "Courier New", monospace; font-size: 1rem; line-height: 1.4; padding: .6rem; border: 1.5px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--fg); tab-size: 2; resize: vertical; }
 .ws-code:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
-.ws--big .ws-code { font-size: 1.15rem; }
 /* Stage 8: start from my page, or blank */
 .ws-start { display: grid; gap: .35rem; padding: .45rem .6rem; border: 2px solid var(--teal); border-radius: var(--radius-sm); background: var(--teal-soft); font-size: .92rem; }
 .ws-start p { margin: 0; }
@@ -1240,11 +1235,11 @@ button.cc-cell:focus-visible { outline: 3px solid #b4006a; outline-offset: -3px;
 .ws-check--good { background: var(--teal-soft); border-color: var(--teal); }
 .ws-check--fix { background: #fdecea; border-color: #b42318; color: #5c1610; }
 .ws-check--person { background: var(--surface-2); border-color: #7a5a0e; }
-.ws-challenge { margin-top: .5rem; padding: .5rem .6rem; border: 1.5px dashed var(--line); border-radius: var(--radius-sm); }
-.ws-challenge ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .2rem; font-size: .9rem; }
-.ws-challenge li { display: flex; gap: .35rem; align-items: center; }
-.ws-challenge svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 2; }
-.ws-challenge li.is-done { font-weight: 700; }
+.ws-levelup { margin-top: .5rem; padding: .5rem .6rem; border: 1.5px dashed var(--line); border-radius: var(--radius-sm); }
+.ws-levelup ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .2rem; font-size: .9rem; }
+.ws-levelup li { display: flex; gap: .35rem; align-items: center; }
+.ws-levelup svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 2; }
+.ws-levelup li.is-done strong { font-weight: 700; }
 .ws-cheer { display: flex; gap: .4rem; align-items: center; font-weight: 800; font-size: 1.05rem; margin: 0 0 .6rem; }
 .ws-cheer svg { width: 1.3rem; height: 1.3rem; fill: none; stroke: var(--teal); stroke-width: 2.6; }
 /* Stage 1: plan */
@@ -1799,3 +1794,19 @@ button.cc-cell:focus-visible { outline: 3px solid #b4006a; outline-offset: -3px;
 @media (max-width: 760px) { .wse, .wst, .wst__ex { grid-template-columns: minmax(0, 1fr); } }
 .ce__hl code, .ce__sline code { padding: 0; border: 0; border-radius: 0; background: none; font: inherit; color: inherit; }
 .ce .ce__marks { right: 0; bottom: 0; }
+.ce__fold > summary { display: flex; align-items: center; min-height: 28px; padding: 0 .6rem 0 3.1rem; cursor: pointer; font: .8rem/1.4 var(--font-body, sans-serif); color: var(--muted); }
+.ce__fold > summary:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
+.ce__fold[open] > summary { margin-bottom: .15rem; }
+
+.ws-levelup > summary { display: flex; align-items: center; gap: .35rem; min-height: 32px; cursor: pointer; font-weight: 700; }
+.ws-levelup li { align-items: flex-start; }
+.ws-levelup li svg { margin-top: .2rem; flex: none; }
+.ws-file { font-weight: 400; font-size: .82em; opacity: .85; }
+.ws .ws-checks__h { margin: .2rem 0 .4rem; }
+/* Short screens (a Chromebook): the code box gives up height so Check my page stays on the first screen. The
+   Esc-then-Tab tip is still read by screen readers (aria-describedby), just not drawn. */
+@media (max-height: 760px) and (min-width: 1000px) {
+  .ws .ce .ce__input { min-height: 0; height: 9.6rem; }
+  .ws .ce__keys { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; padding: 0; border: 0; }
+  .ws .ce__fold > summary { min-height: 24px; }
+}

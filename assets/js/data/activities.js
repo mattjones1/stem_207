@@ -6138,7 +6138,7 @@ window.STEM.activities = [
       "Build your own page, look at it on the Phone preview, and mark it ready for review."
     ],
     reflect: "What does your website help people do? What changed after you tested your design, and how did you make the page easier for more people to use?",
-    extend: "Turn on Challenge mode: add a store hours section with a second link that jumps to it, a second picture, and a color theme where all the text has 7 to 1 contrast.",
+    extend: "Try the Level Up goals under Check my page: a second section with its own link, a second picture with alt text, and a color theme where all the text has 7 to 1 contrast.",
     teacherNotes: [
       "Workshop flow (90 minutes): welcome, what is a website? 8 minutes. Wireframe and five-second partner test, 12. HTML: headings, paragraphs, lists, pictures, links (stages 2–4), 17. CSS (stage 5), 12. Accessibility and contrast (stage 6), 10. Debug the broken page (stage 7), 10. Build and ship (stage 8), 16. Showcase and reflection, 5. These are targets and haven't been tested with classes yet; nothing times students out.",
       "No web experience needed to teach it. Demo stage 2 on the projector: type <h1>, the business name, </h1>, and watch the preview. Then show the Tag Shelf, which types the same real tags for students who need it.",
@@ -6147,7 +6147,7 @@ window.STEM.activities = [
       "Stage 7 answer guide: change <p class=\"title\"> to <h1> (or <h1 class=\"title\">); add alt text to the picture, like alt=\"A lighthouse by the harbor\"; change \"click here\" to words like \"See all our flavors\"; and make the body text darker, like color: #333333. Any valid fix passes.",
       "Check my page gives three outcomes: Looks good, Needs a fix, and Check with a person. It can tell that alt text and link words exist and aren't generic, but only a person can judge whether they're good. The contrast check uses WCAG's formula and asks for 4.5 to 1 for all text (WCAG allows 3 to 1 for large text). Passing these checks doesn't mean a page is fully accessible.",
       "Rubric for the final page: Structure (one h1, a paragraph, a list); Media (a picture with meaningful alt text, a link with clear words); Style (background, text color, one more choice); Access (readable contrast, fits a phone); Process (plan, tester feedback, and fixes the student can explain).",
-      "Grades 2–3: aim for stage 5, with Extra help on (Show an example, and clues after two tries); Bigger code makes the Tag Shelf and code larger for anyone. On stage 8, most grades 4–5 students should choose Start from my page. Grades 5–8 can turn on Challenge mode for more sections, links, and a stronger color theme. Ask afterward: who did your website help, and what did you change because of a real person's feedback?"
+      "Grades 2–3: aim for stage 5. Show an Example is always on screen, and after two tries the feedback points to it and to Need a hint?. For bigger text, use the browser zoom. On stage 8, most grades 4–5 students should choose Start from my page. Grades 5–8 can work on the Level Up goals under Check my page for more sections, links, and a stronger color theme. Ask afterward: who did your website help, and what did you change because of a real person's feedback?"
     ]
   },
   {
