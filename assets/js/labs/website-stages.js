@@ -55,25 +55,25 @@
     },
     {
       title: "Build the Bones", concept: "HTML structure", kind: "code", source: "project",
-      goal: "Write a main heading with <h1> and a paragraph with <p> about your business.",
-      steps: ["Type a main heading: <h1>, the business name, then </h1>.", "Add a paragraph about the business: <p>…</p>.", "Change the words in your heading and watch the preview change."],
-      hints: ["Tags come in pairs. <h1> opens the heading and </h1> closes it.", "HTML tells the browser what each part means. <h1> means the page's main heading, not just big words.", "Try: <h1>Casco Bay Bakery</h1> then <p>Fresh bread every morning.</p>"],
+      goal: "Write a main heading with <h1> and a paragraph with <p> about your website's idea.",
+      steps: ["Type a main heading: <h1>, your website's name, then </h1>.", "Add your opening sentence in a paragraph: <p>…</p>.", "Change the words in your heading and watch the preview change."],
+      hints: ["Tags come in pairs. <h1> opens the heading and </h1> closes it.", "HTML tells the browser what each part means. <h1> means the page's main heading, not just big words.", "Try: <h1>Maine Moose Facts</h1> then <p>Moose love ponds and lakes.</p>"],
       learned: "HTML gives a page its structure. An <h1> tells people and screen readers what the whole page is about.",
       tags: ["h1", "p"], checks: ["h1", "p"], example: (b) => ex.bones(b)
     },
     {
       title: "Tell Your Story", concept: "Paragraphs and lists", kind: "code", source: "project",
-      goal: "Add a section heading with <h2> and a list of what your business offers.",
-      steps: ["Add a section heading: <h2>…</h2>.", "Add a list: <ul>, then one <li> for each thing you offer, then </ul>.", "Use your own words."],
-      hints: ["A list is one <ul> with several <li> items inside it.", "<h2> is a smaller heading for one part of the page. It helps people find their way.", "<ul>\n  <li>Blueberry muffins</li>\n  <li>Sourdough bread</li>\n</ul>"],
+      goal: "Add a section heading with <h2> and a list of the three things visitors should see.",
+      steps: ["Add a section heading: <h2>…</h2>.", "Add a list: <ul>, then one <li> for each thing, then </ul>.", "Use your own words."],
+      hints: ["A list is one <ul> with several <li> items inside it.", "<h2> is a smaller heading for one part of the page. It helps people find their way.", "<ul>\n  <li>Where moose live</li>\n  <li>What moose eat</li>\n</ul>"],
       learned: "HTML describes what information is: a heading, a paragraph, a list. That structure helps every visitor, including people using screen readers.",
       tags: ["h2", "p", "ul", "ol", "li"], checks: ["h1", "p", "h2", "list"], example: (b) => ex.story(b)
     },
     {
       title: "Connect and Illustrate", concept: "Links and images", kind: "code", source: "project",
       goal: "Add a picture with alt text, and a link with clear words that jumps to a part of your page.",
-      steps: ["Add a picture: <img src=\"muffins.svg\" alt=\"…\">. Pick the picture for your business.", "Write alt text that says what's in the picture.", "Give your <h2> an id, like <h2 id=\"menu\">.", "Add a link to it: <a href=\"#menu\">See our bakery menu</a>."],
-      hints: ["The pictures you can use are muffins.svg, kayak.svg, and tackle.svg. The Picture button types yours.", "Alt text is read aloud for people who can't see the picture. Link words should say where the link goes, not \"click here\".", "<a href=\"#menu\"> jumps to the part of the page with id=\"menu\"."],
+      steps: ["Add a picture: <img src=\"moose.svg\" alt=\"…\">. The Picture button types the one from your plan.", "Write alt text that says what's in the picture.", "Give your <h2> an id, like <h2 id=\"facts\">.", "Add a link to it: <a href=\"#facts\">See the fun facts</a>."],
+      hints: ["You can use any built-in picture, like moose.svg, rocket.svg, or soccer.svg. The Picture button types yours.", "Alt text is read aloud for people who can't see the picture. Link words should say where the link goes, not \"click here\".", "<a href=\"#facts\"> jumps to the part of the page with id=\"facts\"."],
       learned: "Images need alt text, and links need words that say where they go. Those two habits make the web work for more people.",
       tags: ["img", "a", "id"], checks: ["h1", "p", "list", "img", "alt", "link"], example: (b) => ex.media(b)
     },
@@ -103,8 +103,8 @@
     },
     {
       title: "Ship Your First Website", concept: "Create", kind: "code", source: "ship", css: true,
-      goal: "Build your business's page: heading, paragraph, list, picture with alt text, a clear link, your own styles, and readable colors. Check it on a phone, then mark it ready.",
-      steps: ["Choose: start from your page, or start blank for a challenge.", "Look back at your wireframe. Write the HTML, then the CSS.", "Look at the Phone preview.", "Press Check my page and fix what it finds.", "When every check passes, press Mark ready for review."],
+      goal: "Finish your website: heading, paragraph, list, picture with alt text, a clear link, your own styles, and readable colors. Check it on a phone, then finish it.",
+      steps: ["Choose: start from your page, or start blank for a challenge.", "Open My plan. Write the HTML, then the CSS.", "Look at the Phone preview.", "Press Check my page and fix what it finds.", "When every check passes, press Finish my website."],
       hints: ["Start with the bones: <h1> and <p>. Then add the rest one piece at a time.", "Check often. Each check tells you the next thing the page needs.", "Look back at your earlier page with Show my earlier page. You can type the same tags again."],
       learned: "You planned a website, wrote the code, tested it, fixed mistakes, and made a page other people can understand and use.",
       tags: ["h1", "h2", "p", "ul", "li", "img", "a", "id"], checks: ["h1", "p", "list", "img", "alt", "link", "style", "contrast", "narrow", "phone", "own"]

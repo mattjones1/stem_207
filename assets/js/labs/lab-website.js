@@ -17,7 +17,7 @@
   const { icon, esc } = SE;
   const WK = SE.webKit;
   const { BUSINESSES, STAGES, BROKEN, SHIP, ex } = SE.websiteStages;
-  const { EXAMPLES, TAG_LESSON } = SE.websiteLessons;
+  const { EXAMPLES, LESSONS, PUZZLES, TAG_LESSON } = SE.websiteLessons;
   const exampleFor = (idx) => EXAMPLES[idx] || EXAMPLES[1];
   const LAB = "build-your-first-website";
   const PIC_NAMES = Object.keys(WK.PICTURES);
@@ -318,7 +318,7 @@
   }
   /* A starting page for a stage, built from the stages before it (for a student who starts partway). */
   function seed(idx, b) {
-    if (idx <= 1) return { html: "<h1></h1>\n", css: "" };
+    if (idx <= 1) return { html: "<h1></h1>\n<!-- Your opening sentence goes here, in a <p> -->\n", css: "" };
     let html = ex.bones(b);
     if (idx >= 3) html += ex.story(b);
     if (idx >= 4) html += ex.media(b);
@@ -348,6 +348,11 @@
     const bucket = S.source === "project" ? "project" : S.source;   // project (stages 2–6), debug, ship
     if (!state[bucket] || typeof state[bucket].html !== "string") state[bucket] = S.source === "debug" ? { ...BROKEN } : S.source === "ship" ? { ...SHIP } : seed(idx, b);
     state.snap = state.snap || {};
+    // Starter code: on a page that doesn't have this stage's part yet, a comment says where the new part goes.
+    // It's added once, only to a project page, and never replaces anything.
+    const GUIDE = { 2: [/<h2|<ul|<ol/i, "<!-- Stage 3: add an <h2> section heading and a <ul> list here -->"], 3: [/<img|<a\s/i, "<!-- Stage 4: add a picture (<img>) and a link (<a>) here -->"] };
+    if (S.source === "project" && !state.snap[idx] && GUIDE[idx] && !GUIDE[idx][0].test(state.project.html)) state.project.html = state.project.html.replace(/\s*$/, "\n") + GUIDE[idx][1] + "\n";
+    if (S.source === "project" && idx === 4 && !state.snap[idx] && !String(state.project.css || "").trim()) state.project.css = "/* Stage 5: style your page here. Start with a body { } rule. */\n";
     if (!state.snap[idx]) state.snap[idx] = { ...state[bucket] };   // what Start over goes back to
     state.viewed = state.viewed || {};
     state.fixes = state.fixes || [];
@@ -688,6 +693,7 @@
       const res = checks(d, ctx);
       res.challenges = challenges(d, ctx);
       const failing = S.checks.filter((id) => res.results[id].state === "fix");
+      milestones(res, state, prev, st);
       // Notice accessibility fixes the student made (stages 6–8), for the finished-website screen.
       ["h1", "alt", "link", "contrast"].forEach((id) => {
         if (prev[id] === "fix" && res.results[id] && res.results[id].state === "good" && !state.fixes.includes(FIX_WORDS[id])) state.fixes.push(FIX_WORDS[id]);
@@ -865,8 +871,122 @@
 
     render();
     if (S.cssFirst) showTab("css");   // a stage about CSS opens on the CSS tab
+    lessonStepper(idx, api, { example: () => $("#ws-example").click(), check: () => $("#ws-check").click(), focusCode: () => ta[tab].focus() });
     if (S.source === "debug") api.say("Another developer left this page with four problems. Press Check my page to start investigating.", "info");
     return () => { clearTimeout(timer); SE.speech.stop(); };
+  }
+
+  /* ───────── Lessons: learn first, then try (the left panel on code stages) ───────── */
+  /* Words from the glossary become toggletips, so a student never has to leave to look one up. */
+  function teach(text) {
+    let out = esc(text);
+    const done = new Set();
+    Object.keys(SE.webStudio.GLOSSARY).forEach((w) => {
+      if (done.has(w)) return;
+      const re = new RegExp(`\\b(${w.replace(/ /g, "\\s")})\\b`, "i");
+      if (re.test(out) && !/&lt;[^&]*$/.test(out.split(re)[0])) { out = out.replace(re, (m) => SE.webStudio.term(w, m)); done.add(w); }
+    });
+    return out;
+  }
+  function lessonStepper(idx, api, hooks) {
+    const L = LESSONS[idx], S = STAGES[idx];
+    const brief = document.querySelector(".lab-brief");
+    if (!L || !brief) return;
+    const steps = [
+      { t: "What we're building", body: `<p>${teach(L.building)}</p>` },
+      { t: "Why it matters", body: `<p>${teach(L.why)}</p>` },
+      ...L.learn.map((c) => ({ t: `Learn: ${c.h}`, body: `${c.say.map((s) => `<p>${teach(s)}</p>`).join("")}${c.code ? `<pre class="wl__code"><code>${esc(c.code)}</code></pre>` : ""}` })),
+      { t: "See a working example", body: `<p>See the code beside the website it makes. It's about a different topic, so it shows the idea without doing your page for you.</p><button type="button" class="btn btn--ghost btn--small" data-wl="example">${icon("eye")}Show an Example</button>` },
+      { t: "Start coding", body: `<p>${teach(L.start)}</p><button type="button" class="btn btn--ghost btn--small" data-wl="code">${icon("code")}Go to my code</button>` },
+      ...L.experiments.map((x, n) => ({ t: L.experiments.length > 1 ? `Try an experiment (${n + 1} of ${L.experiments.length})` : "Try an experiment", body: x.detective
+        ? `<p>${teach(x.predict)}</p><button type="button" class="btn btn--ghost btn--small" data-wl="detective">${icon("search")}Open Debug Detective</button>`
+        : `<p><strong>${teach(x.predict)}</strong></p>${x.options.length ? `<p class="muted small">Predict first, then try it in your code.</p><div class="wl__opts" role="group" aria-label="Your prediction">${x.options.map((o, k) => `<button type="button" class="btn btn--ghost btn--small" data-guess="${k}" data-x="${n}">${esc(o)}</button>`).join("")}</div><p class="wl__why" data-why="${n}" role="status"></p>` : `<p class="muted">${teach(x.explain)}</p>`}` })),
+      { t: "Check your understanding", body: `<p>${teach(L.check)}</p><button type="button" class="btn btn--primary btn--small" data-wl="check">${icon("check")}Check my page</button>` },
+      { t: "Common mistakes", body: `<ul>${L.mistakes.map((m) => `<li>${teach(m)}</li>`).join("")}</ul>` },
+      { t: "What you just learned", body: `<p>${teach(S.learned)}</p>` }
+    ];
+    const key = `stem207.website.lesson.${idx}`;
+    let at = 0;
+    try { at = Math.min(steps.length - 1, Number(sessionStorage.getItem(key)) || 0); } catch (e) { /* private mode */ }
+    const box = document.createElement("section");
+    box.className = "wl";
+    box.setAttribute("aria-labelledby", "wl-h");
+    const old = brief.querySelector(".lab-steps");
+    if (old) old.replaceWith(box); else brief.appendChild(box);
+    function draw(focus) {
+      const s = steps[at];
+      box.innerHTML = `<p class="wl__top"><span class="eyebrow">Lesson</span><span class="wl__n">${at + 1} of ${steps.length}</span></p>
+        <ol class="wl__dots" aria-hidden="true">${steps.map((_, i) => `<li class="${i === at ? "is-on" : i < at ? "is-done" : ""}"></li>`).join("")}</ol>
+        <h3 id="wl-h" tabindex="-1">${esc(s.t)}</h3>
+        <div class="wl__body">${s.body}</div>
+        <div class="wl__nav">${at ? `<button type="button" class="btn btn--ghost btn--small" data-wl="back">${icon("arrowLeft")}Back</button>` : ""}${at < steps.length - 1 ? `<button type="button" class="btn btn--primary btn--small" data-wl="next">Next${icon("arrowRight")}</button>` : ""}</div>`;
+      try { sessionStorage.setItem(key, String(at)); } catch (e) { /* private mode */ }
+      if (focus) box.querySelector("#wl-h").focus({ preventScroll: false });
+    }
+    box.addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      const w = b.dataset.wl;
+      if (w === "next") { at++; draw(true); }
+      else if (w === "back") { at--; draw(true); }
+      else if (w === "example") hooks.example();
+      else if (w === "check") hooks.check();
+      else if (w === "code") hooks.focusCode();
+      else if (w === "detective") debugDetective(api);
+      else if (b.dataset.guess) {
+        const x = L.experiments[Number(b.dataset.x)], k = Number(b.dataset.guess);
+        box.querySelectorAll(`[data-x="${b.dataset.x}"]`).forEach((o) => o.setAttribute("aria-pressed", String(o === b)));
+        box.querySelector(`[data-why="${b.dataset.x}"]`).innerHTML = `${k === x.answer ? "<strong>Good prediction!</strong> " : "<strong>Let's see.</strong> "}${teach(x.explain)} Try it in your code and watch the preview.`;
+        api.log("lab_predict", { stage: idx, right: k === x.answer });
+      }
+    });
+    draw(false);
+  }
+  /* Debug Detective: small broken pages, one bug each, in their own editor. They never touch the student's page. */
+  function debugDetective(api) {
+    const solved = new Set();
+    SE.modal.open({
+      title: "Debug Detective", wide: true,
+      body: `<p>Each page has one bug. Find it, fix it, and press Check my fix. These pages are practice: your website doesn't change.</p>
+        <div class="wdd"><div class="wdd__list" role="group" aria-label="Puzzles">${PUZZLES.map((p, i) => `<button type="button" class="wst__tag" data-pz="${i}" aria-pressed="${i === 0}"><span>${i + 1}. ${esc(p.title)}</span><b class="wdd__ok" data-ok="${i}"></b></button>`).join("")}</div>
+        <div class="wdd__work" id="wdd-work"></div></div>`,
+      onOpen(dlg) {
+        let cur = 0;
+        const show = (i) => {
+          cur = i;
+          const p = PUZZLES[i];
+          dlg.querySelectorAll("[data-pz]").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.pz) === i)));
+          dlg.querySelector("#wdd-work").innerHTML = `<h3>${esc(p.title)}</h3>
+            <label class="visually-hidden" for="wdd-code">The broken code</label>
+            <textarea id="wdd-code" class="ws-code" rows="5" spellcheck="false">${esc(p.html)}</textarea>
+            <iframe class="ws-mini" id="wdd-frame" title="What the broken code makes" sandbox="allow-same-origin"></iframe>
+            <div class="wdd__btns"><button type="button" class="btn btn--primary btn--small" id="wdd-check">${icon("check")}Check my fix</button><button type="button" class="linkish" id="wdd-clue">Give me a clue</button><button type="button" class="linkish" id="wdd-reset">Start this one over</button></div>
+            <p class="wdd__say" id="wdd-say" role="status"></p>`;
+          const code = dlg.querySelector("#wdd-code"), frame = dlg.querySelector("#wdd-frame");
+          const draw = () => { frame.srcdoc = WK.srcdoc(code.value, { css: "body{font-family:system-ui,sans-serif;margin:.5rem}" }); };
+          code.addEventListener("input", draw); draw();
+          dlg.querySelector("#wdd-clue").addEventListener("click", () => { dlg.querySelector("#wdd-say").textContent = p.clue; });
+          dlg.querySelector("#wdd-reset").addEventListener("click", () => { code.value = p.html; draw(); dlg.querySelector("#wdd-say").textContent = ""; });
+          dlg.querySelector("#wdd-check").addEventListener("click", () => {
+            const ok = p.fixed(code.value);
+            dlg.querySelector("#wdd-say").innerHTML = ok ? `<strong>Bug fixed!</strong> ${esc(p.explain)}` : "Not yet. Look at the preview: what looks wrong? Try the clue.";
+            if (ok && !solved.has(cur)) { solved.add(cur); dlg.querySelector(`[data-ok="${cur}"]`).innerHTML = `${icon("check")}<span class="visually-hidden"> solved</span>`; api.log("lab_debug_puzzle", { puzzle: cur }); }
+          });
+        };
+        dlg.querySelector(".wdd__list").addEventListener("click", (e) => { const b = e.target.closest("[data-pz]"); if (b) show(Number(b.dataset.pz)); });
+        show(0);
+      }
+    });
+  }
+  /* Milestones: real learning moments, said once, lightly. */
+  function milestones(res, state, prev, st) {
+    state.milestones = state.milestones || [];
+    const R = res.results, hit = [];
+    const once = (k, msg) => { if (!state.milestones.includes(k)) { state.milestones.push(k); hit.push(msg); } };
+    if (R.h1 && R.h1.state === "good") once("heading", "Milestone: your first heading is on the page!");
+    if (R.link && R.link.state === "good") once("link", "Milestone: your first working link!");
+    if (["h1", "alt", "link", "contrast"].some((id) => prev[id] === "fix" && R[id] && R[id].state === "good")) once("fix", "Milestone: you found and fixed your first bug!");
+    if (hit.length) { st.save(state); if (SE.toast) SE.toast(hit[0]); }
   }
 
   /* The student's page as one HTML file to copy: the same allowlist, pictures named (not embedded), no outside requests. */
