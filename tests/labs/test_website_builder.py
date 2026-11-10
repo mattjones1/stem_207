@@ -1,0 +1,219 @@
+# STEM 207 Website Builder (wb-interview.js, lab-wb.js): the whole journey the way a student takes it. The welcome
+# says the builder isn't AI; the interview asks one thing at a time; the review lets each answer be edited; Build
+# makes real HTML and CSS; the Coding Studio teaches by changing it. Each activity passes on real edits and not on
+# none; Make a Change shows Before → After and the diff, Cancel changes nothing, Apply saves a version and never
+# counts as the student's work; Teach Me checks the student's own typing; the debug copy's bugs each have a Find
+# it; hostile code stays sandboxed; work comes back after a reload; and the Chromebook first screen and phone width.
+# The builder itself is checked in tests/tools/test_wb_composer.js.
+#   LOCAL_MODE=1 PORT=8767 node tests/backend/mock-supabase.js ; python3 tests/labs/test_website_builder.py [url]
+import asyncio, sys
+from playwright.async_api import async_playwright
+S = next((a for a in sys.argv[1:] if a.startswith("http")), "http://localhost:8767/")
+R = []
+def ok(n, c, x=""): R.append(bool(c)); print(("PASS " if c else "FAIL ") + n, x)
+LAB = "website-builder"
+async def act(pg, n):
+    await pg.goto(S + "#/activities"); await pg.wait_for_timeout(120)
+    await pg.goto(S + f"#/lab/{LAB}/{n}"); await pg.wait_for_timeout(800)
+async def won(pg): await pg.wait_for_timeout(250); return await pg.locator("#lab-win:not([hidden])").count() == 1
+async def check(pg): await pg.click("#wb-check"); await pg.wait_for_timeout(800)
+async def code(pg, sel, text): await pg.fill(sel, text); await pg.wait_for_timeout(450)
+async def fb(pg): return (await pg.inner_text("#lab-feedback")).strip()
+
+async def main():
+  async with async_playwright() as p:
+    b = await p.chromium.launch(); errs = []
+    ctx = await b.new_context(viewport={"width": 1366, "height": 650}, reduced_motion="reduce")
+    pg = await ctx.new_page(); pg.on("pageerror", lambda e: errs.append(f"{pg.url}: {e}"))
+    outside = []
+    pg.on("request", lambda r: outside.append(r.url) if r.frame.parent_frame is not None and not (r.url.startswith("data:") or r.url.startswith("about:")) else None)
+    await pg.goto(S); await pg.evaluate("localStorage.clear(); sessionStorage.clear()"); await pg.reload(); await pg.wait_for_timeout(400)
+    await pg.evaluate("SE.store.signInEducator(SE.store.DEMO.email, SE.store.DEMO.password)")
+
+    # Welcome and the example
+    await pg.goto(S + f"#/lab/{LAB}"); await pg.wait_for_timeout(700)
+    t = await pg.inner_text("#app")
+    ok("the welcome says: Your ideas. Your website. Your code.", "Your ideas. Your website. Your code." in t)
+    ok("the welcome says plainly the builder isn't AI", "It isn't AI" in t)
+    await pg.click("#wb-example"); await pg.wait_for_timeout(300)
+    ok("Explore an Example is labeled as an example from sample answers", "example project" in (await pg.inner_text("#app")).lower() and await pg.locator(".wb-frame").count() == 1)
+    ok("the example isn't saved as the student's website", await pg.evaluate("!JSON.parse(sessionStorage.getItem('stem207.wb.preview') || '{}').v1"))
+
+    # The interview: one decision at a time, Back, Skip, and answers saved
+    await pg.click("#wb-mine"); await pg.wait_for_timeout(150)
+    ok("question 1 has a progress row and kind choices", await pg.locator(".wb-dots li").count() == 7 and await pg.locator('[data-k="kind"]').count() == 8)
+    await pg.click("#wb-next")
+    ok("a required question asks before moving on", "Question 1 of 7" in await pg.inner_text(".wb-card"))
+    await pg.click('[data-k="kind"][data-v="animals"]'); await pg.click("#wb-next")
+    await pg.fill("#wb-idea", "moose"); await pg.click("#wb-next")
+    ok("a too-short idea gets a kind nudge", "a few words" in await pg.inner_text("#wb-msg"))
+    await pg.locator("[data-ex]").first.click()
+    ok("example answers fill the box to change", len(await pg.input_value("#wb-idea")) > 20)
+    await pg.fill("#wb-idea", "A website about moose and hiking trails in Maine forests"); await pg.click("#wb-next")
+    ok("name ideas come from the student's own words", "Moose" in await pg.inner_text(".wb-chips") or "Hiking" in await pg.inner_text(".wb-chips"), await pg.inner_text(".wb-chips"))
+    await pg.fill("#wb-name", "Maine Moose Facts"); await pg.click("#wb-next")
+    ok("the sections question warns against personal information", "full name, address, school" in await pg.inner_text(".wb-card"))
+    await pg.check('[data-sec="facts"]'); await pg.fill('[data-more="facts"]', "Moose can swim. They eat plants.")
+    await pg.check('[data-sec="favorites"]'); await pg.fill('[data-more="favorites"]', "hiking, kayaking and camping")
+    await pg.check('[data-sec="about"]'); await pg.click("#wb-next")
+    await pg.click("#wb-back"); await pg.wait_for_timeout(100)
+    ok("Back keeps the answers", await pg.is_checked('[data-sec="favorites"]') and await pg.input_value('[data-more="favorites"]') == "hiking, kayaking and camping")
+    await pg.click("#wb-next"); await pg.click('[data-k="style"][data-v="nature"]'); await pg.click("#wb-next")
+    await pg.click("#wb-skip"); await pg.click("#wb-skip")
+    rv = await pg.inner_text("#app")
+    ok("Here's What You Told Us shows every answer, skipped ones too", "Here's What You Told Us" in rv and "Maine Moose Facts" in rv and "(skipped)" in rv)
+    await pg.locator('[data-edit="2"]').click(); await pg.fill("#wb-name", "Moose Country");
+    for _ in range(5): await pg.click("#wb-next") if await pg.locator("#wb-next").count() else None; await pg.wait_for_timeout(40)
+    if await pg.locator("#wb-skip").count(): await pg.click("#wb-skip")
+    if await pg.locator("#wb-skip").count(): await pg.click("#wb-skip")
+    ok("an edited answer shows in the review", "Moose Country" in await pg.inner_text("#app"))
+    await pg.click("#wb-build"); await pg.wait_for_timeout(500)
+    ok("Build makes Version 1: You Made a Website!", "You Made a Website!" in await pg.inner_text("#app") and "version 1" in (await pg.inner_text("#app")).lower())
+    ok("the reveal explains HTML and CSS and what the builder made", "index.html" in await pg.inner_text("#app") and "placeholder" in await pg.inner_text(".wb-what"))
+    fr = pg.frame_locator(".wb-frame")
+    ok("the website uses the student's own words", (await fr.locator("h1").inner_text()) == "Moose Country" and "Kayaking" in await fr.locator("body").inner_text())
+    await pg.click('[data-size="phone"]')
+    ok("the reveal has a Phone preview", await pg.locator("#wb-box.is-phone").count() == 1)
+    ok("three ways in: Explore My Code, Make Changes, Open Coding Studio", await pg.locator("[data-open]").count() == 3)
+
+    # Activity 1: passes only on a real change
+    await pg.click('[data-open="studio"]'); await pg.wait_for_timeout(900)
+    ok("the studio has index.html and styles.css, the lesson, and Check my work", await pg.locator("#wb-tab-html").count() == 1 and await pg.locator("#wb-tab-css").count() == 1 and await pg.locator(".wl").count() == 1)
+    cb = await pg.locator("#wb-check").bounding_box()
+    ok("Check my work is on the first screen at 1366x650", cb and cb["y"] + cb["height"] <= 650, cb)
+    await check(pg)
+    ok("no edits: Activity 1 isn't done", not await won(pg))
+    await pg.frame_locator("#wb-frame").locator("h1").click(); await pg.wait_for_timeout(200)
+    sel = await pg.evaluate("(() => { const t = document.getElementById('wb-html'); return t.value.slice(t.selectionStart, t.selectionEnd); })()")
+    ok("tapping the preview selects its HTML", sel == "<h1>", sel)
+    ok("and lists the CSS rules that style it, with Go to rule", "Go to rule" in await pg.inner_text("#wb-rules") and ".hero h1" in await pg.inner_text("#wb-rules"))
+    await pg.locator("#wb-rules [data-rule]").last.click(); await pg.wait_for_timeout(100)
+    ok("Go to rule opens styles.css at that rule", await pg.get_attribute("#wb-tab-css", "aria-selected") == "true")
+    await pg.click("#wb-tab-html")
+    v = await pg.input_value("#wb-html")
+    await code(pg, "#wb-html", v.replace("<h1>Moose Country</h1>", "<h1>Moose of Maine</h1>"))
+    await check(pg)
+    ok("changing a heading's words finishes Activity 1", await won(pg), await fb(pg))
+
+    # Activity 2: Make a Change, Cancel, Apply (doesn't count), Teach Me, Versions
+    await act(pg, 2)
+    before = await pg.input_value("#wb-html") + await pg.input_value("#wb-css")
+    await pg.click("#wb-change"); await pg.fill("#wbc-q", "make the title stand out"); await pg.click("#wbc-form button[type=submit]"); await pg.wait_for_timeout(300)
+    ok("Make a Change shows Before → After and the code diff", await pg.locator("dialog[open] .wbc__f").count() == 2 and await pg.locator("dialog[open] .wsd__l--add").count() >= 1)
+    await pg.click("#wbc-cancel"); await pg.wait_for_timeout(150)
+    ok("Cancel changes nothing", await pg.input_value("#wb-html") + await pg.input_value("#wb-css") == before)
+    await pg.click("#wb-change"); await pg.fill("#wbc-q", "make it fly"); await pg.click("#wbc-form button[type=submit]"); await pg.wait_for_timeout(200)
+    ok("an unknown request is answered honestly", "isn't AI" in await pg.inner_text("dialog[open] #wbc-out"))
+    await pg.fill("#wbc-q", "make the title stand out"); await pg.click("#wbc-form button[type=submit]"); await pg.wait_for_timeout(200)
+    await pg.click("#wbc-apply"); await pg.wait_for_timeout(400)
+    ok("Apply changes the code", await pg.input_value("#wb-html") + await pg.input_value("#wb-css") != before)
+    await check(pg)
+    ok("an applied change doesn't count as the student's own work", not await won(pg))
+    await pg.click("#wb-versions"); await pg.wait_for_timeout(200)
+    ok("Versions lists Version 1 and the page before the change", await pg.locator("dialog[open] .wbv li").count() == 2 and "Before: make the title" in await pg.inner_text("dialog[open] .wbv"))
+    await pg.locator("dialog[open] [data-cmp]").first.click()
+    ok("Compare with now shows the differences", await pg.locator("dialog[open] .wsd").count() >= 1)
+    await pg.click("dialog[open] [data-modal-close]")
+    await pg.click("#wb-change"); await pg.fill("#wbc-q", "add more space"); await pg.click("#wbc-form button[type=submit]"); await pg.wait_for_timeout(200)
+    await pg.click("#wbc-teach"); await pg.wait_for_timeout(200)
+    ok("Teach Me shows the steps to type, with Find it", await pg.locator(".wbt li").count() >= 1 and await pg.locator(".wbt [data-step]").count() >= 1)
+    await pg.click("#wbt-check")
+    ok("Teach Me checks the student's own typing: not done yet", "Not yet" in await pg.inner_text("#wbt-say"))
+    await pg.click("#wb-tab-css")
+    css = await pg.input_value("#wb-css")
+    await code(pg, "#wb-css", css.replace(".part {\n  max-width: 60rem;\n  margin: 0 auto;\n  padding: 2rem 1.5rem;", ".part {\n  max-width: 60rem;\n  margin: 0 auto;\n  padding: 3rem 2rem;"))
+    await pg.click("#wbt-check")
+    ok("after typing it, Teach Me says the student did it", "You made the change yourself" in await pg.inner_text("#wbt-say"), await pg.inner_text("#wbt-say"))
+    await pg.click("#wb-tab-html")
+    h = await pg.input_value("#wb-html")
+    await code(pg, "#wb-html", h.replace("Moose of Maine", "Moose Country, Maine").replace("Write your About words here.", "I love hiking near moose ponds every summer with my family.").replace("<!-- Add your own About words here -->", ""))
+    await check(pg)
+    ok("Activity 2 passes on the student's own heading, paragraph, and new words", await won(pg), await pg.inner_text("#wb-results"))
+
+    # Activity 3: CSS
+    await act(pg, 3)
+    await pg.click("#wb-tab-css")
+    css = await pg.input_value("#wb-css")
+    await code(pg, "#wb-css", css.replace("  color: #1f3324;", "  color: #142417;", 1))
+    await check(pg)
+    ok("a color alone isn't enough: it also asks for typography", not await won(pg) and "typography" in (await pg.inner_text("#wb-results")).lower())
+    await code(pg, "#wb-css", (await pg.input_value("#wb-css")).replace("  line-height: 1.6;", "  line-height: 1.7;", 1))
+    await check(pg)
+    ok("a color and a typography change finish Activity 3", await won(pg), await pg.inner_text("#wb-results"))
+
+    # Activity 6: the debug copy
+    await act(pg, 6)
+    mine = await pg.evaluate("JSON.parse(sessionStorage.getItem('stem207.wb.preview')).files.html")
+    await check(pg)
+    keys = await pg.eval_on_selector_all("#wb-results [data-issue]", "els => els.map((e) => e.dataset.issue)")
+    ok("the practice copy has three bugs, each with its own Find it", len(keys) == 3 and len(set(keys)) == 3, keys)
+    await pg.locator("#wb-results [data-issue]").nth(2).click(); await pg.wait_for_timeout(120)
+    ok("Find it on the third bug goes to its own code", "Line" in await fb(pg) or "line" in await fb(pg), await fb(pg))
+    await pg.click("#wb-tab-html")
+    html = await pg.input_value("#wb-html")
+    html = html.replace('href="#oops"', 'href="#about"')
+    import re
+    html = re.sub(r'(<img (?:class="[^"]*" )?src="[^"]+")>', r'\1 alt="A picture for my moose page">', html, count=1)
+    await code(pg, "#wb-html", html)
+    await pg.click("#wb-tab-css")
+    c = await pg.input_value("#wb-css")
+    c = re.sub(r"(\n\s*color: [^;\n]+)(\n\s*font-family)", r"\1;\2", c, count=1)
+    await code(pg, "#wb-css", c)
+    await check(pg)
+    ok("fixing all three bugs finishes Activity 6", await won(pg), await pg.inner_text("#wb-results"))
+    ok("the student's real website didn't change", await pg.evaluate("JSON.parse(sessionStorage.getItem('stem207.wb.preview')).files.html") == mine)
+
+    # Activity 7: the human touch
+    await act(pg, 7)
+    await pg.fill('[data-reflect="right"]', "It used my moose facts")
+    await pg.fill('[data-reflect="wrong"]', "It guessed the pictures")
+    await pg.fill('[data-reflect="changed"]', "I will add a safety tip")
+    await check(pg)
+    ok("answers alone aren't enough: one improvement of the student's own", not await won(pg))
+    await pg.click("#wb-tab-html")
+    await code(pg, "#wb-html", (await pg.input_value("#wb-html")).replace("</main>", "  <p>Safety tip: never walk up to a moose.</p>\n</main>"))
+    await check(pg)
+    ok("answers and an improvement finish Activity 7", await won(pg), await pg.inner_text("#wb-results"))
+
+    # Safety: hostile code in the studio
+    await act(pg, 1)
+    url = pg.url
+    await code(pg, "#wb-html", '<h1>Hi</h1><script>parent.PWNED=1</script><img src="x" onerror="parent.PWNED=2"><img src="https://example.com/a.png" alt="outside"><a id="bad" href="javascript:parent.PWNED=3">bad</a>')
+    await pg.frame_locator("#wb-frame").locator("#bad").click(); await pg.wait_for_timeout(300)
+    ok("hostile code can't reach the app", await pg.evaluate("typeof window.PWNED") == "undefined" and pg.url == url)
+    ok("the preview made no outside requests", not outside, outside[:3])
+    ok("the preview iframe never allows scripts", (await pg.get_attribute("#wb-frame", "sandbox")) == "allow-same-origin")
+
+    # A signed-in student: the website comes back after a reload, and the log has no code or words
+    st = await (await b.new_context(viewport={"width": 1366, "height": 900})).new_page()
+    st.on("pageerror", lambda e: errs.append(f"student: {e}"))
+    await st.goto(S); await st.evaluate("localStorage.clear()"); await st.reload(); await st.wait_for_timeout(300)
+    await st.goto(S + "#/signin/student"); await st.wait_for_timeout(300)
+    await st.fill("#class-code", "MOOSE7"); await st.click("#code-form button[type=submit]"); await st.wait_for_timeout(400)
+    await st.click("text=Ava R."); await st.wait_for_timeout(200)
+    for x in ["pine", "lighthouse", "moon"]: await st.click(f"[data-pic={x}]")
+    await st.wait_for_timeout(800)
+    await st.evaluate("""(() => { const id = SE.store.currentUser().id; const r = SE.wbComposer.build({ kind: 'space', idea: 'Rockets and planets', name: 'Rocket Notes', sections: [{ id: 'facts', more: 'Mars is red.' }], style: 'futuristic' });
+      localStorage.setItem('stem207.wb.' + id, JSON.stringify({ answers: {}, q: 7, v1: { html: r.html, css: r.css, title: r.title }, files: { html: r.html, css: r.css }, title: r.title })); })()""")
+    await st.goto(S + f"#/lab/{LAB}/1"); await st.wait_for_timeout(800)
+    ok("a signed-in student's website loads in the studio", "Rocket Notes" in await st.input_value("#wb-html"))
+    await st.reload(); await st.wait_for_timeout(800)
+    ok("and comes back after a reload", "Rocket Notes" in await st.input_value("#wb-html"))
+    logged = await st.evaluate("JSON.stringify(SE.store.eventsFor(SE.store.currentUser().id).filter((e) => e.data && e.data.labId === 'website-builder'))")
+    ok("the activity log never holds the student's code or words", "Rocket" not in logged and "Mars" not in logged)
+
+    # Phone width and the activity page
+    ph = await (await b.new_context(viewport={"width": 390, "height": 800}, reduced_motion="reduce")).new_page()
+    ph.on("pageerror", lambda e: errs.append(f"phone: {e}"))
+    await ph.goto(S); await ph.evaluate("SE.store.signInEducator(SE.store.DEMO.email, SE.store.DEMO.password)")
+    await ph.goto(S + f"#/lab/{LAB}"); await ph.wait_for_timeout(600)
+    sw = await ph.evaluate("document.documentElement.scrollWidth - window.innerWidth")
+    ok("the welcome has no sideways scroll on a phone", sw <= 1, sw)
+    await ph.goto(S + "#/activity/lab-website-builder"); await ph.wait_for_timeout(500)
+    ok("the activity page says the builder follows rules and isn't AI", "isn't AI" in await ph.inner_text("#app"))
+
+    ok("no page errors", not errs, errs[:3])
+    await b.close()
+  print(f"\n{sum(R)}/{len(R)} passed"); sys.exit(0 if all(R) else 1)
+
+asyncio.run(main())

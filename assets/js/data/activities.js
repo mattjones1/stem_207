@@ -6045,10 +6045,10 @@ window.STEM.activities = [
       "2-AP-15"
     ],
     simple: {
-      "mission": "Make a real web page for a made-up Maine business. Plan it, code it, and check it.",
+      "mission": "Make a real web page about an idea you choose. Plan it, code it, and check it.",
       "steps": [
-        "Pick a business. Draw your page on paper.",
-        "Show a partner for five seconds. Change one thing.",
+        "Pick an idea. Plan your page.",
+        "Write a headline and one sentence.",
         "Type HTML to build your page.",
         "Add CSS to pick your colors.",
         "Press Check my page. Fix what it finds.",
@@ -6102,7 +6102,7 @@ window.STEM.activities = [
     },
     title: "Build Your First Website",
     area: "coding",
-    summary: "Plan, code, test, and launch a webpage for a fictional Maine business using real HTML and CSS.",
+    summary: "Plan, code, test, and launch a web page about your own idea (or a made-up Maine business) using real HTML and CSS.",
     level: "beginner",
     grades: ["2-3", "4-5", "6-8"],
     duration: 90,
@@ -6113,9 +6113,9 @@ window.STEM.activities = [
     keywords: ["lab", "workshop", "web development", "html", "css", "wireframe", "accessibility", "alt text", "contrast", "debugging", "website", "maine", "interactive"],
     access: { account: "none", cost: "free", supervision: false, hardware: [] },
     launch: { status: "lab", labId: "build-your-first-website", label: "Open Build Your First Website", note: "Runs inside STEM 207. The preview can't run scripts or reach the internet, and student code stays on the device." },
-    mission: "A made-up Maine business needs a website, and you're the web developer. Plan it on paper and test it with a partner. Then write real HTML and CSS, check that everyone can read and use it, fix a broken website another developer left behind, and ship a page of your own.",
+    mission: "You're the web developer. Plan a website about an idea you care about, or a made-up Maine business. Then learn and write real HTML and CSS one stage at a time, check that everyone can read and use it, fix a broken website another developer left behind, and finish a page of your own.",
     learn: [
-      "Plan a web page with a wireframe, and improve it from what a tester noticed.",
+      "Plan a web page: its purpose, audience, words, look, and structure.",
       "Write HTML for headings, paragraphs, lists, pictures, and links.",
       "Write CSS rules that change colors and spacing.",
       "Check and fix headings, alt text, link words, and color contrast."
@@ -6148,6 +6148,118 @@ window.STEM.activities = [
       "Check my page gives three outcomes: Looks good, Needs a fix, and Check with a person. It can tell that alt text and link words exist and aren't generic, but only a person can judge whether they're good. The contrast check uses WCAG's formula and asks for 4.5 to 1 for all text (WCAG allows 3 to 1 for large text). Passing these checks doesn't mean a page is fully accessible.",
       "Rubric for the final page: Structure (one h1, a paragraph, a list); Media (a picture with meaningful alt text, a link with clear words); Style (background, text color, one more choice); Access (readable contrast, fits a phone); Process (plan, tester feedback, and fixes the student can explain).",
       "Grades 2–3: aim for stage 5. Show an Example is always on screen, and after two tries the feedback points to it and to Need a hint?. For bigger text, use the browser zoom. On stage 8, most grades 4–5 students should choose Start from my page. Grades 5–8 can work on the Level Up goals under Check my page for more sections, links, and a stronger color theme. Ask afterward: who did your website help, and what did you change because of a real person's feedback?"
+    ]
+  },
+  {
+    id: "lab-website-builder",
+    group: "web",
+    bridge: { from: "lab-build-your-first-website", text: "You built a website one tag at a time. Now describe one in your own words, and learn by changing the code a program writes for you." },
+    primm: {
+      "predict": "Before you open the Coding Studio, guess: which tag makes your website's big title? Which file holds its colors?",
+      "investigate": [
+        "Tap a part of your page. Which HTML made it, and which CSS rules style it?",
+        "What did the builder get right about your idea, and what did it get wrong?"
+      ],
+      "modify": "Change a heading, a color, and the spacing, and watch the preview after each one.",
+      "make": "Add something the builder didn't make: a list, a picture with alt text, a link, or a new section."
+    },
+    career: {
+      "role": "Front-end web developer",
+      "industry": "Maine businesses, schools, and nonprofits",
+      "what": "Builds the pages people see on websites: reads code written by others and by tools, fixes it, and makes it work for every visitor."
+    },
+    explain: "In three sentences: what the builder made from your answers, one thing you changed in the HTML or CSS and why, and one thing a person can do that the builder can't.",
+    standards: [
+      "1B-AP-15",
+      "2-AP-15",
+      "2-AP-17"
+    ],
+    simple: {
+      "mission": "Tell the builder about your website idea. It writes the code. Then you change it and make it yours.",
+      "steps": [
+        "Answer the questions about your website.",
+        "Press Build My Website. Look at your page.",
+        "Open the Coding Studio. Tap a part of your page.",
+        "Change a heading. Change a color.",
+        "Add something new of your own.",
+        "Press Check my work."
+      ]
+    },
+    skills: [
+      "debugging",
+      "design-iteration",
+      "responsible-use"
+    ],
+    why: "Tools can write code, but people decide what's right for their visitors. Reading, changing, and fixing code someone else wrote is how most real web work happens.",
+    realWorld: "Web developers often start from a template or a page another tool made, then change the HTML and CSS until it fits the people who will use it.",
+    vocab: [
+      { "term": "HTML", "def": "The code that says what each part of a page is: a heading, a paragraph, a picture." },
+      { "term": "CSS", "def": "The code that says how the page looks: colors, fonts, and spacing." },
+      { "term": "Selector", "def": "The part of a CSS rule that picks what to style, like h1 or .card." },
+      { "term": "Debugging", "def": "Finding and fixing mistakes in code, one at a time." }
+    ],
+    check: "Show your finished page. Point to one change you made in the HTML and one in the CSS, and say what the builder got right and wrong.",
+    stopAt: "You finish all 8 activities (My Website, My Creation). Grades 2–3 can stop after Discover CSS (activity 3).",
+    stuck: [
+      "Tap the part of your page you want to change. Its code is selected.",
+      "Put the cursor in the code and read What does this do? under the editor.",
+      "Open Make a Change and press Teach Me to Make This Change."
+    ],
+    next: "lab-web-builder",
+    time: {
+      "prep": 5,
+      "core": [
+        60,
+        90
+      ],
+      "verified": false
+    },
+    title: "STEM 207 Website Builder",
+    area: "coding",
+    summary: "Describe a website in your own words, watch a rule-based builder write it in real HTML and CSS, then learn by changing, extending, and debugging the code.",
+    level: "beginner",
+    grades: ["4-5", "6-8"],
+    duration: 75,
+    format: "independent",
+    equipment: ["computer"],
+    source: "original",
+    featured: false,
+    keywords: ["lab", "web development", "html", "css", "website", "builder", "debugging", "accessibility", "design", "interactive"],
+    access: { account: "none", cost: "free", supervision: false, hardware: [] },
+    launch: { status: "lab", labId: "website-builder", label: "Open Website Builder", note: "Runs inside STEM 207. The builder follows rules (it isn't AI), the preview can't run scripts or reach the internet, and the website stays on the device." },
+    mission: "You have an idea for a website. Answer seven questions about it, and STEM 207's builder writes a real first version in HTML and CSS. Then the real work starts: open the Coding Studio, find out how the code works, change it, add to it, fix bugs, and make the website completely yours.",
+    learn: [
+      "Read an HTML document and find the code that makes each part of a page.",
+      "Change HTML content and CSS colors, fonts, and spacing.",
+      "Add new HTML, like lists, links, pictures with alt text, and sections.",
+      "Find and fix HTML and CSS bugs, and explain what a person adds that a program can't."
+    ],
+    before: {
+      materials: ["A Chromebook or laptop with a keyboard for each student", "A projector for the reveal and the Make a Change demo"],
+      setup: [
+        "Make a class and print login cards. Students sign in, and their website saves on each student's device.",
+        "Try Explore an Example on the projector so students see what the builder makes.",
+        "Tell students the builder follows rules: it isn't AI, and it only knows what they tell it."
+      ],
+      prerequisites: "None. Build Your First Website first helps, but isn't required."
+    },
+    steps: [
+      "Open the Website Builder and press Let's Build Something.",
+      "Answer the seven questions, check Here's What You Told Us, and press Build My Website.",
+      "Open the Coding Studio. Tap parts of your page to see their HTML and CSS.",
+      "Work through the activities: change headings and colors, adjust the layout, and add something new.",
+      "Fix the bugs in the practice copy, then think about what the builder got right and wrong.",
+      "Test your website like a visitor and press Check my work to finish."
+    ],
+    reflect: "What did the builder get right about your idea, and what did you have to change yourself? What can a person do that a rule-based program can't?",
+    extend: "Use Make a Change and then Teach Me to Make This Change to learn a new CSS trick, then try a second one without the builder's help.",
+    teacherNotes: [
+      "The builder is rule-based, not AI: it matches keywords in the student's answers, picks a layout and a style theme, and uses the student's own words. Where it can't know something, it leaves a placeholder. Nothing is sent to any outside service.",
+      "Activities check the student's own edits against a snapshot taken when each activity opens. Applying a Make a Change suggestion updates that snapshot, so it never completes an activity by itself.",
+      "Activity 6 works on a practice copy with three injected bugs (a missing semicolon, a link to a missing id, and a picture without alt text). The student's real website doesn't change.",
+      "Activity 7 (The Human Touch) asks three written questions that stay on the device. Read them over the student's shoulder, or ask the student to share them out loud.",
+      "Levels of achievement come from real work: Website Created (the builder made Version 1), Code Explorer (activities 1 to 3), Website Developer (all 8).",
+      "Ask afterward: the builder followed rules exactly. Who decided what the website should say? (Keep the humanity in technology.)"
     ]
   },
   {
