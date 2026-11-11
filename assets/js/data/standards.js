@@ -35,6 +35,8 @@ window.STEM = window.STEM || {};
     "2-AP-15": c("Seek and incorporate feedback from team members and users to refine a solution that meets user needs."),
     "2-AP-17": c("Systematically test and refine programs using a range of test cases."),
     "2-AP-18": c("Distribute tasks and maintain a project timeline when collaboratively developing computational artifacts."),
+    // Verified November 10, 2026 against CSTA's official 2017 standards spreadsheet (csteachers.org).
+    "2-AP-19": c("Document programs in order to make them easier to follow, test, and debug."),
     // CSTA, Networks & the Internet (cybersecurity), verified October 28, 2026 against CSTA's standards PDF
     "1A-NI-04": c("Explain what passwords are and why we use them, and use strong passwords to protect devices and information from unauthorized access."),
     "1B-NI-05": c("Discuss real-world cybersecurity problems and how personal information can be protected."),

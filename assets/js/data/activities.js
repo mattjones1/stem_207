@@ -6172,7 +6172,8 @@ window.STEM.activities = [
     standards: [
       "1B-AP-15",
       "2-AP-15",
-      "2-AP-17"
+      "2-AP-19",
+      "2-IC-21"
     ],
     simple: {
       "mission": "Tell the builder about your website idea. It writes the code. Then you change it and make it yours.",
@@ -6255,9 +6256,11 @@ window.STEM.activities = [
     extend: "Use Make a Change and then Teach Me to Make This Change to learn a new CSS trick, then try a second one without the builder's help.",
     teacherNotes: [
       "The builder is rule-based, not AI: it matches keywords in the student's answers, picks a layout and a style theme, and uses the student's own words. Where it can't know something, it leaves a placeholder. Nothing is sent to any outside service.",
-      "Activities check the student's own edits against a snapshot taken when each activity opens. Applying a Make a Change suggestion updates that snapshot, so it never completes an activity by itself.",
-      "Activity 6 works on a practice copy with three injected bugs (a missing semicolon, a link to a missing id, and a picture without alt text). The student's real website doesn't change.",
+      "Activities check the student's own edits against a snapshot taken when each activity opens, and the checks look for quality, not just a keystroke: real new words in a heading, a real sentence (not \"asdf asdf\"), a color that's still readable, a CSS comment that explains a change. Applying a Make a Change suggestion updates the snapshot, so it never completes an activity, and the builder applies at most 3 changes per activity. Teach Me is the main button, then Your turn asks for the same kind of change with no steps.",
+      "Each activity's lesson is three steps: Learn, Predict (a question about the student's own code, answered before they change it), and Do it.",
+      "Activity 6 works on a practice copy with three bugs picked from a pool of ten (CSS: a missing semicolon or }, a misspelled property, hard-to-read colors; HTML: a broken link, a missing alt, a misspelled picture name, a tag that never closes, a skipped heading level, a duplicate id). Students see the kind of bug first, then Where is it?, then Find it, and fill in a bug log for at least one bug. More tools gives a new practice copy with different bugs. The student's real website doesn't change.",
       "Activity 7 (The Human Touch) asks three written questions that stay on the device. Read them over the student's shoulder, or ask the student to share them out loud.",
+      "Activity 8 needs a partner test: a classmate (or you) tries three tasks on the page and taps Easy, Hard, or I got lost, and the student writes one change they'll make. Placeholders the builder left must be replaced before the website is finished.",
       "Levels of achievement come from real work: Website Created (the builder made Version 1), Code Explorer (activities 1 to 3), Website Developer (all 8).",
       "Ask afterward: the builder followed rules exactly. Who decided what the website should say? (Keep the humanity in technology.)"
     ]

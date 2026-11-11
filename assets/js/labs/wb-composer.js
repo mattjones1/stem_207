@@ -6,7 +6,8 @@
  *
  *   SE.wbComposer.build(answers) → { v: 1, title, html, css, sections: [{ id, title, kind }], concepts: [..],
  *                                     explanation: [..], notes: [..] }
- *   answers: { kind, idea, name, sections: [{ id, more }], style, color, special, audience }
+ *   answers: { kind, idea, name, sections: [{ id, more }], style, color, special, pic, audience }
+ *     pic       the student's choice of main picture (a built-in picture), or "" to let the keywords pick
  *     kind      gaming | sports | animals | hobby | business | club | portfolio | other
  *     sections  ids: welcome | pictures | facts | cards | favorites | about | business | links
  *     style     futuristic | bright | dark | nature | minimal | sports | retro | custom (uses color)
@@ -14,6 +15,7 @@
  *     audience  friends | students | learners | fans | visitors | everyone
  *   SE.wbComposer.contrast(a, b), fixContrast(fg, bg, min): hex colors, WCAG 2
  *   SE.wbComposer.THEMES, KINDS, SECTION_INFO: the choices the interview offers
+ *   SE.wbComposer.picturesFor(text, kind, idea): the built-in pictures that match, best first
  * The same answers always give the same website (choices that vary use a seed from the name).
  */
 (function () {
@@ -96,19 +98,22 @@
     const chosen = (a.sections && a.sections.length ? a.sections : [{ id: "welcome" }, { id: "about" }, { id: "favorites" }]).filter((s) => SECTION_INFO[s.id]);
     const more = (id) => clean((chosen.find((s) => s.id === id) || {}).more);
     const allText = [a.idea, ...chosen.map((s) => s.more)].join(" ");
-    const pics = picturesFor(allText, kind, a.idea);
+    const matched = picturesFor(allText, kind, a.idea);
+    // The student's own choice of main picture comes first; the keywords fill in the rest.
+    const own = a.pic && SE.webKit && SE.webKit.PICTURES && SE.webKit.PICTURES[a.pic] ? a.pic : "";
+    const pics = own ? [own, ...matched.filter((x) => x !== own)] : matched;
     const seed = hash(`${name}|${kind}|${style}`);
     const special = SPECIALS[a.special] ? a.special : "";
 
     // Colors: the theme, or the student's own color; every text pair is pushed to 4.5 to 1 or more.
     const T = Object.assign({}, THEMES[style]);
     if (style === "custom" && /^#[0-9a-f]{6}$/i.test(a.color || "")) { T.accent = a.color; T.hero = a.color; T.bg = mix(a.color, "#ffffff", 0.93); T.panel = "#ffffff"; }
-    if (special === "colors") { T.hero = mix(T.accent, T.hero, 0.35); }
+    if (special === "colors") { T.hero = T.accent; T.heroText = lum(T.accent) > 0.4 ? "#111111" : "#ffffff"; }
     T.text = fixContrast(T.text, T.bg); T.panelText = fixContrast(T.text, T.panel);
     T.heroText = fixContrast(T.heroText, T.hero);
     T.link = fixContrast(T.accent, T.bg); T.panelLink = fixContrast(T.accent, T.panel);
     T.button = T.accent; T.buttonText = fixContrast(lum(T.accent) > 0.4 ? "#111111" : "#ffffff", T.accent);
-    const big = a.audience === "friends" || a.audience === "students" ? "1.15rem" : "1.05rem";
+    const big = a.audience === "friends" || a.audience === "students" ? "1.2rem" : "1.05rem";
 
     // Layout choices: driven by the answers, with a seeded pick where the student didn't say.
     const heroLayout = special === "hero" ? "banner" : special === "title" ? "centered" : ["centered", "split", "banner"][seed % 3];
@@ -127,7 +132,8 @@
 
     const bodySections = chosen.filter((s) => s.id !== "welcome" && s.id !== "links");
     // Header and menu
-    H.push("<!-- The header: your website's name and its menu -->", "<header class=\"site-header\">", ind(1, `<p class="site-name">${textEsc(name)}</p>`));
+    const backTop = chosen.some((s) => s.id === "links");
+    H.push("<!-- The header: your website's name and its menu -->", `<header class="site-header"${backTop ? " id=\"top\"" : ""}>`, ind(1, `<p class="site-name">${textEsc(name)}</p>`));
     const navTargets = bodySections.map((s) => ({ s, title: SECTION_INFO[s.id].title }));
     navTargets.forEach((n) => { n.id = idOf(n.title); });
     if (navTargets.length) {
@@ -139,12 +145,16 @@
     // Main: the hero, then each section
     H.push("<main>");
     H.push(ind(1, "<!-- The hero: the first thing visitors see -->"), ind(1, `<section class="hero hero--${heroLayout}">`));
-    const heroText = [...el(2, "<h1>", textEsc(name), "</h1>"), ...el(2, "<p class=\"tagline\">", textEsc(chosen.some((s) => s.id === "welcome") && more("welcome") ? sentence(more("welcome")) : idea), "</p>")];
+    // A welcome message is its own line above the title (the student's words, or a plain "Welcome!").
+    const welcome = chosen.some((s) => s.id === "welcome") ? (more("welcome") ? cap(more("welcome")) : "Welcome!") : "";
+    const heroText = [...(welcome ? el(2, "<p class=\"welcome\">", textEsc(welcome), "</p>") : []), ...el(2, "<h1>", textEsc(name), "</h1>"), ...el(2, "<p class=\"tagline\">", textEsc(idea), "</p>")];
     if (heroLayout === "split") { H.push(ind(2, "<div class=\"hero-words\">"), ...heroText.map((l) => "  " + l), ind(2, "</div>"), ...img(2, "", pics[0])); }
     else { H.push(...heroText); if (heroLayout === "banner") H.push(...img(2, "class=\"hero-pic\" ", pics[0])); }
     // The gallery shows pictures the hero didn't already use.
     const galleryPics = (heroLayout !== "centered" && pics.length > 1 ? pics.slice(1) : pics).slice(0, 3);
-    if (navTargets.length) H.push(ind(2, `<a class="button" href="#${navTargets[0].id}">Start with ${textEsc(navTargets[0].title.toLowerCase())}</a>`));
+    // The button speaks to the audience the student chose.
+    const go = { friends: "Let's go", students: "Start exploring", learners: "Start learning", fans: "Jump in", visitors: "See what we do" }[a.audience] || `Start with ${navTargets.length ? navTargets[0].title.toLowerCase() : "a look"}`;
+    if (navTargets.length) H.push(ind(2, `<a class="button" href="#${navTargets[0].id}">${textEsc(go)}</a>`));
     H.push(ind(1, "</section>"));
     sections.push({ id: "hero", title: name, kind: "hero" });
 
@@ -180,6 +190,7 @@
       } else if (s.id === "business") {
         H.push(...el(2, "<p class=\"callout\">", m ? textEsc(sentence(m)) : "Describe what your made-up business does. (No real addresses or phone numbers.)", "</p>"));
       }
+      if (backTop) H.push(ind(2, "<p class=\"back-top\"><a href=\"#top\">Back to top</a></p>"));
       H.push(ind(1, "</section>"));
       sections.push({ id, title: n.title, kind: s.id });
     });
@@ -201,6 +212,7 @@
     C.push("/* The hero */", ".hero {", "  padding: 3rem 1.5rem;", `  background-color: ${T.hero};`, `  color: ${T.heroText};`, "}", "");
     C.push(".hero h1 {", `  font-size: ${special === "title" ? "3.4rem" : "2.6rem"};`, "  margin: 0 0 0.5rem;", ...(special === "title" ? [`  text-shadow: 3px 3px 0 ${mix(T.hero, "#000000", 0.4)};`] : []), ...(T.upper ? ["  text-transform: uppercase;"] : []), "}", "");
     C.push(".tagline {", "  font-size: 1.25rem;", "  max-width: 40rem;", "}", "");
+    if (welcome) C.push("/* The welcome line above the title */", ".welcome {", "  margin: 0 0 0.25rem;", "  font-size: 1.3rem;", "  font-weight: bold;", "}", "");
     if (heroLayout === "centered") C.push(".hero--centered {", "  text-align: center;", "}", "", ".hero--centered .tagline {", "  margin: 0 auto 1.5rem;", "}", "");
     if (heroLayout === "split") C.push("/* Words on one side, a picture on the other (they stack on a phone) */", ".hero--split {", "  display: grid;", "  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));", "  gap: 2rem;", "  align-items: center;", "}", "");
     if (heroLayout === "banner") C.push(".hero--banner .hero-pic {", "  display: block;", "  width: 100%;", "  max-width: 28rem;", "  margin: 1.5rem 0;", "}", "");
@@ -213,6 +225,7 @@
     if (used.has("facts")) C.push(".facts li {", "  margin-bottom: 0.5rem;", "}", "");
     if (used.has("business")) C.push(".callout {", "  padding: 1rem 1.25rem;", `  border-left: 6px solid ${T.accent};`, `  background-color: ${T.panel};`, `  color: ${T.panelText};`, "}", "");
     if (special === "layout") C.push("/* A creative layout: every other part leans the other way */", ".part--flip {", "  text-align: right;", "}", "");
+    if (backTop) C.push("/* A link back to the top at the end of each part */", ".back-top {", "  margin-top: 1.5rem;", "  font-size: 0.95rem;", "}", "");
     C.push("/* The footer */", ".site-footer {", "  padding: 1.5rem;", "  text-align: center;", `  background-color: ${T.panel};`, `  color: ${T.panelText};`, "}", "", ".site-footer a {", `  color: ${T.panelLink};`, "}");
     const css = C.join("\n").replace(/\n{3,}/g, "\n\n") + "\n";
 
@@ -229,5 +242,5 @@
     return { v: 1, title: name, html, css, sections, concepts, explanation, notes, pictures: pics.slice(0, 3), theme: style, hero: heroLayout };
   }
 
-  SE.wbComposer = { build, contrast, fixContrast, THEMES, KINDS, SECTION_INFO, SPECIALS, AUDIENCES, listFrom };
+  SE.wbComposer = { build, contrast, fixContrast, THEMES, KINDS, SECTION_INFO, SPECIALS, AUDIENCES, listFrom, picturesFor };
 })();

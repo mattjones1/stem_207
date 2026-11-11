@@ -12,9 +12,9 @@ Answer these on paper first, if it helps. Don't write your full name, address, s
 3. **What's it called?** ______________________________
 4. **What should people see?** (a welcome, pictures, fun facts, cards, a list of favorites, an About section)
    ______________________________________________
-5. **What's its style?** (futuristic, bright, dark, nature, clean, sports, retro, my own colors)
+5. **What's its style?** (futuristic, bright, dark, nature, clean, sports, retro, my own colors) And what would make someone say "Wow"?
    ______________________________________________
-6. **What would make someone say "Wow"?** ______________________
+6. **What's the main picture?** (a moose, a loon, a lighthouse, a rocket, a guitar, …) ______________________
 7. **Who is it for?** ______________________________
 
 ## Exit ticket

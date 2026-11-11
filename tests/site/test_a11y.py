@@ -173,6 +173,16 @@ async def main():
         await visit(pg, "#/activity/lab-dance-party"); await pg.locator("a[data-deeper]").first.click(); await pg.wait_for_timeout(250)
         await audit(pg, "modal: go deeper", F); await pg.keyboard.press("Escape")
         await pg.evaluate("STEM.moxieSessions.forEach((s) => { s.pub = 'draft'; })")
+        # The Website Builder: a question with its live preview, then the studio of a built website (the lesson, Predict,
+        # More tools, Debug's hint ladder and bug log, The Human Touch, and the partner test).
+        SEED = """(q) => { const id = SE.store.currentUser().id, key = 'stem207.wb.' + id, A = { kind: 'animals', idea: 'moose in maine', name: 'Moose', sections: [{ id: 'facts', more: 'Moose swim.' }, { id: 'about' }, { id: 'links' }], style: 'nature', special: 'cards', pic: '', audience: 'friends', color: '#145b72' };
+          if (q != null) { localStorage.setItem(key, JSON.stringify({ answers: A, q })); return; }
+          const r = SE.wbComposer.build(A); localStorage.setItem(key, JSON.stringify({ answers: A, q: 7, v1: { html: r.html, css: r.css, title: r.title }, files: { html: r.html, css: r.css }, title: r.title })); }"""
+        await pg.evaluate(SEED, 4); await visit(pg, "#/lab/website-builder/1"); await pg.wait_for_timeout(300); await audit(pg, "builder: a question and its live preview", F)
+        await pg.evaluate(SEED, None)
+        for n in [1, 7, 8]: await visit(pg, f"#/lab/website-builder/{n}"); await audit(pg, f"builder studio {n}", F)
+        await visit(pg, "#/lab/website-builder/1"); await pg.click('.wl [data-wl="next"]'); await pg.click('.wl [data-pick="0"]'); await pg.click("#wb-more"); await pg.wait_for_timeout(150); await audit(pg, "builder: Predict and More tools", F)
+        await visit(pg, "#/lab/website-builder/6"); await pg.click("#wb-check"); await pg.wait_for_timeout(700); await pg.locator("#wb-results [data-where]").first.click(); await audit(pg, "builder: Debug", F)
         await pg.evaluate("SE.certificate.open({award:'Responsible AI Explorer',course:'Pattern Machine Lab',detail:'Passed with 8 of 10',name:'Ava R.',className:'Room 12'})"); await pg.wait_for_timeout(200)
         await audit(pg, "certificate", F); await pg.keyboard.press("Escape")
         await sign_teacher(pg)
