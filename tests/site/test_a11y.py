@@ -183,6 +183,8 @@ async def main():
         for n in [1, 7, 8]: await visit(pg, f"#/lab/website-builder/{n}"); await audit(pg, f"builder studio {n}", F)
         await visit(pg, "#/lab/website-builder/1"); await pg.click('.wl [data-wl="next"]'); await pg.click('.wl [data-pick="0"]'); await pg.click("#wb-more"); await pg.wait_for_timeout(150); await audit(pg, "builder: Predict and More tools", F)
         await visit(pg, "#/lab/website-builder/6"); await pg.click("#wb-check"); await pg.wait_for_timeout(700); await pg.locator("#wb-results [data-where]").first.click(); await audit(pg, "builder: Debug", F)
+        await visit(pg, "#/lab/website-builder/1"); await pg.click("#wb-more"); await pg.click("#wb-share"); await pg.wait_for_timeout(500); await audit(pg, "builder: Hand in or share", F); await pg.keyboard.press("Escape")
+        await pg.click("#wb-more"); await pg.click("#wb-gallery"); await pg.wait_for_timeout(500); await audit(pg, "builder: class gallery", F); await pg.keyboard.press("Escape")
         await pg.evaluate("SE.certificate.open({award:'Responsible AI Explorer',course:'Pattern Machine Lab',detail:'Passed with 8 of 10',name:'Ava R.',className:'Room 12'})"); await pg.wait_for_timeout(200)
         await audit(pg, "certificate", F); await pg.keyboard.press("Escape")
         await sign_teacher(pg)
@@ -194,6 +196,7 @@ async def main():
         aid = await pg.evaluate(f"(() => {{ SE.store.publishPathway('{pw}'); const c = SE.store.classesFor(SE.store.currentUser().id)[0]; return SE.store.assignPathway(c.id, '{pw}').id; }})()")
         for h in [f"#/teach/plans/{pw}", f"#/teach/plans/{pw}/students", f"#/teach/plans/{pw}/checks"]: await visit(pg, h); await audit(pg, h, F)
         await visit(pg, "#/teach/plans/tpl-ws-sampler"); await audit(pg, "workshop template", F)
+        await visit(pg, f"#/teach/classes/{cid}"); await pg.locator("#class-websites [data-web-open]").first.click(); await pg.wait_for_timeout(300); await audit(pg, "modal: a student's website", F); await pg.keyboard.press("Escape"); await pg.wait_for_timeout(300)
         # The shared modal, open: Add students (with a checked list), Message a class, and Send a note.
         await visit(pg, f"#/teach/classes/{cid}"); await pg.locator("[data-add-students]").first.click(); await pg.wait_for_timeout(250)
         await pg.fill("#ms-names", "Sam P.\nava r.\nx@y.org"); await pg.wait_for_timeout(150); await audit(pg, "modal: add students", F)

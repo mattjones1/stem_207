@@ -36,6 +36,7 @@
     state.answers = Object.assign({ kind: "", idea: "", name: "", sections: [], style: "", color: "#145b72", special: "", pic: "", audience: "" }, state.answers || {});
     const A = state.answers;
     let q = state.q || 0;
+    let fromCloud = false;   // the website just came from the student's other device
     const save = () => { state.q = q; store.save(state); };
 
     function welcome() {
@@ -44,6 +45,7 @@
           <p>Ever imagined creating your own website? Tell us what you have in mind, and our builder will turn your ideas into a real first version. Then you'll learn how to change the real code and make it completely your own.</p>
           <p class="muted small">The builder is a program that follows rules to turn your answers into HTML and CSS. It isn't AI, and you'll see every line it writes.</p>
           <div class="wb-actions"><button type="button" class="btn btn--launch" id="wb-go">${icon("rocket")}Let's Build Something</button><button type="button" class="btn btn--ghost" id="wb-example">${icon("eye")}Explore an Example</button></div>
+          ${fromCloud ? `<p class="wb-hint">${icon("check")}Your website came from your class account, so you can keep working on this device.</p>` : ""}
           ${state.v1 ? `<p><a href="#/lab/website-builder/1">${icon("arrowRight")}Back to my website in the Coding Studio</a></p>` : ""}
         </div>
         ${state.v1 ? achievements(state, api) : ""}
@@ -210,6 +212,16 @@
     else if (!A.kind && !state.v1) welcome();
     else if (state.v1) welcome();
     else interview();
+    // A website saved from the student's other device comes along when this device has none yet.
+    if (!state.v1 && api0 && api0.user && api0.user.role === "student") SE.store.websiteMine().then((w) => {
+      if (!w || state.v1 || !el.isConnected) return;
+      Object.assign(state, { v1: { html: w.html, css: w.css, title: w.title, at: Date.now() }, files: { html: w.html, css: w.css }, title: w.title, base: {}, q: Q.length,
+        sentHash: SE.wbShare.hash(w.title, w.html, w.css) });
+      store.save(state);
+      if (/^#\/lab\/website-builder\/\d/.test(location.hash) && SE.route) { SE.route(true); return; }   // in an activity: open the studio
+      fromCloud = true;
+      welcome();
+    });
   }
 
   /* Levels of achievement, from real work only. */

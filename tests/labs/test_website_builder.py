@@ -12,9 +12,19 @@ S = next((a for a in sys.argv[1:] if a.startswith("http")), "http://localhost:87
 R = []
 def ok(n, c, x=""): R.append(bool(c)); print(("PASS " if c else "FAIL ") + n, x)
 LAB = "website-builder"
+async def mounted(pg):
+    # The lesson is drawn last, after every studio button has its handler: wait for it, not a fixed time.
+    await pg.wait_for_selector(".wl", timeout=20000); await pg.wait_for_timeout(150)
 async def act(pg, n):
     await pg.goto(S + "#/activities"); await pg.wait_for_timeout(120)
-    await pg.goto(S + f"#/lab/{LAB}/{n}"); await pg.wait_for_timeout(800)
+    await pg.goto(S + f"#/lab/{LAB}/{n}"); await mounted(pg)
+async def more(pg, item):
+    # Open More tools, and make sure it opened before picking from it.
+    for _ in range(3):
+        if not await pg.locator("#wb-more-menu").is_visible(): await pg.click("#wb-more")
+        try: await pg.locator(item).wait_for(state="visible", timeout=3000); break
+        except Exception: await pg.wait_for_timeout(300)
+    await pg.click(item)
 async def won(pg): await pg.wait_for_timeout(250); return await pg.locator("#lab-win:not([hidden])").count() == 1
 async def check(pg): await pg.click("#wb-check"); await pg.wait_for_timeout(800)
 async def code(pg, sel, text): await pg.fill(sel, text); await pg.wait_for_timeout(450)
@@ -136,7 +146,7 @@ async def main():
     await check(pg)
     ok("an applied change doesn't count as the student's own work", not await won(pg))
     ok("Versions and the Tag Explorer are tucked into More tools", not await pg.locator("#wb-versions").is_visible())
-    await pg.click("#wb-more"); await pg.click("#wb-versions"); await pg.wait_for_timeout(250)
+    await more(pg, "#wb-versions"); await pg.wait_for_timeout(250)
     ok("Versions lists Version 1 and the page before the change, each with a picture", await pg.locator("dialog[open] .wbv li").count() == 2 and "Before: make the title" in await pg.inner_text("dialog[open] .wbv") and await pg.locator("dialog[open] .wbv__f").count() == 2)
     await pg.locator("dialog[open] [data-restore]").first.click()
     ok("Restore asks first, in words", await pg.locator("dialog[open] #wbv-yes").count() == 1)
@@ -199,7 +209,7 @@ async def main():
     SET_BUGS = "(kinds) => { const k = 'stem207.wb.preview', s = JSON.parse(sessionStorage.getItem(k)); s.debug = SE.wb.injectBugs(s.files, kinds); s.bugLog = {}; delete s.base[5]; sessionStorage.setItem(k, JSON.stringify(s)); }"
     await pg.goto(S + "#/activities"); await pg.wait_for_timeout(120)
     await pg.evaluate(SET_BUGS, ["semi", "link", "alt"])
-    await pg.goto(S + f"#/lab/{LAB}/6"); await pg.wait_for_timeout(800)
+    await pg.goto(S + f"#/lab/{LAB}/6"); await mounted(pg)
     mine = await pg.evaluate("JSON.parse(sessionStorage.getItem('stem207.wb.preview')).files.html")
     ok("Debug doesn't name a bug before the student presses Check my work", "semicolon" not in await pg.inner_text("#wb-blank"))
     await check(pg)
@@ -234,13 +244,13 @@ async def main():
     for kind in ["semi", "brace", "prop", "contrast", "link", "alt", "src", "unclosed", "heading", "dupid", None]:
       await pg.goto(S + "#/activities"); await pg.wait_for_timeout(100)
       await pg.evaluate(SET_BUGS, [kind] if kind else [])
-      await pg.goto(S + f"#/lab/{LAB}/6"); await pg.wait_for_timeout(700)
+      await pg.goto(S + f"#/lab/{LAB}/6"); await mounted(pg)
       await check(pg)
       found[kind] = await pg.eval_on_selector_all("#wb-results [data-issue]", "els => els.map((e) => e.dataset.issue.split(':')[0])")
     # A misspelled background-color also leaves the hero's white words unreadable: a real second symptom.
     ok("each of the 10 kinds of bug is found by itself", all(found[k] == [k] or (k == "prop" and found[k] == ["prop", "contrast"]) for k in found if k), found)
     ok("a clean copy has no bugs", found[None] == [], found[None])
-    await pg.click("#wb-more"); await pg.click("#wb-newcopy"); await pg.wait_for_timeout(300)
+    await more(pg, "#wb-newcopy"); await pg.wait_for_timeout(300)
     ok("New practice copy brings three new bugs", await pg.evaluate("JSON.parse(sessionStorage.getItem('stem207.wb.preview')).debug.kinds.length") == 3 and await pg.locator("#wb-buglog fieldset").count() == 3)
 
     # Activity 7: the human touch

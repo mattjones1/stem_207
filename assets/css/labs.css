@@ -2060,6 +2060,55 @@ button.cc-cell:focus-visible { outline: 3px solid #b4006a; outline-offset: -3px;
 .wbv__ask { display: grid; gap: .4rem; padding: .55rem .7rem; border: 1.5px solid var(--orange-ink, var(--line)); border-radius: var(--radius-sm); background: var(--orange-soft); }
 .wbv__ask p { margin: 0; }
 .wl__body h4 { margin: .2rem 0 0; font-size: .95rem; }
+/* Saving for the teacher, a newer copy from another device, Hand in or share, and the class gallery (wb-share.js) */
+.wbs__who { display: grid; gap: .1rem; }
+.wbs__sync { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; margin: 0; color: var(--muted); font-size: .85rem; }
+.wbs__sync:empty { display: none; }
+.wbs__sync.is-warn { color: var(--orange-ink); font-weight: 700; }
+.wbs__sync svg, .wbs__newer svg, .wbh svg, .wbg__empty svg { width: 1rem; height: 1rem; flex: none; fill: none; stroke: currentColor; stroke-width: 2; }
+.wbs__newer { display: grid; gap: .4rem; padding: .6rem .8rem; border: 1.5px solid var(--teal); border-radius: var(--radius-sm); background: var(--teal-soft); }
+.wbs__newer[hidden] { display: none; }
+.wbs__newer p { display: flex; gap: .4rem; align-items: flex-start; margin: 0; }
+.wbh { display: grid; gap: .8rem; }
+.wbh__part { display: grid; gap: .35rem; padding: .7rem .8rem; border: 1.5px solid var(--line); border-radius: var(--radius-sm); }
+.wbh__part h3 { display: flex; align-items: center; gap: .35rem; margin: 0; font-size: 1.02rem; }
+.wbh__part p { margin: 0; }
+.wbh__part .btn { justify-self: start; }
+.wbh__note { padding: .45rem .6rem; border-left: 4px solid var(--teal); background: var(--teal-soft); border-radius: var(--radius-sm); }
+.wbh__msg { display: flex; gap: .35rem; align-items: flex-start; margin: 0; }
+.wbh__msg:empty { display: none; }
+.wbh__msg.is-warn { color: var(--orange-ink); font-weight: 700; }
+.wbh__off { display: flex; gap: .4rem; align-items: flex-start; margin: 0; padding: .5rem .7rem; border-radius: var(--radius-sm); background: var(--orange-soft); }
+.wb-sharebox { margin-top: .4rem; }
+.wbg { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: .9rem; margin: .6rem 0 0; padding: 0; list-style: none; }
+.wbg__card { display: grid; gap: .35rem; align-content: start; padding: .7rem; border: 1.5px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
+.wbg__card h3, .wbg__card p { margin: 0; }
+.wbg__f { width: 100%; height: 13rem; border: 1.5px solid var(--line); border-radius: var(--radius-sm); background: #fff; }
+.wbg__kudos { display: flex; flex-wrap: wrap; gap: .3rem; }
+.wbg__n { margin-left: .2rem; padding: 0 .4rem; border-radius: 999px; background: var(--surface-2); font-weight: 700; }
+.wbg__empty { display: flex; gap: .4rem; align-items: center; color: var(--muted); }
+/* The educator's class page: student websites (views-websites.js) */
+.webq { display: grid; gap: .4rem; margin-bottom: .9rem; padding: .7rem .9rem; border: 1.5px solid var(--teal); border-radius: var(--radius); background: var(--teal-soft); }
+.webq h3 { display: flex; align-items: center; gap: .4rem; margin: 0; font-size: 1.02rem; }
+.webq svg, .web-table svg, .webm svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 2; vertical-align: -.15em; }
+.webq ul { display: grid; gap: .35rem; margin: 0; padding: 0; list-style: none; }
+.webq li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .4rem; }
+.webq__btns { display: flex; flex-wrap: wrap; gap: .35rem; }
+.web-table td, .web-table th { vertical-align: middle; }
+.webm { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 1rem; align-items: start; }
+.webm__view, .webm__side { display: grid; gap: .5rem; min-width: 0; }
+.webm__side h3, .webm__side p { margin: 0; }
+.webm__f { width: 100%; height: 24rem; border: 1.5px solid var(--line); border-radius: var(--radius-sm); background: #fff; }
+.wb-frame-box.is-phone .webm__f { width: 375px; max-width: 100%; }
+.webm__dl { display: grid; gap: .2rem; margin: 0; }
+.webm__dl dt { font-weight: 700; } .webm__dl dd { margin: 0 0 .35rem; }
+@media (max-width: 860px) { .webm { grid-template-columns: minmax(0, 1fr); } }
+@media print {
+  body.web-printing > *:not(dialog) { display: none !important; }
+  body.web-printing dialog.modal { position: static; max-width: none; width: auto; max-height: none; overflow: visible; border: 0; box-shadow: none; }
+  body.web-printing dialog.modal::backdrop { background: none; }
+  body.web-printing .modal__close, body.web-printing .webm .wb-size, body.web-printing .webm form button, body.web-printing .webm .wb-actions { display: none !important; }
+}
 /* The studio fits a Chromebook screen: the code and the preview use the height there is, and scroll inside. */
 .wbs .ce__hl, .wbs .ce .ce__input { font-size: .9rem; }
 .wbs .ws-frame { height: clamp(15rem, calc(100vh - 15rem), 34rem); }

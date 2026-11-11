@@ -6,7 +6,7 @@
 | --- | --- |
 | **Big idea** | A program can write a first draft of a website by following rules. People decide what it should say, test it, fix it, and make it good for real visitors. |
 | **What students do** | Answer seven questions while a live preview shows their site taking shape, read the HTML and CSS the builder writes, then predict, change, extend, debug, and finish it in 8 activities, ending with a partner test. |
-| **What they make** | Their own website (`index.html` and `styles.css`), saved on their device. |
+| **What they make** | Their own website (`index.html` and `styles.css`), saved on their device and, for you, in their class account. |
 | **What they earn** | Website Created (the builder made Version 1), Code Explorer (activities 1–3), Website Developer (all 8, with a certificate). |
 | **Grades 4–5** | Aim for Discover CSS (activity 3). |
 | **Early finishers** | Make a Change with Teach Me, then the Web Builder Lab. |
@@ -59,7 +59,7 @@ Each activity's lesson is three steps: **Learn**, **Predict** (a question about 
 
 ## Before class
 
-- [ ] Make a class and print login cards. Each student's website saves on their device.
+- [ ] Make a class and print login cards. Each student's website saves on their device and for you: open it from your class page, under **Student websites**.
 - [ ] Open the lab and press **Explore an Example** on the projector.
 - [ ] Decide how far each group should go (see Differentiation).
 
@@ -99,11 +99,12 @@ Each activity's lesson is three steps: **Learn**, **Predict** (a question about 
 ## Assessment
 
 - Activities check real code changes, not clicks: real words, readable colors, and an explaining comment.
-- Look for evidence over the student's shoulder: the Predict answer, the bug log in activity 6, the three answers in activity 7, and the partner test in activity 8. They stay on the device.
+- Look for evidence over the student's shoulder: the Predict answer and the bug log in activity 6 stay on the device. When a student hands in, you see their website, their three Human Touch answers, and their partner-test change on your class page, and you can leave a note and print a one-page summary.
 - Exit ticket: on the printable card.
 
 ## Troubleshooting
 
-1. **"My website is gone."** It's saved on the device they built it on.
+1. **"My website is gone."** Signed in on a new device, their website comes back from the class account. If it's not there, it may have had personal information (an email, phone number, or address), which never leaves the device: open it on the first device and take that out.
 2. **The page looks blank.** The message under the preview says why: no words in `<body>`, a tag that never closed, or a missing `{` or `}`.
 3. **Make a Change says it doesn't know.** That's honest: it only knows a list of changes. Try one of the examples, or make the change by hand.
+4. **Sharing with the class.** Students choose **More tools → Hand in or share → Ask to share with my class**. Their website waits for you under **Student websites** on your class page: **Look first**, then **Approve** or **Decline**. Classmates see only approved websites, in the **Class gallery**, with three kind-feedback buttons and no comments.

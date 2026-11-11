@@ -288,7 +288,23 @@
     ];
     // One sample partner team (Moxie partners share capstone work).
     const teams = [{ id: `team_demo_1${sfx}`, classId: cls.id, studentIds: [students[0].id, students[1].id], isDemo: true, createdAt: now - 7 * SE.DAY }];
-    return { educator, cls, students, events, assignments, messages, teams };
+    // Two sample Website Builder websites: Priya's handed in and in the class gallery, Darius's asking to share.
+    const page = (title, line, fact, color) => ({
+      title,
+      html: `<header class="site-header">\n  <p class="site-name">${title}</p>\n</header>\n\n<main>\n  <section class="hero">\n    <h1>${title}</h1>\n    <p class="tagline">${line}</p>\n  </section>\n  <section id="facts" class="part">\n    <h2>Fun facts</h2>\n    <ul>\n      <li>${fact}</li>\n      <li>Made with STEM 207's Website Builder.</li>\n    </ul>\n  </section>\n</main>\n`,
+      css: `body {\n  margin: 0;\n  background-color: #f3f7ee;\n  color: #1f3324;\n  font-family: Georgia, serif;\n}\n\n.site-header {\n  padding: 1rem 1.5rem;\n}\n\n.hero {\n  padding: 3rem 1.5rem;\n  background-color: ${color};\n  color: #ffffff;\n}\n\n.part {\n  padding: 2rem 1.5rem;\n}\n`
+    });
+    const puffins = page("Puffins of Maine", "Little seabirds with big orange beaks.", "Puffins can dive 200 feet deep.", "#13213c");
+    const boats = page("Lobster Boat Club", "A made-up club for people who love boats.", "Lobster boats race every summer in Maine.", "#2f5d3a");
+    const websites = [
+      { studentId: students[2].id, classId: cls.id, ...puffins, status: "handed_in", handedInAt: now - 2 * SE.DAY, updatedAt: now - 2 * SE.DAY,
+        reflect: { right: "It used my puffin facts.", wrong: "It picked the wrong picture at first.", changed: "I added a fact about diving." },
+        gallery: "approved", galleryTitle: puffins.title, galleryHtml: puffins.html, galleryCss: puffins.css, teacherNote: "Great facts! Try one more section.", isDemo: true },
+      { studentId: students[5].id, classId: cls.id, ...boats, status: "draft", handedInAt: null, updatedAt: now - 5 * 3600000, reflect: {},
+        gallery: "requested", galleryTitle: boats.title, galleryHtml: boats.html, galleryCss: boats.css, teacherNote: "", isDemo: true }
+    ];
+    const kudos = [{ websiteId: students[2].id, studentId: students[1].id, kind: "learned", at: now - SE.DAY, isDemo: true }];
+    return { educator, cls, students, events, assignments, messages, teams, websites, kudos };
   }
 
   async function ensureDemoHash() {
@@ -308,6 +324,8 @@
     db.assignments = (db.assignments || []).filter((x) => !x.isDemo).concat(d.assignments);
     db.messages = (db.messages || []).filter((x) => !x.isDemo).concat(d.messages);
     db.teams = (db.teams || []).filter((x) => !x.isDemo).concat(d.teams);
+    db.websites = (db.websites || []).filter((x) => !x.isDemo).concat(d.websites);
+    db.kudos = (db.kudos || []).filter((x) => !x.isDemo).concat(d.kudos);
   }
 
   /* Only students and educators can be signed in. Anything else (like a session from the
@@ -346,6 +364,12 @@
       Object.assign(db, { pathways: [], pathwayVersions: [], pathwayAssignments: [] });
       save();
     }
+    if (!db.websites) { // added with the Website Builder's class gallery: the sample class's websites
+      const d = seedDemo();
+      const has = db.classes.some((c) => c.id === d.cls.id);
+      Object.assign(db, { websites: has ? d.websites : [], kudos: has ? d.kudos : [] });
+      save();
+    }
     return ensureDemoHash();
   }
 
@@ -364,7 +388,10 @@
     pathway: (r) => ({ id: r.id, educatorId: r.educator_id, title: r.title, essentialQuestion: r.essential_question || "", goal: r.goal || "", finalProduct: r.final_product || "",
       audience: r.audience || {}, status: r.status, version: r.version, steps: r.steps || [], basedOn: r.based_on || null, isDemo: r.is_demo, createdAt: ms(r.created_at), updatedAt: ms(r.updated_at) }),
     pathwayVersion: (r) => ({ pathwayId: r.pathway_id, version: r.version, snapshot: r.snapshot, publishedAt: ms(r.published_at) }),
-    pathwayAssignment: (r) => ({ id: r.id, classId: r.class_id, pathwayId: r.pathway_id, version: r.version, assignedAt: ms(r.assigned_at), dueDate: r.due_date || null, note: r.note || null, isDemo: r.is_demo })
+    pathwayAssignment: (r) => ({ id: r.id, classId: r.class_id, pathwayId: r.pathway_id, version: r.version, assignedAt: ms(r.assigned_at), dueDate: r.due_date || null, note: r.note || null, isDemo: r.is_demo }),
+    website: (r) => ({ studentId: r.student_id, classId: r.class_id, title: r.title, html: r.html, css: r.css, status: r.status, reflect: r.reflect || {}, gallery: r.gallery,
+      galleryTitle: r.gallery_title, galleryHtml: r.gallery_html, galleryCss: r.gallery_css, teacherNote: r.teacher_note || "", updatedAt: ms(r.updated_at), handedInAt: r.handed_in_at ? ms(r.handed_in_at) : null, isDemo: r.is_demo }),
+    kudos: (r) => ({ websiteId: r.website_id, studentId: r.student_id, kind: r.kind, at: ms(r.at) })
   };
   const toRow = {
     cls: (c) => ({ id: c.id, educator_id: c.educatorId, name: c.name, code: c.code, is_demo: !!c.isDemo, created_at: iso(c.createdAt) }),
@@ -379,14 +406,17 @@
     pathwayVersion: (v) => ({ pathway_id: v.pathwayId, version: v.version, snapshot: v.snapshot, published_at: iso(v.publishedAt) }),
     pathwayAssignment: (a) => ({ id: a.id, class_id: a.classId, pathway_id: a.pathwayId, version: a.version, assigned_at: iso(a.assignedAt), due_date: a.dueDate || null, note: a.note || null, is_demo: !!a.isDemo })
   };
-  const emptyDb = () => ({ version: 7, educators: [], classes: [], students: [], events: [], assignments: [], messages: [], teams: [], pathways: [], pathwayVersions: [], pathwayAssignments: [] });
+  const emptyDb = () => ({ version: 7, educators: [], classes: [], students: [], events: [], assignments: [], messages: [], teams: [], pathways: [], pathwayVersions: [], pathwayAssignments: [], websites: [], kudos: [] });
   const cloudCode = () => `${CODE_WORDS[Math.floor(Math.random() * CODE_WORDS.length)]}${Math.floor(Math.random() * 900 + 100)}`;
 
   async function loadEducator(user) {
     journey = null;
     // Educator pathways arrive with supabase/update-6-pathways.sql; until then there are none.
     const missing6 = (e) => { if (e.offline) throw e; console.warn("STEM 207: pathway tables missing (run supabase/update-6-pathways.sql)", e); return []; };
-    const [eds, classes, students, events, assignments, messages, teams, pathways, pathwayVersions, pathwayAssignments] = await Promise.all([
+    // Students' websites arrive with supabase/update-13-student-websites.sql; until then the Websites list says so.
+    websitesMissing = false;
+    const missing13 = (e) => { if (e.offline) throw e; websitesMissing = true; console.warn("STEM 207: student_websites missing (run supabase/update-13-student-websites.sql)", e); return []; };
+    const [eds, classes, students, events, assignments, messages, teams, pathways, pathwayVersions, pathwayAssignments, websites, kudos] = await Promise.all([
       SE.cloud.selectAll("educators", `id=eq.${user.id}`),
       SE.cloud.selectAll("classes", "order=created_at.asc"),
       SE.cloud.selectAll("students", "order=created_at.asc"),
@@ -399,7 +429,9 @@
       SE.cloud.selectAll("class_teams", "order=created_at.asc").catch((e) => { if (e.offline) throw e; console.warn("STEM 207: class_teams table missing (run supabase/update-5-moxie-teams.sql)", e); return []; }),
       SE.cloud.selectAll("pathways", "order=created_at.asc").catch(missing6),
       SE.cloud.selectAll("pathway_versions", "order=published_at.asc").catch(missing6),
-      SE.cloud.selectAll("pathway_assignments", "order=assigned_at.asc").catch(missing6)
+      SE.cloud.selectAll("pathway_assignments", "order=assigned_at.asc").catch(missing6),
+      SE.cloud.selectAll("student_websites", "order=updated_at.asc").catch(missing13),
+      SE.cloud.selectAll("website_kudos", "order=at.asc").catch(missing13)
     ]);
     if (!eds.length) {
       // The sign-up trigger normally creates this row; make it here if it's missing.
@@ -408,8 +440,13 @@
       eds.push(row);
     }
     db = { version: 7, educators: eds.map(fromRow.educator), classes: classes.map(fromRow.cls), students: students.map(fromRow.student), events: events.map(fromRow.event), assignments: assignments.map(fromRow.assignment), messages: messages.map(fromRow.message), teams: teams.map(fromRow.team),
-      pathways: pathways.map(fromRow.pathway), pathwayVersions: pathwayVersions.map(fromRow.pathwayVersion), pathwayAssignments: pathwayAssignments.map(fromRow.pathwayAssignment) };
+      pathways: pathways.map(fromRow.pathway), pathwayVersions: pathwayVersions.map(fromRow.pathwayVersion), pathwayAssignments: pathwayAssignments.map(fromRow.pathwayAssignment),
+      websites: websites.map(fromRow.website), kudos: kudos.map(fromRow.kudos) };
   }
+  /* Website Builder in cloud mode: false until supabase/update-13-student-websites.sql is run (then the app keeps
+     the website on the device only, and says so). A missing database function answers 404. */
+  let websitesMissing = false;
+  const missingFn = (e) => e && (e.status === 404 || e.code === "PGRST202" || e.code === "42883");
   /* A student's partner team and their teammates' shared work, on a student's device in cloud mode
      (supabase/update-5-moxie-teams.sql). Null until loaded, or if the function isn't there yet. */
   let teamCache = null;
@@ -688,6 +725,8 @@
       db.messages = (db.messages || []).filter((m) => m.classId !== id);
       db.teams = (db.teams || []).filter((t) => t.classId !== id);
       db.pathwayAssignments = (db.pathwayAssignments || []).filter((a) => a.classId !== id);
+      db.websites = (db.websites || []).filter((w) => w.classId !== id);
+      db.kudos = (db.kudos || []).filter((k) => !ids.has(k.studentId) && !ids.has(k.websiteId));
       if (CLOUD) send(restOp("DELETE", `/classes?id=eq.${encodeURIComponent(id)}`, undefined, "return=minimal")); else save();
     },
     createClass(educatorId, name) {
@@ -792,6 +831,8 @@
       if (team) SE.store.saveTeam(team.classId, team.studentIds.filter((x) => x !== id)).ok || SE.store.deleteTeam(team.id);
       db.students = db.students.filter((s) => s.id !== id);
       db.events = db.events.filter((e) => e.studentId !== id);
+      db.websites = (db.websites || []).filter((w) => w.studentId !== id);
+      db.kudos = (db.kudos || []).filter((k) => k.studentId !== id && k.websiteId !== id);
       if (CLOUD) send(restOp("DELETE", `/students?id=eq.${encodeURIComponent(id)}`, undefined, "return=minimal")); else save();
     },
     async signInStudent(studentId, code) {
@@ -1022,6 +1063,128 @@
     deleteTeam(id) {
       db.teams = (db.teams || []).filter((t) => t.id !== id);
       if (CLOUD) send(restOp("DELETE", `/class_teams?id=eq.${encodeURIComponent(id)}`, undefined, "return=minimal")); else save();
+    },
+
+    /* ───────── Website Builder: a student's website for their teacher, and the class gallery ─────────
+       The website lives on the student's device (lab-wb.js); these keep a copy for the teacher (and for the
+       student's other devices). In cloud mode they need supabase/update-13-student-websites.sql. */
+    websitesReady: () => !(CLOUD && websitesMissing),
+    /* The signed-in student's saved website, or null. */
+    async websiteMine() {
+      const s = readSession();
+      if (!s || s.role !== "student") return null;
+      if (!CLOUD) { const w = (db.websites || []).find((x) => x.studentId === s.id); return w ? { ...w } : null; }
+      try { const r = await SE.cloud.rpc("website_mine", { p_token: s.token }); return r && r.ok && r.website ? { ...r.website, updatedAt: Number(r.website.updatedAt) } : null; }
+      catch (e) { if (missingFn(e)) websitesMissing = true; return null; }
+    },
+    /* Save the student's website (title, index.html, styles.css). The caller checks it with SE.privacy first. */
+    websiteSave({ title, html, css }) {
+      const s = readSession();
+      if (!s || s.role !== "student") return false;
+      const st = db.students.find((x) => x.id === s.id);
+      if (!st) return false;
+      const t = clip(title, 80) || "My Website", h = String(html || "").slice(0, 60000), c = String(css || "").slice(0, 60000);
+      if (CLOUD) {
+        if (websitesMissing) return false;
+        send({ run: async () => { const r = await SE.cloud.rpc("website_save", { p_token: s.token, p_title: t, p_html: h, p_css: c }); if (r && r.ok === false && r.error === "session") { const err = new Error("Your sign-in expired. Please sign in again."); err.status = 401; throw err; } },
+          onError: async (e) => { if (missingFn(e)) { websitesMissing = true; return true; } return false; } });
+        return true;
+      }
+      db.websites = db.websites || [];
+      let w = db.websites.find((x) => x.studentId === st.id);
+      if (!w) { w = { studentId: st.id, classId: st.classId, status: "draft", reflect: {}, gallery: "none", teacherNote: "", handedInAt: null }; db.websites.push(w); }
+      Object.assign(w, { title: t, html: h, css: c, updatedAt: Date.now() });
+      save();
+      return true;
+    },
+    /* Hand in: the website, with the student's Human Touch answers for the teacher. */
+    async websiteHandIn(reflect = {}) {
+      const s = readSession();
+      if (!s || s.role !== "student") return false;
+      const r = {};
+      ["right", "wrong", "changed", "partner"].forEach((k) => { if (reflect[k]) r[k] = clip(reflect[k], 400); });
+      if (CLOUD) {
+        await flush();
+        try { const x = await SE.cloud.rpc("website_hand_in", { p_token: s.token, p_reflect: r }); return !!(x && x.ok); }
+        catch (e) { if (missingFn(e)) websitesMissing = true; return false; }
+      }
+      const w = (db.websites || []).find((x) => x.studentId === s.id);
+      if (!w) return false;
+      Object.assign(w, { status: "handed_in", handedInAt: Date.now(), reflect: r });
+      save();
+      return true;
+    },
+    /* Ask to share the website with the class (a copy the teacher approves), or stop sharing. */
+    async websiteShare(on) {
+      const s = readSession();
+      if (!s || s.role !== "student") return false;
+      if (CLOUD) {
+        await flush();
+        try { const x = await SE.cloud.rpc("website_share", { p_token: s.token, p_on: !!on }); return !!(x && x.ok); }
+        catch (e) { if (missingFn(e)) websitesMissing = true; return false; }
+      }
+      const w = (db.websites || []).find((x) => x.studentId === s.id);
+      if (!w) return false;
+      Object.assign(w, on ? { gallery: "requested", galleryTitle: w.title, galleryHtml: w.html, galleryCss: w.css } : { gallery: "none", galleryTitle: null, galleryHtml: null, galleryCss: null });
+      save();
+      return true;
+    },
+    /* The class gallery for a student: approved websites in their class, with kind-feedback counts. */
+    async classGallery() {
+      const s = readSession();
+      if (!s || s.role !== "student") return [];
+      if (CLOUD) {
+        try { const r = await SE.cloud.rpc("class_gallery", { p_token: s.token }); return r && r.ok ? r.websites || [] : []; }
+        catch (e) { if (missingFn(e)) websitesMissing = true; return []; }
+      }
+      const st = db.students.find((x) => x.id === s.id);
+      if (!st) return [];
+      return (db.websites || []).filter((w) => w.classId === st.classId && w.gallery === "approved").map((w) => ({
+        id: w.studentId, displayName: (db.students.find((x) => x.id === w.studentId) || {}).displayName || "", title: w.galleryTitle, html: w.galleryHtml, css: w.galleryCss,
+        mine: w.studentId === st.id, kudos: SE.store.kudosFor(w.studentId), given: (db.kudos || []).filter((k) => k.websiteId === w.studentId && k.studentId === st.id).map((k) => k.kind)
+      })).sort((a, b) => a.displayName.localeCompare(b.displayName));
+    },
+    /* Kind feedback on a classmate's shared website: turns on or off. Returns { ok, on }. */
+    async websiteKudos(websiteId, kind) {
+      const s = readSession();
+      if (!s || s.role !== "student" || !["learned", "design", "readable"].includes(kind) || websiteId === s.id) return { ok: false };
+      if (CLOUD) {
+        try { const r = await SE.cloud.rpc("website_kudos", { p_token: s.token, p_website: websiteId, p_kind: kind }); return r && r.ok ? r : { ok: false }; }
+        catch (e) { return { ok: false }; }
+      }
+      const st = db.students.find((x) => x.id === s.id), w = (db.websites || []).find((x) => x.studentId === websiteId);
+      if (!st || !w || w.classId !== st.classId || w.gallery !== "approved") return { ok: false };
+      db.kudos = db.kudos || [];
+      const had = db.kudos.findIndex((k) => k.websiteId === websiteId && k.studentId === st.id && k.kind === kind);
+      if (had >= 0) db.kudos.splice(had, 1); else db.kudos.push({ websiteId, studentId: st.id, kind, at: Date.now() });
+      save();
+      return { ok: true, on: had < 0 };
+    },
+    /* Educators: their class's websites, the kudos they got, and approving, declining, or a note. */
+    websitesFor: (classId) => (db.websites || []).filter((w) => w.classId === classId),
+    kudosFor(websiteId) {
+      const n = { learned: 0, design: 0, readable: 0 };
+      (db.kudos || []).forEach((k) => { if (k.websiteId === websiteId && n[k.kind] != null) n[k.kind]++; });
+      return n;
+    },
+    reviewWebsite(studentId, patch = {}) {
+      const s = readSession();
+      const w = (db.websites || []).find((x) => x.studentId === studentId);
+      if (!s || s.role !== "educator" || !w) return false;
+      const ch = {};
+      if (patch.gallery === "approved" && w.gallery === "requested") ch.gallery = "approved";
+      if (patch.gallery === "none") Object.assign(ch, { gallery: "none", galleryTitle: null, galleryHtml: null, galleryCss: null });
+      if (patch.teacherNote != null) ch.teacherNote = clip(patch.teacherNote, 300);
+      if (!Object.keys(ch).length) return false;
+      Object.assign(w, ch);
+      if (CLOUD) {
+        const row = {};
+        if (ch.gallery) row.gallery = ch.gallery;
+        if (ch.gallery === "none") Object.assign(row, { gallery_title: null, gallery_html: null, gallery_css: null });
+        if (ch.teacherNote != null) row.teacher_note = ch.teacherNote;
+        send(restOp("PATCH", `/student_websites?student_id=eq.${encodeURIComponent(studentId)}`, row, "return=minimal"));
+      } else save();
+      return true;
     },
 
     /* Demo: in local mode, restores the built-in sample class. In cloud mode, adds a

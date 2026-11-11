@@ -161,17 +161,21 @@
     el.innerHTML = `
       <div class="wbs" id="wbs">
         <div class="wbs__bar">
-          <p class="wbs__name">${debug ? `${icon("alert")}<span>A <strong>practice copy</strong> of your website, with three bugs. Your real website doesn't change.</span>` : `<span>My website: <strong>${esc(title)}</strong></span>`}</p>
+          <div class="wbs__who"><p class="wbs__name">${debug ? `${icon("alert")}<span>A <strong>practice copy</strong> of your website, with three bugs. Your real website doesn't change.</span>` : `<span>My website: <strong>${esc(title)}</strong></span>`}</p>
+            ${debug ? "" : `<p class="wbs__sync" id="wb-sync" role="status"></p>`}</div>
           <div class="ws__toggles" role="group" aria-label="Studio tools">
             <button type="button" class="btn btn--ghost btn--small" id="wb-example">${icon("eye")}Show an Example</button>
             ${debug ? "" : `<button type="button" class="btn btn--ghost btn--small" id="wb-change">${icon("palette")}Make a Change</button>`}
             <span class="wbs__more"><button type="button" class="btn btn--ghost btn--small" id="wb-more" aria-expanded="false" aria-controls="wb-more-menu">${icon("list")}More tools</button>
               <span class="wbs__menu" id="wb-more-menu" hidden>
                 <button type="button" class="linkish" id="wb-tags">${icon("code")}Tag Explorer</button>
-                ${debug ? `<button type="button" class="linkish" id="wb-newcopy">${icon("refresh")}New practice copy (new bugs)</button>` : `<button type="button" class="linkish" id="wb-versions">${icon("refresh")}Versions</button>`}
+                ${debug ? `<button type="button" class="linkish" id="wb-newcopy">${icon("refresh")}New practice copy (new bugs)</button>` : `<button type="button" class="linkish" id="wb-versions">${icon("refresh")}Versions</button>
+                <button type="button" class="linkish" id="wb-share">${icon("check")}Hand in or share</button>
+                <button type="button" class="linkish" id="wb-gallery">${icon("users")}Class gallery</button>`}
               </span></span>
           </div>
         </div>
+        <div class="wbs__newer" id="wb-newer" hidden></div>
         <div class="wbs__panes">
           <section class="wbs__edit" aria-label="Your code">
             <div class="ws-tabrow">
@@ -204,7 +208,29 @@
     const ta = { html: $("#wb-html"), css: $("#wb-css") };
     const shellTop = [{ text: "<!DOCTYPE html>", why: "Use modern HTML" }, { text: "<html lang=\"en\">", why: "The whole page, in English" }, { text: "<head>", why: "Information for the browser" }, { text: "  <meta charset=\"UTF-8\">", why: "Show every letter correctly" }, { text: `  <title>${title}</title>`, why: "The name in the browser tab" }, { text: "  <link rel=\"stylesheet\" href=\"styles.css\">", why: "Use the CSS in styles.css" }, { text: "</head>" }, { text: "<body>", why: "Everything visitors see" }];
     const ed = { html: SE.codeEditor(ta.html, { lang: "html", shellTop, shellBottom: [{ text: "</body>" }, { text: "</html>" }], foldTop: true }), css: SE.codeEditor(ta.css, { lang: "css" }) };
-    const persist = () => { files.html = ta.html.value; files.css = ta.css.value; save(); };
+    const persist = () => { files.html = ta.html.value; files.css = ta.css.value; save(); sync(); };
+    /* A copy for the teacher (and the student's other devices): a few seconds after typing stops, only for a student,
+       never the Debug copy, and only when SE.privacy finds nothing personal in it. */
+    const student = !!(api.user && api.user.role === "student");
+    let syncTimer = null, lastSent = "", syncHit = null;
+    function sync(now) {
+      if (!student || debug) return;
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(() => {
+        const out = $("#wb-sync");
+        if (!out) return;
+        syncHit = SE.wbShare.privacy(state);
+        out.classList.toggle("is-warn", !!syncHit);
+        if (syncHit) {
+          out.innerHTML = `${icon("alert")}<span>Saved on this device only: it has ${esc(syncHit.say)} ("${esc(syncHit.text)}"). Take it out to save it for your teacher.</span>${syncHit.where === "html" ? `<button type="button" class="linkish" id="wb-sync-find">Find it</button>` : ""}`;
+          return;
+        }
+        if (!SE.store.websitesReady()) { out.textContent = "Saved on this device."; return; }
+        const key = `${title}\u0000${files.html}\u0000${files.css}`;
+        if (key !== lastSent && SE.store.websiteSave({ title, html: files.html, css: files.css })) { lastSent = key; state.sentHash = SE.wbShare.hash(title, files.html, files.css); save(); }
+        out.textContent = SE.store.websitesReady() ? "Saved for your teacher too." : "Saved on this device.";
+      }, now ? 0 : 2500);
+    }
     function setFiles(f) { ta.html.value = f.html; ta.css.value = f.css; ed.html.refresh(); ed.css.refresh(); persist(); render(); }
     function showTab(t) {
       tab = t;
@@ -351,12 +377,15 @@
           <p>You described a website, read the code a program wrote, and made it your own. The builder followed rules; you and your partner did the thinking. <strong>Keep the humanity in technology.</strong></p>
           <iframe class="ws-done__frame" title="Your finished website" sandbox srcdoc="${esc(WK.srcdoc(ta.html.value, { css: ta.css.value, title }))}"></iframe>
           <div class="ws-done__actions">${SE.certificate ? SE.certificate.button(info, "Print my certificate") : ""}</div>
-          <p class="muted small">Your website stays on this device. It isn't published on the internet.</p>
+          <p class="muted small">Your website isn't published on the internet. Only your teacher sees it, and your class too if you share it and your teacher says yes.</p>
+          <div class="wb-sharebox" id="wb-sharebox"></div>
           <p><strong>What's next:</strong> <a href="#/activity/lab-web-builder">${icon("arrowRight")}Web Builder Lab</a>: write a page from a blank file, with no builder at all.</p></section>`;
       }
       if (idx === 1 || idx === 6) extra = `<p class="ws-cheer">${icon("users")}Check with a person: read your new words to a partner. Do they make sense to someone who doesn't know your topic?</p>`;
       api.say(idx === 7 ? "You finished your website!" : `${ACTIVITIES[idx].title}: done!`, "good");
       api.win({ activity: idx, achievements: done.size >= 8 ? 3 : [0, 1, 2].every((i) => done.has(i)) ? 2 : 1 }, { extra });
+      const box = document.getElementById("wb-sharebox");
+      if (box) SE.wbShare.box(box, { state, user: api.user });
     }
     $("#wb-results").addEventListener("click", (e) => {
       const wh = e.target.closest("[data-where]");
@@ -565,6 +594,34 @@
         onInsert(text, lang) { const area = ta[lang] || ta.html; showTab(lang === "css" ? "css" : "html"); const before = area.value.slice(0, area.selectionStart); typeAt(area, (before && !before.endsWith("\n") ? "\n" : "") + text + "\n"); } });
     });
     if (!debug) { $("#wb-change").addEventListener("click", () => makeChange("")); $("#wb-versions").addEventListener("click", () => { closeMenu(false); versions(); }); }
+    if (!debug) {
+      $("#wb-share").addEventListener("click", () => {
+        closeMenu(false);
+        SE.modal.open({ title: "Hand in or share", body: `<div id="wb-sharebox-m"></div>`, onOpen(dlg) { SE.wbShare.box(dlg.querySelector("#wb-sharebox-m"), { state, user: api.user }); } });
+      });
+      $("#wb-gallery").addEventListener("click", () => { closeMenu(false); SE.wbShare.gallery(api.user); });
+      $("#wb-sync").addEventListener("click", (e) => {
+        if (!e.target.closest("#wb-sync-find") || !syncHit) return;
+        showTab("html"); ed.html.goTo(syncHit.at, syncHit.at + syncHit.length);
+        api.say(`This is ${syncHit.say}. Take it out to keep your website private and safe.`, "warn");
+      });
+      // A newer copy saved from another device (another Chromebook): the student chooses which one to keep.
+      if (student) SE.store.websiteMine().then((w) => {
+        // Newer means "not what this device has, and not what this device sent last": no clocks, so no false alarms.
+        if (!w || !$("#wb-newer") || (w.html === files.html && w.css === files.css) || SE.wbShare.hash(w.title, w.html, w.css) === state.sentHash) { sync(true); return; }
+        const box = $("#wb-newer");
+        box.hidden = false;
+        box.innerHTML = `<p>${icon("refresh")}<span><strong>A newer copy of your website</strong> was saved on another device (${new Date(w.updatedAt).toLocaleString()}).</span></p>
+          <div class="wb-actions"><button type="button" class="btn btn--primary btn--small" id="wb-newer-use">Use the newer copy</button><button type="button" class="btn btn--ghost btn--small" id="wb-newer-keep">Keep this device's copy</button></div>`;
+        $("#wb-newer-use").addEventListener("click", () => {
+          state.versions.push({ at: Date.now(), label: "This device's copy, before using the newer one", html: files.html, css: files.css });
+          setFiles({ html: w.html, css: w.css });
+          box.hidden = true;
+          api.say("Using the newer copy. This device's copy is saved in Versions.", "info");
+        });
+        $("#wb-newer-keep").addEventListener("click", () => { box.hidden = true; lastSent = ""; sync(true); api.say("Kept this device's copy. It's saved for your teacher now.", "info"); });
+      });
+    }
     if (debug) $("#wb-newcopy").addEventListener("click", () => {
       closeMenu(false);
       const fresh = injectBugs(state.files, Date.now());
@@ -581,7 +638,7 @@
     if (open === "change" && !debug) setTimeout(() => makeChange(""), 50);
     if (open === "explore") api.say("Tap any part of your page in the preview: its code is selected, and the CSS rules that style it are listed.", "info");
     if (debug) api.say("This is a practice copy with three bugs. Look at the preview: what looks wrong? Then press Check my work.", "info");
-    return () => { clearTimeout(timer); document.removeEventListener("click", outside); };
+    return () => { clearTimeout(timer); clearTimeout(syncTimer); document.removeEventListener("click", outside); };
   }
 
   SE.labs.goals(ACTIVITIES, GOALS);

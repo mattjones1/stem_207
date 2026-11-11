@@ -649,6 +649,7 @@
           </table>
         </div>
       </section>
+      ${SE.teachWebsites ? SE.teachWebsites.block(cls, sum) : ""}
       <section class="wrap section">${messageBlock(cls)}</section>
 
       <section class="wrap section teach-grid teach-grid--class" id="add-student-block">
@@ -699,6 +700,7 @@
     bindFrame(user);
     bindRoster(sum);
     bindMessages(cls);
+    if (SE.teachWebsites) SE.teachWebsites.bind(cls);
     const $ = (sel) => document.getElementById(sel);
     $("rename-class").addEventListener("submit", (e) => {
       e.preventDefault();
