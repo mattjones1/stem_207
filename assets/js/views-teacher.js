@@ -515,10 +515,11 @@
 
   /* ───────── Classes ───────── */
   /* Two quick actions on a class card (they open the shared modal). */
-  const classTools = (c) => `
+  const classTools = (c, extra = "") => `
     <div class="class-tools">
       <button type="button" class="btn btn--ghost btn--small" data-add-students="${c.id}">${icon("plus")}Add students<span class="visually-hidden"> to ${esc(c.name)}</span></button>
       <button type="button" class="btn btn--ghost btn--small" data-message-class="${c.id}">${icon("message")}Message<span class="visually-hidden"> ${esc(c.name)}</span></button>
+      ${extra}
     </div>`;
 
   SE.views.teachClasses = function (user) {
@@ -526,12 +527,13 @@
     if (!classes.length && !archived.length) return noClass(user);
     const card = (c) => {
       const n = SE.store.studentsIn(c.id).length;
+      const del = `<button type="button" class="btn btn--ghost btn--small class-tools__delete" data-delete-class="${c.id}">${icon("trash")}Delete<span class="visually-hidden"> ${esc(c.name)}</span></button>`;
       return `
         <li class="block dash-class">
           <h3><a href="#/teach/classes/${c.id}">${esc(c.name)}</a>${c.isDemo ? ` <span class="chip">Sample</span>` : ""}</h3>
           <p class="muted small">Class code ${esc(c.code)} · ${plural(n, "student", "students")}</p>
           ${c.archivedAt ? `<p class="small">Archived ${SE.dateShort(c.archivedAt)}. Students can't sign in.</p>
-            <button type="button" class="btn btn--ghost btn--small" data-restore="${c.id}">${icon("refresh")}Restore<span class="visually-hidden"> ${esc(c.name)}</span></button>` : classTools(c)}
+            <div class="class-tools"><button type="button" class="btn btn--ghost btn--small" data-restore="${c.id}">${icon("refresh")}Restore<span class="visually-hidden"> ${esc(c.name)}</span></button>${del}</div>` : classTools(c, del)}
         </li>`;
     };
     const body = `
@@ -574,7 +576,6 @@
     }));
   };
 
-  let deleteOpen = null;   // the class whose delete confirmation is open
   SE.views.teachClassPage = function (user, id) {
     const cls = SE.store.classById(id);
     if (!cls || cls.educatorId !== user.id) return SE.views.notFound();
@@ -597,14 +598,7 @@
           </form>
           <div class="class-manage__btns">
             <button type="button" class="btn btn--ghost btn--small" id="archive-class">${icon(cls.archivedAt ? "refresh" : "box")}${cls.archivedAt ? "Restore class" : "Archive class"}</button>
-            <button type="button" class="btn btn--ghost btn--small" id="delete-open" aria-expanded="${deleteOpen === cls.id}" aria-controls="delete-zone">${icon("trash")}Delete class</button>
-          </div>
-          <div id="delete-zone" class="danger-zone" ${deleteOpen === cls.id ? "" : "hidden"}>
-            <p><strong>Deleting removes ${esc(cls.name)}, its ${plural(students.length, "student", "students")}, and all their work. This can't be undone.</strong> To keep the work, archive the class instead.</p>
-            <label for="del-confirm">Type the class name to confirm</label>
-            <input id="del-confirm" class="input" autocomplete="off" placeholder="${esc(cls.name)}">
-            <button type="button" class="btn btn--danger btn--small" id="delete-yes">${icon("trash")}Delete forever</button>
-            <p class="form__error" id="del-err" role="alert"></p>
+            <button type="button" class="btn btn--ghost btn--small" id="delete-open" data-delete-class="${cls.id}">${icon("trash")}Delete class</button>
           </div>
         </div>
         <div class="kpis">
@@ -713,15 +707,6 @@
       SE.toast(on ? "Class archived. Its students can't sign in until you restore it." : "Class restored");
       SE.route(true);
     });
-    $("delete-open").addEventListener("click", () => { deleteOpen = deleteOpen === cls.id ? null : cls.id; SE.route(true); if (deleteOpen) $("del-confirm").focus(); });
-    $("delete-yes").addEventListener("click", () => {
-      if ($("del-confirm").value.trim() !== cls.name) { $("del-err").textContent = `Type ${cls.name} exactly to delete it.`; $("del-confirm").focus(); return; }
-      const name = cls.name;
-      SE.store.deleteClass(cls.id);
-      deleteOpen = null;
-      SE.toast(`Deleted ${name}`);
-      location.hash = "#/teach/classes";
-    });
     app().querySelectorAll("[data-grade]").forEach((sel) => sel.addEventListener("change", () => {
       SE.store.updateStudent(sel.dataset.grade, { gradeBand: sel.value });
       SE.toast("Grade band updated");
@@ -752,7 +737,7 @@
 
   /* ───────── Quick tasks in the shared modal ─────────
    * Any button can open these: data-add-students="<classId>", data-message-class="<classId or empty>",
-   * data-note-student="<studentId>". The page behind re-renders when the modal closes. */
+   * data-note-student="<studentId>", data-delete-class="<classId>". The page behind re-renders when the modal closes. */
   const picChip = (pid) => `<span class="pic-chip">${icon(pid)}<span>${esc(SE.pictureById[pid].name)}</span></span>`;
   function loginCard(st, cls, tools = "") {
     return `
@@ -903,17 +888,83 @@
     });
   }
 
+  /* Delete a class. It lists what goes away, offers Archive as the safer choice, and asks for the
+     class name only when there are students to lose (case and extra spaces don't matter). */
+  const sameName = (a, b) => String(a).trim().replace(/\s+/g, " ").toLowerCase() === String(b).trim().replace(/\s+/g, " ").toLowerCase();
+  function deleteClassModal(cls) {
+    const students = SE.store.studentsIn(cls.id);
+    const plans = SE.store.pathwayAssignmentsFor(cls.id).filter((pa) => pa.snapshot).length;
+    const sites = SE.store.websitesFor ? SE.store.websitesFor(cls.id).length : 0;
+    const msgs = SE.store.messagesFor ? SE.store.messagesFor(cls.id).length : 0;
+    const lose = [
+      students.length && `${plural(students.length, "student", "students")} and their login cards`,
+      students.length && "Their XP, patches, and check history",
+      plans && `${plural(plans, "Learning Plan", "Learning Plans")} assigned to this class (the plans stay in your library)`,
+      sites && `${plural(sites, "student website", "student websites")}`,
+      msgs && "Class messages"
+    ].filter(Boolean);
+    const typed = students.length > 0;
+    let archived = false;
+    SE.modal.open({
+      title: `Delete ${cls.name}?`,
+      onClose: () => { if (archived) SE.route(true); },
+      body: `
+        <form id="dc-form" class="form dc-form" novalidate>
+          ${lose.length ? `<p><strong>This can't be undone.</strong> Deleting the class also deletes:</p><ul class="dc-lose">${lose.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>`
+            : `<p>This class has no students or work yet. <strong>Deleting it can't be undone.</strong></p>`}
+          ${cls.isDemo && SE.store.mode === "cloud" ? `<p class="muted">You can add the sample class again from Classes.</p>` : ""}
+          ${cls.archivedAt ? "" : `<div class="dc-safer">
+            <p><strong>Want to keep the work?</strong> Archive the class. Students can't sign in, and you keep everything.</p>
+            <button type="button" class="btn btn--ghost btn--small" id="dc-archive">${icon("box")}Archive instead</button>
+          </div>`}
+          ${typed ? `<div class="form__field">
+            <label for="dc-name">Type the class name to confirm</label>
+            <input id="dc-name" class="input" autocomplete="off" spellcheck="false" placeholder="${esc(cls.name)}" aria-describedby="dc-help">
+            <p class="field-help" id="dc-help">Type ${esc(cls.name)}. Delete forever turns on when the name matches.</p>
+          </div>` : ""}
+          <div class="modal__actions">
+            <button type="button" class="btn btn--ghost" data-modal-close id="dc-keep">Keep class</button>
+            <button type="submit" class="btn btn--danger" id="dc-yes" ${typed ? "disabled" : ""}>${icon("trash")}Delete forever</button>
+          </div>
+        </form>`,
+      onOpen(dlg) {
+        const input = dlg.querySelector("#dc-name"), yes = dlg.querySelector("#dc-yes");
+        const ok = () => !typed || sameName(input.value, cls.name);
+        if (input) input.addEventListener("input", () => { yes.disabled = !ok(); });
+        (input || dlg.querySelector("#dc-keep")).focus();   // the next step is typing; Enter can't delete while it's off
+        const arch = dlg.querySelector("#dc-archive");
+        if (arch) arch.addEventListener("click", () => {
+          SE.store.archiveClass(cls.id, true);
+          archived = true;
+          SE.modal.close();
+          SE.toast("Class archived. Its students can't sign in until you restore it.");
+        });
+        dlg.querySelector("#dc-form").addEventListener("submit", (e) => {
+          e.preventDefault();
+          if (!ok()) { input.focus(); return; }
+          const name = cls.name;
+          SE.store.deleteClass(cls.id);
+          if (currentClassId === cls.id) currentClassId = null;
+          SE.modal.close();
+          SE.toast(`Deleted ${name}`);
+          if (location.hash === "#/teach/classes") SE.route(true); else location.hash = "#/teach/classes";
+        });
+      }
+    });
+  }
+
   document.addEventListener("click", (e) => {
-    const b = e.target.closest("[data-add-students], [data-message-class], [data-note-student]");
+    const b = e.target.closest("[data-add-students], [data-message-class], [data-note-student], [data-delete-class]");
     if (!b) return;
     const user = SE.store.currentUser();
     if (!user || user.role !== "educator") return;
     e.preventDefault();
     if (b.dataset.addStudents !== undefined) { const c = SE.store.classById(b.dataset.addStudents); if (c) addStudentsModal(c); }
     else if (b.dataset.messageClass !== undefined) messageModal(user, b.dataset.messageClass);
+    else if (b.dataset.deleteClass !== undefined) { const c = SE.store.classById(b.dataset.deleteClass); if (c && c.educatorId === user.id) deleteClassModal(c); }
     else { const s = SE.store.studentById ? SE.store.studentById(b.dataset.noteStudent) : null; if (s) noteModal(s); }
   });
-  SE.teachQuick = { addStudents: addStudentsModal, message: messageModal, note: noteModal };
+  SE.teachQuick = { addStudents: addStudentsModal, message: messageModal, note: noteModal, deleteClass: deleteClassModal };
 
   /* ───────── Bits used on library pages ───────── */
   SE.views.educatorStrip = function (user) {

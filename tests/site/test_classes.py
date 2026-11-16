@@ -1,5 +1,5 @@
 # Classes and the Dashboard (usability Stage 3): one Dashboard for every class, a Classes page
-# (add, archive, restore), and each class's own page (rename, archive, delete with a typed name,
+# (add, archive, restore, delete), and each class's own page (rename, archive, delete in a dialog,
 # roster, sign-in cards). Archived classes can't be used to sign in. Local mode (sample class).
 #   LOCAL_MODE=1 PORT=8767 node tests/backend/mock-supabase.js ; python3 tests/site/test_classes.py [url]
 import asyncio, sys
@@ -52,13 +52,42 @@ async def main():
     await pg.click(f'[data-restore="{cid}"]'); await pg.wait_for_timeout(400)
     ok("restore puts it back", await pg.locator(".dash-classes > li").count() == n0 + 1 and await pg.evaluate(f"SE.store.findClass('{code}').then(r => !!r)"))
 
-    # Delete: needs the exact class name, then removes the class and its students.
+    # Delete (a dialog): lists what goes away, offers Archive instead, and asks for the name when
+    # the class has students. Keep class and Esc leave it alone.
     await go(pg, f"#/teach/classes/{cid}")
     await pg.click("#delete-open"); await pg.wait_for_timeout(300)
-    await pg.fill("#del-confirm", "room 9"); await pg.click("#delete-yes"); await pg.wait_for_timeout(300)
-    ok("delete refuses the wrong name", "Type Room 9 Science exactly" in await pg.inner_text("#del-err") and await pg.evaluate(f"!!SE.store.classById('{cid}')"))
-    await pg.fill("#del-confirm", "Room 9 Science"); await pg.click("#delete-yes"); await pg.wait_for_timeout(500)
+    dlg = pg.locator("dialog.modal")
+    txt = await dlg.inner_text()
+    ok("delete dialog says what goes away", "Delete Room 9 Science?" in txt and "1 student and their login cards" in txt and "can't be undone" in txt, txt[:200])
+    ok("delete dialog offers Archive instead", await pg.locator("#dc-archive").count() == 1)
+    ok("Delete forever is off until the name is typed", await pg.locator("#dc-yes").is_disabled())
+    ok("focus starts in the name box", await pg.evaluate("document.activeElement.id") == "dc-name")
+    await pg.fill("#dc-name", "room 9"); ok("the wrong name keeps it off", await pg.locator("#dc-yes").is_disabled())
+    await pg.click("#dc-keep"); await pg.wait_for_timeout(300)
+    ok("Keep class closes it and keeps the class", await dlg.count() == 0 and await pg.evaluate(f"!!SE.store.classById('{cid}')"))
+    ok("focus goes back to Delete class", await pg.evaluate("document.activeElement.id") == "delete-open")
+    await pg.click("#delete-open"); await pg.wait_for_timeout(300); await pg.keyboard.press("Escape"); await pg.wait_for_timeout(300)
+    ok("Esc closes it and keeps the class", await dlg.count() == 0 and await pg.evaluate(f"!!SE.store.classById('{cid}')"))
+    await pg.click("#delete-open"); await pg.wait_for_timeout(300)
+    await pg.fill("#dc-name", "  room 9   SCIENCE "); ok("case and extra spaces don't matter", await pg.locator("#dc-yes").is_enabled())
+    await pg.click("#dc-yes"); await pg.wait_for_timeout(500)
     ok("delete removes the class and its students", await pg.evaluate(f"!SE.store.classById('{cid}') && !SE.store.studentsIn('{cid}').length") and pg.url.endswith("#/teach/classes"))
+
+    # From the Classes page: Archive instead, then an empty class deletes with no typing, and an archived card has Delete.
+    await go(pg, "#/teach/classes")
+    await pg.fill("#nc-name", "Test class"); await pg.click("#new-class button[type=submit]"); await pg.wait_for_timeout(600)
+    eid = pg.url.split("#/teach/classes/")[1]
+    await go(pg, "#/teach/classes")
+    ok("each Classes card has Delete", await pg.locator(f'.dash-classes [data-delete-class="{eid}"]').count() == 1)
+    await pg.click(f'[data-delete-class="{eid}"]'); await pg.wait_for_timeout(300)
+    ok("an empty class needs no typing", await pg.locator("#dc-name").count() == 0 and await pg.locator("#dc-yes").is_enabled() and "no students or work yet" in await dlg.inner_text())
+    await pg.click("#dc-archive"); await pg.wait_for_timeout(400)
+    ok("Archive instead archives it", await pg.evaluate(f"!!SE.store.classById('{eid}').archivedAt"))
+    await pg.locator("details:has(#archived-title) summary").click()
+    await pg.click(f'[data-delete-class="{eid}"]'); await pg.wait_for_timeout(300)
+    ok("an archived class's dialog has no Archive instead", await pg.locator("#dc-archive").count() == 0)
+    await pg.click("#dc-yes"); await pg.wait_for_timeout(500)
+    ok("delete from an archived card", await pg.evaluate(f"!SE.store.classById('{eid}')") and await pg.locator(f'[data-delete-class="{eid}"]').count() == 0)
 
     # The sample class page has the roster, journey, messages, and labs.
     demo = await pg.evaluate("SE.store.classesFor(SE.store.currentUser().id).find(c => c.isDemo).id")

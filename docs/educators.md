@@ -4,9 +4,14 @@ The teacher side. Read before changing the Dashboard, classes, Learning Plans, t
 
 ## Classes and the Dashboard
 - `#/teach` (`SE.views.teach`) is the **Dashboard** for every class: quick actions, Checks waiting, your classes, current Learning Plans with progress (`planProgress`), and "Needs a check-in" (`attentionFor`). There's no per-class dropdown and no 14-day chart.
-- `#/teach/classes` (`teachClasses`): class cards, Add a class, and Archived with Restore.
+- `#/teach/classes` (`teachClasses`): class cards, Add a class, and Archived with Restore. Every card (active and archived) has **Delete**, set apart on the right.
 - `#/teach/classes/<id>` (`teachClassPage`):
-  - rename, archive, and delete (only after typing the class name);
+  - rename, archive, and **Delete class**;
+  - **Deleting a class** happens in one dialog (`data-delete-class="<classId>"`, `SE.teachQuick.deleteClass(cls)`):
+    - It lists what goes away (students and login cards, their XP and check history, assigned Learning Plans, student websites, messages). The plans themselves stay.
+    - It offers **Archive instead** unless the class is already archived.
+    - A class with students needs its name typed first. Case and extra spaces don't count, and Delete forever stays off until the name matches. An empty class deletes with no typing.
+    - Afterward it lands on `#/teach/classes`. No SQL is needed: cloud tables cascade from `classes`.
   - KPIs, roster, Learning Plans, check-ins, class journey, labs, messages, add a student, sign-in steps, login cards, and the live log.
   - The page header shows the class code (`frame(..., { code: true })`).
 - Store:
@@ -39,7 +44,7 @@ The teacher side. Read before changing the Dashboard, classes, Learning Plans, t
 
 ## Educator QA round: modal, à la carte plans, workshops, dashboard, notes
 - **Shared modal** (`SE.modal.open({ title, body, wide, onOpen(dlg), onClose })`, `SE.modal.close()` in `core.js`): a native `<dialog>` with a Dark Teal header. Esc, Close, or a backdrop click closes it, and focus returns to the opener. The router closes it on navigation. Use it only for quick tasks; full work stays on pages. Styles: `.modal`.
-- **Quick tasks** (`views-teacher.js`, delegated clicks, any page): `data-add-students="<classId>"`, `data-message-class="<classId or empty>"`, `data-note-student="<studentId>"`. Also `SE.teachQuick.addStudents / message / note`.
+- **Quick tasks** (`views-teacher.js`, delegated clicks, any page): `data-add-students="<classId>"`, `data-message-class="<classId or empty>"`, `data-note-student="<studentId>"`, `data-delete-class="<classId>"`. Also `SE.teachQuick.addStudents / message / note / deleteClass`.
   - **Add students:** paste names, one per line, with a live check (`SE.roster.checkNames(text, existing)` → `[{ name, ok, reason }]`: email/number, too long (24), already in class, listed twice). One grade band for the batch. Afterward it shows the new login cards with Print these cards (`body.modal-printing`). The inline add form is gone.
   - **Send a note:** `teacher_note { note }` (up to 200 characters) via `SE.store.teacherLog`. The student sees the newest one from the last 14 days on Home as **Just for you** (`.home-note`); all notes are on Me (`.notes-list`); `prof.notes` is newest first. No other student sees it. No SQL needed.
 - **Dashboard** (`SE.views.teach`): a greeting band (`.dash-hello`), palette KPI tiles (`.kpi--green` Checks, `.kpi--teal` Classes, `.kpi--blue` plans; `--brand-blue` only for borders and icons), class cards with Add students and Message, and a side column with **Recent activity** (last 8 sent, passed, try again, help, and note events) and Needs a check-in with a Note button.
